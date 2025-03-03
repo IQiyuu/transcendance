@@ -1,0 +1,50 @@
+modules to install:
+    fastify
+    @fastify/view
+    @fastify/cookie
+    @fastify/static
+    @fastify/websocket
+    @fastify/multipart
+    better-sqlite3
+    fastify-bcrypt
+    jsonwebtoken
+    ejs ?
+    fs ?
+
+table des parties:
+game_id INTEGER PRIMARY KEY AUTOINCREMENT,
+winner_id INTEGER NOT NULL,
+loser_id INTEGER NOT NULL,
+loser_score INTEGER NOT NULL,
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+
+
+tables des utilisateur:
+	user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+	username TEXT NOT NULL,
+	password TEXT NOT NULL,
+    picture_path TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+
+
+SELECT g.game_id, uw.username AS winner_username, ul.username AS loser_username, g.loser_score, g.created_at FROM games g JOIN users uw ON g.winner_id = uw.user_id JOIN users ul ON g.loser_id = ul.user_id WHERE uw.username = ? OR ul.username = ? ORDER BY g.created_at DESC LIMIT 5;
+
+INSERT INTO games (winner_id, loser_id, loser_score) SELECT u1.user_id AS winner_id, u2.user_id AS loser_id, ? AS loser_score FROM users u1, users u2  WHERE u1.username = ? AND u2.username = ?
+
+
+SOIT:
+    - les games on un 'type' dans la db et ce type est affiche dans l'historique et les liens des profils ne sont pas cliquables.
+    - les games local ne sont pas compte dans la base de donnees.
+
+multiplayer_module:
+    faire un plateau qui a autant de cote que de nombre de joueurs (3 joueurs un triangle, 4 un carre, 5 hexagone...)
+
+user_management:
+    - avoir un nickname en plus de username
+
+
+normalement mon cookie est secureimport Fastify from 'fastify'
+import FastifyView from '@fastify/view'
+import FastifyStatic from "@fastify/static";
+import fastifyWebsocket from '@fastify/websocket';
+import fastifyMultipart from '@fastify/multipart';
