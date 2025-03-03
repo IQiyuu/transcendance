@@ -27,6 +27,7 @@ var keyState = {};
 
 let ws = null;
 
+// Rentre la game dans la db
 async function saveGame(game) {
     try {
         const winner = game.scores.left == 11 ? "left" : "right";
@@ -48,6 +49,7 @@ async function saveGame(game) {
     }
 }
 
+// Affiche le canvas
 async function draw(ws) {
     try {
         const response = await fetch(`/game/${_gameId}`, {
@@ -96,11 +98,13 @@ async function draw(ws) {
     requestAnimationFrame(draw);
 }
 
+// Recupere les touches enfoncees
 function keyHandler(e){
     keyState[e.code] = (e.type === "keydown");
- }
+}
  
 
+// Fait une requete qui va bouger les paddles (raquettes)
 async function moves() {
     if (keyState["ArrowUp"] || keyState["ArrowDown"]) {
         const body = { 
@@ -123,6 +127,7 @@ async function moves() {
     }
 };
 
+// Lance la partie
 function startGame(oponnent, ws) {
     document.addEventListener("keydown",  keyHandler);
     document.addEventListener("keyup",  keyHandler);
@@ -132,6 +137,7 @@ function startGame(oponnent, ws) {
     draw(ws);
 }
 
+// Termine la partie
 async function endGame(ws) {
     canvas.removeEventListener("keydown", moves);
     _gameId = 0;
@@ -145,19 +151,21 @@ async function endGame(ws) {
 let count = 0;
 let interval;
 const matchmakingText = ['Waiting an opponent', 'Waiting an opponent.', 'Waiting an opponent..', 'Waiting an opponent...'];
+// Animation du boutton
 function startMatchmakingAnimation() {
     count = 0;
     interval = setInterval(() => {
         count++;
         matchmaking_btn.textContent = matchmakingText[count % matchmakingText.length];
     }, 500);
-  }
+}
   
-  function stopMatchmakingAnimation() {
+function stopMatchmakingAnimation() {
     clearInterval(interval);
     matchmaking_btn.textContent = 'Play';
-  }
+}
 
+// Se connecte en socket avec le serveur et attend un autre utilisateur.
 async function matchmaking(event) {
     if (!ws)
         ws = new WebSocket(`wss://${window.location.host}/matchmaking?username=${_username}`);

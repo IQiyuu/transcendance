@@ -3,6 +3,7 @@ import FastifyView from '@fastify/view'
 import FastifyStatic from "@fastify/static";
 import fastifyWebsocket from '@fastify/websocket';
 import fastifyMultipart from '@fastify/multipart';
+import jwt from '@fastify/jwt';
 
 import ejs from 'ejs'
 import fs from 'fs';
@@ -19,7 +20,7 @@ import fastifyBcrypt from 'fastify-bcrypt';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from "node:path";
 
-const secretKey = 'd-throw-bair'; // a mettre autre part
+const secretKey = 'bommerang-fleche-upair'; // pas sur de ce que je fais la
 
 const rootDir = dirname(dirname(fileURLToPath(import.meta.url)));
 
@@ -33,14 +34,19 @@ const fastify = Fastify({
 
 const db = new Database('../sqlite/transcendance.db');
 
-
 fastify.register(fastifyWebsocket);
+
 fastify.register(fastifyMultipart, {
   limits: {
     fileSize: 10 * 1024 * 1024,
   },
 });
+
 fastify.register(cookie);
+
+fastify.register(jwt, {
+  secret: secretKey
+});
 
 fastify.register(fastifyBcrypt, {
   saltWorkFactor: 12
@@ -48,7 +54,7 @@ fastify.register(fastifyBcrypt, {
 
 fastify.register(LogginRoute, {
   db: db,
-  secretKey: secretKey,
+  secretKey: secretKey
 });
 
 fastify.register(GameRoute, {
@@ -61,14 +67,11 @@ fastify.register(FastifyStatic, {
   root: join(rootDir, 'dist')
 })
 
-
-
 fastify.register(FastifyView, {
   engine: {
     ejs
   },
 })
-
 
 fastify.listen({ port: 3000, host: '10.11.1.10' }, function (err, address) {
   if (err) {

@@ -2,9 +2,11 @@ let _ws = null;
 let _username = sessionStorage.username;
 
 function init() {
+    // Se connecter a la socket du server (wss secu)
     const promise1 = async () => {
         return new Promise( resolve => {
             _ws = new WebSocket(`wss://${window.location.host}/chat?username=${_username}`);
+            // Quand un message est recu
             _ws.onmessage = (message) => {
                 message = JSON.parse(message.data);
                 console.log("recu ", message);
@@ -16,6 +18,7 @@ function init() {
             });
         });
     }
+    // ajouter un message dans la chatbox
     function appendMessage(message) {
         const chatbox = document.getElementById('chatbox');
         chatbox.innerHTML +=
@@ -28,7 +31,7 @@ function init() {
         chatbox.scrollBy(0,25);
     }
 
-
+    // quand on est connecte ajouter les events pour envoyer des message (entrer et click sur le boutton)
     promise1().then((value) => {
         document.getElementById('chat').addEventListener("keydown", (event) => { 
             if(event.key == 'Enter') {
