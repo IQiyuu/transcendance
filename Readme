@@ -33,7 +33,7 @@ INSERT INTO games (winner_id, loser_id, loser_score) SELECT u1.user_id AS winner
 
 
 SOIT:
-    - les games on un 'type' dans la db et ce type est affiche dans l'historique et les liens des profils ne sont pas cliquables.
+    - les games on un type dans la db et ce type est affiche dans lhistorique et les liens des profils ne sont pas cliquables.
     - les games local ne sont pas compte dans la base de donnees.
 
 multiplayer_module:
@@ -43,8 +43,13 @@ user_management:
     - avoir un nickname en plus de username
 
 
-normalement mon cookie est secureimport Fastify from 'fastify'
-import FastifyView from '@fastify/view'
-import FastifyStatic from "@fastify/static";
-import fastifyWebsocket from '@fastify/websocket';
-import fastifyMultipart from '@fastify/multipart';
+normalement le cookie est secure
+
+transcendance modules:
+    - backend fastify (1)
+    - db backend (0.5)
+    - standart user management (1)
+    - remote players (1)
+    - live chat (1)
+    - server-side pong (1)
+    - 2FA (1)
