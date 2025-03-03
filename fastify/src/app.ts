@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const registerLink = document.getElementById("register-view");
     let isRegisterMode = false;
 
+    // swap entre connexion et inscription
     registerLink.addEventListener("click", (event) => {
         event.preventDefault();
 
@@ -27,7 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
             form.innerHTML += `<button type="submit">Register</button>`
         }
     });
-
+    // formulaire de connexion / inscription
     form.addEventListener("submit", async (event) => {
         event.preventDefault();
 
@@ -56,7 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 sessionStorage.setItem('username', data.username);
                 sessionStorage.setItem('userId', data.id);
                 const loginForm = document.getElementById("login-form") as HTMLDivElement;
-                const pongGame = document.getElementById("pong-game") as HTMLDivElement;
+                const pongGame = document.getElementById("site") as HTMLDivElement;
                 const chat = document.getElementById("chat") as HTMLDivElement;
                 loginForm.style.display = "none";
                 pongGame.style.display = "flex";
@@ -77,6 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
+// check si l'utilisateur est connecte
 async function checkIfLoggedIn() {
     try {
         const response = await fetch('/protected', {
@@ -103,10 +105,10 @@ async function checkIfLoggedIn() {
     }
 }
 
-
+// choisit l'affichage en fonction de l'utilisateur (connecte ou non)
 checkIfLoggedIn().then((isLoggedIn) => {
     const loginForm = document.getElementById("login-form") as HTMLDivElement;
-    const pongGame = document.getElementById("pong-game") as HTMLDivElement;
+    const pongGame = document.getElementById("site") as HTMLDivElement;
     const chat = document.getElementById("chat") as HTMLDivElement;
     if (isLoggedIn) {
         loginForm.style.display = "none";
@@ -120,11 +122,13 @@ checkIfLoggedIn().then((isLoggedIn) => {
     }
 });
 
+// GET et afficher les infos du profile / historique
 async function display_profile(username) {
     const list = document.getElementById("histo_list") as HTMLUListElement;
     const menu = document.getElementById("menu");
     menu.style.display = "none";
     try {
+        // requete des infos pour afficher le profile
         const profile_req = await fetch(`/profile/${username}`, {
             method: 'GET',
             credentials: 'include',
@@ -136,10 +140,11 @@ async function display_profile(username) {
             console.log("player not found.");
             return ;
         }
-        (document.getElementById("profile_picture") as HTMLImageElement).src = profile.datas.picture_path + new Date().getTime();
+        (document.getElementById("profile_picture") as HTMLImageElement).src = profile.datas.picture_path + "?" + new Date().getTime();
         document.getElementById("profile_username").innerText = profile.datas.username;
         document.getElementById("profile_creation").innerText = `member since: ${profile.datas.created_at}`;
 
+        // requete des games
         const histo_req = await fetch(`/historic/${username}`, {
             method: 'GET',
             credentials: 'include',
@@ -148,6 +153,8 @@ async function display_profile(username) {
         const data = await histo_req.json();
         console.log(data);
         list.replaceChildren();
+
+        // affiche l'historique
         if (data.success) {
             var cpt = 0;
             var w;
@@ -179,6 +186,7 @@ async function display_profile(username) {
             });
             document.getElementById("winrate").innerHTML = `${cpt} games (${w}/${cpt-w})`
         }
+        // change les a (lien) de l'historique par des liens qui menent a la page de profile
         document.querySelectorAll("a#profileDisplay").forEach((item) => { 
             item.addEventListener("click", async (event) => {
                     event.preventDefault();
@@ -192,10 +200,12 @@ async function display_profile(username) {
     }
 }
 
+// afficher le profile
 document.getElementById("profile_button").addEventListener("click", async (event) => {
     await display_profile(_username);
 });
 
+// afficher le menu du jeu
 async function displayMenu() {
     document.getElementById("menu").style.display = "flex";
     document.getElementById("player_profile").style.display = "none";
@@ -203,11 +213,13 @@ async function displayMenu() {
     document.getElementById("scoreboard").style.display = "none";
 }
 
+// retourner au menu
 document.getElementById("game_title").addEventListener("click", async (event) => {
     console.log("back to menu");
     await displayMenu();
 });
 
+// input recherche de joueur
 document.getElementById("search_player_in").addEventListener("keydown", async (event) => {
     if(event.key == 'Enter') {
         const input = (event.target as HTMLInputElement);
@@ -215,6 +227,7 @@ document.getElementById("search_player_in").addEventListener("keydown", async (e
         input.value = "";
     }
 });
+// button recherche de joueur
 document.getElementById("search_player_btn").addEventListener("click", async (event) => {
     event.preventDefault();
     const input = ((document.getElementById("search_player_in")) as HTMLInputElement);
@@ -225,12 +238,16 @@ document.getElementById("search_player_btn").addEventListener("click", async (ev
 const pp = document.getElementById("profile_picture") as HTMLImageElement;
 const ci = document.getElementById("camera_icon");
 
+// clique sur la photo de profile
 pp.addEventListener("click", async (event) => {
     const user_page = document.getElementById("profile_username").textContent;
-    if (user_page == _username)
+    if (user_page == _username) {
         document.getElementById("profile_picture_overlay").style.display = "flex";
+        ci.style.opacity = "0";
+    }
 });
 
+// clique sur la photo de profile
 ci.addEventListener("click", async (event) => {
     const user_page = document.getElementById("profile_username").textContent;
     if (user_page == _username) {
@@ -239,17 +256,24 @@ ci.addEventListener("click", async (event) => {
     }
 });
 
+// hover sur la photo de profile
 pp.addEventListener('mouseout', () => {
-    ci.style.opacity = "0";
+    const user_page = document.getElementById("profile_username").textContent;
+    if (user_page == _username)
+        ci.style.opacity = "0";
 });
 pp.addEventListener("mouseover", async (event) => {
-    ci.style.opacity = "0.6";
+    const user_page = document.getElementById("profile_username").textContent;
+    if (user_page == _username)
+        ci.style.opacity = "0.6";
 });
 ci.addEventListener("mouseover", async (event) => {
-    ci.style.opacity = "0.6";
+    const user_page = document.getElementById("profile_username").textContent;
+    if (user_page == _username)
+        ci.style.opacity = "0.6";
 });
 
-
+// croix du changement de photo de profile
 document.getElementById("profile_cross").addEventListener("click", async (event) => {
     event.preventDefault();
     document.getElementById("profile_picture_overlay").style.display = "none";
@@ -257,6 +281,7 @@ document.getElementById("profile_cross").addEventListener("click", async (event)
     (document.getElementById("file_input") as HTMLInputElement).value = "";
 });
 
+// echape du changement de photo de profile
 document.addEventListener("keydown", async (event) => {
     if (document.getElementById("profile_picture_overlay").style.display !== "none") {
         event.preventDefault();
@@ -269,7 +294,7 @@ document.addEventListener("keydown", async (event) => {
     }
 });
 
-
+// previsualiser la photo de profile selectionnee
 document.getElementById("file_input").addEventListener("change", async (event) => {
     const file = (event.target as HTMLInputElement).files[0];
     const previsuImage = document.getElementById("previsu_picture") as HTMLImageElement;
@@ -284,6 +309,7 @@ document.getElementById("file_input").addEventListener("change", async (event) =
     }
 });
 
+// upload une photo de profile avec le boutton
 document.getElementById("upload_btn").addEventListener("click", async (event) => {
     event.preventDefault();
 

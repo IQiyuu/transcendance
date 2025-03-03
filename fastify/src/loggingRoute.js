@@ -1,11 +1,10 @@
-import jwt from 'jsonwebtoken';
-
 async function logginRoute (fastify, options) {
   const secretKey = options.secretKey;
   fastify.get('/', async (request, reply) => {
     return reply.view("src/index.ejs");
   })
 
+  // Route pour s'inscrire, verifie que le username n'existe pas
   fastify.post('/register', async (request, reply) => {
     const { username, password } = request.body;
     console.log("Données REGISTER reçues :", username, password);
@@ -26,7 +25,7 @@ async function logginRoute (fastify, options) {
         username: username,
       };
 
-      const token = jwt.sign(payload, secretKey, { expiresIn: '1d' });
+      const token = fastify.jwt.sign(payload, secretKey, { expiresIn: '1d' });
 
       reply.setCookie('auth_token', token, {
         path: '/',
@@ -43,6 +42,7 @@ async function logginRoute (fastify, options) {
     }
   });
 
+  // Route pour se connecter verifier le username et password dans la db
   fastify.post('/login', async (request, reply) => {
     const { username, password } = request.body;
     console.log("Données LOGIN reçues :", username, password);
@@ -62,7 +62,7 @@ async function logginRoute (fastify, options) {
         const payload = {
           username: username,
         };
-        const token = jwt.sign(payload, secretKey, { expiresIn: '1d' });
+        const token = fastify.jwt.sign(payload, { expiresIn: '1d' });
 
         reply.setCookie('auth_token', token, {
           path: '/',
@@ -76,10 +76,12 @@ async function logginRoute (fastify, options) {
         return { success: true, message: `Welcome ${username}`, username: username };
 
     } catch (error) {
+      console.log("error: ", error);
         return reply.code(500).send({ success: false, message: 'Error.' });
     }
   });
 
+  // Verifie si on est authentifie
   const isAuthenticated = async (request, reply) => {
     const token = request.cookies.auth_token;
 
@@ -88,13 +90,14 @@ async function logginRoute (fastify, options) {
     }
 
     try {
-        const decoded = jwt.verify(token, secretKey);
+        const decoded = fastify.jwt.verify(token, secretKey);
         request.user = decoded.username;
     } catch (error) {
         return reply.send({ success: false });
     }
   };
 
+  // Je sais plus mais c'est une route qui verifie si on est deja connecter
   fastify.get('/protected', {
     preHandler: isAuthenticated,
     }, async (request, reply) => {

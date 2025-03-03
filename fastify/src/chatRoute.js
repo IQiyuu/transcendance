@@ -6,12 +6,13 @@ async function chatRoute (fastify, options) {
             reply.code(403).send('Connection rejected');
         }
     });
-
+    // Envoie un message a tous les clients connectes
     function broadcast(message) {
         for(let client of fastify.websocketServer.clients) {
             client.send(JSON.stringify(message));
         }
     }
+    // Gere la socket du chat
     fastify.register(async function(fastify) {
         fastify.get('/chat', {websocket: true}, (socket, req) => {
             // New user

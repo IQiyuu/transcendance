@@ -1,3 +1,4 @@
+import fs from 'fs';
 function randomIntFromInterval(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
@@ -8,6 +9,7 @@ async function gameRoute (fastify, options) {
     let w_uname = null;
     let img_path = "./dist/imgs/";
 
+    // Creer un objet game cote server
     function createGame(l_name, r_name) {
         const gameId = Object.keys(games).length;
         console.log(gameId);
@@ -43,7 +45,7 @@ async function gameRoute (fastify, options) {
         return gameId;
     };
 
-
+    // Stocke la game dans la db
     fastify.post('/storeGame', async (request, reply) => {
         const { winner_username, loser_username, loser_score } = request.body;
         console.log(winner_username, loser_username, loser_score);
@@ -59,6 +61,7 @@ async function gameRoute (fastify, options) {
         }
     });
 
+    // Route qui recupere les infos du user :username dans la db et les renvoie
     fastify.get('/profile/:username', async (request, reply) => {
         try {
             const username = request.params.username;
@@ -73,12 +76,13 @@ async function gameRoute (fastify, options) {
         }
     });
 
+    // Pareil que au dessus avec les games
     fastify.get('/historic/:username', async (request, reply) => {
 
         try {
             const username = request.params.username;
             console.log(username);
-            const datas = options.db.prepare('SELECT g.game_id, uw.username AS winner_username, ul.username AS loser_username, g.loser_score, g.created_at FROM games g JOIN users uw ON g.winner_id = uw.user_id JOIN users ul ON g.loser_id = ul.user_id WHERE uw.username = ? OR ul.username = ? ORDER BY g.created_at DESC LIMIT 5;').all(username,username);
+            const datas = options.db.prepare('SELECT g.game_id, uw.username AS winner_username, ul.username AS loser_username, g.loser_score, g.created_at FROM games g JOIN users uw ON g.winner_id = uw.user_id JOIN users ul ON g.loser_id = ul.user_id WHERE uw.username = ? OR ul.username = ? ORDER BY g.created_at DESC;').all(username,username);
 
             console.log(`historic fetched from db: `, datas);
             return { success: true, message: `Game fetched`, datas: datas };
@@ -88,6 +92,7 @@ async function gameRoute (fastify, options) {
         }
     });
 
+    // Route qui recupere une game l'upload dans ./dist/img et change le path dans la db
     fastify.post('/upload/:username', async (request, reply) => {
         const data = await request.parts();
         let uploadedFile;
@@ -120,12 +125,14 @@ async function gameRoute (fastify, options) {
         }
     });
 
+    // Route qui renvoie les infos de la game
     fastify.get('/game/:id', async (request, reply) => {
         const game = games[request.params.id];
         if (!game) return reply.status(404).send({ error: 'Game not found' });
         return game;
     });
 
+    // Route qui change les coordonnees du joueur qui bouge
     fastify.post('/game/:id/move', async (request, reply) => {
         var game = games[request.params.id];
         var newY = game.paddles[request.body.role].y + (request.body.moveUp ? -3 : 3);
@@ -134,6 +141,8 @@ async function gameRoute (fastify, options) {
     })
 
     fastify.register(async function (fastify) {
+        // Gere le matchmaking et la deconnexion en pleine partie (Le deconnecte perd automatiquement)
+        // marche en socket
         fastify.get('/matchmaking', { websocket: true }, (socket, req) => {
 
             if (waiting_list && w_uname != req.query.username) {

@@ -7,7 +7,7 @@ modules to install:
     @fastify/multipart
     better-sqlite3
     fastify-bcrypt
-    jsonwebtoken
+    @fastify/jwt
     ejs ?
     fs ?
 
