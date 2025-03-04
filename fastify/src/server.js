@@ -7,6 +7,7 @@ import jwt from '@fastify/jwt';
 
 import ejs from 'ejs'
 import fs from 'fs';
+import os from 'os';
 
 import LogginRoute from './loggingRoute.js'
 import GameRoute from './gameRoute.js'
@@ -19,6 +20,19 @@ import fastifyBcrypt from 'fastify-bcrypt';
 
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from "node:path";
+
+// Recup l'ip
+const networkInterfaces = os.networkInterfaces();
+let localIP = 'localhost';
+
+if (networkInterfaces.enp6s0) {
+  for (let details of networkInterfaces.enp6s0) {
+    if (details.family === 'IPv4' && !details.internal) {
+      localIP = details.address;
+      break;
+    }
+  }
+}
 
 const secretKey = 'bommerang-fleche-upair'; // pas sur de ce que je fais la
 
@@ -73,7 +87,7 @@ fastify.register(FastifyView, {
   },
 })
 
-fastify.listen({ port: 3000, host: '10.11.1.10' }, function (err, address) {
+fastify.listen({ port: 3000, host: localIP }, function (err, address) {
   if (err) {
     fastify.log.error(err)
     process.exit(1)
