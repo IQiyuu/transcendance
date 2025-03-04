@@ -29,12 +29,12 @@ let ws = null;
 
 // Rentre la game dans la db
 async function saveGame(game) {
+    console.log("game saved");
     try {
         const winner = game.scores.left == 11 ? "left" : "right";
-        console.log(game.players[winner], " won.");
         const body = { 
             winner_username: game.players[winner], 
-            loser_username: game.players[winner == "right" ? winner : "left"],
+            loser_username: game.players[(winner == "right" ? "left": "right")],
             loser_score: game.scores.left == 11 ? game.scores.right : game.scores.left
         };
         const response = await fetch("storeGame", {
@@ -82,13 +82,22 @@ async function draw(ws) {
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         ctx.fillStyle = "black";
-        ctx.fillRect(10, game.paddles.left.y - paddleHeight / 2, paddleWidth, paddleHeight);
-        ctx.fillRect(canvas.width - paddleWidth - 10, game.paddles.right.y - paddleHeight / 2, paddleWidth, paddleHeight);
+        ctx.fillRect(game.paddles.left.x - paddleWidth, game.paddles.left.y - paddleHeight / 2, paddleWidth, paddleHeight);
+        ctx.fillRect(game.paddles.right.x - paddleWidth, game.paddles.right.y - paddleHeight / 2, paddleWidth, paddleHeight);
 
         ctx.beginPath();
         ctx.arc(game.ball.x, game.ball.y, ballRadius, 0, Math.PI * 2);
         ctx.fill();
         ctx.closePath();
+
+        
+        ctx.beginPath();
+        ctx.moveTo(100, 100);
+        ctx.lineTo(800, 100);
+        ctx.lineTo(800, 600);
+        ctx.lineTo(100, 600);
+        ctx.lineTo(100, 100);
+        ctx.stroke();
 
     } catch (error) {
         console.log("error: ", error);
@@ -131,6 +140,8 @@ async function moves() {
 function startGame(oponnent, ws) {
     document.addEventListener("keydown",  keyHandler);
     document.addEventListener("keyup",  keyHandler);
+    document.getElementById("scoreboard").style.display = "flex"
+    document.getElementById("menu").style.display = "none"
     canvas.tabIndex = 1000;
     canvas.style.outline = "none";
     console.log("moves avaible, playing against: ", oponnent);
@@ -140,10 +151,13 @@ function startGame(oponnent, ws) {
 // Termine la partie
 async function endGame(ws) {
     canvas.removeEventListener("keydown", moves);
+    document.getElementById("scoreboard").style.display = "none"
+    document.getElementById("menu").style.display = "flex"
     _gameId = 0;
     console.log("moves unavaible");
+    if (ws instanceof WebSocket)
+        ws.close();
     ws = null;
-    ws.close();
     await displayMenu();
 }
 
@@ -162,7 +176,7 @@ function startMatchmakingAnimation() {
   
 function stopMatchmakingAnimation() {
     clearInterval(interval);
-    matchmaking_btn.textContent = 'Play';
+    matchmaking_btn.textContent = 'Play online';
 }
 
 // Se connecte en socket avec le serveur et attend un autre utilisateur.

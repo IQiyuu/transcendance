@@ -14,7 +14,7 @@ async function gameRoute (fastify, options) {
         const gameId = Object.keys(games).length;
         console.log(gameId);
         const neg = randomIntFromInterval(0,1);
-        const vx = randomIntFromInterval(5, 10) * (neg ? -1 : 1);
+        const vx = randomIntFromInterval(5, 8) * (neg ? -1 : 1);
         games[gameId] = {
             id: gameId,
             players: {
@@ -33,12 +33,12 @@ async function gameRoute (fastify, options) {
             },
             paddles: {
                 left: {
-                    x: 20,
-                    y: 200
+                    x: 120,
+                    y: 300
                 },
                 right: {
                     x: 780,
-                    y: 200
+                    y: 300
                 }
             }
         }
@@ -48,8 +48,9 @@ async function gameRoute (fastify, options) {
     // Stocke la game dans la db
     fastify.post('/storeGame', async (request, reply) => {
         const { winner_username, loser_username, loser_score } = request.body;
-        console.log(winner_username, loser_username, loser_score);
+        console.log("LOL ", winner_username, " VS ", loser_username, loser_score);
         try {
+            console.log(winner_username, loser_username);
             const insert = options.db.prepare('INSERT INTO games (winner_id, loser_id, loser_score) SELECT u1.user_id AS winner_id, u2.user_id AS loser_id, ? AS loser_score FROM users u1, users u2 WHERE u1.username = ? AND u2.username = ?');
             insert.run(loser_score, winner_username, loser_username);
 
@@ -136,7 +137,7 @@ async function gameRoute (fastify, options) {
     fastify.post('/game/:id/move', async (request, reply) => {
         var game = games[request.params.id];
         var newY = game.paddles[request.body.role].y + (request.body.moveUp ? -3 : 3);
-        if (newY > 70 && newY < 330)
+        if (newY > 120 && newY < 580)
             game.paddles[request.body.role].y = newY;
     })
 
@@ -146,7 +147,7 @@ async function gameRoute (fastify, options) {
         fastify.get('/matchmaking', { websocket: true }, (socket, req) => {
 
             if (waiting_list && w_uname != req.query.username) {
-                const gameId = createGame(req.query.username, w_uname);
+                const gameId = createGame(w_uname, req.query.username);
                 console.log("game created: ", gameId);
                 waiting_list.send(JSON.stringify({ state: "found", gameId: gameId, role: "left", opponent: w_uname }));
                 socket.send(JSON.stringify({ state: "found", gameId: gameId, role: "right", opponent: req.query.username }));
@@ -180,17 +181,17 @@ async function gameRoute (fastify, options) {
             game.ball.x += game.ball.vx;
             game.ball.y += game.ball.vy;
     
-            if (game.ball.y <= 5 || game.ball.y >= 395)
+            if (game.ball.y <= 110 || game.ball.y >= 590)
                 game.ball.vy *= -1;
 
-            if ((game.ball.x <= game.paddles.left.x + 5
-                && game.ball.y >= game.paddles.left.y - 55
-                && game.ball.y <= game.paddles.left.y + 55) 
+            if ((game.ball.x <= game.paddles.left.x + 10
+                && game.ball.y >= game.paddles.left.y - 50
+                && game.ball.y <= game.paddles.left.y + 50) 
                     || 
-                (game.ball.x >= game.paddles.right.x - 5
-                && game.ball.y >= game.paddles.right.y - 55
-                && game.ball.y <= game.paddles.right.y + 55)) {
-                    game.ball.x = (game.ball.x <= game.paddles.left.x + 5 ? game.paddles.left.x + 5 : game.paddles.right.x - 5);
+                (game.ball.x >= game.paddles.right.x - 10
+                && game.ball.y >= game.paddles.right.y - 50
+                && game.ball.y <= game.paddles.right.y + 50)) {
+                    // game.ball.x = (game.ball.x <= game.paddles.left.x + 5 ? game.paddles.left.x + 5 : game.paddles.right.x - 5);
                     // if ((game.ball.y >= game.paddles.right.y - 15
                     //     && game.ball.y <= game.paddles.right.y + 15
                     // || game.ball.y >= game.paddles.left.y - 15
@@ -201,9 +202,9 @@ async function gameRoute (fastify, options) {
                     game.ball.vx *= -1;
                 }
 
-            if (game.ball.x <= 5 || game.ball.x >= 795) {
-                game.scores[game.ball.x <= 5 ? "right" : "left"]++;
-                Object.assign(game.ball, { x: 400, y: 200 });
+            if (game.ball.x <= game.paddles.left.x - 10 || game.ball.x >= game.paddles.right.x + 10) {
+                game.scores[game.ball.x <= game.paddles.left.x - 10 ? "right" : "left"]++;
+                Object.assign(game.ball, { x: 385, y: 300 });
             }
                     
         });

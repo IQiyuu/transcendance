@@ -157,8 +157,9 @@ async function display_profile(username) {
         // affiche l'historique
         if (data.success) {
             var cpt = 0;
-            var w;
+            var w = 0;;
             data.datas.forEach((item) => {
+                cpt++;
                 if (cpt < 20) {
                     let li = document.createElement("li");
                     let a = document.createElement("a");
