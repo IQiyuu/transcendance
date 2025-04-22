@@ -87,7 +87,7 @@ fastify.register(FastifyView, {
   },
 })
 
-fastify.listen({ port: 3000, host: localIP }, function (err, address) {
+fastify.listen({ port: 3001, host: localIP }, function (err, address) {
   if (err) {
     fastify.log.error(err)
     process.exit(1)

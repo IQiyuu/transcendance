@@ -1,5 +1,17 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    Makefile                                           :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: ggiboury <ggiboury@student.42.fr>          +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2025/04/22 15:00:40 by ggiboury          #+#    #+#              #
+#    Updated: 2025/04/22 15:00:41 by ggiboury         ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
 
-# Transcendence, a 42 project, done by 
+
+# Transcendence, a 42 project, done by dgoubin, romartin, ktaplin, ggiboury
 
 # Variables
 #
