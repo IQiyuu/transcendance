@@ -4,15 +4,34 @@ services:
   website:
     pull_policy: build
     build:
-      context:
+      context: ${SRCS}${WEBSITE_SERVICE}
       args:
         - NODE_VERSION=${NODE_VERSION}
+        - PORT=${PORT}
     image : ${WEBSITE_SERVICE_IMAGE}
     container_name: pong-${WEBSITE_SERVICE}
-    ports: "3001:3001"
+    ports:
+      - "3001:3001"
     environment:
       - NODE_ENV=${DEV_ENV}
+    volumes:
+      - db:${LOCATION_DB}
+      - script:${LOCATION_WS}
+    networks:
+      - pong
     
+  # db:
+  #   pull_policy: build
+  #   build:
+  #     context: ${SRCS}${DB_SERVICE}
+  #   image: ${DB_SERVICE_IMAGE}
+  #   container_name: pong-${DB_SERVICE}
+  #   volumes:
+  #     - db:${LOCATION_DB}
+  #   networks:
+  #     - pong
+    # ports: ""
+  
   monitoring:
     image: ${MONITORING_SERVICE_IMAGE}
     container_name: pong-${MONITORING_SERVICE}
@@ -35,6 +54,22 @@ networks:
   pong:
 
 volumes:
+  db:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${VOLUME_DB}
+      o: "bind"
+    name: pong-${DB_SERVICE}
+
+  scripts:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${VOLUME_SCRIPTS}
+      o: "bind"
+    name: pong-${WEBSITE_SERVICE}
+
   monitoring-logs:
     name: pong-${MONITORING_SERVICE}
 
