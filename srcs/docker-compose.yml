@@ -16,7 +16,7 @@ services:
       - NODE_ENV=${DEV_ENV}
     volumes:
       - db:${LOCATION_DB}
-      - script:${LOCATION_WS}
+      - scripts:${LOCATION_SCRIPTS}
     networks:
       - pong
     
@@ -58,7 +58,7 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: ${VOLUME_DB}
+      device: ${HOME}/goinfre/${VOLUME_DB}
       o: "bind"
     name: pong-${DB_SERVICE}
 
