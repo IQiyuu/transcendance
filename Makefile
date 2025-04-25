@@ -6,7 +6,7 @@
 #    By: ggiboury <ggiboury@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/22 15:00:40 by ggiboury          #+#    #+#              #
-#    Updated: 2025/04/25 16:59:37 by ggiboury         ###   ########.fr        #
+#    Updated: 2025/04/25 17:03:27 by ggiboury         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -47,6 +47,7 @@ $(SECRETS):
 	mkdir -p $(SECRETS)
 
 $(SSL_CERTIFICATE): $(SECRETS)
+# to do : write a script that test if file exists already
 	openssl req -x509 -newkey rsa:4096 -keyout ssl.key -out ssl.crt -sha256 -days 30 -nodes -subj "/C=FR/ST=France/L=Mulhouse/O=pong/CN=none"
 	mv ssl.crt ssl.key ./srcs/secrets/
 
