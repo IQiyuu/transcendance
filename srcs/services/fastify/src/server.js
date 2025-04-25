@@ -41,8 +41,8 @@ const rootDir = dirname(dirname(fileURLToPath(import.meta.url)));
 const fastify = Fastify({
   logger: true,
   https: {
-    key: fs.readFileSync(join(rootDir, '/.ssl/ssl.key')),
-    cert: fs.readFileSync(join(rootDir, '/.ssl/ssl.crt'))
+    key: fs.readFileSync('/run/secrets/ssl.key'),
+    cert: fs.readFileSync('/run/secrets/ssl.crt')
   }
 })
 

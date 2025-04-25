@@ -76,3 +76,9 @@ volumes:
 configs:
   prometheus-config:
     file: ${SRCS_MONITORING_CONFIG}
+
+secrets:
+  SSL-certificate:
+    file: ${SECRETS}${SSL_CERTIFICATE}
+  SSL-key:
+    file: ${SECRETS}${SSL_KEY}

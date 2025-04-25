@@ -130,3 +130,6 @@ out
 
 # SSL certificate
 .ssl
+
+# Docker secrets
+secrets/

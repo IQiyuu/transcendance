@@ -6,7 +6,7 @@
 #    By: ggiboury <ggiboury@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/22 15:00:40 by ggiboury          #+#    #+#              #
-#    Updated: 2025/04/23 16:15:57 by ggiboury         ###   ########.fr        #
+#    Updated: 2025/04/25 16:59:37 by ggiboury         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,20 +15,20 @@
 
 # Variables
 #
+NAME	= pong
+
+REQ	= $(VOLUME_DATABASE) $(VOLUME_WEBSITE) $(SSL_CERTIFICATE)
 
 COMPOSE_FILE	= ./srcs/docker-compose.yml
 
-# VOLUME_WEBSITE	= /home/ggiboury/data/www
-VOLUME_DATABASE	= /home/ggiboury/goinfre/db_transcendence
+VOLUME	= /home/ggiboury/goinfre/pong/data
+VOLUME_WEBSITE	= /home/ggiboury/goinfre/pong/data/website
+VOLUME_DATABASE	= /home/ggiboury/goinfre/pong/data/db_transcendence
 
-# SECRETS	= ./srcs/secrets/
+SECRETS	= ./srcs/secrets
 
-# SSL_CERTIFICATE	= $(SECRETS)site.key ${SECRETS}site.crt
+SSL_CERTIFICATE	= ${SECRETS}ssl.crt $(SECRETS)ssl.key
 
-# REQ	= $(VOLUME_DATABASE) $(VOLUME_WEBSITE) $(SECRETS) $(SSL_CERTIFICATE)
-REQ	= $(VOLUME_DATABASE)
-
-NAME	= pong
 
 # Rules
 #
@@ -37,24 +37,33 @@ $(NAME): $(REQ)
 	docker compose -f $(COMPOSE_FILE) up -d
 
 dev:
-	cp ./srcs/sqlite/transcendence.db ${VOLUME_DATABASE}/
+	cp ./srcs/services/sqlite/transcendence.db ${VOLUME_DATABASE}/
+# cp ./srcs/services/transcendence.db ${VOLUME_DATABASE}/
 
 all: $(NAME)
 
 
-# $(SECRETS):
-# 	mkdir -p $(SECRETS)
+$(SECRETS):
+	mkdir -p $(SECRETS)
 
-# $(VOLUME_WEBSITE):
-# 	mkdir -p /home/ggiboury/data/www
+$(SSL_CERTIFICATE): $(SECRETS)
+	openssl req -x509 -newkey rsa:4096 -keyout ssl.key -out ssl.crt -sha256 -days 30 -nodes -subj "/C=FR/ST=France/L=Mulhouse/O=pong/CN=none"
+	mv ssl.crt ssl.key ./srcs/secrets/
 
-$(VOLUME_DATABASE):
-	mkdir -p /home/ggiboury/goinfre/db_transcendence
+$(VOLUME):
+	mkdir -p /home/ggiboury/goinfre/pong/data
+
+$(VOLUME_WEBSITE): $(VOLUME)
+	mkdir -p /home/ggiboury/goinfre/pong/data/website
+
+$(VOLUME_DATABASE): $(VOLUME)
+	mkdir -p /home/ggiboury/goinfre/pong/data/db_transcendence
 
 re : down $(NAME)
 
 clean : down
 	docker container prune -f
+
 # docker image prune -af
 
 # fclean : clean

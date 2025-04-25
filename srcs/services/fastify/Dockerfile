@@ -13,7 +13,7 @@ RUN npm install fastify fastify-cli
 
 ENTRYPOINT ["node"]
 # ENTRYPOINT ["bash"]
-# ENTRYPOINT ["sleep"]
+ENTRYPOINT ["sleep"]
 
-# CMD ["200"]
-CMD ["src/server.js"]
+CMD ["200"]
+# CMD ["src/server.js"]
