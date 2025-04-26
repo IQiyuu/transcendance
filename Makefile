@@ -6,7 +6,7 @@
 #    By: ggiboury <ggiboury@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/22 15:00:40 by ggiboury          #+#    #+#              #
-#    Updated: 2025/04/26 14:36:36 by ggiboury         ###   ########.fr        #
+#    Updated: 2025/04/26 16:21:27 by ggiboury         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -21,8 +21,13 @@ REQ	= $(VOLUME_DATABASE) $(VOLUME_WEBSITE) $(SSL_CERTIFICATE)
 
 COMPOSE_FILE	= ./srcs/docker-compose.yml
 
+SRC_SCRIPTS	= $(shell find $$PWD/srcs/services/fastify/src) # Listing all scripts in the repo
+
+
 VOLUME	= /home/ggiboury/goinfre/pong/data
 VOLUME_WEBSITE	= /home/ggiboury/goinfre/pong/data/fastify
+VOLUME_WEBSITE_FILES	= $(shell cd srcs/services/fastify && find src)
+VOLUME_WEBSITE_FILES	:= $(VOLUME_WEBSITE_FILES)
 VOLUME_DATABASE	= /home/ggiboury/goinfre/pong/data/sqlite
 
 SECRETS	= ./srcs/secrets
@@ -30,9 +35,9 @@ SECRETS	= ./srcs/secrets
 SSL_CERTIFICATE	= ${SECRETS}/ssl.crt $(SECRETS)/ssl.key
 
 
-SRC_SCRIPTS	= app.ts chat.ts chatRoute.js chat.ts gameRoute.js index.ejs loggingRoute.js pong.ts server.js
 
-
+test:
+	@echo $(VOLUME_WEBSITE_FILES)
 
 # Rules
 #
@@ -46,7 +51,7 @@ all: $(NAME)
 $(SECRETS):
 	mkdir -p $(SECRETS)
 
-$(SSL_CERTIFICATE): | $(SECRETS)
+$(SSL_CERTIFICATE) &: | $(SECRETS)
 	@if [ -e ${SECRETS}/ssl.crt -a -e ${SECRETS}/ssl.key ] ; then \
 		echo "SSL Certificate already there";\
 	else \
@@ -60,13 +65,16 @@ $(VOLUME):
 
 $(VOLUME_WEBSITE): | $(VOLUME)
 	mkdir -p $(VOLUME_WEBSITE)
-	@if [ ! ( -e ${VOLUME_WEBSITE_FILES} ) ] ; then \
-		echo "Importing scripts"; \
-		cp $(SRC_SCRIPTS) $(VOLUME_WEBSITE) \
-	fi 
+
+$(VOLUME_WEBSITE_FILES): | $(VOLUME_WEBSITE)
+	@if [ ! ( -e $@ ) ] ; then \
+		echo "Importing $@"; \
+		cp @./ \
+	fi
 
 $(VOLUME_DATABASE): | $(VOLUME)
 	mkdir -p $(VOLUME_DATABASE)
+	
 
 re : down $(NAME)
 
