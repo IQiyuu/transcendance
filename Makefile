@@ -6,7 +6,7 @@
 #    By: ggiboury <ggiboury@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/22 15:00:40 by ggiboury          #+#    #+#              #
-#    Updated: 2025/04/26 12:38:34 by ggiboury         ###   ########.fr        #
+#    Updated: 2025/04/26 14:36:36 by ggiboury         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,12 +22,16 @@ REQ	= $(VOLUME_DATABASE) $(VOLUME_WEBSITE) $(SSL_CERTIFICATE)
 COMPOSE_FILE	= ./srcs/docker-compose.yml
 
 VOLUME	= /home/ggiboury/goinfre/pong/data
-VOLUME_WEBSITE	= /home/ggiboury/goinfre/pong/data/website
-VOLUME_DATABASE	= /home/ggiboury/goinfre/pong/data/db_transcendence
+VOLUME_WEBSITE	= /home/ggiboury/goinfre/pong/data/fastify
+VOLUME_DATABASE	= /home/ggiboury/goinfre/pong/data/sqlite
 
 SECRETS	= ./srcs/secrets
 
 SSL_CERTIFICATE	= ${SECRETS}/ssl.crt $(SECRETS)/ssl.key
+
+
+SRC_SCRIPTS	= app.ts chat.ts chatRoute.js chat.ts gameRoute.js index.ejs loggingRoute.js pong.ts server.js
+
 
 
 # Rules
@@ -35,10 +39,6 @@ SSL_CERTIFICATE	= ${SECRETS}/ssl.crt $(SECRETS)/ssl.key
 
 $(NAME): $(REQ)
 	docker compose -f $(COMPOSE_FILE) up -d
-
-dev:
-	cp ./srcs/services/sqlite/transcendence.db ${VOLUME_DATABASE}/
-# cp ./srcs/services/transcendence.db ${VOLUME_DATABASE}/
 
 all: $(NAME)
 
@@ -54,17 +54,19 @@ $(SSL_CERTIFICATE): | $(SECRETS)
 		openssl req -x509 -newkey rsa:4096 -keyout ssl.key -out ssl.crt -sha256 -days 30 -nodes -subj "/C=FR/ST=France/L=Mulhouse/O=pong/CN=none" ; \
 		mv ssl.crt ssl.key ./srcs/secrets/ ; \
 	fi 
-#	openssl req -x509 -newkey rsa:4096 -keyout ssl.key -out ssl.crt -sha256 -days 30 -nodes -subj "/C=FR/ST=France/L=Mulhouse/O=pong/CN=none"
-#	mv ssl.crt ssl.key ./srcs/secrets/
 
 $(VOLUME):
-	mkdir -p /home/ggiboury/goinfre/pong/data
+	mkdir -p $(VOLUME)
 
-$(VOLUME_WEBSITE): $(VOLUME)
-	mkdir -p /home/ggiboury/goinfre/pong/data/website
+$(VOLUME_WEBSITE): | $(VOLUME)
+	mkdir -p $(VOLUME_WEBSITE)
+	@if [ ! ( -e ${VOLUME_WEBSITE_FILES} ) ] ; then \
+		echo "Importing scripts"; \
+		cp $(SRC_SCRIPTS) $(VOLUME_WEBSITE) \
+	fi 
 
-$(VOLUME_DATABASE): $(VOLUME)
-	mkdir -p /home/ggiboury/goinfre/pong/data/db_transcendence
+$(VOLUME_DATABASE): | $(VOLUME)
+	mkdir -p $(VOLUME_DATABASE)
 
 re : down $(NAME)
 

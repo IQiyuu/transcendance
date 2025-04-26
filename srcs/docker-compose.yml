@@ -60,7 +60,7 @@ volumes:
       type: none
       device: ${VOLUME_DB}
       o: "bind"
-    name: pong-${DB_SERVICE}
+    name: ${DB_SERVICE}
 
   scripts:
     driver: local
@@ -68,7 +68,7 @@ volumes:
       type: none
       device: ${VOLUME_SCRIPTS}
       o: "bind"
-    name: pong-${WEBSITE_SERVICE}
+    name: ${WEBSITE_SERVICE}
 
   monitoring-logs:
     name: pong-${MONITORING_SERVICE}
