@@ -6,7 +6,7 @@
 #    By: ggiboury <ggiboury@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/22 15:00:40 by ggiboury          #+#    #+#              #
-#    Updated: 2025/04/25 17:03:27 by ggiboury         ###   ########.fr        #
+#    Updated: 2025/04/26 12:38:34 by ggiboury         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -27,7 +27,7 @@ VOLUME_DATABASE	= /home/ggiboury/goinfre/pong/data/db_transcendence
 
 SECRETS	= ./srcs/secrets
 
-SSL_CERTIFICATE	= ${SECRETS}ssl.crt $(SECRETS)ssl.key
+SSL_CERTIFICATE	= ${SECRETS}/ssl.crt $(SECRETS)/ssl.key
 
 
 # Rules
@@ -46,10 +46,16 @@ all: $(NAME)
 $(SECRETS):
 	mkdir -p $(SECRETS)
 
-$(SSL_CERTIFICATE): $(SECRETS)
-# to do : write a script that test if file exists already
-	openssl req -x509 -newkey rsa:4096 -keyout ssl.key -out ssl.crt -sha256 -days 30 -nodes -subj "/C=FR/ST=France/L=Mulhouse/O=pong/CN=none"
-	mv ssl.crt ssl.key ./srcs/secrets/
+$(SSL_CERTIFICATE): | $(SECRETS)
+	@if [ -e ${SECRETS}/ssl.crt -a -e ${SECRETS}/ssl.key ] ; then \
+		echo "SSL Certificate already there";\
+	else \
+		echo "Creating SSL certificate"; \
+		openssl req -x509 -newkey rsa:4096 -keyout ssl.key -out ssl.crt -sha256 -days 30 -nodes -subj "/C=FR/ST=France/L=Mulhouse/O=pong/CN=none" ; \
+		mv ssl.crt ssl.key ./srcs/secrets/ ; \
+	fi 
+#	openssl req -x509 -newkey rsa:4096 -keyout ssl.key -out ssl.crt -sha256 -days 30 -nodes -subj "/C=FR/ST=France/L=Mulhouse/O=pong/CN=none"
+#	mv ssl.crt ssl.key ./srcs/secrets/
 
 $(VOLUME):
 	mkdir -p /home/ggiboury/goinfre/pong/data
@@ -86,5 +92,5 @@ info : logs status
 infow : status
 	docker compose -f $(COMPOSE_FILE) logs website
 
-# .PHONY: re clean fclean down logs status info
+.PHONY: re clean fclean down logs status info
 
