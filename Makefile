@@ -6,7 +6,7 @@
 #    By: ggiboury <ggiboury@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/22 15:00:40 by ggiboury          #+#    #+#              #
-#    Updated: 2025/04/27 17:42:01 by ggiboury         ###   ########.fr        #
+#    Updated: 2025/04/27 22:45:25 by ggiboury         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,15 +15,15 @@
 
 # Variables
 #
-NAME	= pong
+NAME	= trong
 
 REQ	= $(VOLUME_DATABASE_FILES) $(VOLUME_WEBSITE_FILES) $(SSL_CERTIFICATE)
 
 COMPOSE_FILE	= ./srcs/docker-compose.yml
 
 SCRIPTS	= $(shell cd srcs/services/fastify/src && find | cut -c2- )
-
-SRCS	= ./srcs/services
+#https://coolors.co/331832-694d75-1b5299
+SRCS	= ./srcs/services/
 SRCS_FASTIFY	= $(SCRIPTS:%=$(SRCS)%)
 SRCS_DB	= $(SRCS)/sqlite/transcendence.db
 
@@ -32,7 +32,8 @@ SRCS_DB	= $(SRCS)/sqlite/transcendence.db
 VOLUME	= /home/ggiboury/goinfre/pong/data
 
 VOLUME_WEBSITE	= /home/ggiboury/goinfre/pong/data/fastify
-VOLUME_WEBSITE_FILES	:= $(SCRIPTS:%=$(VOLUME_WEBSITE)%)
+VOLUME_WEBSITE_DIRS	= $(VOLUME_WEBSITE)/dist $(VOLUME_WEBSITE)/src $(VOLUME_WEBSITE)/img
+VOLUME_WEBSITE_FILES	:= $(SCRIPTS:%=$(VOLUME_WEBSITE)/src%)
 
 VOLUME_DATABASE	= /home/ggiboury/goinfre/pong/data/sqlite
 VOLUME_DATABASE_FILES	:= $(VOLUME_DATABASE)/transcendence.db
@@ -43,7 +44,8 @@ SSL_CERTIFICATE	= ${SECRETS}ssl.crt $(SECRETS)ssl.key
 
 # Rules
 #
-
+#https://coolors.co/a0ddff-053225-e34a6f
+#https://coolors.co/0d0106-3626a7-657ed4
 $(NAME): $(REQ)
 	docker compose -f $(COMPOSE_FILE) up -d
 
@@ -61,15 +63,17 @@ $(SSL_CERTIFICATE) &: | $(SECRETS)
 		mv ssl.crt ssl.key ./srcs/secrets/ ; \
 	fi 
 
-$(VOLUME):
-	mkdir -p $(VOLUME)
+# $(VOLUME):
+# 	mkdir -p $(VOLUME)
 
 $(VOLUME_WEBSITE): | $(VOLUME)
 	mkdir -p $(VOLUME_WEBSITE)
 
+$(VOLUME) $(VOLUME_WEBSITE_DIRS):
+	mkdir -p $@
 
-$(VOLUME_WEBSITE_FILES): | $(VOLUME_WEBSITE)
-	cp -r $(@:${VOLUME_WEBSITE}%=$(SRCS)/fastify/src%) $@
+$(VOLUME_WEBSITE_FILES): $(VOLUME_WEBSITE)/src
+	cp -r $(@:${VOLUME_WEBSITE}/src%=$(SRCS)fastify/src%) $@
 
 $(VOLUME_DATABASE): | $(VOLUME)
 	mkdir -p $(VOLUME_DATABASE)
