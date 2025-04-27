@@ -11,14 +11,18 @@ services:
     image : ${WEBSITE_SERVICE_IMAGE}
     container_name: pong-${WEBSITE_SERVICE}
     ports:
-      - "3001:3001"
+      - "${PORT}:${PORT}"
     environment:
       - NODE_ENV=${DEV_ENV}
     volumes:
       - db:${LOCATION_DB}
       - scripts:${LOCATION_SCRIPTS}
+    secrets:
+      - SSL-certificate
+      - SSL-key
     networks:
       - pong
+    hostname : "Trong"
     
   # db:
   #   pull_policy: build
@@ -47,7 +51,7 @@ services:
     image: ${MONITORING_VISUALISER_SERVICE_IMAGE}
     container_name: pong-${MONITORING_VISUALISER_SERVICE}
     ports:
-      - "3000:3000"
+      - "3001:3001"
 
 
 networks:

@@ -6,7 +6,7 @@
 #    By: ggiboury <ggiboury@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/22 15:00:40 by ggiboury          #+#    #+#              #
-#    Updated: 2025/04/27 16:45:21 by ggiboury         ###   ########.fr        #
+#    Updated: 2025/04/27 17:42:01 by ggiboury         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -44,17 +44,10 @@ SSL_CERTIFICATE	= ${SECRETS}ssl.crt $(SECRETS)ssl.key
 # Rules
 #
 
-ttt: $(REQ)
-
-
-# ttt:
-# 	@echo $(SCRIPTS:%=$(VOLUME_WEBSITE)/%)
-
 $(NAME): $(REQ)
 	docker compose -f $(COMPOSE_FILE) up -d
 
 all: $(NAME)
-
 
 $(SECRETS):
 	mkdir -p $(SECRETS)
@@ -74,13 +67,6 @@ $(VOLUME):
 $(VOLUME_WEBSITE): | $(VOLUME)
 	mkdir -p $(VOLUME_WEBSITE)
 
-# $(VOLUME_WEBSITE_FILES): | $(VOLUME_WEBSITE)
-# 	@echo $@
-# 	exit 1	
-
-# $(SCRIPTS:%=$(VOLUME_WEBSITE)/%): | $(VOLUME_WEBSITE)
-# 	@echo "Importing $@"
-# 	cp $(SRCS_FASTIFY)$@ $(VOLUME_WEBSITE)
 
 $(VOLUME_WEBSITE_FILES): | $(VOLUME_WEBSITE)
 	cp -r $(@:${VOLUME_WEBSITE}%=$(SRCS)/fastify/src%) $@
@@ -99,12 +85,12 @@ clean : down
 
 # docker image prune -af
 
-# fclean : clean
-# 	rm -rf data
-# #	docker volume rm `(docker volume ls -q | grep srcs)`
+fclean : clean
+	docker volume rm `(docker volume ls -q)`
+	rm -rf $(VOLUME)
 
 down :
-	docker compose -f $(COMPOSE_FILE) down -v
+	docker compose -f $(COMPOSE_FILE) down
 
 logs:
 	docker compose -f $(COMPOSE_FILE) logs

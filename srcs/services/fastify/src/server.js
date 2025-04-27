@@ -25,8 +25,8 @@ import { dirname, join } from "node:path";
 const networkInterfaces = os.networkInterfaces();
 let localIP = 'localhost';
 
-if (networkInterfaces.enp6s0) {
-  for (let details of networkInterfaces.enp6s0) {
+if (networkInterfaces.enp3s0f0) {
+  for (let details of networkInterfaces.enp3s0f0) {
     if (details.family === 'IPv4' && !details.internal) {
       localIP = details.address;
       break;
@@ -41,12 +41,12 @@ const rootDir = dirname(dirname(fileURLToPath(import.meta.url)));
 const fastify = Fastify({
   logger: true,
   https: {
-    key: fs.readFileSync('/run/secrets/ssl.key'),
-    cert: fs.readFileSync('/run/secrets/ssl.crt')
+    key: fs.readFileSync('/run/secrets/SSL-key'),
+    cert: fs.readFileSync('/run/secrets/SSL-certificate')
   }
 })
 
-const db = new Database('../sqlite/transcendance.db');
+const db = new Database('../db/transcendence.db');
 
 fastify.register(fastifyWebsocket);
 
@@ -87,7 +87,7 @@ fastify.register(FastifyView, {
   },
 })
 
-fastify.listen({ port: 3001, host: localIP }, function (err, address) {
+fastify.listen({ port: 3000, host: "0.0.0.0" }, function (err, address) {
   if (err) {
     fastify.log.error(err)
     process.exit(1)
