@@ -6,7 +6,7 @@
 #    By: ggiboury <ggiboury@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/22 15:00:40 by ggiboury          #+#    #+#              #
-#    Updated: 2025/04/26 16:21:27 by ggiboury         ###   ########.fr        #
+#    Updated: 2025/04/27 16:45:21 by ggiboury         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,30 +17,38 @@
 #
 NAME	= pong
 
-REQ	= $(VOLUME_DATABASE) $(VOLUME_WEBSITE) $(SSL_CERTIFICATE)
+REQ	= $(VOLUME_DATABASE_FILES) $(VOLUME_WEBSITE_FILES) $(SSL_CERTIFICATE)
 
 COMPOSE_FILE	= ./srcs/docker-compose.yml
 
-SRC_SCRIPTS	= $(shell find $$PWD/srcs/services/fastify/src) # Listing all scripts in the repo
+SCRIPTS	= $(shell cd srcs/services/fastify/src && find | cut -c2- )
+
+SRCS	= ./srcs/services
+SRCS_FASTIFY	= $(SCRIPTS:%=$(SRCS)%)
+SRCS_DB	= $(SRCS)/sqlite/transcendence.db
+
 
 
 VOLUME	= /home/ggiboury/goinfre/pong/data
+
 VOLUME_WEBSITE	= /home/ggiboury/goinfre/pong/data/fastify
-VOLUME_WEBSITE_FILES	= $(shell cd srcs/services/fastify && find src)
-VOLUME_WEBSITE_FILES	:= $(VOLUME_WEBSITE_FILES)
+VOLUME_WEBSITE_FILES	:= $(SCRIPTS:%=$(VOLUME_WEBSITE)%)
+
 VOLUME_DATABASE	= /home/ggiboury/goinfre/pong/data/sqlite
+VOLUME_DATABASE_FILES	:= $(VOLUME_DATABASE)/transcendence.db
 
 SECRETS	= ./srcs/secrets
 
-SSL_CERTIFICATE	= ${SECRETS}/ssl.crt $(SECRETS)/ssl.key
-
-
-
-test:
-	@echo $(VOLUME_WEBSITE_FILES)
+SSL_CERTIFICATE	= ${SECRETS}ssl.crt $(SECRETS)ssl.key
 
 # Rules
 #
+
+ttt: $(REQ)
+
+
+# ttt:
+# 	@echo $(SCRIPTS:%=$(VOLUME_WEBSITE)/%)
 
 $(NAME): $(REQ)
 	docker compose -f $(COMPOSE_FILE) up -d
@@ -66,15 +74,23 @@ $(VOLUME):
 $(VOLUME_WEBSITE): | $(VOLUME)
 	mkdir -p $(VOLUME_WEBSITE)
 
+# $(VOLUME_WEBSITE_FILES): | $(VOLUME_WEBSITE)
+# 	@echo $@
+# 	exit 1	
+
+# $(SCRIPTS:%=$(VOLUME_WEBSITE)/%): | $(VOLUME_WEBSITE)
+# 	@echo "Importing $@"
+# 	cp $(SRCS_FASTIFY)$@ $(VOLUME_WEBSITE)
+
 $(VOLUME_WEBSITE_FILES): | $(VOLUME_WEBSITE)
-	@if [ ! ( -e $@ ) ] ; then \
-		echo "Importing $@"; \
-		cp @./ \
-	fi
+	cp -r $(@:${VOLUME_WEBSITE}%=$(SRCS)/fastify/src%) $@
 
 $(VOLUME_DATABASE): | $(VOLUME)
 	mkdir -p $(VOLUME_DATABASE)
 	
+$(VOLUME_DATABASE_FILES): | $(VOLUME_DATABASE)
+	@echo "Importing database"
+	@cp $(SRCS_DB) $(VOLUME_DATABASE_FILES)
 
 re : down $(NAME)
 
@@ -102,5 +118,5 @@ info : logs status
 infow : status
 	docker compose -f $(COMPOSE_FILE) logs website
 
-.PHONY: re clean fclean down logs status info
+.PHONY: re clean fclean down logs status info ttt
 
