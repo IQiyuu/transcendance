@@ -1,4 +1,4 @@
-#ft_transcendence
+#Trong, the project
 
 services:
   website:
@@ -20,6 +20,11 @@ services:
     secrets:
       - SSL-certificate
       - SSL-key
+    configs:
+      - source: fastify-config
+        target: ${LOCATION_SCRIPTS}package.json
+      - source: fastify-tsconfig
+        target: ${LOCATION_SCRIPTS}tsconfig.json
     networks:
       - pong
     hostname : "Trong"
@@ -80,6 +85,10 @@ volumes:
 configs:
   prometheus-config:
     file: ${SRCS_MONITORING_CONFIG}
+  fastify-config:
+    file: ${SRCS_FASTIFY_CONFIG}
+  fastify-tsconfig:
+    file: ${SRCS_FASTIFY_TSCONFIG}
 
 secrets:
   SSL-certificate:

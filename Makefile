@@ -6,7 +6,7 @@
 #    By: ggiboury <ggiboury@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/22 15:00:40 by ggiboury          #+#    #+#              #
-#    Updated: 2025/04/27 22:45:25 by ggiboury         ###   ########.fr        #
+#    Updated: 2025/04/28 11:55:28 by ggiboury         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -59,17 +59,11 @@ $(SSL_CERTIFICATE) &: | $(SECRETS)
 		echo "SSL Certificate already there";\
 	else \
 		echo "Creating SSL certificate"; \
-		openssl req -x509 -newkey rsa:4096 -keyout ssl.key -out ssl.crt -sha256 -days 30 -nodes -subj "/C=FR/ST=France/L=Mulhouse/O=pong/CN=none" ; \
+		openssl req -x509 -newkey rsa:4096 -keyout ssl.key -out ssl.crt -sha256 -days 30 -nodes -subj "/C=FR/ST=France/L=Mulhouse/O=pong/CN=none"; \
 		mv ssl.crt ssl.key ./srcs/secrets/ ; \
 	fi 
 
-# $(VOLUME):
-# 	mkdir -p $(VOLUME)
-
-$(VOLUME_WEBSITE): | $(VOLUME)
-	mkdir -p $(VOLUME_WEBSITE)
-
-$(VOLUME) $(VOLUME_WEBSITE_DIRS):
+$(VOLUME) $(VOLUME_WEBSITE) $(VOLUME_WEBSITE_DIRS):
 	mkdir -p $@
 
 $(VOLUME_WEBSITE_FILES): $(VOLUME_WEBSITE)/src
@@ -79,7 +73,6 @@ $(VOLUME_DATABASE): | $(VOLUME)
 	mkdir -p $(VOLUME_DATABASE)
 	
 $(VOLUME_DATABASE_FILES): | $(VOLUME_DATABASE)
-	@echo "Importing database"
 	@cp $(SRCS_DB) $(VOLUME_DATABASE_FILES)
 
 re : down $(NAME)

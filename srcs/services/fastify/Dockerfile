@@ -15,5 +15,5 @@ ENTRYPOINT ["npm"]
 
 ENTRYPOINT ["sleep"]
 
-CMD ["200"]
+CMD ["500"]
 # CMD ["start"]
