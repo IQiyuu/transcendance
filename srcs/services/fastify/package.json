@@ -1,10 +1,13 @@
 {
-  "name": "fastify",
+  "name": "Trong",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "npx tsc",
+    "start": "npm install && node --watch src/server.js",
+    "run": "node --watch src/server.js"
   },
   "keywords": [],
   "author": "",
@@ -28,7 +31,8 @@
     "fastify-plugin": "^5.0.1",
     "jsonwebtoken": "^9.0.2",
     "socket.io": "^4.8.1",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^5.1.7",
+    "tailwindcss" : "^4.1.4"
   },
   "devDependencies": {
     "@types/node": "^22.13.4",

@@ -144,7 +144,7 @@ function startGame(oponnent, ws) {
     document.getElementById("menu").style.display = "none"
     canvas.tabIndex = 1000;
     canvas.style.outline = "none";
-    console.log("moves avaible, playing against: ", oponnent);
+    console.log("moves available, playing against: ", oponnent);
     draw(ws);
 }
 

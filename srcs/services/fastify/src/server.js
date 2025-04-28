@@ -42,12 +42,12 @@ const rootDir = dirname(dirname(fileURLToPath(import.meta.url)));
 const fastify = Fastify({
   logger: true,
   https: {
-    key: fs.readFileSync(join(rootDir, '/.ssl/ssl.key')),
-    cert: fs.readFileSync(join(rootDir, '/.ssl/ssl.crt'))
+    key: fs.readFileSync('/run/secrets/SSL-key'),
+    cert: fs.readFileSync('/run/secrets/SSL-certificate')
   }
 })
 
-const db = new Database('../sqlite/transcendance.db');
+const db = new Database('../db/transcendence.db');
 
 db.prepare('PRAGMA foreign_keys = ON;').run(); 
 
@@ -125,7 +125,7 @@ fastify.register(FastifyView, {
   },
 })
 
-fastify.listen({ port: 3000, host: localIP }, function (err, address) {
+fastify.listen({ port: 3000, host: "0.0.0.0" }, function (err, address) {
   if (err) {
     fastify.log.error(err)
     process.exit(1)

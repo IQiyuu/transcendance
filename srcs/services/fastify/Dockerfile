@@ -1,0 +1,13 @@
+
+ARG NODE_VERSION=latest
+
+FROM node:${NODE_VERSION}
+
+ARG PORT=3000
+EXPOSE ${PORT}
+
+WORKDIR /home/fastify
+
+ENTRYPOINT ["npm"]
+
+CMD ["start"]
