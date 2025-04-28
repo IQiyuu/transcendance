@@ -8,12 +8,6 @@ EXPOSE ${PORT}
 
 WORKDIR /home/fastify
 
-# RUN npx tsc
-# RUN npm install @fastify/view @fastify/cookie @fastify/static @fastify/websocket @fastify/multipart better-sqlite3 fastify-bcrypt @fastify/jwt
-
 ENTRYPOINT ["npm"]
 
-ENTRYPOINT ["sleep"]
-
-CMD ["500"]
-# CMD ["start"]
+CMD ["start"]
