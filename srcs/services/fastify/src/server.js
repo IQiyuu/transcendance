@@ -11,7 +11,8 @@ import os from 'os';
 
 import LogginRoute from './loggingRoute.js'
 import GameRoute from './gameRoute.js'
-import ChatRoute from './chatRoute.js';
+import websocketRoute from './webSocketRoute.js';
+import DbRoute from './dbRoute.js';
 
 import cookie from '@fastify/cookie';
 
@@ -48,6 +49,39 @@ const fastify = Fastify({
 
 const db = new Database('../db/transcendence.db');
 
+db.prepare('PRAGMA foreign_keys = ON;').run(); 
+
+db.exec(`
+  CREATE TABLE IF NOT EXISTS games (
+    game_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    winner_id INTEGER NOT NULL,
+    loser_id INTEGER NOT NULL,
+    loser_score INTEGER NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  );
+  
+  CREATE TABLE IF NOT EXISTS users (
+    user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL,
+    password TEXT NOT NULL,
+    picture_path TEXT DEFAULT "imgs/standart.jpg",
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  );
+
+  CREATE TABLE IF NOT EXISTS friends (
+    user_id INTEGER NOT NULL,
+    friend_id INTEGER NOT NULL,
+    status STRING NOT NULL DEFAULT "pending",
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, friend_id),
+    FOREIGN KEY(user_id) REFERENCES users(user_id),
+    FOREIGN KEY(friend_id) REFERENCES users(user_id)
+  );
+`)
+
+const schema = db.prepare("PRAGMA table_info(friends);").all();
+// console.log(schema);
+
 fastify.register(fastifyWebsocket);
 
 fastify.register(fastifyMultipart, {
@@ -75,7 +109,11 @@ fastify.register(GameRoute, {
   db: db,
 });
 
-fastify.register(ChatRoute);
+fastify.register(websocketRoute);
+
+fastify.register(DbRoute, {
+  db: db
+});
 
 fastify.register(FastifyStatic, {
   root: join(rootDir, 'dist')

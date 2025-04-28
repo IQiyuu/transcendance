@@ -93,11 +93,11 @@ async function gameRoute (fastify, options) {
         }
     });
 
-    // Route qui recupere une game l'upload dans ./dist/img et change le path dans la db
-    fastify.post('/upload/:username', async (request, reply) => {
+    // Route qui modifie la photo de profile ./dist/img et change le path dans la db
+    fastify.post('/upload/picture/:username', async (request, reply) => {
         const data = await request.parts();
         let uploadedFile;
-        const username = request.params.username;
+        const username = params.username;
         for await (const part of data) {
             if (part.file) {
                 console.log(username);
@@ -123,6 +123,40 @@ async function gameRoute (fastify, options) {
                     
                 });
             }
+        }
+    });
+
+    // Route qui recupere une game l'upload dans ./dist/img et change le path dans la db
+    fastify.post('/upload/username/:username', async (request, reply) => {
+        const { username, newusername } = request.body;
+        console.log(username);
+        
+        if (newusername == username) {
+            return { success: false, message: 'Same username' };
+        }
+        if (newusername.length <= 3) {
+            return { success: false, message: 'Username too small' };
+        }
+
+        if (newusername.length >= 15) {
+            return { success: false, message: 'Username too long' };
+        }
+        try {
+            const datas = options.db.prepare('SELECT username FROM users WHERE username = ?').get(newusername);
+            if (datas != undefined)
+                return { success: false, message: 'Username already taken' };
+        } catch (error) {
+            console.error('Error db.', error);
+            return { success: false, message: 'Error db' };
+        }
+        try {
+            options.db.prepare('UPDATE users SET username = ? WHERE username = ?').run(newusername, username);
+                
+            console.log('Username modified in db for: ', newusername);
+            return { success: true, message: 'Username uploaded' };
+        } catch (error) {
+            console.error('Error updating data in db.', error);
+            return { success: false, message: 'Error updating data in db' };
         }
     });
 

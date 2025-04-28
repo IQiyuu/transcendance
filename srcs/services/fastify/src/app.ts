@@ -143,6 +143,28 @@ async function display_profile(username) {
         (document.getElementById("profile_picture") as HTMLImageElement).src = profile.datas.picture_path + "?" + new Date().getTime();
         document.getElementById("profile_username").innerText = profile.datas.username;
         document.getElementById("profile_creation").innerText = `member since: ${profile.datas.created_at}`;
+        const friendDiv = document.getElementById("friend_div");
+        if (profile.datas.username == _username)
+            friendDiv.style.display = "none";
+        else {
+            const responseFriends = await fetch(`/db/friends/${_username}/${username}`, {
+                method: 'GET',
+                credentials: 'include',
+                headers: { "Content-Type": "application/json" },
+            });
+
+            const friends = await responseFriends.json();
+
+            if (!friends.success)
+                console.log("error: ", friends.error);
+            else {
+                document.getElementById("friend_btn").textContent = friends.message;
+                document.getElementById("block_btn").textContent = friends.emoji;
+            }
+
+            console.log(friends.message);
+            friendDiv.style.display = "flex";
+        }
 
         // requete des games
         const histo_req = await fetch(`/historic/${username}`, {
@@ -195,6 +217,16 @@ async function display_profile(username) {
                 });
         });
         document.getElementById("player_profile").style.display = "block";
+        if (cpt > 0) {
+            document.getElementById("wr").textContent = `${w} / ${cpt}` ;
+            let wr = w/(cpt)*100;
+            document.getElementById("percent").setAttribute("stroke-dasharray", `${wr}, 100`);
+        } else {
+            document.getElementById("wr").textContent = "N/A" ;
+            document.getElementById("percent").setAttribute("stroke-dasharray", `50, 100`);
+            document.getElementById("histo").style.display = "block";
+        }
+        document.getElementById("histo").style.display = "block";
     } catch (error) {
         menu.style.display = "flex";
         console.log("error fetching db: ", error);
@@ -228,7 +260,8 @@ document.getElementById("search_player_in").addEventListener("keydown", async (e
         input.value = "";
     }
 });
-// button recherche de joueur
+
+// button recherche de profile de joueur
 document.getElementById("search_player_btn").addEventListener("click", async (event) => {
     event.preventDefault();
     const input = ((document.getElementById("search_player_in")) as HTMLInputElement);
@@ -319,7 +352,7 @@ document.getElementById("upload_btn").addEventListener("click", async (event) =>
     if (fileInput.files[0]) {
         formData.append('file', fileInput.files[0]);
         try {
-            const response = await fetch(`/upload/${_username}`, {
+            const response = await fetch(`/upload/picture/${_username}`, {
                 method: 'POST',
                 body: formData,
             });
@@ -340,5 +373,87 @@ document.getElementById("upload_btn").addEventListener("click", async (event) =>
       }
 });
 
+document.getElementById("profile_username").addEventListener("click", async (event) => {
+    event.preventDefault();
 
-        
+    document.getElementById("profile_username_overlay").style.display = "flex";
+});
+
+document.getElementById("username_btn").addEventListener("click", async (event) => {
+    event.preventDefault();
+
+    const newusername = (document.getElementById("username_input") as HTMLInputElement).value;
+    console.log(newusername);
+    const body = {
+        username: _username,
+        newusername: newusername
+    };
+    console.log(JSON.stringify(body));
+    if (newusername != "") {
+        try {
+            const response = await fetch(`/upload/username/${_username}`, {
+                method: 'POST',
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body),
+            });
+            if (!response.ok)
+                console.log("error in username upload.");
+            else {
+                console.log("username uploaded.");
+                document.getElementById("profile_username_overlay").style.display = "none";
+                _username = newusername;
+                display_profile(_username);
+            }
+        } catch (error) {
+          console.error("error: ", error);
+        }
+    }
+});
+
+document.getElementById("friend_btn").addEventListener("click", async (event) => {
+    const body = {
+        user: _username,
+        friend: document.getElementById("profile_username").textContent,
+    }
+
+    console.log("body: ", body);
+
+    const friend_req = await fetch(`/db/friends/update`, {
+        method: 'POST',
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+    });
+
+    const data = await friend_req.json();
+    console.log("reponse du server: ", data);
+
+    if (data.success)
+        document.getElementById("friend_btn").textContent = data.message;
+    else
+        console.log("error: ", data.error);
+});
+
+
+document.getElementById("block_btn").addEventListener("click", async (event) => {
+    const body = {
+        user: _username,
+        friend: document.getElementById("profile_username").textContent,
+    }
+
+    console.log("body: ", body);
+
+    const friend_req = await fetch(`/db/friends/block`, {
+        method: 'POST',
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+    });
+
+    const data = await friend_req.json();
+    console.log(data);
+    if (data.success) {
+        document.getElementById("block_btn").textContent = data.blocking ? "🔓" : "🔒";
+        document.getElementById("friend_btn").textContent = data.blocking ? "Blocked" : "Send invite";
+    }
+    else
+        console.log("error: ", data.error);
+});

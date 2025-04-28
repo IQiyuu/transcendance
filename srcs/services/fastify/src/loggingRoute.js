@@ -69,7 +69,7 @@ async function logginRoute (fastify, options) {
           httpOnly: true,
           secure: true,
           SameSite: 'Strict',
-          maxAge: 86400000,
+          maxAge: 3600,
         });
 
 
