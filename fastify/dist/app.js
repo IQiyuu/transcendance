@@ -174,7 +174,7 @@ checkIfLoggedIn().then(function (isLoggedIn) {
 // GET et afficher les infos du profile / historique
 function display_profile(username) {
     return __awaiter(this, void 0, void 0, function () {
-        var list, menu, profile_req, profile_1, histo_req, data, cpt, w, error_3;
+        var list, menu, profile_req, profile_1, friendDiv, responseFriends, friends, histo_req, data, cpt, w, wr, error_3;
         var _this = this;
         return __generator(this, function (_a) {
             switch (_a.label) {
@@ -184,7 +184,7 @@ function display_profile(username) {
                     menu.style.display = "none";
                     _a.label = 1;
                 case 1:
-                    _a.trys.push([1, 6, , 7]);
+                    _a.trys.push([1, 10, , 11]);
                     return [4 /*yield*/, fetch("/profile/".concat(username), {
                             method: 'GET',
                             credentials: 'include',
@@ -202,15 +202,38 @@ function display_profile(username) {
                     document.getElementById("profile_picture").src = profile_1.datas.picture_path + "?" + new Date().getTime();
                     document.getElementById("profile_username").innerText = profile_1.datas.username;
                     document.getElementById("profile_creation").innerText = "member since: ".concat(profile_1.datas.created_at);
-                    return [4 /*yield*/, fetch("/historic/".concat(username), {
-                            method: 'GET',
-                            credentials: 'include',
-                            headers: { "Content-Type": "application/json" },
-                        })];
-                case 4:
+                    friendDiv = document.getElementById("friend_div");
+                    if (!(profile_1.datas.username == _username)) return [3 /*break*/, 4];
+                    friendDiv.style.display = "none";
+                    return [3 /*break*/, 7];
+                case 4: return [4 /*yield*/, fetch("/db/friends/".concat(_username, "/").concat(username), {
+                        method: 'GET',
+                        credentials: 'include',
+                        headers: { "Content-Type": "application/json" },
+                    })];
+                case 5:
+                    responseFriends = _a.sent();
+                    return [4 /*yield*/, responseFriends.json()];
+                case 6:
+                    friends = _a.sent();
+                    if (!friends.success)
+                        console.log("error: ", friends.error);
+                    else {
+                        document.getElementById("friend_btn").textContent = friends.message;
+                        document.getElementById("block_btn").textContent = friends.emoji;
+                    }
+                    console.log(friends.message);
+                    friendDiv.style.display = "flex";
+                    _a.label = 7;
+                case 7: return [4 /*yield*/, fetch("/historic/".concat(username), {
+                        method: 'GET',
+                        credentials: 'include',
+                        headers: { "Content-Type": "application/json" },
+                    })];
+                case 8:
                     histo_req = _a.sent();
                     return [4 /*yield*/, histo_req.json()];
-                case 5:
+                case 9:
                     data = _a.sent();
                     console.log(data);
                     list.replaceChildren();
@@ -261,13 +284,24 @@ function display_profile(username) {
                         }); });
                     });
                     document.getElementById("player_profile").style.display = "block";
-                    return [3 /*break*/, 7];
-                case 6:
+                    if (cpt > 0) {
+                        document.getElementById("wr").textContent = "".concat(w, " / ").concat(cpt);
+                        wr = w / (cpt) * 100;
+                        document.getElementById("percent").setAttribute("stroke-dasharray", "".concat(wr, ", 100"));
+                    }
+                    else {
+                        document.getElementById("wr").textContent = "N/A";
+                        document.getElementById("percent").setAttribute("stroke-dasharray", "50, 100");
+                        document.getElementById("histo").style.display = "block";
+                    }
+                    document.getElementById("histo").style.display = "block";
+                    return [3 /*break*/, 11];
+                case 10:
                     error_3 = _a.sent();
                     menu.style.display = "flex";
                     console.log("error fetching db: ", error_3);
-                    return [3 /*break*/, 7];
-                case 7: return [2 /*return*/];
+                    return [3 /*break*/, 11];
+                case 11: return [2 /*return*/];
             }
         });
     });
@@ -325,7 +359,7 @@ document.getElementById("search_player_in").addEventListener("keydown", function
         }
     });
 }); });
-// button recherche de joueur
+// button recherche de profile de joueur
 document.getElementById("search_player_btn").addEventListener("click", function (event) { return __awaiter(_this, void 0, void 0, function () {
     var input;
     return __generator(this, function (_a) {
@@ -445,7 +479,7 @@ document.getElementById("upload_btn").addEventListener("click", function (event)
                 _a.label = 1;
             case 1:
                 _a.trys.push([1, 3, , 4]);
-                return [4 /*yield*/, fetch("/upload/".concat(_username), {
+                return [4 /*yield*/, fetch("/upload/picture/".concat(_username), {
                         method: 'POST',
                         body: formData,
                     })];
@@ -470,6 +504,114 @@ document.getElementById("upload_btn").addEventListener("click", function (event)
                 console.log("No file selected.");
                 _a.label = 6;
             case 6: return [2 /*return*/];
+        }
+    });
+}); });
+document.getElementById("profile_username").addEventListener("click", function (event) { return __awaiter(_this, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        event.preventDefault();
+        document.getElementById("profile_username_overlay").style.display = "flex";
+        return [2 /*return*/];
+    });
+}); });
+document.getElementById("username_btn").addEventListener("click", function (event) { return __awaiter(_this, void 0, void 0, function () {
+    var newusername, body, response, error_5;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                event.preventDefault();
+                newusername = document.getElementById("username_input").value;
+                console.log(newusername);
+                body = {
+                    username: _username,
+                    newusername: newusername
+                };
+                console.log(JSON.stringify(body));
+                if (!(newusername != "")) return [3 /*break*/, 4];
+                _a.label = 1;
+            case 1:
+                _a.trys.push([1, 3, , 4]);
+                return [4 /*yield*/, fetch("/upload/username/".concat(_username), {
+                        method: 'POST',
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(body),
+                    })];
+            case 2:
+                response = _a.sent();
+                if (!response.ok)
+                    console.log("error in username upload.");
+                else {
+                    console.log("username uploaded.");
+                    document.getElementById("profile_username_overlay").style.display = "none";
+                    _username = newusername;
+                    display_profile(_username);
+                }
+                return [3 /*break*/, 4];
+            case 3:
+                error_5 = _a.sent();
+                console.error("error: ", error_5);
+                return [3 /*break*/, 4];
+            case 4: return [2 /*return*/];
+        }
+    });
+}); });
+document.getElementById("friend_btn").addEventListener("click", function (event) { return __awaiter(_this, void 0, void 0, function () {
+    var body, friend_req, data;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                body = {
+                    user: _username,
+                    friend: document.getElementById("profile_username").textContent,
+                };
+                console.log("body: ", body);
+                return [4 /*yield*/, fetch("/db/friends/update", {
+                        method: 'POST',
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(body),
+                    })];
+            case 1:
+                friend_req = _a.sent();
+                return [4 /*yield*/, friend_req.json()];
+            case 2:
+                data = _a.sent();
+                console.log("reponse du server: ", data);
+                if (data.success)
+                    document.getElementById("friend_btn").textContent = data.message;
+                else
+                    console.log("error: ", data.error);
+                return [2 /*return*/];
+        }
+    });
+}); });
+document.getElementById("block_btn").addEventListener("click", function (event) { return __awaiter(_this, void 0, void 0, function () {
+    var body, friend_req, data;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                body = {
+                    user: _username,
+                    friend: document.getElementById("profile_username").textContent,
+                };
+                console.log("body: ", body);
+                return [4 /*yield*/, fetch("/db/friends/block", {
+                        method: 'POST',
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(body),
+                    })];
+            case 1:
+                friend_req = _a.sent();
+                return [4 /*yield*/, friend_req.json()];
+            case 2:
+                data = _a.sent();
+                console.log(data);
+                if (data.success) {
+                    document.getElementById("block_btn").textContent = data.blocking ? "🔓" : "🔒";
+                    document.getElementById("friend_btn").textContent = data.blocking ? "Blocked" : "Send invite";
+                }
+                else
+                    console.log("error: ", data.error);
+                return [2 /*return*/];
         }
     });
 }); });

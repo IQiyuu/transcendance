@@ -38,15 +38,14 @@ var _ws = null;
 var _username = sessionStorage.username;
 function init() {
     var _this = this;
-    // Se connecter a la socket du server (wss secu)
+    // Se connecter à la socket du serveur (wss sécurisé)
     var promise1 = function () { return __awaiter(_this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             return [2 /*return*/, new Promise(function (resolve) {
-                    _ws = new WebSocket("wss://".concat(window.location.host, "/chat?username=").concat(_username));
-                    // Quand un message est recu
+                    _ws = new WebSocket("wss://".concat(window.location.host, "/ws?username=").concat(_username));
                     _ws.onmessage = function (message) {
                         message = JSON.parse(message.data);
-                        console.log("recu ", message);
+                        console.log("reçu ", message);
                         appendMessage(message);
                     };
                     _ws.addEventListener("open", function (event) {
@@ -56,26 +55,23 @@ function init() {
                 })];
         });
     }); };
-    // ajouter un message dans la chatbox
     function appendMessage(message) {
         var chatbox = document.getElementById('chatbox');
-        chatbox.innerHTML +=
-            "\n        <div id=\"message\">\n            <b>".concat(message.sender, ":&nbsp;</b>\n            ").concat(message.message, "\n        </div>\n        ");
+        chatbox.innerHTML += "\n            <div id=\"message\">\n                <b>".concat(message.sender, ":&nbsp;</b>\n                ").concat(message.message, "\n            </div>\n        ");
         chatbox.scrollBy(0, 25);
     }
-    // quand on est connecte ajouter les events pour envoyer des message (entrer et click sur le boutton)
-    promise1().then(function (value) {
+    promise1().then(function () {
         document.getElementById('chat').addEventListener("keydown", function (event) {
-            if (event.key == 'Enter') {
+            if (event.key === 'Enter') {
                 var input = event.target;
                 if (input.value.includes("<") || input.value.includes(">") || input.value.length > 128) {
                     input.value = '';
                     return;
                 }
-                console.log(input.value);
+                console.log("Sending:", input.value);
                 _ws.send(JSON.stringify({
-                    message: input.value,
-                    username: _username
+                    type: "chat",
+                    message: input.value
                 }));
                 input.value = '';
             }
@@ -87,10 +83,10 @@ function init() {
                 input.value = '';
                 return;
             }
-            console.log(input.value);
+            console.log("Sending:", input.value);
             _ws.send(JSON.stringify({
-                message: input.value,
-                username: _username
+                type: "chat",
+                message: input.value
             }));
             input.value = '';
         });
