@@ -101,6 +101,7 @@ async function logginRoute (fastify, options) {
   fastify.get('/protected', {
     preHandler: isAuthenticated,
     }, async (request, reply) => {
+      console.log("TRUE");
         return reply.send({ success: true, username: request.user });
     });
 
