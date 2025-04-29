@@ -112,7 +112,7 @@ async function gameRoute (fastify, options) {
         
                 fileStream.on('finish', () => {
                     try {
-                        options.db.prepare('UPDATE users SET picture_path = ? WHERE username = ?').run("../assets/imgs/" + filename, username);
+                        options.db.prepare('UPDATE users SET picture_path = ? WHERE username = ?').run(filename, username);
                     
                         console.log('Picture uploaded in db for: ', username);
                         return { success: true, message: 'File uploaded' };
