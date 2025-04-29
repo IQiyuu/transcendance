@@ -1,8 +1,6 @@
-
 {
     "include": ["src"],
     "compilerOptions": {
-      "outDir": "./dist",
-      // "version" : "1.0.0"
+      "outDir": "./dist"
     }
   }

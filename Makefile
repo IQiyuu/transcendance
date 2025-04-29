@@ -6,7 +6,7 @@
 #    By: ggiboury <ggiboury@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/22 15:00:40 by ggiboury          #+#    #+#              #
-#    Updated: 2025/04/29 11:34:06 by ggiboury         ###   ########.fr        #
+#    Updated: 2025/04/29 15:14:12 by ggiboury         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -41,16 +41,16 @@ SRCS_DB			= $(SRCS_DIR)services/sqlite/transcendence.db
 
 # Setting up volumes
 
-VOLUME	= /home/ggiboury/goinfre/pong/data
+VOLUME	= /goinfre/$(USER)/pong/data
 
-VOLUME_WEBSITE			= /home/ggiboury/goinfre/pong/data/fastify
+VOLUME_WEBSITE			= /goinfre/$(USER)/pong/data/fastify
 VOLUME_WEBSITE_DIRS		= $(VOLUME_WEBSITE)/dist $(VOLUME_WEBSITE)/src $(VOLUME_WEBSITE)/assets
 VOLUME_WEBSITE_SCRIPTS	:= $(SCRIPTS:%=$(VOLUME_WEBSITE)/src%)
 VOLUME_WEBSITE_ASSETS	:= $(ASSETS:%=$(VOLUME_WEBSITE)/assets%)
 VOLUME_WEBSITE_FILES	:= $(VOLUME_WEBSITE_ASSETS) $(VOLUME_WEBSITE_SCRIPTS)
 
 
-VOLUME_DATABASE			= /home/ggiboury/goinfre/pong/data/sqlite
+VOLUME_DATABASE			= /goinfre/$(USER)/pong/data/sqlite
 VOLUME_DATABASE_FILES	:= $(VOLUME_DATABASE)/transcendence.db
 
 
