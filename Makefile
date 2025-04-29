@@ -6,7 +6,7 @@
 #    By: ggiboury <ggiboury@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/22 15:00:40 by ggiboury          #+#    #+#              #
-#    Updated: 2025/04/28 11:55:28 by ggiboury         ###   ########.fr        #
+#    Updated: 2025/04/29 15:24:09 by ggiboury         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,26 +17,44 @@
 #
 NAME	= trong
 
-REQ	= $(VOLUME_DATABASE_FILES) $(VOLUME_WEBSITE_FILES) $(SSL_CERTIFICATE)
+REQ	= $(VOLUME_WEBSITE_FILES) $(VOLUME_DATABASE_FILES) $(SSL_CERTIFICATE)
 
 COMPOSE_FILE	= ./srcs/docker-compose.yml
 
+# Getting all files in the repo
 SCRIPTS	= $(shell cd srcs/services/fastify/src && find | cut -c2- )
+ASSETS	= $(shell cd srcs/assets && find | cut -c2- )
+
+SRCS			= $(SRCS_FASTIFY) $(SRCS_ASSETS) $(SRCS_DB)
+
 #https://coolors.co/331832-694d75-1b5299
-SRCS	= ./srcs/services/
-SRCS_FASTIFY	= $(SCRIPTS:%=$(SRCS)%)
-SRCS_DB	= $(SRCS)/sqlite/transcendence.db
+#https://coolors.co/a0ddff-053225-e34a6f
+#https://coolors.co/0d0106-3626a7-657ed4
+
+#Full path scripts and assets
+SRCS_DIR		= ./srcs/
+SRCS_FASTIFY	= $(SCRIPTS:%=$(SRCS_DIR)services/fastify%)
+SRCS_ASSETS		= $(ASSETS:%=$(SRCS_DIR)assets%)
+SRCS_DB			= $(SRCS_DIR)services/sqlite/transcendence.db
 
 
 
-VOLUME	= /home/ggiboury/goinfre/pong/data
+# Setting up volumes
 
-VOLUME_WEBSITE	= /home/ggiboury/goinfre/pong/data/fastify
-VOLUME_WEBSITE_DIRS	= $(VOLUME_WEBSITE)/dist $(VOLUME_WEBSITE)/src $(VOLUME_WEBSITE)/img
-VOLUME_WEBSITE_FILES	:= $(SCRIPTS:%=$(VOLUME_WEBSITE)/src%)
+VOLUME	= /goinfre/$(USER)/pong/data
 
-VOLUME_DATABASE	= /home/ggiboury/goinfre/pong/data/sqlite
+VOLUME_WEBSITE			= /goinfre/$(USER)/pong/data/fastify
+VOLUME_WEBSITE_DIRS		= $(VOLUME_WEBSITE)/dist $(VOLUME_WEBSITE)/src $(VOLUME_WEBSITE)/assets
+VOLUME_WEBSITE_SCRIPTS	:= $(SCRIPTS:%=$(VOLUME_WEBSITE)/src%)
+VOLUME_WEBSITE_ASSETS	:= $(ASSETS:%=$(VOLUME_WEBSITE)/assets%)
+VOLUME_WEBSITE_FILES	:= $(VOLUME_WEBSITE_ASSETS) $(VOLUME_WEBSITE_SCRIPTS)
+
+
+VOLUME_DATABASE			= /goinfre/$(USER)/pong/data/sqlite
 VOLUME_DATABASE_FILES	:= $(VOLUME_DATABASE)/transcendence.db
+
+
+# Secret
 
 SECRETS	= ./srcs/secrets
 
@@ -44,12 +62,18 @@ SSL_CERTIFICATE	= ${SECRETS}ssl.crt $(SECRETS)ssl.key
 
 # Rules
 #
-#https://coolors.co/a0ddff-053225-e34a6f
-#https://coolors.co/0d0106-3626a7-657ed4
+
+# test:
+# 	@echo $(ASSETS)
+# 	@echo $(SRCS_FASTIFY)
+# 	@echo $(SRCS_ASSETS)
+
 $(NAME): $(REQ)
 	docker compose -f $(COMPOSE_FILE) up -d
 
 all: $(NAME)
+
+check: $(SRCS)
 
 $(SECRETS):
 	mkdir -p $(SECRETS)
@@ -66,8 +90,12 @@ $(SSL_CERTIFICATE) &: | $(SECRETS)
 $(VOLUME) $(VOLUME_WEBSITE) $(VOLUME_WEBSITE_DIRS):
 	mkdir -p $@
 
-$(VOLUME_WEBSITE_FILES): $(VOLUME_WEBSITE)/src
-	cp -r $(@:${VOLUME_WEBSITE}/src%=$(SRCS)fastify/src%) $@
+$(VOLUME_WEBSITE_SCRIPTS): $(VOLUME_WEBSITE)/src
+	cp -r $(@:${VOLUME_WEBSITE}/src%=$(SRCS_DIR)services/fastify/src%) $@
+
+$(VOLUME_WEBSITE_ASSETS): $(VOLUME_WEBSITE)/assets
+	@echo $@
+	cp -r $(@:${VOLUME_WEBSITE}/assets%=$(SRCS_DIR)assets%) $@
 
 $(VOLUME_DATABASE): | $(VOLUME)
 	mkdir -p $(VOLUME_DATABASE)
@@ -103,3 +131,42 @@ infow : status
 
 .PHONY: re clean fclean down logs status info ttt
 
+
+#CONTENT OF ENV
+# NODE_VERSION=latest
+# DEV_ENV=dev
+
+# PORT=3000
+
+# #Services
+# WEBSITE_SERVICE=fastify
+# DB_SERVICE=sqlite
+# MONITORING_SERVICE=prometheus
+# MONITORING_VISUALISER_SERVICE=grafana
+
+# WEBSITE_SERVICE_IMAGE=fastify
+# MONITORING_SERVICE_IMAGE=prom/prometheus
+# MONITORING_VISUALISER_SERVICE_IMAGE=grafana/grafana-oss
+
+# # Locations
+# SRCS=./services/
+
+# VOLUME_DB=/goinfre/$USER/pong/data/sqlite/
+# VOLUME_SCRIPTS=/goinfre/$USER/pong/data/fastify/
+
+# # Volume in containers
+# LOCATION_DB=/home/db/
+# LOCATION_SCRIPTS=/home/fastify/
+
+# # Secrets
+# SECRETS=./secrets/
+
+# SSL_CERTIFICATE=ssl.crt
+# SSL_KEY=ssl.key
+
+
+# #Config files
+
+# SRCS_MONITORING_CONFIG=${SRCS}monitoring/prometheus.yml
+# SRCS_FASTIFY_CONFIG=${SRCS}fastify/package.json
+# SRCS_FASTIFY_TSCONFIG=${SRCS}fastify/tsconfig.json

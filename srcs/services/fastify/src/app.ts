@@ -347,7 +347,7 @@ document.getElementById("upload_btn").addEventListener("click", async (event) =>
                 document.getElementById("profile_picture_overlay").style.display = "none";
                 (document.getElementById("previsu_picture") as HTMLImageElement).src = "";
                 (document.getElementById("file_input") as HTMLInputElement).value = "";
-                pp.src = "imgs/" + _username + ".jpg?" + new Date().getTime();
+                pp.src = "../assets/imgs/" + _username + ".jpg?" + new Date().getTime();
             }
         } catch (error) {
           console.error("error: ", error);
