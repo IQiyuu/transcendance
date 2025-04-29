@@ -1,3 +1,4 @@
+let _username = sessionStorage.username;
 document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById("form");
     const formTitle = document.getElementById("form-title");
@@ -58,10 +59,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 sessionStorage.setItem('userId', data.id);
                 const loginForm = document.getElementById("login-form") as HTMLDivElement;
                 const pongGame = document.getElementById("site") as HTMLDivElement;
-                const chat = document.getElementById("chat") as HTMLDivElement;
                 loginForm.style.display = "none";
                 pongGame.style.display = "flex";
-                chat.style.display = "flex";
                 init();
                 fillCanvas();
             } else {
@@ -109,16 +108,13 @@ async function checkIfLoggedIn() {
 checkIfLoggedIn().then((isLoggedIn) => {
     const loginForm = document.getElementById("login-form") as HTMLDivElement;
     const pongGame = document.getElementById("site") as HTMLDivElement;
-    const chat = document.getElementById("chat") as HTMLDivElement;
     if (isLoggedIn) {
         loginForm.style.display = "none";
         pongGame.style.display = "flex";
-        chat.style.display = "flex";
         fillCanvas();
     } else {
         loginForm.style.display = "block";
         pongGame.style.display = "none";
-        chat.style.display = "none";
     }
 });
 

@@ -35,6 +35,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 var _this = this;
+var _username = sessionStorage.username;
 document.addEventListener("DOMContentLoaded", function () {
     var form = document.getElementById("form");
     var formTitle = document.getElementById("form-title");
@@ -58,7 +59,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
     // formulaire de connexion / inscription
     form.addEventListener("submit", function (event) { return __awaiter(_this, void 0, void 0, function () {
-        var username, password, url, body, response, data, loginForm, pongGame, chat, error, error_1;
+        var username, password, url, body, response, data, loginForm, pongGame, error, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -90,10 +91,8 @@ document.addEventListener("DOMContentLoaded", function () {
                         sessionStorage.setItem('userId', data.id);
                         loginForm = document.getElementById("login-form");
                         pongGame = document.getElementById("site");
-                        chat = document.getElementById("chat");
                         loginForm.style.display = "none";
                         pongGame.style.display = "flex";
-                        chat.style.display = "flex";
                         init();
                         fillCanvas();
                     }
@@ -158,17 +157,14 @@ function checkIfLoggedIn() {
 checkIfLoggedIn().then(function (isLoggedIn) {
     var loginForm = document.getElementById("login-form");
     var pongGame = document.getElementById("site");
-    var chat = document.getElementById("chat");
     if (isLoggedIn) {
         loginForm.style.display = "none";
         pongGame.style.display = "flex";
-        chat.style.display = "flex";
         fillCanvas();
     }
     else {
         loginForm.style.display = "block";
         pongGame.style.display = "none";
-        chat.style.display = "none";
     }
 });
 // GET et afficher les infos du profile / historique

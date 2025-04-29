@@ -35,10 +35,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 var _ws = null;
-var _username = sessionStorage.username;
 function init() {
     var _this = this;
-    // Se connecter à la socket du serveur (wss sécurisé)
+    // Se connecter a la socket
     var promise1 = function () { return __awaiter(_this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             return [2 /*return*/, new Promise(function (resolve) {
@@ -46,7 +45,7 @@ function init() {
                     _ws.onmessage = function (message) {
                         message = JSON.parse(message.data);
                         console.log("reçu ", message);
-                        appendMessage(message);
+                        // appendMessage(message);
                     };
                     _ws.addEventListener("open", function (event) {
                         console.log("Connected to WS server!");
@@ -61,34 +60,34 @@ function init() {
         chatbox.scrollBy(0, 25);
     }
     promise1().then(function () {
-        document.getElementById('chat').addEventListener("keydown", function (event) {
-            if (event.key === 'Enter') {
-                var input = event.target;
-                if (input.value.includes("<") || input.value.includes(">") || input.value.length > 128) {
-                    input.value = '';
-                    return;
-                }
-                console.log("Sending:", input.value);
-                _ws.send(JSON.stringify({
-                    type: "chat",
-                    message: input.value
-                }));
-                input.value = '';
-            }
-        });
-        document.getElementById('send_message').addEventListener("click", function (event) {
-            event.preventDefault();
-            var input = document.getElementById("message_input");
-            if (input.value.includes("<") || input.value.includes(">") || input.value.length > 128) {
-                input.value = '';
-                return;
-            }
-            console.log("Sending:", input.value);
-            _ws.send(JSON.stringify({
-                type: "chat",
-                message: input.value
-            }));
-            input.value = '';
-        });
+        // document.getElementById('chat').addEventListener("keydown", (event) => {
+        //     if (event.key === 'Enter') {
+        //         const input = event.target as HTMLInputElement;
+        //         if (input.value.includes("<") || input.value.includes(">") || input.value.length > 128) {
+        //             input.value = '';
+        //             return;
+        //         }
+        //         console.log("Sending:", input.value);
+        //         _ws.send(JSON.stringify({
+        //             type: "chat",
+        //             message: input.value
+        //         }));
+        //         input.value = '';
+        //     }
+        // });
+        // document.getElementById('send_message').addEventListener("click", (event) => {
+        //     event.preventDefault();
+        //     const input = document.getElementById("message_input") as HTMLInputElement;
+        //     if (input.value.includes("<") || input.value.includes(">") || input.value.length > 128) {
+        //         input.value = '';
+        //         return;
+        //     }
+        //     console.log("Sending:", input.value);
+        //     _ws.send(JSON.stringify({
+        //         type: "chat",
+        //         message: input.value
+        //     }));
+        //     input.value = '';
+        // });
     });
 }

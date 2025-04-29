@@ -1,6 +1,7 @@
 async function websocketRoute(fastify, options) {
     let waiting_list = null;
     let w_uname = null;
+    const connectedClients = new Map();
 
     fastify.addHook('preValidation', async (request, reply) => {
         if (request.routerPath === '/ws' && !request.query.username) {
@@ -13,13 +14,12 @@ async function websocketRoute(fastify, options) {
             const username = req.query.username;
 
             console.log(`${username} connected.`);
+            connectedClients.set(socket, username);
 
             // Diffuser un message à tout le monde
             function broadcast(message) {
-                for (let client of fastify.websocketServer.clients) {
-                    if (client.readyState === 1) { // 1 = OPEN
-                        client.send(JSON.stringify(message));
-                    }
+                for (const [socket, username] of connectedClients) {
+                    socket.send(JSON.stringify(message));
                 }
             }
 
@@ -48,7 +48,7 @@ async function websocketRoute(fastify, options) {
                     console.error('Invalid JSON:', rawMessage.toString());
                     return;
                 }
-
+                console.log(data);
                 if (data.type === 'chat') {
                     console.log("MSG");
                     broadcast({
@@ -78,7 +78,7 @@ async function websocketRoute(fastify, options) {
                             opponent: w_uname
                         }));
 
-                        // Sur déconnexion
+                        // Sur deconnexion
                         socket.on('close', () => {
                             games[gameId].scores["left"] = 11;
                         });
@@ -98,9 +98,8 @@ async function websocketRoute(fastify, options) {
 
             // Quand quelqu'un arrive, envoyer un message serveur
             broadcast({
-                type: 'chat',
-                sender: '__server',
-                message: `${username} joined the chat.`,
+                type: 'connexion',
+                user: username,
             });
         });
     });
