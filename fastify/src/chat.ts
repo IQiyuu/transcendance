@@ -10,7 +10,7 @@ function init() {
             _ws.onmessage = (message) => {
                 message = JSON.parse(message.data);
                 console.log("recu ", message);
-                appendMessage(message);
+                // appendMessage(message);
             };
             _ws.addEventListener("open", event => {
                 console.log("Connected to WS server!");
@@ -33,34 +33,34 @@ function init() {
 
     // quand on est connecte ajouter les events pour envoyer des message (entrer et click sur le boutton)
     promise1().then((value) => {
-        document.getElementById('chat').addEventListener("keydown", (event) => { 
-            if(event.key == 'Enter') {
-                const input = (event.target as HTMLInputElement);
-                if (input.value.includes("<") || input.value.includes(">") || input.value.length > 128) {
-                    input.value = '';
-                    return ;
-                }
-                console.log(input.value);
-                _ws.send(JSON.stringify({
-                    message: input.value,
-                    username: _username
-                }));
-                input.value = '';
-            }
-        });
-        document.getElementById('send_message').addEventListener("click", (event) => { 
-            event.preventDefault();
-            const input = document.getElementById("message_input") as HTMLInputElement;
-            if (input.value.includes("<") || input.value.includes(">") || input.value.length > 128) {
-                input.value = '';
-                return ;
-            }
-            console.log(input.value);
-            _ws.send(JSON.stringify({
-                message: input.value,
-                username: _username
-            }));
-            input.value = '';
-        });
+        // document.getElementById('chat').addEventListener("keydown", (event) => { 
+        //     if(event.key == 'Enter') {
+        //         const input = (event.target as HTMLInputElement);
+        //         if (input.value.includes("<") || input.value.includes(">") || input.value.length > 128) {
+        //             input.value = '';
+        //             return ;
+        //         }
+        //         console.log(input.value);
+        //         _ws.send(JSON.stringify({
+        //             message: input.value,
+        //             username: _username
+        //         }));
+        //         input.value = '';
+        //     }
+        // });
+        // document.getElementById('send_message').addEventListener("click", (event) => { 
+        //     event.preventDefault();
+        //     const input = document.getElementById("message_input") as HTMLInputElement;
+        //     if (input.value.includes("<") || input.value.includes(">") || input.value.length > 128) {
+        //         input.value = '';
+        //         return ;
+        //     }
+        //     console.log(input.value);
+        //     _ws.send(JSON.stringify({
+        //         message: input.value,
+        //         username: _username
+        //     }));
+        //     input.value = '';
+        // });
     });
 }

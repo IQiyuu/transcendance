@@ -39,26 +39,26 @@ document.addEventListener("DOMContentLoaded", function () {
     var form = document.getElementById("form");
     var formTitle = document.getElementById("form-title");
     var registerLink = document.getElementById("register-view");
+    var logginBtn = document.getElementById("login_btn");
     var isRegisterMode = false;
     // swap entre connexion et inscription
     registerLink.addEventListener("click", function (event) {
         event.preventDefault();
         isRegisterMode = !isRegisterMode;
-        form.innerHTML = "\n            <label for=\"username\">Username</label>\n            <input id=\"username\" name=\"username\" required />\n\n            <label for=\"password\">Password</label>\n            <input id=\"password\" name=\"password\" type=\"password\" required />\n\n        ";
         if (isRegisterMode) {
             formTitle.textContent = "Inscription";
             registerLink.textContent = "Se connecter";
-            form.innerHTML += "<button type=\"submit\">Register</button>";
+            logginBtn.textContent = "Register";
         }
         else {
             formTitle.textContent = "Connexion";
             registerLink.textContent = "Register";
-            form.innerHTML += "<button type=\"submit\">Register</button>";
+            logginBtn.textContent = "Se connecter";
         }
     });
     // formulaire de connexion / inscription
     form.addEventListener("submit", function (event) { return __awaiter(_this, void 0, void 0, function () {
-        var username, password, url, body, response, data, loginForm, pongGame, chat, error, error_1;
+        var username, password, url, body, response, data, loginForm, pongGame, error, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -90,10 +90,8 @@ document.addEventListener("DOMContentLoaded", function () {
                         sessionStorage.setItem('userId', data.id);
                         loginForm = document.getElementById("login-form");
                         pongGame = document.getElementById("site");
-                        chat = document.getElementById("chat");
                         loginForm.style.display = "none";
                         pongGame.style.display = "flex";
-                        chat.style.display = "flex";
                         init();
                         fillCanvas();
                     }
@@ -101,7 +99,6 @@ document.addEventListener("DOMContentLoaded", function () {
                         error = document.getElementById("errorAuth");
                         error.textContent = data.message;
                         error.style.display = "block";
-                        error.style.color = "red";
                         console.log("Auth error");
                     }
                     return [3 /*break*/, 5];
@@ -158,18 +155,10 @@ function checkIfLoggedIn() {
 checkIfLoggedIn().then(function (isLoggedIn) {
     var loginForm = document.getElementById("login-form");
     var pongGame = document.getElementById("site");
-    var chat = document.getElementById("chat");
-    if (isLoggedIn) {
-        loginForm.style.display = "none";
-        pongGame.style.display = "flex";
-        chat.style.display = "flex";
-        fillCanvas();
-    }
-    else {
+    if (isLoggedIn)
+        pongGame.style.display = "block";
+    else
         loginForm.style.display = "block";
-        pongGame.style.display = "none";
-        chat.style.display = "none";
-    }
 });
 // GET et afficher les infos du profile / historique
 function display_profile(username) {
