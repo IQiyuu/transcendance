@@ -11,7 +11,8 @@ import os from 'os';
 
 import LogginRoute from './loggingRoute.js'
 import GameRoute from './gameRoute.js'
-import ChatRoute from './chatRoute.js';
+import websocketRoute from './webSocketRoute.js';
+import DbRoute from './dbRoute.js';
 
 import cookie from '@fastify/cookie';
 
@@ -25,8 +26,8 @@ import { dirname, join } from "node:path";
 const networkInterfaces = os.networkInterfaces();
 let localIP = 'localhost';
 
-if (networkInterfaces.enp6s0) {
-  for (let details of networkInterfaces.enp6s0) {
+if (networkInterfaces.enp3s0f0) {
+  for (let details of networkInterfaces.enp3s0f0) {
     if (details.family === 'IPv4' && !details.internal) {
       localIP = details.address;
       break;
@@ -41,12 +42,45 @@ const rootDir = dirname(dirname(fileURLToPath(import.meta.url)));
 const fastify = Fastify({
   logger: true,
   https: {
-    key: fs.readFileSync(join(rootDir, '/.ssl/ssl.key')),
-    cert: fs.readFileSync(join(rootDir, '/.ssl/ssl.crt'))
+    key: fs.readFileSync('/run/secrets/SSL-key'),
+    cert: fs.readFileSync('/run/secrets/SSL-certificate')
   }
 })
 
-const db = new Database('../sqlite/transcendance.db');
+const db = new Database('../db/transcendence.db');
+
+db.prepare('PRAGMA foreign_keys = ON;').run(); 
+
+db.exec(`
+  CREATE TABLE IF NOT EXISTS games (
+    game_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    winner_id INTEGER NOT NULL,
+    loser_id INTEGER NOT NULL,
+    loser_score INTEGER NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  );
+  
+  CREATE TABLE IF NOT EXISTS users (
+    user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL,
+    password TEXT NOT NULL,
+    picture_path TEXT DEFAULT "imgs/standart.jpg",
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  );
+
+  CREATE TABLE IF NOT EXISTS friends (
+    user_id INTEGER NOT NULL,
+    friend_id INTEGER NOT NULL,
+    status STRING NOT NULL DEFAULT "pending",
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, friend_id),
+    FOREIGN KEY(user_id) REFERENCES users(user_id),
+    FOREIGN KEY(friend_id) REFERENCES users(user_id)
+  );
+`)
+
+const schema = db.prepare("PRAGMA table_info(friends);").all();
+// console.log(schema);
 
 fastify.register(fastifyWebsocket);
 
@@ -75,7 +109,11 @@ fastify.register(GameRoute, {
   db: db,
 });
 
-fastify.register(ChatRoute);
+fastify.register(websocketRoute);
+
+fastify.register(DbRoute, {
+  db: db
+});
 
 fastify.register(FastifyStatic, {
   root: join(rootDir, 'dist')
@@ -87,7 +125,7 @@ fastify.register(FastifyView, {
   },
 })
 
-fastify.listen({ port: 3000, host: localIP }, function (err, address) {
+fastify.listen({ port: 3000, host: "0.0.0.0" }, function (err, address) {
   if (err) {
     fastify.log.error(err)
     process.exit(1)

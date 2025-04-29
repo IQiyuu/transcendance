@@ -2,33 +2,33 @@ let _ws = null;
 let _username = sessionStorage.username;
 
 function init() {
-    // Se connecter a la socket du server (wss secu)
+    // Se connecter a la socket
     const promise1 = async () => {
-        return new Promise( resolve => {
-            _ws = new WebSocket(`wss://${window.location.host}/chat?username=${_username}`);
-            // Quand un message est recu
+        return new Promise(resolve => {
+            _ws = new WebSocket(`wss://${window.location.host}/ws?username=${_username}`);
+            
             _ws.onmessage = (message) => {
                 message = JSON.parse(message.data);
                 console.log("recu ", message);
                 // appendMessage(message);
             };
+
             _ws.addEventListener("open", event => {
                 console.log("Connected to WS server!");
                 resolve("Ok");
             });
         });
     }
-    // ajouter un message dans la chatbox
+
     function appendMessage(message) {
         const chatbox = document.getElementById('chatbox');
-        chatbox.innerHTML +=
-        `
-        <div id="message">
-            <b>${message.sender}:&nbsp;</b>
-            ${message.message}
-        </div>
-        `
-        chatbox.scrollBy(0,25);
+        chatbox.innerHTML += `
+            <div id="message">
+                <b>${message.sender}:&nbsp;</b>
+                ${message.message}
+            </div>
+        `;
+        chatbox.scrollBy(0, 25);
     }
 
     // quand on est connecte ajouter les events pour envoyer des message (entrer et click sur le boutton)
