@@ -6,7 +6,7 @@
 #    By: ggiboury <ggiboury@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/22 15:00:40 by ggiboury          #+#    #+#              #
-#    Updated: 2025/04/29 15:14:12 by ggiboury         ###   ########.fr        #
+#    Updated: 2025/04/29 15:24:09 by ggiboury         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -131,3 +131,42 @@ infow : status
 
 .PHONY: re clean fclean down logs status info ttt
 
+
+#CONTENT OF ENV
+# NODE_VERSION=latest
+# DEV_ENV=dev
+
+# PORT=3000
+
+# #Services
+# WEBSITE_SERVICE=fastify
+# DB_SERVICE=sqlite
+# MONITORING_SERVICE=prometheus
+# MONITORING_VISUALISER_SERVICE=grafana
+
+# WEBSITE_SERVICE_IMAGE=fastify
+# MONITORING_SERVICE_IMAGE=prom/prometheus
+# MONITORING_VISUALISER_SERVICE_IMAGE=grafana/grafana-oss
+
+# # Locations
+# SRCS=./services/
+
+# VOLUME_DB=/goinfre/$USER/pong/data/sqlite/
+# VOLUME_SCRIPTS=/goinfre/$USER/pong/data/fastify/
+
+# # Volume in containers
+# LOCATION_DB=/home/db/
+# LOCATION_SCRIPTS=/home/fastify/
+
+# # Secrets
+# SECRETS=./secrets/
+
+# SSL_CERTIFICATE=ssl.crt
+# SSL_KEY=ssl.key
+
+
+# #Config files
+
+# SRCS_MONITORING_CONFIG=${SRCS}monitoring/prometheus.yml
+# SRCS_FASTIFY_CONFIG=${SRCS}fastify/package.json
+# SRCS_FASTIFY_TSCONFIG=${SRCS}fastify/tsconfig.json
