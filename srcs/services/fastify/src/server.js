@@ -64,7 +64,7 @@ db.exec(`
     user_id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL,
     password TEXT NOT NULL,
-    picture_path TEXT DEFAULT "imgs/standart.jpg",
+    picture_path TEXT DEFAULT "assets/imgs/standart.jpg",
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   );
 
