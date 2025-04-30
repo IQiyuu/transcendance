@@ -7,7 +7,7 @@ async function gameRoute (fastify, options) {
     let games = {};
     let waiting_list = null;
     let w_uname = null;
-    let img_path = "./dist/imgs/";
+    let img_path = "../assets/imgs/";
 
     // Creer un objet game cote server
     function createGame(l_name, r_name) {
@@ -93,7 +93,7 @@ async function gameRoute (fastify, options) {
         }
     });
 
-    // Route qui modifie la photo de profile ./dist/img et change le path dans la db
+    // Route qui modifie la photo de profile ../assets/imgs et change le path dans la db
     fastify.post('/upload/picture/:username', async (request, reply) => {
         const data = await request.parts();
         let uploadedFile;
@@ -112,7 +112,7 @@ async function gameRoute (fastify, options) {
         
                 fileStream.on('finish', () => {
                     try {
-                        options.db.prepare('UPDATE users SET picture_path = ? WHERE username = ?').run("imgs/"+filename, username);
+                        options.db.prepare('UPDATE users SET picture_path = ? WHERE username = ?').run(filename, username);
                     
                         console.log('Picture uploaded in db for: ', username);
                         return { success: true, message: 'File uploaded' };

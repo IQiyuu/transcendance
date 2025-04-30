@@ -2,7 +2,15 @@ async function websocketRoute(fastify, options) {
     const db = options.db;
     let waiting_list = null;
     let w_uname = null;
+<<<<<<< HEAD
     let connectedClients = new Map();
+=======
+<<<<<<<< HEAD:fastify/src/webSocketRoute.js
+    const connectedClients = new Map();
+========
+    let connectedClients = new Map();
+>>>>>>>> daca160cd07c47da8b499e19eb3e97a24cca2516:srcs/services/fastify/src/webSocketRoute.js
+>>>>>>> daca160cd07c47da8b499e19eb3e97a24cca2516
 
     fastify.addHook('preValidation', async (request, reply) => {
         if (request.routerPath === '/ws' && !request.query.username) {
@@ -26,13 +34,28 @@ async function websocketRoute(fastify, options) {
             const username = req.query.username;
 
             console.log(`${username} connected.`);
+<<<<<<< HEAD
 
             // Diffuser un message à tout le monde
             function broadcast(message) {
+=======
+            connectedClients.set(socket, username);
+
+            // Diffuser un message à tout le monde
+            function broadcast(message) {
+<<<<<<<< HEAD:fastify/src/webSocketRoute.js
+                for (const [socket, username] of connectedClients) {
+                    socket.send(JSON.stringify(message));
+========
+>>>>>>> daca160cd07c47da8b499e19eb3e97a24cca2516
                 for (let client of fastify.websocketServer.clients) {
                     if (client.readyState === 1) {
                         client.send(JSON.stringify(message));
                     }
+<<<<<<< HEAD
+=======
+>>>>>>>> daca160cd07c47da8b499e19eb3e97a24cca2516:srcs/services/fastify/src/webSocketRoute.js
+>>>>>>> daca160cd07c47da8b499e19eb3e97a24cca2516
                 }
             }
 
@@ -43,8 +66,13 @@ async function websocketRoute(fastify, options) {
                     for (let [sock, uname] of connectedClients.entries()) {
                         if (uname === friend.username) {
                             sock.send(JSON.stringify({
+<<<<<<< HEAD
                                 type: t,
                                 user: uname,
+=======
+                                type: 'connection',
+                                user: t,
+>>>>>>> daca160cd07c47da8b499e19eb3e97a24cca2516
                             }));
                         }
                     }
@@ -76,7 +104,11 @@ async function websocketRoute(fastify, options) {
                     console.error('Invalid JSON:', rawMessage.toString());
                     return;
                 }
+<<<<<<< HEAD
 
+=======
+                console.log(data);
+>>>>>>> daca160cd07c47da8b499e19eb3e97a24cca2516
                 if (data.type === 'chat') {
                     console.log("MSG");
                     broadcast({
@@ -106,7 +138,11 @@ async function websocketRoute(fastify, options) {
                             opponent: w_uname
                         }));
 
+<<<<<<< HEAD
                         // Sur déconnexion
+=======
+                        // Sur deconnexion
+>>>>>>> daca160cd07c47da8b499e19eb3e97a24cca2516
                         socket.on('close', () => {
                             games[gameId].scores["left"] = 11;
                         });
@@ -124,8 +160,21 @@ async function websocketRoute(fastify, options) {
                 }
             });
 
+<<<<<<< HEAD
             sendInfosFriends(socket, username, "connection");
             connectedClients.set(socket, username);
+=======
+<<<<<<<< HEAD:fastify/src/webSocketRoute.js
+            // Quand quelqu'un arrive, envoyer un message serveur
+            broadcast({
+                type: 'connexion',
+                user: username,
+            });
+========
+            sendInfosFriends(socket, username, "connection");
+            connectedClients.set(socket, username);
+>>>>>>>> daca160cd07c47da8b499e19eb3e97a24cca2516:srcs/services/fastify/src/webSocketRoute.js
+>>>>>>> daca160cd07c47da8b499e19eb3e97a24cca2516
         });
     });
 }

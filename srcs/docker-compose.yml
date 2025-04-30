@@ -1,0 +1,97 @@
+#Trong, the project
+
+services:
+  website:
+    pull_policy: build
+    build:
+      context: ${SRCS}${WEBSITE_SERVICE}
+      args:
+        - NODE_VERSION=${NODE_VERSION}
+        - PORT=${PORT}
+    image : ${WEBSITE_SERVICE_IMAGE}
+    container_name: pong-${WEBSITE_SERVICE}
+    ports:
+      - "${PORT}:${PORT}"
+    environment:
+      - NODE_ENV=${DEV_ENV}
+    volumes:
+      - db:${LOCATION_DB}
+      - scripts:${LOCATION_SCRIPTS}
+    secrets:
+      - SSL-certificate
+      - SSL-key
+    configs:
+      - source: fastify-config
+        target: ${LOCATION_SCRIPTS}package.json
+      - source: fastify-tsconfig
+        target: ${LOCATION_SCRIPTS}tsconfig.json
+    networks:
+      - pong
+    hostname : "Trong"
+    
+  # db:
+  #   pull_policy: build
+  #   build:
+  #     context: ${SRCS}${DB_SERVICE}
+  #   image: ${DB_SERVICE_IMAGE}
+  #   container_name: pong-${DB_SERVICE}
+  #   volumes:
+  #     - db:${LOCATION_DB}
+  #   networks:
+  #     - pong
+    # ports: ""
+  
+  monitoring:
+    image: ${MONITORING_SERVICE_IMAGE}
+    container_name: pong-${MONITORING_SERVICE}
+    ports:
+      - "9090:9090"
+    volumes:
+      - monitoring-logs:/prometheus
+    configs:
+      - source: prometheus-config
+        target: /etc/prometheus/prometheus.yml
+  
+  monitoring-visualiser:
+    image: ${MONITORING_VISUALISER_SERVICE_IMAGE}
+    container_name: pong-${MONITORING_VISUALISER_SERVICE}
+    ports:
+      - "3001:3001"
+
+
+networks:
+  pong:
+
+volumes:
+  db:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${VOLUME_DB}
+      o: "bind"
+    name: ${DB_SERVICE}
+
+  scripts:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${VOLUME_SCRIPTS}
+      o: "bind"
+    name: ${WEBSITE_SERVICE}
+
+  monitoring-logs:
+    name: pong-${MONITORING_SERVICE}
+
+configs:
+  prometheus-config:
+    file: ${SRCS_MONITORING_CONFIG}
+  fastify-config:
+    file: ${SRCS_FASTIFY_CONFIG}
+  fastify-tsconfig:
+    file: ${SRCS_FASTIFY_TSCONFIG}
+
+secrets:
+  SSL-certificate:
+    file: ${SECRETS}${SSL_CERTIFICATE}
+  SSL-key:
+    file: ${SECRETS}${SSL_KEY}

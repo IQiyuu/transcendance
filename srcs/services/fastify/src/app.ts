@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById("form");
     const formTitle = document.getElementById("form-title");
     const registerLink = document.getElementById("register-view");
+    const logginBtn = document.getElementById("login_btn");
     let isRegisterMode = false;
 
     // swap entre connexion et inscription
@@ -10,23 +11,15 @@ document.addEventListener("DOMContentLoaded", () => {
         event.preventDefault();
 
         isRegisterMode = !isRegisterMode;
-        form.innerHTML = `
-            <label for="username">Username</label>
-            <input id="username" name="username" required />
-
-            <label for="password">Password</label>
-            <input id="password" name="password" type="password" required />
-
-        `;
         if (isRegisterMode) {
             formTitle.textContent = "Inscription";
             registerLink.textContent = "Se connecter";
-            form.innerHTML += `<button type="submit">Register</button>`
+            logginBtn.textContent = "Register";
 
         } else {
             formTitle.textContent = "Connexion";
             registerLink.textContent = "Register";
-            form.innerHTML += `<button type="submit">Register</button>`
+            logginBtn.textContent = "Se connecter";
         }
     });
     // formulaire de connexion / inscription
@@ -67,7 +60,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 const error = document.getElementById("errorAuth") as HTMLParagraphElement;
                 error.textContent = data.message;
                 error.style.display = "block";
-                error.style.color = "red";
                 console.log("Auth error");
             }
         } catch (error) {
@@ -108,14 +100,11 @@ async function checkIfLoggedIn() {
 checkIfLoggedIn().then((isLoggedIn) => {
     const loginForm = document.getElementById("login-form") as HTMLDivElement;
     const pongGame = document.getElementById("site") as HTMLDivElement;
-    if (isLoggedIn) {
-        loginForm.style.display = "none";
-        pongGame.style.display = "flex";
-        fillCanvas();
-    } else {
+
+    if (isLoggedIn)
+        pongGame.style.display = "block";
+    else
         loginForm.style.display = "block";
-        pongGame.style.display = "none";
-    }
 });
 
 // GET et afficher les infos du profile / historique
@@ -359,7 +348,7 @@ document.getElementById("upload_btn").addEventListener("click", async (event) =>
                 document.getElementById("profile_picture_overlay").style.display = "none";
                 (document.getElementById("previsu_picture") as HTMLImageElement).src = "";
                 (document.getElementById("file_input") as HTMLInputElement).value = "";
-                pp.src = "imgs/" + _username + ".jpg?" + new Date().getTime();
+                pp.src = "../assets/imgs/" + _username + ".jpg?" + new Date().getTime();
             }
         } catch (error) {
           console.error("error: ", error);

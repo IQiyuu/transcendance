@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="style.css" rel="stylesheet">
+    <title>Transcendance</title>
+</head>
+<body class="h-screen content-center bg-gradient-to-br from-purple-600 to-blue-500">
+
+    <!-- LOGIN FORM -->
+    <div id="login-form" class="flex flex-col p-6 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 max-w-sm mx-auto mb-5"  style="display:none">
+        <h1 class="underline text-white text-4xl text-center" id="form-title">Connexion</h1>
+
+        <form class="max-w-sm mx-auto" id="form">
+            <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="username">Username</label>
+            <input class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" id="username" name="username" required />
+
+            <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="password">Password</label>
+            <input class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" id="password" name="password" type="password" required />
+
+            <p style="display:none;" class="text-red-600" id="errorAuth"></p>
+
+            <a class="font-medium text-blue-600 hover:underline dark:text-blue-500" id="register-view" href="#">S'inscrire</a>
+            <button id="login_btn" class="my-2 w-full text-white bg-gradient-to-br from-green-400 to-blue-600 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-green-200 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2" type="submit">Se connecter</button>
+        </form>
+        
+    </div>
+
+    <div id="site" style="display: none;">
+        <div id="pong-game">
+            <div id="gameContainer">
+                <h1 class="mb-50 underline text-white text-7xl text-center cursor-pointer" id="game_title">Pong The Game</h1>
+                <!-- SCOREBOARD -->
+                <div id="scoreboard" style="font-size: 24px; font-weight: bold; margin-bottom: 10px; display: none;">
+                    <span id="player-left">Player 1</span> 
+                    <span id="score-left">0</span> - 
+                    <span id="score-right">0</span>
+                    <span id="player-right">Player 2</span>
+                </div>
+                <!-- MENU -->
+                <div class="flex w-full justify-between">
+                    <!-- Premier UL : 70% -->
+                    <ul class="w-[70%] space-y-6 text-gray-500 list-none dark:text-gray-400">
+                        <li>
+                            <button id="offline" class="w-[90%] hover:w-full transition-all duration-500 ease-in-out cursor-pointer p-12 text-5xl italic font-medium text-white dark:text-black bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg border-4 border-purple-600 flex items-center justify-center text-center">
+                                Play local
+                            </button>
+                        </li>
+                        <li>
+                            <button id="matchmaking" class="w-[90%] hover:w-full transition-all duration-500 ease-in-out cursor-pointer p-12 text-5xl italic font-medium text-white dark:text-black bg-gradient-to-r from-teal-200 to-lime-200 hover:from-lime-200 hover:to-teal-200 rounded-lg border-4 border-green-800 flex items-center justify-center text-center">
+                                Play online
+                            </button>
+                        </li>
+                        <li>
+                            <button id="profile_button" class="w-[90%] hover:w-full transition-all duration-500 ease-in-out cursor-pointer p-12 text-5xl italic font-medium text-white dark:text-black bg-gradient-to-r from-red-200 via-red-300 to-yellow-200 hover:from-yellow-200 hover:to-red-300 rounded-lg border-4 border-red-600 flex items-center justify-center text-center">
+                                Settings
+                            </button>
+                        </li>
+                        <li>
+                            <button class="w-[90%] hover:w-full transition-all duration-500 ease-in-out cursor-pointer p-12 text-5xl italic font-medium text-white dark:text-black bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-blue-500 hover:to-cyan-500 rounded-lg border-4 border-blue-700 flex items-center justify-center text-center">
+                                About
+                            </button>
+                        </li>
+                    </ul>
+                    
+                
+                    <!-- Deuxième UL : 20% -->
+                    <ul class="w-[20%]">
+                        <li>
+                            <!-- Contenu éventuel -->
+                        </li>
+                    </ul>
+
+                    <div class="w-[20%] h-[80vh] overflow-y-auto bg-gray-100 dark:bg-gray-800 rounded-lg p-4 border border-gray-300 dark:border-gray-700 shadow-inner">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">Amis connectés</h2>
+                            <!-- Bouton pour ouvrir/fermer le menu amis -->
+                            <button id="toggleFriendsMenu" class="bg-purple-600 text-white px-4 py-2 rounded shadow hover:bg-purple-700 transition">
+                                ^
+                            </button>
+                        </div>
+                        
+                        <div id="friendList" class="w-[20%] h-[80vh] overflow-y-auto bg-gray-100 dark:bg-gray-800 rounded-lg p-4 border border-gray-300 dark:border-gray-700 shadow-inner transform transition-transform duration-300 ease-in-out translate-x-full fixed top-20 right-0 z-40 hidden md:block">
+                            <div id="friendsContainer" class="space-y-3"></div>
+                        </div>
+                        <div class="space-y-3">
+                            <!-- Ami en ligne -->
+                            <button class="w-full flex items-center justify-between p-3 rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white shadow hover:bg-gray-200 dark:hover:bg-gray-600 transition cursor-pointer">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                                    <span class="text-lg">Alice</span>
+                                </div>
+                                <span class="text-sm bg-green-500 text-white px-3 py-1 rounded">Inviter</span>
+                            </button>
+                    
+                            <!-- Ami hors ligne -->
+                            <button class="w-full flex items-center justify-between p-3 rounded-md bg-white dark:bg-gray-700 text-gray-400 dark:text-gray-400 shadow cursor-not-allowed">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                                    <span class="text-lg">Bob</span>
+                                </div>
+                                <span class="text-sm bg-gray-300 text-white px-3 py-1 rounded">Hors ligne</span>
+                            </button>
+                    
+                            <!-- Ami en ligne -->
+                            <button class="w-full flex items-center justify-between p-3 rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white shadow hover:bg-gray-200 dark:hover:bg-gray-600 transition cursor-pointer">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                                    <span class="text-lg">Charlie</span>
+                                </div>
+                                <span class="text-sm bg-green-500 text-white px-3 py-1 rounded">Inviter</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                           
+                    <!-- PROFILE -->
+                <div id="player_profile" style="display:none; margin-right: 1%; margin-left: 1%">
+                    <div id="player_infos" style="display: flex; justify-content: flex-start;">
+                        <img id="profile_picture" width="100" height="100" style="position: relative;"/>
+                        <img src="../assets/imgs/hoverPicture.png" width="50" height="50" id="camera_icon" style="z-index: 15; position: absolute; top: 9%; left: 2.8%; opacity: 0;" />
+                        <!-- PROFILE PICTURE UPLOAD -->
+                        <div id="profile_picture_overlay" style="z-index: 20; display: none; justify-content: center; align-items: center; background: rgba(0, 0, 0, 0.5); position: fixed; top: 0; left: 0; width: 100%; height: 100%;">
+                            <form id="profil_picture_square" style="align-items: center; display: flex; flex-direction: column; position: relative; background: gray; height: 20%; padding: 20px; text-align: center; border-radius: 10px;">
+                                <p id="div_title">Upload your profile picture</p>
+                                <button id="profile_cross" style="position: absolute; top: 10px; right: 10px;">X</button>
+                                <input type="file" id="file_input" style="margin-bottom: 5%;" value=""/>
+                                <button id="upload_btn" style="width: 50%">Upload</button>
+                                <img id="previsu_picture" src="" width="50" height="50" style="margin-top: 3%;"/>
+                            </form>
+                        </div>
+                        <h1 id="profile_username" style="display: flex; align-items: center; margin-left: 1%;"></h1>
+                        <!-- PROFILE USERNAME MODIFIER -->
+                        <div id="profile_username_overlay" style="z-index: 20; display: none; justify-content: center; align-items: center; background: rgba(0, 0, 0, 0.5); position: fixed; top: 0; left: 0; width: 100%; height: 100%;">
+                            <input type="text" id="username_input" style="margin-bottom: 5%;" value=""/>
+                            <button id="username_btn" style="width: 50%">Modify</button>
+                        </div>
+                        <div id="friend_div">
+                            <button id="friend_btn">Add friend</button>
+                            <button id="block_btn">🔒</button>
+                        </div>
+                        <p id="profile_creation" style="display: flex; align-items: center; margin-left: auto;"></p>
+                    </div>
+                    <!-- SEARCH PROFILE -->
+                    <div id="search_container" style="display: flex; align-items: center; margin-top: 1%;">
+                        <input id="search_player_in" type="text" placeholder="username" style="flex: 1; padding: 8px; border-radius: 10px;"/>
+                        <button id="search_player_btn" style="margin-left: 5px; padding: 8px; border-radius: 10px;">🔎</button>
+                    </div>
+                    <!-- HISTORIC -->
+                    <div id="histo">
+                        <p id="winrate"></p>
+                        <svg id="wr_graph" viewBox="0 0 36 36" style="display: block; max-height: 100px;" class="circle-svg">
+                            <path class="around" style="stroke: #960e0e; fill: none; stroke-width: 2.8;" stroke-dasharray="100, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+  
+                            <path id="percent" class="percent" style="stroke: #6f6fff; fill: none; stroke-width: 2.8; stroke-linecap: round;" stroke-dasharray="30, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+                            
+                            <text id="wr" x="18" y="14" style="font-size: 10px; text-align: center;" text-anchor="middle" dy="7" font-size="20">3/10</text>
+                        </svg>
+                        <ul id="histo_list"></ul>
+                    </div>
+                </div>
+            </div>
+            <!-- JEU -->
+            <canvas id="pong" width="1490" height="880" style="border: 2px solid #ccc; position: absolute; top: 0; left: 0; margin-right: 10px; z-index: 1; display:none" autofocus></canvas>
+        </div>
+        <!-- CHAT -->
+        <!-- <div id="chat" style="flex: 1; display: none; flex-direction: column; align-items: center; margin-bottom: 20px; padding-left: 10px; border: 2px solid #ccc; overflow: hidden; background-color: black">
+            <div id="chatbox" style="height: 100%; padding: 12px; background-color: rgb(99, 123, 145); overflow-y: scroll; width: 100%;"></div>
+            <div id="userInput" style="width: 100%; display: flex;">
+                <input id="message_input" type="text" placeholder="write message" value="" style="margin: 5px; width: 90%;"/>
+                <button id="send_message" style="margin: 5px; width: 10%;">Send</button>
+            </div> -->
+        <!-- </div> -->
+      
+      </div>
+      
+      
+
+    <script src="app.js"></script>
+    <script src="pong.js"></script>
+    <script src="chat.js"></script>
+</body>
+</html>
