@@ -14,6 +14,19 @@ async function dbRoute (fastify, options) {
         }
     });
 
+    // retourne les infos du user demande
+    fastify.get('/db/select/users/:username' , async (request, reply) => {
+        try {
+            const datas = db.prepare(`
+                SELECT username, profile_path as pp, 
+                 FROM users`).all();
+            reply.send(datas);
+        } catch (error) {
+            console.log("error: ", error);
+            return { success: false, error: error };
+        }
+    });
+
     // retourne les tables de la db
     fastify.get('/db/tables' , async (request, reply) => {
         try {
@@ -92,7 +105,7 @@ async function dbRoute (fastify, options) {
 
     function getFriendList(user) {
         return db.prepare(`
-            SELECT users.username
+            SELECT users.username as username, users.picture_path as pp
             FROM users
             JOIN friends 
               ON users.user_id = friends.user_id OR users.user_id = friends.friend_id
@@ -110,6 +123,10 @@ async function dbRoute (fastify, options) {
         `).get(user1, user2, user2, user1);
     }
     
+    function getUserInfo(user) {
+        return db.prepare(`SELECT username, picture_path AS pp FROM users WHERE user_id = ?`).get(user);
+    }
+
     // insert un ami
     fastify.post('/db/friends/update', async (request, reply) => {
         const body = request.body;
@@ -129,18 +146,20 @@ async function dbRoute (fastify, options) {
                         return { success: true, message: "Send invitation", status: null };
                     } else {
                         updateStatus(userId, friendId, "accepted");
-                        reply.send({ success: true, message: "Remove friend", status: "accepted" });
+                        return { success: true, message: "Remove friend", status: "accepted", user: getUserInfo(userId), friend: getUserInfo(friendId) };
                     }
                 } else {
                     deleteRelation(userId, friendId);
                     return { success: true, message: "Send invitation", status: null };
                 }
+        
             } else {
                 // on creer la relation
                 createRelation(userId, friendId, 'pending');
                 return { success: true, message: "Cancel invitation", status: 'pending' };
             }
         } catch (error) {
+
             console.log("error: ", error);
             return { success: false, error: error.message };
         }
@@ -158,10 +177,8 @@ async function dbRoute (fastify, options) {
             if (datas) {
                 // Si uniquement 1 a bloque l'autre
                 if (datas.status === "blocked") {
-                    if (datas.user == userId) {
+                    if (datas.user == userId)
                         deleteRelation(userId, friendId);
-                        return { success: true, blocking: false };
-                    }
                     else 
                         updateStatus(userId, friendId, friendId, userId, "both_blocking");
                     return { success: true, blocking: false };
@@ -194,16 +211,14 @@ async function dbRoute (fastify, options) {
         }
     });
 
+
     // Verifie si il y a un lien d amitie
     fastify.get('/db/friends/:user/:friend', async (request, reply) => {
-        const body = request.body;
-
         try {
-            const userId = getIdFromUsername(body.user);
-            const friendId = getIdFromUsername(body.friend);
+            const userId = getIdFromUsername(request.params.user);
+            const friendId = getIdFromUsername(request.params.friend);
     
             const friendship = getFriendRelation(userId, friendId);
-    
             if (friendship) {
                 if (friendship.status == "pending") {
                     const message = friendship.user == userId ? "Cancel invitation" : "Accept invitation";
@@ -219,10 +234,22 @@ async function dbRoute (fastify, options) {
                     reply.send({ success: true, message: "Remove friend", status: friendship.status, emoji: "🔒" });
                 }
             } else {
-                reply.send({ success: true, mesage: "Send invitation", status: friendship.status, emoji: "🔒" });
+                reply.send({ success: true, message: "Send invitation", status: null, emoji: "🔒" });
             }
         } catch (error) {
             reply.send({ success: false, error: error.message });
+        }
+    });
+
+    fastify.get('/db/friends/friendlist/:username', async (request, reply) => {
+        try {
+            const userId = getIdFromUsername(request.params.username);
+
+            const friendlist = getFriendList(userId);
+            reply.send({ success: true, friends: friendlist });
+        } catch (error) {
+            console.log(error);
+            reply.send({ succes: false, error: error });
         }
     });
 

@@ -109,7 +109,9 @@ fastify.register(GameRoute, {
   db: db,
 });
 
-fastify.register(websocketRoute);
+fastify.register(websocketRoute, {
+  db: db
+});
 
 fastify.register(DbRoute, {
   db: db

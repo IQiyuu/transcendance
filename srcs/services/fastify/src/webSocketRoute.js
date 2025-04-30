@@ -29,42 +29,43 @@ async function websocketRoute(fastify, options) {
 
             // Diffuser un message à tout le monde
             function broadcast(message) {
-                for (let client of fastify.websocketServer.clients) {
+                for (const [socket, username] of connectedClients) {
                     if (client.readyState === 1) {
                         client.send(JSON.stringify(message));
                     }
                 }
             }
-
-            function sendInfosFriends(socket, username, t) {
+            
+            function sendInfosFriends(socket, username, type) {
                 const friendlist = getFriendList(username);
             
                 for (let friend of friendlist) {
-                    for (let [sock, uname] of connectedClients.entries()) {
-                        if (uname === friend.username) {
-                            sock.send(JSON.stringify({
-                                type: 'connection',
-                                user: t,
-                            }));
-                        }
+                    const friendSocket = connectedClients.get(friend.username);
+            
+                    if (friendSocket && friendSocket !== socket) {
+                        // envoie a l'ami de celui qui vient de se co
+                        friendSocket.send(JSON.stringify({
+                            type,
+                            user: username,
+                        }));
+                        // envoie a celui qui vient de se co
+                        socket.send(JSON.stringify({
+                            type,
+                            user: friend.username,
+                        }));
                     }
                 }
-                socket.send({
-                    type: "friendlist",
-                    friendlist: friendlist
-                });
-            }            
+            }          
 
             // Quand un user ferme sa connexion
             socket.on('close', () => {
-
                 // Si le joueur attendait un match
                 if (waiting_list && w_uname === username) {
                     waiting_list = null;
                     w_uname = null;
                 }
+                connectedClients.delete(username);
                 sendInfosFriends(socket, username, "disconnection");
-                connectedClients.delete(socket);
             });
 
             // Quand un message arrive
@@ -76,20 +77,21 @@ async function websocketRoute(fastify, options) {
                     console.error('Invalid JSON:', rawMessage.toString());
                     return;
                 }
-
                 if (data.type === 'chat') {
-                    console.log("MSG");
                     broadcast({
                         type: 'chat',
                         sender: username,
                         message: data.message
                     });
-                } 
-                else if (data.type === 'matchmaking') {
+                } if (data.type === 'addFriend' || data.type === 'removeFriend') {
+                    const targetSocket = connectedClients.get(data.target);
+                    if (targetSocket) {
+                        targetSocket.send(JSON.stringify(data));
+                    }
+                } else if (data.type === 'matchmaking') {
                     if (waiting_list && w_uname !== username) {
                         const gameId = createGame(w_uname, username);
                         console.log(`Game created: ${gameId}`);
-
                         waiting_list.send(JSON.stringify({
                             type: 'matchmaking',
                             state: 'found',
@@ -97,7 +99,7 @@ async function websocketRoute(fastify, options) {
                             role: 'left',
                             opponent: username
                         }));
-
+                        
                         socket.send(JSON.stringify({
                             type: 'matchmaking',
                             state: 'found',
@@ -106,7 +108,7 @@ async function websocketRoute(fastify, options) {
                             opponent: w_uname
                         }));
 
-                        // Sur déconnexion
+                        // Sur deconnexion
                         socket.on('close', () => {
                             games[gameId].scores["left"] = 11;
                         });
@@ -125,9 +127,11 @@ async function websocketRoute(fastify, options) {
             });
 
             sendInfosFriends(socket, username, "connection");
-            connectedClients.set(socket, username);
+            connectedClients.set(username, socket);
         });
     });
 }
 
 export default websocketRoute;
+
+

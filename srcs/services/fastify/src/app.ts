@@ -1,3 +1,4 @@
+let _username = sessionStorage.username;
 document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById("form");
     const formTitle = document.getElementById("form-title");
@@ -47,6 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
             console.log("Réponse du serveur :", data);
 
             if (data.success) {
+                _username = data.username;
                 sessionStorage.setItem('username', data.username);
                 sessionStorage.setItem('userId', data.id);
                 const loginForm = document.getElementById("login-form") as HTMLDivElement;
@@ -95,22 +97,142 @@ async function checkIfLoggedIn() {
     }
 }
 
+function removeFriend(username) {
+    const list = document.getElementById("friendlist");
+    if (!list)
+        return ;
+    const divs = list.querySelectorAll("div");
+
+    divs.forEach((div) => {
+        if (div.id == `${username}_friendlist`) {
+            console.log('elem removed');
+            list.removeChild(div);
+            return ;
+        }
+    });
+}
+
+function addFriend(username, pp) {
+    const friendlist = document.getElementById("friendlist");
+    const div = document.createElement("div");
+    const img = document.createElement("img");
+    const span = document.createElement("span");
+    const p = document.createElement("p");
+    div.className = "w-full flex items-center justify-between p-3 rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white shadow hover:bg-gray-200 dark:hover:bg-gray-600 transition cursor-pointer";
+    div.id = username+"_friendlist";
+    let usname = username
+
+    img.src = pp;
+    img.className = "rounded-full";
+    img.style.width = "7%";
+
+    span.className = "flex w-3 h-3 me-3 bg-red-500 rounded-full";
+
+    p.className = 'text-lg';
+    p.textContent = username.length > 10 ? username.substring(0,8)+"..":username;
+                
+    div.appendChild(img);
+    div.appendChild(span);
+    div.appendChild(p);
+
+    // afficher la popup (comme sur chesscom) d'un resume du joueur vite aif
+    div.addEventListener("contextmenu", async (event) => {
+        event.preventDefault();
+    
+        // Supprimer les anciennes popups s'il y en a déjà une
+        const existing = document.getElementById("profile_window");
+        if (existing) existing.remove();
+    
+        const popup = document.createElement("div");
+        const popup_img = document.createElement("img");
+        const popup_span = document.createElement("span");
+        const popup_name = document.createElement("p");
+        const add_btn = document.createElement("button");
+        const close_btn = document.createElement("button");
+    
+        popup.id = "profile_window";
+        
+        // positionne la ou est la souris
+        popup.style.position = "absolute";
+        popup.style.left = `${event.clientX}px`;
+        popup.style.top = `${event.clientY}px`;
+        popup.style.backgroundColor = "grey";
+    
+        popup_img.src = pp;
+        popup_img.style.cursor = "pointer";
+    
+        popup_name.textContent = usname;
+    
+        add_btn.textContent = "Add Friend";
+        add_btn.style.cursor = "pointer";
+    
+        close_btn.textContent = "×";
+        close_btn.style.color = "red";
+        close_btn.style.cursor = "pointer";
+    
+        close_btn.addEventListener("click", () => {
+            popup.remove();
+        });
+    
+        popup_img.addEventListener("click", () => {
+            display_profile(usname);
+        });
+
+        add_btn.addEventListener("click", () => {
+            console.log("invite a jouer");
+        });
+    
+        popup.appendChild(close_btn);
+        popup.appendChild(popup_img);
+        popup.appendChild(popup_span);
+        popup.appendChild(popup_name);
+        popup.appendChild(add_btn);
+    
+        document.body.appendChild(popup);
+    });
+    
+
+    friendlist.appendChild(div);
+}
+
+async function initFriendlist() {
+    try {
+        const response = await fetch(`/db/friends/friendlist/${_username}`, {
+            method: "GET",
+        });
+
+        const data = await response.json();
+
+        if (!data.success) {
+            console.log("error: ", data);
+        } else {
+            console.log(data);
+            for (let user of data.friends) {
+                addFriend(user.username, user.pp);
+            }
+        }
+    } catch (error) {
+        console.log("error: ", error);
+    }
+}
+
 // choisit l'affichage en fonction de l'utilisateur (connecte ou non)
 checkIfLoggedIn().then((isLoggedIn) => {
     const loginForm = document.getElementById("login-form") as HTMLDivElement;
     const pongGame = document.getElementById("site") as HTMLDivElement;
 
-    if (isLoggedIn)
+    if (isLoggedIn) {
         pongGame.style.display = "block";
+        initFriendlist();
+    }
     else
         loginForm.style.display = "block";
+
 });
 
 // GET et afficher les infos du profile / historique
 async function display_profile(username) {
     const list = document.getElementById("histo_list") as HTMLUListElement;
-    const menu = document.getElementById("menu");
-    menu.style.display = "none";
     try {
         // requete des infos pour afficher le profile
         const profile_req = await fetch(`/profile/${username}`, {
@@ -142,6 +264,7 @@ async function display_profile(username) {
             if (!friends.success)
                 console.log("error: ", friends.error);
             else {
+                console.log(friends);
                 document.getElementById("friend_btn").textContent = friends.message;
                 document.getElementById("block_btn").textContent = friends.emoji;
             }
@@ -212,7 +335,6 @@ async function display_profile(username) {
         }
         document.getElementById("histo").style.display = "block";
     } catch (error) {
-        menu.style.display = "flex";
         console.log("error fetching db: ", error);
     }
 }
@@ -224,7 +346,6 @@ document.getElementById("profile_button").addEventListener("click", async (event
 
 // afficher le menu du jeu
 async function displayMenu() {
-    document.getElementById("menu").style.display = "flex";
     document.getElementById("player_profile").style.display = "none";
     fillCanvas();
     document.getElementById("scoreboard").style.display = "none";
@@ -395,9 +516,10 @@ document.getElementById("username_btn").addEventListener("click", async (event) 
 });
 
 document.getElementById("friend_btn").addEventListener("click", async (event) => {
+    const friend_uname = document.getElementById("profile_username").textContent;
     const body = {
         user: _username,
-        friend: document.getElementById("profile_username").textContent,
+        friend: friend_uname,
     }
 
     console.log("body: ", body);
@@ -410,18 +532,42 @@ document.getElementById("friend_btn").addEventListener("click", async (event) =>
 
     const data = await friend_req.json();
     console.log("reponse du server: ", data);
-
-    if (data.success)
+    if (data.success) {
         document.getElementById("friend_btn").textContent = data.message;
+        if (data.status == "accepted") {
+            try {
+                const friend = data.friend;
+                const me = data.user;
+                addFriend(friend.username, friend.pp);
+                _ws.send(JSON.stringify({
+                    type: "addFriend",
+                    user: me.username,
+                    pp: me.pp,
+                    target: friend.username,
+                }));
+            } catch (error) {
+
+                console.log("error: " + error);
+            }
+        } else if (data.status == null) {
+            removeFriend(friend_uname)
+            _ws.send(JSON.stringify({
+                type: "removeFriend",
+                user: _username,
+                target: friend_uname,
+            }));
+        }
+    }
     else
-        console.log("error: ", data.error);
+        console.log("errorr: ", data.error);
 });
 
 
 document.getElementById("block_btn").addEventListener("click", async (event) => {
+    const toBlock = document.getElementById("profile_username").textContent;
     const body = {
         user: _username,
-        friend: document.getElementById("profile_username").textContent,
+        friend: toBlock,
     }
 
     console.log("body: ", body);
@@ -437,6 +583,14 @@ document.getElementById("block_btn").addEventListener("click", async (event) => 
     if (data.success) {
         document.getElementById("block_btn").textContent = data.blocking ? "🔓" : "🔒";
         document.getElementById("friend_btn").textContent = data.blocking ? "Blocked" : "Send invite";
+        if (data.blocking) {
+            _ws.send(JSON.stringify({
+                type: "removeFriend",
+                user: _username,
+                target: toBlock,
+            }));
+            removeFriend(toBlock);
+        }
     }
     else
         console.log("error: ", data.error);
