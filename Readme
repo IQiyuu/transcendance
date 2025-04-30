@@ -53,3 +53,24 @@ transcendance modules:
     - live chat (1)
     - server-side pong (1)
     - 2FA (1)
+
+=====================================================================
+
+on a:
+    - backend fastify (1)
+    - db backend (0.5)
+    - remote players (1)
+    - server-side pong (1)
+    - standart user management (1) => marche mais qqs bugs
+    
+4.5
+
+on a pas:
+    - tournois
+    - local pong
+    - 2FA (1)
+    - live chat (1) -> envoyer des dms -> invitations a jouer -> chat de tournois
+    
+    
+
+2

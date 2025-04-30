@@ -1,16 +1,31 @@
 let _ws = null;
-let _username = sessionStorage.username;
 
 function init() {
     // Se connecter a la socket
     const promise1 = async () => {
         return new Promise(resolve => {
             _ws = new WebSocket(`wss://${window.location.host}/ws?username=${_username}`);
-            
+            console.log(_username);
             _ws.onmessage = (message) => {
-                message = JSON.parse(message.data);
-                console.log("recu ", message);
+                const data = JSON.parse(message.data);
+                console.log("recu ", data.user);
                 // appendMessage(message);
+                if (data.type == "connection") {
+                    const div = document.getElementById(`${data.user}_friendlist`);
+                    const dot = div.getElementsByTagName("span")[0];
+                    dot.classList.replace("bg-red-500", "bg-green-500");
+                    console.log(dot.classList[4]);
+                    console.log(div);
+                    console.log(dot);
+                } else if (data.type == "disconnection") {
+                    const div = document.getElementById(`${data.user}_friendlist`);
+                    const dot = div.getElementsByTagName("span")[0];
+                    dot.classList.replace("bg-green-500", "bg-red-500");
+                } else if (data.type == "addFriend") {
+                    addFriend(data.user, data.pp);
+                } else if (data.type == "removeFriend") {
+                    removeFriend(data.user);
+                }
             };
 
             _ws.addEventListener("open", event => {
