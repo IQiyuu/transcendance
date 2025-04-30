@@ -90,15 +90,26 @@ async function dbRoute (fastify, options) {
         return db.prepare('SELECT user_id FROM users WHERE username = ?').get(username).user_id;
     }
 
+    function getFriendList(user) {
+        return db.prepare(`
+            SELECT users.username
+            FROM users
+            JOIN friends 
+              ON users.user_id = friends.user_id OR users.user_id = friends.friend_id
+            WHERE users.user_id != ?
+              AND friends.status = 'accepted'
+        `).all(user);
+    }
+
     function getFriendRelation(user1, user2) {
-        return options.db.prepare(`
+        return db.prepare(`
             SELECT user_id as user, status
             FROM friends
             WHERE (user_id = ? AND friend_id = ?) OR (user_id = ? AND friend_id = ?)
             LIMIT 1
         `).get(user1, user2, user2, user1);
     }
-
+    
     // insert un ami
     fastify.post('/db/friends/update', async (request, reply) => {
         const body = request.body;
@@ -117,7 +128,7 @@ async function dbRoute (fastify, options) {
                         deleteRelation(userId, friendId);
                         return { success: true, message: "Send invitation", status: null };
                     } else {
-                        updateStatus(user1, user2, "accepted");
+                        updateStatus(userId, friendId, "accepted");
                         reply.send({ success: true, message: "Remove friend", status: "accepted" });
                     }
                 } else {
@@ -134,7 +145,6 @@ async function dbRoute (fastify, options) {
             return { success: false, error: error.message };
         }
     });
-
 
     fastify.post('/db/friends/block', async (request, reply) => {
         const body = request.body;

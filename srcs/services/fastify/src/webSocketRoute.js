@@ -1,12 +1,25 @@
 async function websocketRoute(fastify, options) {
+    const db = options.db;
     let waiting_list = null;
     let w_uname = null;
+    let connectedClients = new Map();
 
     fastify.addHook('preValidation', async (request, reply) => {
         if (request.routerPath === '/ws' && !request.query.username) {
             reply.code(403).send('Connection rejected: missing username');
         }
     });
+
+    function getFriendList(user) {
+        return db.prepare(`
+            SELECT users.username
+            FROM users
+            JOIN friends 
+              ON users.user_id = friends.user_id OR users.user_id = friends.friend_id
+            WHERE users.user_id != ?
+              AND friends.status = 'accepted'
+        `).all(user);
+    }
 
     fastify.register(async function (fastify) {
         fastify.get('/ws', { websocket: true }, (socket, req) => {
@@ -17,26 +30,41 @@ async function websocketRoute(fastify, options) {
             // Diffuser un message à tout le monde
             function broadcast(message) {
                 for (let client of fastify.websocketServer.clients) {
-                    if (client.readyState === 1) { // 1 = OPEN
+                    if (client.readyState === 1) {
                         client.send(JSON.stringify(message));
                     }
                 }
             }
 
+            function sendInfosFriends(socket, username, t) {
+                const friendlist = getFriendList(username);
+            
+                for (let friend of friendlist) {
+                    for (let [sock, uname] of connectedClients.entries()) {
+                        if (uname === friend.username) {
+                            sock.send(JSON.stringify({
+                                type: 'connection',
+                                user: t,
+                            }));
+                        }
+                    }
+                }
+                socket.send({
+                    type: "friendlist",
+                    friendlist: friendlist
+                });
+            }            
+
             // Quand un user ferme sa connexion
             socket.on('close', () => {
-                console.log(`${username} disconnected.`);
-                broadcast({
-                    type: 'chat',
-                    sender: '__server',
-                    message: `${username} left the chat.`,
-                });
 
                 // Si le joueur attendait un match
                 if (waiting_list && w_uname === username) {
                     waiting_list = null;
                     w_uname = null;
                 }
+                sendInfosFriends(socket, username, "disconnection");
+                connectedClients.delete(socket);
             });
 
             // Quand un message arrive
@@ -96,12 +124,8 @@ async function websocketRoute(fastify, options) {
                 }
             });
 
-            // Quand quelqu'un arrive, envoyer un message serveur
-            broadcast({
-                type: 'chat',
-                sender: '__server',
-                message: `${username} joined the chat.`,
-            });
+            sendInfosFriends(socket, username, "connection");
+            connectedClients.set(socket, username);
         });
     });
 }

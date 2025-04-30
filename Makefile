@@ -64,9 +64,10 @@ SSL_CERTIFICATE	= ${SECRETS}ssl.crt $(SECRETS)ssl.key
 #
 
 # test:
-# 	@echo $(ASSETS)
-# 	@echo $(SRCS_FASTIFY)
-# 	@echo $(SRCS_ASSETS)
+#	@echo $(ASSETS)
+#	@echo $(SRCS_FASTIFY)
+#	@echo $(SRCS_ASSETS)
+#	@echo $(SRCS)
 
 $(NAME): $(REQ)
 	docker compose -f $(COMPOSE_FILE) up -d
