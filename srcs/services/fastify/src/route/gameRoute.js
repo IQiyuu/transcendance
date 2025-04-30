@@ -7,7 +7,7 @@ async function gameRoute (fastify, options) {
     let games = {};
     let waiting_list = null;
     let w_uname = null;
-    let img_path = "../assets/imgs/";
+    let img_path = "assets/imgs/";
 
     // Creer un objet game cote server
     function createGame(l_name, r_name) {

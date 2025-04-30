@@ -6,7 +6,7 @@
 #    By: ggiboury <ggiboury@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/22 15:00:40 by ggiboury          #+#    #+#              #
-#    Updated: 2025/04/30 11:27:09 by ggiboury         ###   ########.fr        #
+#    Updated: 2025/04/30 16:18:18 by ggiboury         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -31,6 +31,9 @@ SRCS			= $(SRCS_FASTIFY) $(SRCS_ASSETS) $(SRCS_DB)
 #https://coolors.co/a0ddff-053225-e34a6f
 #https://coolors.co/0d0106-3626a7-657ed4
 
+# SOmething to help
+#https://github.com/microsoft/TypeScript-Node-Starter
+
 #Full path scripts and assets
 SRCS_DIR		= ./srcs/
 SRCS_FASTIFY	= $(SCRIPTS:%=$(SRCS_DIR)services/fastify/src%)
@@ -44,9 +47,9 @@ SRCS_DB			= $(SRCS_DIR)services/sqlite/transcendence.db
 VOLUME	= /goinfre/$(USER)/pong/data
 
 VOLUME_WEBSITE			= /goinfre/$(USER)/pong/data/fastify
-VOLUME_WEBSITE_DIRS		= $(VOLUME_WEBSITE)/dist $(VOLUME_WEBSITE)/src $(VOLUME_WEBSITE)/assets
+VOLUME_WEBSITE_DIRS		= $(VOLUME_WEBSITE)/dist $(VOLUME_WEBSITE)/src $(VOLUME_WEBSITE)/dist/assets
 VOLUME_WEBSITE_SCRIPTS	:= $(SCRIPTS:%=$(VOLUME_WEBSITE)/src%)
-VOLUME_WEBSITE_ASSETS	:= $(ASSETS:%=$(VOLUME_WEBSITE)/assets%)
+VOLUME_WEBSITE_ASSETS	:= $(ASSETS:%=$(VOLUME_WEBSITE)/dist/assets%)
 VOLUME_WEBSITE_FILES	:= $(VOLUME_WEBSITE_ASSETS) $(VOLUME_WEBSITE_SCRIPTS)
 
 
@@ -62,6 +65,7 @@ SSL_CERTIFICATE	= ${SECRETS}ssl.crt $(SECRETS)ssl.key
 
 # Rules
 #
+# test: $(VOLUME_WEBSITE_ASSETS)
 
 $(NAME): $(REQ)
 	docker compose -f $(COMPOSE_FILE) up -d
@@ -88,9 +92,8 @@ $(VOLUME) $(VOLUME_WEBSITE) $(VOLUME_WEBSITE_DIRS):
 $(VOLUME_WEBSITE_SCRIPTS): $(VOLUME_WEBSITE)/src
 	cp -r $(@:${VOLUME_WEBSITE}/src%=$(SRCS_DIR)services/fastify/src%) $@
 
-$(VOLUME_WEBSITE_ASSETS): $(VOLUME_WEBSITE)/assets
-	@echo $@
-	cp -r $(@:${VOLUME_WEBSITE}/assets%=$(SRCS_DIR)assets%) $@
+$(VOLUME_WEBSITE_ASSETS): $(VOLUME_WEBSITE)/dist/assets
+	cp -r $(@:${VOLUME_WEBSITE}/dist/assets%=$(SRCS_DIR)assets%) $@
 
 $(VOLUME_DATABASE): | $(VOLUME)
 	mkdir -p $(VOLUME_DATABASE)
@@ -115,10 +118,11 @@ down :
 
 # DEV
 
-# echo:
-# 	@echo $(ASSETS)
-# 	@echo $(SRCS_FASTIFY)
-# 	@echo $(SRCS_ASSETS)
+echo:
+	@echo $(ASSETS)
+	@echo $(SRCS_FASTIFY)
+	@echo $(SRCS_ASSETS)
+	@echo $(VOLUME_WEBSITE_ASSETS)
 
 logs:
 	docker compose -f $(COMPOSE_FILE) logs
@@ -134,8 +138,9 @@ infow : status
 
 #Apply changes on the scripts
 reload : 
-	cp -r ${SRCS_FASTIFY} ${VOLUME_WEBSITE}/src
-	docker compose -f $(COMPOSE_FILE) restart
+	@echo "NOT WORKING"
+#	cp -r ${SRCS_FASTIFY} ${VOLUME_WEBSITE}/src
+#	docker compose -f $(COMPOSE_FILE) restart
 
 .PHONY: re clean fclean down logs status info reload
 

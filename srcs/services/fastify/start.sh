@@ -6,7 +6,7 @@ cd /home/fastify
 
 shutdown(){
 	echo "Shutting down the container"
-	npm uninstall
+	npm uninstall 2> err.txt
 	exit
 };
 
@@ -14,5 +14,8 @@ shutdown(){
 trap shutdown SIGTERM
 
 
+echo "Setting up website"
 npm install
+
+echo "Starting website"
 npm start

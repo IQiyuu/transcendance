@@ -2,7 +2,7 @@
   "name": "Transcendance",
   "version": "1.0.0",
   "description": "",
-  "main": "src/index.js",
+  "main": "src/server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "prepare": "npx tsc && npx @tailwindcss/cli -i ./src/input.css -o ./dist/style.css --watch ",

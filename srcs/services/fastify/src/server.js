@@ -5,14 +5,14 @@ import fastifyWebsocket from '@fastify/websocket';
 import fastifyMultipart from '@fastify/multipart';
 import jwt from '@fastify/jwt';
 
-import ejs from 'ejs'
+import ejs from 'ejs' // to remove
 import fs from 'fs';
 import os from 'os';
 
-import LogginRoute from './loggingRoute.js'
-import GameRoute from './gameRoute.js'
-import websocketRoute from './webSocketRoute.js';
-import DbRoute from './dbRoute.js';
+import LogginRoute from './route/loggingRoute.js'
+import GameRoute from './route/gameRoute.js'
+import websocketRoute from './route/webSocketRoute.js';
+import DbRoute from './route/dbRoute.js';
 
 import cookie from '@fastify/cookie';
 
@@ -37,7 +37,7 @@ if (networkInterfaces.enp3s0f0) {
 
 const secretKey = 'bommerang-fleche-upair'; // pas sur de ce que je fais la
 
-const rootDir = dirname(dirname(fileURLToPath(import.meta.url)));
+const rootDir = dirname(dirname(fileURLToPath(import.meta.url))); // Root of the website
 
 const fastify = Fastify({
   logger: true,
@@ -119,7 +119,7 @@ fastify.register(FastifyStatic, {
   root: join(rootDir, 'dist')
 })
 
-fastify.register(FastifyView, {
+fastify.register(FastifyView, { // To remplace/remove
   engine: {
     ejs
   },
