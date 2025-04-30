@@ -6,7 +6,7 @@
 #    By: ggiboury <ggiboury@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/22 15:00:40 by ggiboury          #+#    #+#              #
-#    Updated: 2025/04/29 15:24:09 by ggiboury         ###   ########.fr        #
+#    Updated: 2025/04/30 11:27:09 by ggiboury         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -33,7 +33,7 @@ SRCS			= $(SRCS_FASTIFY) $(SRCS_ASSETS) $(SRCS_DB)
 
 #Full path scripts and assets
 SRCS_DIR		= ./srcs/
-SRCS_FASTIFY	= $(SCRIPTS:%=$(SRCS_DIR)services/fastify%)
+SRCS_FASTIFY	= $(SCRIPTS:%=$(SRCS_DIR)services/fastify/src%)
 SRCS_ASSETS		= $(ASSETS:%=$(SRCS_DIR)assets%)
 SRCS_DB			= $(SRCS_DIR)services/sqlite/transcendence.db
 
@@ -62,11 +62,6 @@ SSL_CERTIFICATE	= ${SECRETS}ssl.crt $(SECRETS)ssl.key
 
 # Rules
 #
-
-# test:
-# 	@echo $(ASSETS)
-# 	@echo $(SRCS_FASTIFY)
-# 	@echo $(SRCS_ASSETS)
 
 $(NAME): $(REQ)
 	docker compose -f $(COMPOSE_FILE) up -d
@@ -103,7 +98,7 @@ $(VOLUME_DATABASE): | $(VOLUME)
 $(VOLUME_DATABASE_FILES): | $(VOLUME_DATABASE)
 	@cp $(SRCS_DB) $(VOLUME_DATABASE_FILES)
 
-re : down $(NAME)
+re : fclean $(NAME)
 
 clean : down
 	docker container prune -f
@@ -117,6 +112,14 @@ fclean : clean
 down :
 	docker compose -f $(COMPOSE_FILE) down
 
+
+# DEV
+
+# echo:
+# 	@echo $(ASSETS)
+# 	@echo $(SRCS_FASTIFY)
+# 	@echo $(SRCS_ASSETS)
+
 logs:
 	docker compose -f $(COMPOSE_FILE) logs
 
@@ -129,7 +132,12 @@ info : logs status
 infow : status
 	docker compose -f $(COMPOSE_FILE) logs website
 
-.PHONY: re clean fclean down logs status info ttt
+#Apply changes on the scripts
+reload : 
+	cp -r ${SRCS_FASTIFY} ${VOLUME_WEBSITE}/src
+	docker compose -f $(COMPOSE_FILE) restart
+
+.PHONY: re clean fclean down logs status info reload
 
 
 #CONTENT OF ENV
