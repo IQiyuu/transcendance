@@ -6,7 +6,7 @@
 #    By: ggiboury <ggiboury@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/22 15:00:40 by ggiboury          #+#    #+#              #
-#    Updated: 2025/04/30 16:18:18 by ggiboury         ###   ########.fr        #
+#    Updated: 2025/05/05 09:28:31 by ggiboury         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -31,7 +31,7 @@ SRCS			= $(SRCS_FASTIFY) $(SRCS_ASSETS) $(SRCS_DB)
 #https://coolors.co/a0ddff-053225-e34a6f
 #https://coolors.co/0d0106-3626a7-657ed4
 
-# SOmething to help
+# Something to help
 #https://github.com/microsoft/TypeScript-Node-Starter
 
 #Full path scripts and assets
@@ -109,11 +109,10 @@ clean : down
 # docker image prune -af
 
 fclean : clean
-	docker volume rm `(docker volume ls -q)`
 	rm -rf $(VOLUME)
 
 down :
-	docker compose -f $(COMPOSE_FILE) down
+	docker compose -f $(COMPOSE_FILE) down -v
 
 
 # DEV

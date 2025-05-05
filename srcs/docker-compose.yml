@@ -51,12 +51,21 @@ services:
     configs:
       - source: prometheus-config
         target: /etc/prometheus/prometheus.yml
+    secrets:
+      - SSL-certificate
+      - SSL-key
   
   monitoring-visualiser:
     image: ${MONITORING_VISUALISER_SERVICE_IMAGE}
     container_name: pong-${MONITORING_VISUALISER_SERVICE}
     ports:
-      - "3001:3001"
+      - "3001:3000"
+    configs:
+      - source: grafana-config
+        target: /etc/grafana/grafana.ini
+    secrets:
+      - SSL-certificate
+      - SSL-key
 
 
 networks:
@@ -85,6 +94,8 @@ volumes:
 configs:
   prometheus-config:
     file: ${SRCS_MONITORING_CONFIG}
+  grafana-config:
+    file: ${SRCS_MONITORING_VIS_CONFIG}
   fastify-config:
     file: ${SRCS_FASTIFY_CONFIG}
   fastify-tsconfig:
@@ -95,3 +106,4 @@ secrets:
     file: ${SECRETS}${SSL_CERTIFICATE}
   SSL-key:
     file: ${SECRETS}${SSL_KEY}
+  # Prom-auth:
