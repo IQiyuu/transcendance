@@ -35,6 +35,8 @@ if (networkInterfaces.enp3s0f0) {
   }
 }
 
+// Removing mongodb, to remove view 
+
 const secretKey = 'bommerang-fleche-upair'; // pas sur de ce que je fais la
 
 const rootDir = dirname(dirname(fileURLToPath(import.meta.url))); // Root of the website
