@@ -1,7 +1,7 @@
 {
-    "include": ["./src/*", "./src/game/*"],
+    "include": ["src/**/*.ts"],
     "exclude": ["node_modules"],
     "compilerOptions": {
-      "outDir": "./dist"
+      "outDir": "dist"
     }
   }

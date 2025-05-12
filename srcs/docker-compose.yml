@@ -28,44 +28,32 @@ services:
     networks:
       - pong
     hostname : "Trong"
-    
-  # db:
-  #   pull_policy: build
-  #   build:
-  #     context: ${SRCS}${DB_SERVICE}
-  #   image: ${DB_SERVICE_IMAGE}
-  #   container_name: pong-${DB_SERVICE}
+  
+  # monitoring:
+  #   image: ${MONITORING_SERVICE_IMAGE}
+  #   container_name: pong-${MONITORING_SERVICE}
+  #   ports:
+  #     - "9090:9090"
   #   volumes:
-  #     - db:${LOCATION_DB}
-  #   networks:
-  #     - pong
-    # ports: ""
+  #     - monitoring-logs:/prometheus
+  #   configs:
+  #     - source: prometheus-config
+  #       target: /etc/prometheus/prometheus.yml
+  #   secrets:
+  #     - SSL-certificate
+  #     - SSL-key
   
-  monitoring:
-    image: ${MONITORING_SERVICE_IMAGE}
-    container_name: pong-${MONITORING_SERVICE}
-    ports:
-      - "9090:9090"
-    volumes:
-      - monitoring-logs:/prometheus
-    configs:
-      - source: prometheus-config
-        target: /etc/prometheus/prometheus.yml
-    secrets:
-      - SSL-certificate
-      - SSL-key
-  
-  monitoring-visualiser:
-    image: ${MONITORING_VISUALISER_SERVICE_IMAGE}
-    container_name: pong-${MONITORING_VISUALISER_SERVICE}
-    ports:
-      - "3001:3000"
-    configs:
-      - source: grafana-config
-        target: /etc/grafana/grafana.ini
-    secrets:
-      - SSL-certificate
-      - SSL-key
+  # monitoring-visualiser:
+  #   image: ${MONITORING_VISUALISER_SERVICE_IMAGE}
+  #   container_name: pong-${MONITORING_VISUALISER_SERVICE}
+  #   ports:
+  #     - "3001:3000"
+  #   configs:
+  #     - source: grafana-config
+  #       target: /etc/grafana/grafana.ini
+  #   secrets:
+  #     - SSL-certificate
+  #     - SSL-key
 
 
 networks:

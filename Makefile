@@ -6,7 +6,7 @@
 #    By: ggiboury <ggiboury@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/22 15:00:40 by ggiboury          #+#    #+#              #
-#    Updated: 2025/05/05 09:28:31 by ggiboury         ###   ########.fr        #
+#    Updated: 2025/05/12 11:31:10 by ggiboury         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -33,6 +33,8 @@ SRCS			= $(SRCS_FASTIFY) $(SRCS_ASSETS) $(SRCS_DB)
 
 # Something to help
 #https://github.com/microsoft/TypeScript-Node-Starter
+
+# We should have done like this ... https://github.com/fastify/demo/
 
 #Full path scripts and assets
 SRCS_DIR		= ./srcs/
