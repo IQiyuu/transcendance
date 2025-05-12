@@ -17,6 +17,7 @@ echo "Setting up website"
 npm install
 
 cp src/server.js dist
+cp -r src/routes dist
 
 echo "Starting website"
 npm start

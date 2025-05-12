@@ -9,10 +9,10 @@ import ejs from 'ejs' // to remove
 import fs from 'fs';
 import os from 'os';
 
-import LogginRoute from './route/loggingRoute.js'
-import GameRoute from './route/gameRoute.js'
-import websocketRoute from './route/webSocketRoute.js';
-import DbRoute from './route/dbRoute.js';
+import LogginRoute from './routes/loggingRoute.js'
+import GameRoute from './routes/gameRoute.js'
+import websocketRoute from './routes/webSocketRoute.js';
+import DbRoute from './routes/dbRoute.js';
 
 import cookie from '@fastify/cookie';
 

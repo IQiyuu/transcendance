@@ -218,13 +218,16 @@ async function gameRoute (fastify, options) {
             if (game.ball.y <= 110 || game.ball.y >= 590)
                 game.ball.vy *= -1;
 
-            if ((game.ball.x <= game.paddles.left.x + 10
+            if (game.ball.x <= game.paddles.left.x + 10
                 && game.ball.y >= game.paddles.left.y - 50
-                && game.ball.y <= game.paddles.left.y + 50) 
-                    || 
-                (game.ball.x >= game.paddles.right.x - 10
+                && game.ball.y <= game.paddles.left.y + 50) {
+                    game.ball.vx *= -1;
+                }
+            else if (game.ball.x >= game.paddles.right.x - 10
                 && game.ball.y >= game.paddles.right.y - 50
-                && game.ball.y <= game.paddles.right.y + 50)) {
+                && game.ball.y <= game.paddles.right.y + 50) {
+                    game.ball.vx *= -1;
+                }
                     // game.ball.x = (game.ball.x <= game.paddles.left.x + 5 ? game.paddles.left.x + 5 : game.paddles.right.x - 5);
                     // if ((game.ball.y >= game.paddles.right.y - 15
                     //     && game.ball.y <= game.paddles.right.y + 15
@@ -233,8 +236,7 @@ async function gameRoute (fastify, options) {
                     //     game.ball.vx *= -1 + game.ball.vy;
                     //     game.ball.vy = 0;
                     // } else
-                    game.ball.vx *= -1;
-                }
+                    // game.ball.vy *= (game.paddle.y);
 
             if (game.ball.x <= game.paddles.left.x - 10 || game.ball.x >= game.paddles.right.x + 10) {
                 game.scores[game.ball.x <= game.paddles.left.x - 10 ? "right" : "left"]++;
