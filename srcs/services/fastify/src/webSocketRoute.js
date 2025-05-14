@@ -58,9 +58,15 @@ async function websocketRoute(fastify, options) {
             }          
 
             // Quand un user ferme sa connexion
-            socket.on('close', () => {
+            socket.on('close', (rawMessage) => {
+                const data = JSON.parse(rawMessage.toString());
+                if (data.gameId != -1) {
+                    if (data.mod == 'l') {
+                        delete games[data.gameId];
+                    }
+                }
                 // Si le joueur attendait un match
-                if (waiting_list && w_uname === username) {
+                else if (waiting_list && w_uname === data.uname) {
                     waiting_list = null;
                     w_uname = null;
                 }
@@ -89,15 +95,23 @@ async function websocketRoute(fastify, options) {
                         targetSocket.send(JSON.stringify(data));
                     }
                 } else if (data.type === 'matchmaking') {
-                    if (waiting_list && w_uname !== username) {
-                        const gameId = createGame(w_uname, username);
+                    if (data.state == 'enter' && waiting_list == null) {
+                        waiting_list = socket;
+                        w_uname = data.uname;
+                    }
+                    if (data.state == 'left') {
+                        waiting_list = null;
+                        w_uname = null;
+                    }
+                    if (waiting_list && w_uname !== data.uname) {
+                        const gameId = createGame(w_uname, data.uname);
                         console.log(`Game created: ${gameId}`);
                         waiting_list.send(JSON.stringify({
                             type: 'matchmaking',
                             state: 'found',
                             gameId: gameId,
                             role: 'left',
-                            opponent: username
+                            opponent: data.uname
                         }));
                         
                         socket.send(JSON.stringify({
@@ -115,13 +129,13 @@ async function websocketRoute(fastify, options) {
                         waiting_list.on('close', () => {
                             games[gameId].scores["right"] = 11;
                         });
-
-                        waiting_list = null;
-                        w_uname = null;
-                    } else {
-                        waiting_list = socket;
-                        w_uname = username;
-                        console.log(`${username} is waiting for a match.`);
+                    } 
+                } else if (type == "disconnection") {
+                    console.log("OUIIIIIIIIIIIIIIIIIIIIIIIIII");
+                    if (gameId != -1) {
+                        console.log(games[gameId]);
+                        delete games[gameId];
+                        console.log("OUIIIIIIIIIIIIIIIIIIIIIIIIII");
                     }
                 }
             });

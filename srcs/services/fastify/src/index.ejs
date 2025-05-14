@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="style.css" rel="stylesheet">
-    <title>Transcendance</title>
+    <title>Trong</title>
 </head>
 <body class="h-screen content-center bg-gradient-to-br from-purple-600 to-blue-500">
 
@@ -30,7 +30,7 @@
     <div id="site" style="display: none;">
         <div id="pong-game">
             <div id="gameContainer">
-                <h1 class="mb-50 underline text-white text-7xl text-center cursor-pointer" id="game_title">Pong The Game</h1>
+                <h1 class="mb-50 underline text-white text-7xl text-center cursor-pointer" id="game_title">Trong the Game</h1>
                 <!-- SCOREBOARD -->
                 <div id="scoreboard" style="font-size: 24px; font-weight: bold; margin-bottom: 10px; display: none;">
                     <span id="player-left">Player 1</span> 
@@ -39,7 +39,7 @@
                     <span id="player-right">Player 2</span>
                 </div>
                 <!-- MENU -->
-                <div class="flex w-full justify-between">
+                <div id="menu" class="flex w-full justify-between">
                     <!-- Premier UL : 70% -->
                     <ul class="w-[70%] space-y-6 text-gray-500 list-none dark:text-gray-400">
                         <li>
@@ -53,8 +53,13 @@
                             </button>
                         </li>
                         <li>
+                            <button id="matchmaking" class="w-[90%] hover:w-full transition-all duration-500 ease-in-out cursor-pointer p-12 text-5xl italic font-medium text-white dark:text-black bg-gradient-to-r from-teal-200 to-lime-200 hover:from-lime-200 hover:to-teal-200 rounded-lg border-4 border-green-800 flex items-center justify-center text-center">
+                                Tournois
+                            </button>
+                        </li>
+                        <li>
                             <button id="profile_button" class="w-[90%] hover:w-full transition-all duration-500 ease-in-out cursor-pointer p-12 text-5xl italic font-medium text-white dark:text-black bg-gradient-to-r from-red-200 via-red-300 to-yellow-200 hover:from-yellow-200 hover:to-red-300 rounded-lg border-4 border-red-600 flex items-center justify-center text-center">
-                                Settings
+                                Profile
                             </button>
                         </li>
                         <li>
@@ -64,7 +69,7 @@
                         </li>
                     </ul>
                     
-
+                    <!-- Friendlist box -->
                     <div class="w-[20%] h-[80vh] overflow-y-auto bg-gray-100 dark:bg-gray-800 rounded-lg p-4 border border-gray-300 dark:border-gray-700 shadow-inner">
                         <div class="flex justify-between items-center mb-4">
                             <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">Amis connectés</h2>

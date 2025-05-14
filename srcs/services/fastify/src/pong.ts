@@ -21,11 +21,11 @@ let rightUsername = null;
 
 let _winningScore = 11;
 
-let _gameId = 0;
+let _gameId = -1;
 
 var keyState = {};
 
-let ws = null;
+let _mod = null;
 
 // Rentre la game dans la db
 async function saveGame(game) {
@@ -37,7 +37,7 @@ async function saveGame(game) {
             loser_username: game.players[(winner == "right" ? "left": "right")],
             loser_score: game.scores.left == 11 ? game.scores.right : game.scores.left
         };
-        const response = await fetch("storeGame", {
+        const response = await fetch("game/storeGame", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(body),
@@ -50,7 +50,7 @@ async function saveGame(game) {
 }
 
 // Affiche le canvas
-async function draw(ws) {
+async function draw(ws, local) {
     try {
         const response = await fetch(`/game/${_gameId}`, {
             method: "GET",
@@ -71,7 +71,7 @@ async function draw(ws) {
 
         if (game.scores.left == _winningScore || game.scores.right == _winningScore) {
             const winner = game.scores.left == 11 ? "left" : "right";
-            if (_role == winner)
+            if (ws && _role == winner)
                 await saveGame(game);
             endGame(ws);
             return ;
@@ -103,8 +103,8 @@ async function draw(ws) {
         console.log("error: ", error);
     }
 
-    moves();
-    requestAnimationFrame(draw);
+    moves(local);
+    requestAnimationFrame(() => draw(ws, local));
 }
 
 // Recupere les touches enfoncees
@@ -114,50 +114,95 @@ function keyHandler(e){
  
 
 // Fait une requete qui va bouger les paddles (raquettes)
-async function moves() {
-    if (keyState["ArrowUp"] || keyState["ArrowDown"]) {
-        const body = { 
-            gameId: _gameId, 
-            role: _role,
-            moveUp: keyState["ArrowUp"],
-        };
-        try {
-            const response = await fetch(`/game/${_gameId}/move`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(body),
-            });
+async function moves(local) {
+    if (!local) {
+        if (keyState["ArrowUp"] || keyState["ArrowDown"]) {
+            const body = { 
+                gameId: _gameId, 
+                role: _role,
+                moveUp: keyState["ArrowUp"],
+            };
+            try {
+                const response = await fetch(`/game/${_gameId}/move`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(body),
+                });
 
-            if (!response.ok)
-                console.log("error in movement request");
-        } catch (error) {
-            console.log("error: ", error);
+                if (!response.ok)
+                    console.log("error in movement request");
+            } catch (error) {
+                console.log("error: ", error);
+            }
+        }
+    }
+    else {
+        console.log(keyState);
+        if (keyState["KeyW"] || keyState["KeyS"] || keyState["ArrowUp"] || keyState["ArrowDown"]) {
+            const body = { 
+                gameId: _gameId, 
+                moveRight: (keyState["ArrowUp"] || keyState["ArrowDown"]) ? keyState["ArrowUp"] : null,
+                moveLeft: (keyState["KeyW"] || keyState["KeyS"]) ? keyState["KeyW"] : null,
+            };
+            try {
+                const response = await fetch(`/game/local/${_gameId}/move`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(body),
+                });
+
+                if (!response.ok)
+                    console.log("error in movement request");
+            } catch (error) {
+                console.log("error: ", error);
+            }
         }
     }
 };
 
 // Lance la partie
-function startGame(oponnent, ws) {
+function startGame(oponnent, ws, local) {
     document.addEventListener("keydown",  keyHandler);
     document.addEventListener("keyup",  keyHandler);
+    document.addEventListener("S",  keyHandler);
+    document.addEventListener("W",  keyHandler);
+    keyState["KeyW"] = false;
+    keyState["KeyS"] = false;
+    keyState["ArrowUp"] = false;
+    keyState["ArrowDown"] = false;
     document.getElementById("scoreboard").style.display = "flex"
     document.getElementById("menu").style.display = "none"
+    canvas.style.display = "flex";
     canvas.tabIndex = 1000;
     canvas.style.outline = "none";
     console.log("moves available, playing against: ", oponnent);
-    draw(ws);
+    console.log(local);
+    draw(ws, local);
 }
 
 // Termine la partie
 async function endGame(ws) {
+    try {
+        const body = { 
+            gameId: _gameId, 
+        };
+        await fetch("game/stopGame", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+        });
+    } catch (error) {
+        console.log("error: ", error);
+    }
     canvas.removeEventListener("keydown", moves);
-    document.getElementById("scoreboard").style.display = "none"
-    document.getElementById("menu").style.display = "flex"
-    _gameId = 0;
+    document.getElementById("scoreboard").style.display = "none";
+    document.getElementById("menu").style.display = "flex";
+    canvas.style.display = "none";
+    _gameId = -1;
     console.log("moves unavaible");
     if (ws instanceof WebSocket)
         ws.close();
-    ws = null;
+    _mod = null;
     await displayMenu();
 }
 
@@ -179,32 +224,28 @@ function stopMatchmakingAnimation() {
     matchmaking_btn.textContent = 'Play online';
 }
 
+let searching = false;
+
 // Se connecte en socket avec le serveur et attend un autre utilisateur.
 async function matchmaking(event) {
-    if (!ws)
-        ws = new WebSocket(`wss://${window.location.host}/matchmaking?username=${_username}`);
+    if (!searching) {
+        startMatchmakingAnimation();
+        searching = true;
+        _ws.send(JSON.stringify({
+            type: "matchmaking",
+            uname: _username,
+            state: "enter"
+        }));
+    }
     else {
+        searching = false;
         console.log("queue stopped.");
         stopMatchmakingAnimation();
-        ws.close();
-        ws = null;
-        return ;
+        _ws.send(JSON.stringify({
+            type: "matchmaking",
+            state: "left"
+        }));
     }
-    ws.onopen = (event) => {
-        console.log("searching for a match. . .");
-        startMatchmakingAnimation();
-    }
-    ws.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        stopMatchmakingAnimation();
-        if (data.state == "found") {
-            console.log("Match trouvé :", data);
-            _role = data.role;
-            _gameId = data.gameId;
-            console.log("game starting ", _gameId);
-            startGame(data.opponent, ws);
-        }
-    };
 }
 matchmaking_btn.addEventListener("click", matchmaking);
 
