@@ -25,8 +25,23 @@ function init() {
                     addFriend(data.user, data.pp);
                 } else if (data.type == "removeFriend") {
                     removeFriend(data.user);
+                } else if (data.type == "matchmaking") {
+                    if (data.state == "found") {
+                        stopMatchmakingAnimation();
+                        _role = data.role;
+                        _gameId = data.gameId;
+                        console.log("game starting ", _gameId);
+                        startGame(data.opponent, _ws, false);
+                    }
                 }
             };
+
+            if (_ws && _ws.readyState === WebSocket.CLOSING) {
+                _ws.close(JSON.stringify({
+                    gameId:_gameId,
+                    mod: _mod,
+                    uname: _username}));
+            }
 
             _ws.addEventListener("open", event => {
                 console.log("Connected to WS server!");
@@ -35,16 +50,7 @@ function init() {
         });
     }
 
-    function appendMessage(message) {
-        const chatbox = document.getElementById('chatbox');
-        chatbox.innerHTML += `
-            <div id="message">
-                <b>${message.sender}:&nbsp;</b>
-                ${message.message}
-            </div>
-        `;
-        chatbox.scrollBy(0, 25);
-    }
+
 
     // quand on est connecte ajouter les events pour envoyer des message (entrer et click sur le boutton)
     promise1().then((value) => {

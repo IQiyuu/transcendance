@@ -15,6 +15,7 @@ async function gameRoute (fastify, options) {
         console.log(gameId);
         const neg = randomIntFromInterval(0,1);
         const vx = randomIntFromInterval(5, 8) * (neg ? -1 : 1);
+        console.log(gameId);
         games[gameId] = {
             id: gameId,
             players: {
@@ -46,7 +47,7 @@ async function gameRoute (fastify, options) {
     };
 
     // Stocke la game dans la db
-    fastify.post('/storeGame', async (request, reply) => {
+    fastify.post('/game/storeGame', async (request, reply) => {
         const { winner_username, loser_username, loser_score } = request.body;
         console.log("LOL ", winner_username, " VS ", loser_username, loser_score);
         try {
@@ -60,6 +61,10 @@ async function gameRoute (fastify, options) {
             console.error('Error insert data in db.', error);
             return { success: false, message: 'Error insert data in db.' };
         }
+    });
+
+    fastify.post('/game/stopGame', async (req, reply) => {
+        delete games[req.body.gameId];
     });
 
     // Route qui recupere les infos du user :username dans la db et les renvoie
@@ -160,6 +165,11 @@ async function gameRoute (fastify, options) {
         }
     });
 
+    fastify.post('/game/local/create', async (req, reply) => {
+        const id = createGame(req.body.username, req.body.username+"-2");
+        return ({success: true, id: id});
+    });
+
     // Route qui renvoie les infos de la game
     fastify.get('/game/:id', async (request, reply) => {
         const game = games[request.params.id];
@@ -170,9 +180,23 @@ async function gameRoute (fastify, options) {
     // Route qui change les coordonnees du joueur qui bouge
     fastify.post('/game/:id/move', async (request, reply) => {
         var game = games[request.params.id];
-        var newY = game.paddles[request.body.role].y + (request.body.moveUp ? -3 : 3);
+        var newY = game.paddles[request.body.role].y + (request.body.moveUp ? -4 : 4);
         if (newY > 120 && newY < 580)
             game.paddles[request.body.role].y = newY;
+    })
+
+    // Route qui change les coordonnees du joueur qui bouge
+    fastify.post('/game/local/:id/move', async (request, reply) => {
+        var game = games[request.params.id];
+        if (request.body.moveRight != null)
+            var newY1 = game.paddles["right"].y + (request.body.moveRight ? -4 : 4);
+            if (newY1 > 120 && newY1 < 580)
+                game.paddles["right"].y = newY1;
+
+        if (request.body.moveLeft != null)
+            var newY2 = game.paddles["left"].y + (request.body.moveLeft ? -4 : 4);
+            if (newY2 > 120 && newY2 < 580)
+                game.paddles["left"].y = newY2;
     })
 
     fastify.register(async function (fastify) {
@@ -212,8 +236,9 @@ async function gameRoute (fastify, options) {
 
     setInterval(() => {
         Object.values(games).forEach(game => {
-            game.ball.x += game.ball.vx; // * speed_x
-            game.ball.y += game.ball.vy; // * speed_y
+            game.ball.x += game.ball.vx;
+            game.ball.y += game.ball.vy;
+
             if (game.ball.y <= 110 || game.ball.y >= 590)
                 game.ball.vy *= -1;
 
