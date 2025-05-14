@@ -7,7 +7,7 @@ async function gameRoute (fastify, options) {
     let games = {};
     let waiting_list = null;
     let w_uname = null;
-    let img_path = "../assets/imgs/";
+    let img_path = "assets/imgs/";
 
     // Creer un objet game cote server
     function createGame(l_name, r_name) {
@@ -242,21 +242,20 @@ async function gameRoute (fastify, options) {
             if (game.ball.y <= 110 || game.ball.y >= 590)
                 game.ball.vy *= -1;
 
-            if ((game.ball.x <= game.paddles.left.x + 10
+            if (game.ball.x <= game.paddles.left.x + 10
                 && game.ball.y >= game.paddles.left.y - 50
-                && game.ball.y <= game.paddles.left.y + 50) 
-                    || 
-                (game.ball.x >= game.paddles.right.x - 10
+                && game.ball.y <= game.paddles.left.y + 50) {
+                    // ix = game.ball.x
+                    // iy = game.ball.y
+                    let dist = Math.abs(game.ball.y, game.paddles.left.y)
+
+
+                    game.ball.vx *= -1;
+                }
+            else if (game.ball.x >= game.paddles.right.x - 10
                 && game.ball.y >= game.paddles.right.y - 50
-                && game.ball.y <= game.paddles.right.y + 50)) {
-                    // game.ball.x = (game.ball.x <= game.paddles.left.x + 5 ? game.paddles.left.x + 5 : game.paddles.right.x - 5);
-                    // if ((game.ball.y >= game.paddles.right.y - 15
-                    //     && game.ball.y <= game.paddles.right.y + 15
-                    // || game.ball.y >= game.paddles.left.y - 15
-                    //     && game.ball.y <= game.paddles.left.y + 15)) {
-                    //     game.ball.vx *= -1 + game.ball.vy;
-                    //     game.ball.vy = 0;
-                    // } else
+                && game.ball.y <= game.paddles.right.y + 50) {
+                    let dist = Math.abs(game.ball.y, game.paddles.left.y)
                     game.ball.vx *= -1;
                 }
 

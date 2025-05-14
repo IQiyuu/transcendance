@@ -6,8 +6,8 @@ FROM node:${NODE_VERSION}
 ARG PORT=3000
 EXPOSE ${PORT}
 
-WORKDIR /home/fastify
+COPY --chmod=775 ./start.sh /home/start.sh
 
-ENTRYPOINT ["npm"]
+# WORKDIR /home/fastify
 
-CMD ["start"]
+ENTRYPOINT ["bash", "/home/start.sh"]
