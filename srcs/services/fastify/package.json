@@ -32,7 +32,8 @@
     "jsonwebtoken": "^9.0.2",
     "socket.io": "^4.8.1",
     "sqlite3": "^5.1.7",
-    "tailwindcss": "^4.1.4"
+    "tailwindcss": "^4.1.4",
+    "fastify-metrics": "^10.x"
   },
   "devDependencies": {
     "@types/node": "^22.13.4",
