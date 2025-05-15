@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="./style.css" rel="stylesheet">
-    <title>Transcendance</title>
+    <link href="style.css" rel="stylesheet">
+    <title>Trong</title>
 </head>
 <body class="h-screen content-center bg-gradient-to-br from-purple-600 to-blue-500">
 
@@ -30,7 +30,7 @@
     <div id="site" style="display: none;">
         <div id="pong-game">
             <div id="gameContainer">
-                <h1 class="mb-50 underline text-white text-7xl text-center cursor-pointer" id="game_title">Pong The Game</h1>
+                <h1 class="mb-50 underline text-white text-7xl text-center cursor-pointer" id="game_title">Trong the Game</h1>
                 <!-- SCOREBOARD -->
                 <div id="scoreboard" style="font-size: 24px; font-weight: bold; margin-bottom: 10px; display: none;">
                     <span id="player-left">Player 1</span> 
@@ -39,7 +39,7 @@
                     <span id="player-right">Player 2</span>
                 </div>
                 <!-- MENU -->
-                <div class="flex w-full justify-between">
+                <div id="menu" class="flex w-full justify-between">
                     <!-- Premier UL : 70% -->
                     <ul class="w-[70%] space-y-6 text-gray-500 list-none dark:text-gray-400">
                         <li>
@@ -53,8 +53,13 @@
                             </button>
                         </li>
                         <li>
+                            <button id="matchmaking" class="w-[90%] hover:w-full transition-all duration-500 ease-in-out cursor-pointer p-12 text-5xl italic font-medium text-white dark:text-black bg-gradient-to-r from-teal-200 to-lime-200 hover:from-lime-200 hover:to-teal-200 rounded-lg border-4 border-green-800 flex items-center justify-center text-center">
+                                Tournois
+                            </button>
+                        </li>
+                        <li>
                             <button id="profile_button" class="w-[90%] hover:w-full transition-all duration-500 ease-in-out cursor-pointer p-12 text-5xl italic font-medium text-white dark:text-black bg-gradient-to-r from-red-200 via-red-300 to-yellow-200 hover:from-yellow-200 hover:to-red-300 rounded-lg border-4 border-red-600 flex items-center justify-center text-center">
-                                Settings
+                                Profile
                             </button>
                         </li>
                         <li>
@@ -64,14 +69,7 @@
                         </li>
                     </ul>
                     
-                
-                    <!-- Deuxième UL : 20% -->
-                    <ul class="w-[20%]">
-                        <li>
-                            <!-- Contenu éventuel -->
-                        </li>
-                    </ul>
-
+                    <!-- Friendlist box -->
                     <div class="w-[20%] h-[80vh] overflow-y-auto bg-gray-100 dark:bg-gray-800 rounded-lg p-4 border border-gray-300 dark:border-gray-700 shadow-inner">
                         <div class="flex justify-between items-center mb-4">
                             <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">Amis connectés</h2>
@@ -81,36 +79,30 @@
                             </button>
                         </div>
                         
-                        <div id="friendList" class="w-[20%] h-[80vh] overflow-y-auto bg-gray-100 dark:bg-gray-800 rounded-lg p-4 border border-gray-300 dark:border-gray-700 shadow-inner transform transition-transform duration-300 ease-in-out translate-x-full fixed top-20 right-0 z-40 hidden md:block">
+                        <!-- <div id="friendList" class="w-[20%] h-[80vh] overflow-y-auto bg-gray-100 dark:bg-gray-800 rounded-lg p-4 border border-gray-300 dark:border-gray-700 shadow-inner transform transition-transform duration-300 ease-in-out translate-x-full fixed top-20 right-0 z-40 hidden md:block">
                             <div id="friendsContainer" class="space-y-3"></div>
-                        </div>
-                        <div class="space-y-3">
+                        </div> -->
+                        <div id="friendlist" class="space-y-3">
                             <!-- Ami en ligne -->
-                            <button class="w-full flex items-center justify-between p-3 rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white shadow hover:bg-gray-200 dark:hover:bg-gray-600 transition cursor-pointer">
-                                <div class="flex items-center gap-3">
-                                    <span class="w-3 h-3 rounded-full bg-green-500"></span>
-                                    <span class="text-lg">Alice</span>
-                                </div>
-                                <span class="text-sm bg-green-500 text-white px-3 py-1 rounded">Inviter</span>
-                            </button>
+                            <div class="w-full flex items-center justify-between p-3 rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white shadow hover:bg-gray-200 dark:hover:bg-gray-600 transition cursor-pointer">
+                                <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                                <p class="text-lg">Alice</p>
+                                <button class="text-sm bg-green-500 text-white px-3 py-1 rounded">Inviter</buton>
+                            </div>
                     
                             <!-- Ami hors ligne -->
-                            <button class="w-full flex items-center justify-between p-3 rounded-md bg-white dark:bg-gray-700 text-gray-400 dark:text-gray-400 shadow cursor-not-allowed">
-                                <div class="flex items-center gap-3">
-                                    <span class="w-3 h-3 rounded-full bg-red-500"></span>
-                                    <span class="text-lg">Bob</span>
-                                </div>
-                                <span class="text-sm bg-gray-300 text-white px-3 py-1 rounded">Hors ligne</span>
-                            </button>
+                            <div class="w-full flex items-center justify-between p-3 rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white shadow hover:bg-gray-200 dark:hover:bg-gray-600 transition cursor-pointer">
+                                <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                                <p class="text-lg">Alice</p>
+                                <button class="text-sm bg-green-500 text-white px-3 py-1 rounded">Inviter</buton>
+                            </div>
                     
                             <!-- Ami en ligne -->
-                            <button class="w-full flex items-center justify-between p-3 rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white shadow hover:bg-gray-200 dark:hover:bg-gray-600 transition cursor-pointer">
-                                <div class="flex items-center gap-3">
-                                    <span class="w-3 h-3 rounded-full bg-green-500"></span>
-                                    <span class="text-lg">Charlie</span>
-                                </div>
-                                <span class="text-sm bg-green-500 text-white px-3 py-1 rounded">Inviter</span>
-                            </button>
+                            <div class="w-full flex items-center justify-between p-3 rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white shadow hover:bg-gray-200 dark:hover:bg-gray-600 transition cursor-pointer">
+                                <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                                <p class="text-lg">Alice</p>
+                                <button class="text-sm bg-green-500 text-white px-3 py-1 rounded">Inviter</buton>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -119,7 +111,7 @@
                 <div id="player_profile" style="display:none; margin-right: 1%; margin-left: 1%">
                     <div id="player_infos" style="display: flex; justify-content: flex-start;">
                         <img id="profile_picture" width="100" height="100" style="position: relative;"/>
-                        <img src="imgs/hoverPicture.png" width="50" height="50" id="camera_icon" style="z-index: 15; position: absolute; top: 9%; left: 2.8%; opacity: 0;" />
+                        <img src="assets/imgs/hoverPicture.png" width="50" height="50" id="camera_icon" style="z-index: 15; position: absolute; top: 9%; left: 2.8%; opacity: 0;" />
                         <!-- PROFILE PICTURE UPLOAD -->
                         <div id="profile_picture_overlay" style="z-index: 20; display: none; justify-content: center; align-items: center; background: rgba(0, 0, 0, 0.5); position: fixed; top: 0; left: 0; width: 100%; height: 100%;">
                             <form id="profil_picture_square" style="align-items: center; display: flex; flex-direction: column; position: relative; background: gray; height: 20%; padding: 20px; text-align: center; border-radius: 10px;">

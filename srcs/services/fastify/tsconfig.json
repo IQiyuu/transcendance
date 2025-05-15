@@ -1,8 +1,7 @@
-
 {
-    "include": ["src"],
+    "include": ["src/**/*.ts"],
+    "exclude": ["node_modules"],
     "compilerOptions": {
-      "outDir": "./dist",
-      // "version" : "1.0.0"
+      "outDir": "dist"
     }
   }

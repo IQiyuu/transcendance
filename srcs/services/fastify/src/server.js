@@ -5,14 +5,14 @@ import fastifyWebsocket from '@fastify/websocket';
 import fastifyMultipart from '@fastify/multipart';
 import jwt from '@fastify/jwt';
 
-import ejs from 'ejs'
+import ejs from 'ejs' // to remove
 import fs from 'fs';
 import os from 'os';
 
-import LogginRoute from './loggingRoute.js'
-import GameRoute from './gameRoute.js'
-import websocketRoute from './webSocketRoute.js';
-import DbRoute from './dbRoute.js';
+import LogginRoute from './routes/loggingRoute.js'
+import GameRoute from './routes/gameRoute.js'
+import websocketRoute from './routes/webSocketRoute.js';
+import DbRoute from './routes/dbRoute.js';
 
 import cookie from '@fastify/cookie';
 
@@ -35,9 +35,11 @@ if (networkInterfaces.enp3s0f0) {
   }
 }
 
+// Removing mongodb, to remove view 
+
 const secretKey = 'bommerang-fleche-upair'; // pas sur de ce que je fais la
 
-const rootDir = dirname(dirname(fileURLToPath(import.meta.url)));
+const rootDir = dirname(dirname(fileURLToPath(import.meta.url))); // Root of the website
 
 const fastify = Fastify({
   logger: true,
@@ -64,7 +66,7 @@ db.exec(`
     user_id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL,
     password TEXT NOT NULL,
-    picture_path TEXT DEFAULT "imgs/standart.jpg",
+    picture_path TEXT DEFAULT "../assets/imgs/standart.jpg",
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   );
 
@@ -109,7 +111,9 @@ fastify.register(GameRoute, {
   db: db,
 });
 
-fastify.register(websocketRoute);
+fastify.register(websocketRoute, {
+  db: db
+});
 
 fastify.register(DbRoute, {
   db: db
@@ -119,7 +123,7 @@ fastify.register(FastifyStatic, {
   root: join(rootDir, 'dist')
 })
 
-fastify.register(FastifyView, {
+fastify.register(FastifyView, { // To remplace/remove
   engine: {
     ejs
   },

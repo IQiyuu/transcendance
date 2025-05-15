@@ -132,4 +132,4 @@ out
 .ssl
 
 # Docker secrets
-secrets/
+srcs/secrets/
