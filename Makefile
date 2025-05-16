@@ -6,7 +6,7 @@
 #    By: ggiboury <ggiboury@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/22 15:00:40 by ggiboury          #+#    #+#              #
-#    Updated: 2025/05/14 14:49:36 by ggiboury         ###   ########.fr        #
+#    Updated: 2025/05/16 12:32:30 by ggiboury         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,7 +22,7 @@ REQ	= $(VOLUME_WEBSITE_FILES) $(VOLUME_DATABASE_FILES) $(SSL_CERTIFICATE)
 COMPOSE_FILE	= ./srcs/docker-compose.yml
 
 # Getting all files in the repo
-SCRIPTS	= $(shell cd srcs/services/fastify/src && find | cut -c2- )
+SCRIPTS	= $(shell cd srcs/services/fastify/src && find | cut -c2- ) # change with grepp, to get all files, its easier
 ASSETS	= $(shell cd srcs/assets && find | cut -c2- )
 
 SRCS			= $(SRCS_FASTIFY) $(SRCS_ASSETS) $(SRCS_DB)
@@ -39,6 +39,7 @@ SRCS			= $(SRCS_FASTIFY) $(SRCS_ASSETS) $(SRCS_DB)
 #Full path scripts and assets
 SRCS_DIR		= ./srcs/
 SRCS_FASTIFY	= $(SCRIPTS:%=$(SRCS_DIR)services/fastify/src%)
+SRCS_CONFIG		= $(SCRIPTS:%=$(SRCS_DIR)services/fastify/src%)
 SRCS_ASSETS		= $(ASSETS:%=$(SRCS_DIR)assets%)
 SRCS_DB			= $(SRCS_DIR)services/sqlite/transcendence.db
 
@@ -52,7 +53,8 @@ VOLUME_WEBSITE			= /goinfre/$(USER)/pong/data/fastify
 VOLUME_WEBSITE_DIRS		= $(VOLUME_WEBSITE)/dist $(VOLUME_WEBSITE)/src $(VOLUME_WEBSITE)/dist/assets
 VOLUME_WEBSITE_SCRIPTS	:= $(SCRIPTS:%=$(VOLUME_WEBSITE)/src%)
 VOLUME_WEBSITE_ASSETS	:= $(ASSETS:%=$(VOLUME_WEBSITE)/dist/assets%)
-VOLUME_WEBSITE_FILES	:= $(VOLUME_WEBSITE_ASSETS) $(VOLUME_WEBSITE_SCRIPTS)
+VOLUME_WEBSITE_CONFIG	= $(ASSETS:%=$(VOLUME_WEBSITE)/dist/assets%)
+VOLUME_WEBSITE_FILES	:= $(VOLUME_WEBSITE_ASSETS) $(VOLUME_WEBSITE_SCRIPTS) $(VOLUME_WEBSITE_CONFIG)
 
 
 VOLUME_DATABASE			= /goinfre/$(USER)/pong/data/sqlite
