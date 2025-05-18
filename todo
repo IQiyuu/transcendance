@@ -1,0 +1,16 @@
+DONE :
+- Location of scripts executed
+  All scripts are now located at root ;/
+
+DOING :
+
+TODO :
+- Fix node sqlite3 dependancy (cannot be removed)
+- Tournament
+- Trajectory of the ball
+- Configure grafana
+- Configure Prometheus
+- Historic to add
+- Script for database queries (from server.js)
+
+- Front end

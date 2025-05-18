@@ -6,7 +6,7 @@
 #    By: ggiboury <ggiboury@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/22 15:00:40 by ggiboury          #+#    #+#              #
-#    Updated: 2025/05/16 12:32:30 by ggiboury         ###   ########.fr        #
+#    Updated: 2025/05/16 13:50:17 by ggiboury         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,7 +22,7 @@ REQ	= $(VOLUME_WEBSITE_FILES) $(VOLUME_DATABASE_FILES) $(SSL_CERTIFICATE)
 COMPOSE_FILE	= ./srcs/docker-compose.yml
 
 # Getting all files in the repo
-SCRIPTS	= $(shell cd srcs/services/fastify/src && find | cut -c2- ) # change with grepp, to get all files, its easier
+SCRIPTS	= $(shell cd srcs/services/fastify/src && find | cut -c2- )
 ASSETS	= $(shell cd srcs/assets && find | cut -c2- )
 
 SRCS			= $(SRCS_FASTIFY) $(SRCS_ASSETS) $(SRCS_DB)
@@ -48,16 +48,16 @@ SRCS_DB			= $(SRCS_DIR)services/sqlite/transcendence.db
 # Setting up volumes
 
 VOLUME	= /goinfre/$(USER)/pong/data
-
 VOLUME_WEBSITE			= /goinfre/$(USER)/pong/data/fastify
 VOLUME_WEBSITE_DIRS		= $(VOLUME_WEBSITE)/dist $(VOLUME_WEBSITE)/src $(VOLUME_WEBSITE)/dist/assets
-VOLUME_WEBSITE_SCRIPTS	:= $(SCRIPTS:%=$(VOLUME_WEBSITE)/src%)
-VOLUME_WEBSITE_ASSETS	:= $(ASSETS:%=$(VOLUME_WEBSITE)/dist/assets%)
-VOLUME_WEBSITE_CONFIG	= $(ASSETS:%=$(VOLUME_WEBSITE)/dist/assets%)
-VOLUME_WEBSITE_FILES	:= $(VOLUME_WEBSITE_ASSETS) $(VOLUME_WEBSITE_SCRIPTS) $(VOLUME_WEBSITE_CONFIG)
-
-
 VOLUME_DATABASE			= /goinfre/$(USER)/pong/data/sqlite
+
+VOLUME_WEBSITE_SCRIPTS	:= $(SCRIPTS:%=$(VOLUME_WEBSITE)/src%)
+VOLUME_WEBSITE_CONFIG	= package.json tsconfig.json
+VOLUME_WEBSITE_CONFIG	:= $(VOLUME_WEBSITE_CONFIG:%=$(VOLUME_WEBSITE)/%)
+VOLUME_WEBSITE_ASSETS	:= $(ASSETS:%=$(VOLUME_WEBSITE)/dist/assets%)
+
+VOLUME_WEBSITE_FILES	:= $(VOLUME_WEBSITE_ASSETS) $(VOLUME_WEBSITE_SCRIPTS) $(VOLUME_WEBSITE_CONFIG)
 VOLUME_DATABASE_FILES	:= $(VOLUME_DATABASE)/transcendence.db
 
 
@@ -71,7 +71,7 @@ SSL_CERTIFICATE	= ${SECRETS}ssl.crt $(SECRETS)ssl.key
 #
 
 # test:
-#	@echo $(ASSETS)
+# 	@echo $(VOLUME_WEBSITE_CONFIG)
 #	@echo $(SRCS_FASTIFY)
 #	@echo $(SRCS_ASSETS)
 #	@echo $(SRCS)
@@ -100,6 +100,9 @@ $(VOLUME) $(VOLUME_WEBSITE) $(VOLUME_WEBSITE_DIRS):
 
 $(VOLUME_WEBSITE_SCRIPTS): $(VOLUME_WEBSITE)/src
 	cp -r $(@:${VOLUME_WEBSITE}/src%=$(SRCS_DIR)services/fastify/src%) $@
+	
+$(VOLUME_WEBSITE_CONFIG): $(VOLUME_WEBSITE)
+	cp $(@:${VOLUME_WEBSITE}%=$(SRCS_DIR)services/fastify/%) $@
 
 $(VOLUME_WEBSITE_ASSETS): $(VOLUME_WEBSITE)/dist/assets
 	cp -r $(@:${VOLUME_WEBSITE}/dist/assets%=$(SRCS_DIR)assets%) $@

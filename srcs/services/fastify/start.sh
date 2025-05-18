@@ -14,12 +14,11 @@ shutdown(){
 trap shutdown SIGTERM
 
 echo "Setting up website"
-ls -la /home/fastify
 npm install
-npm build
+npm run buildcss
 
-# cp src/server.js dist
-# cp -r src/routes dist
+cp src/server.js dist
+cp -r src/routes dist
 
 echo "Starting website"
 npm start
