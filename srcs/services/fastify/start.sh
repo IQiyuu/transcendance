@@ -6,7 +6,7 @@ cd /home/fastify
 
 shutdown(){
 	echo "Shutting down the container"
-	npm uninstall 2> /home/fastify/err.txt
+	rm -rf node_modules
 	exit
 };
 

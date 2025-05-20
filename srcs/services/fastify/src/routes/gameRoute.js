@@ -1,4 +1,6 @@
 import fs from 'fs';
+import fastifyPlugin from 'fastify-plugin';
+
 function randomIntFromInterval(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
@@ -9,6 +11,10 @@ async function gameRoute (fastify, options) {
     let w_uname = null;
     let img_path = "assets/imgs/";
 
+    // function addGame(game){
+    //     games[Object.keys(games).length] = game;
+    // }
+
     // Creer un objet game cote server
     function createGame(l_name, r_name) {
         const gameId = Object.keys(games).length;
@@ -18,7 +24,7 @@ async function gameRoute (fastify, options) {
         console.log(gameId);
         games[gameId] = {
             id: gameId,
-            players: {
+            players: {  
                 left: l_name,
                 right: r_name
             },
@@ -270,5 +276,4 @@ async function gameRoute (fastify, options) {
 
 
 
-
-export default gameRoute;
+export default fastifyPlugin(gameRoute);

@@ -10,6 +10,7 @@ import fs from 'fs';
 
 import LogginRoute from './routes/loggingRoute.js'
 import GameRoute from './routes/gameRoute.js'
+import tournamentRoute from './routes/tournament.js'
 import websocketRoute from './routes/webSocketRoute.js';
 import DbRoute from './routes/dbRoute.js';
 
@@ -96,6 +97,8 @@ fastify.register(LogginRoute, {
 fastify.register(GameRoute, {
   db: db,
 });
+
+fastify.register(tournamentRoute);
 
 fastify.register(websocketRoute, {
   db: db

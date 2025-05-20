@@ -1,16 +1,16 @@
 DONE :
 - Location of scripts executed
   All scripts are now located at root ;/
+- Fix node sqlite3 dependancy (cannot be removed)
+  Can remove it in docker with another user (or su)
 
 DOING :
+- Tournament
+- favicon.ico
 
 TODO :
-- Fix node sqlite3 dependancy (cannot be removed)
-- Tournament
 - Trajectory of the ball
 - Configure grafana
 - Configure Prometheus
 - Historic to add
 - Script for database queries (from server.js)
-
-- Front end

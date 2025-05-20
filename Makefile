@@ -6,7 +6,7 @@
 #    By: ggiboury <ggiboury@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/22 15:00:40 by ggiboury          #+#    #+#              #
-#    Updated: 2025/05/16 13:50:17 by ggiboury         ###   ########.fr        #
+#    Updated: 2025/05/20 16:58:26 by ggiboury         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -118,10 +118,8 @@ re : fclean $(NAME)
 clean : down
 	docker container prune -f
 
-# docker image prune -af
-
 fclean : clean
-	rm -rf $(VOLUME)
+	rm -rf $(VOLUME) 2> err.txt
 
 down :
 	docker compose -f $(COMPOSE_FILE) down -v
@@ -192,5 +190,6 @@ reload :
 # #Config files
 
 # SRCS_MONITORING_CONFIG=${SRCS}monitoring/prometheus.yml
+# SRCS_MONITORING_VIS_CONFIG=${SRCS}monitoring/grafana.ini
 # SRCS_FASTIFY_CONFIG=${SRCS}fastify/package.json
 # SRCS_FASTIFY_TSCONFIG=${SRCS}fastify/tsconfig.json
