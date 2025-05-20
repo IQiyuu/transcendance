@@ -11,6 +11,8 @@ async function gameRoute (fastify, options) {
     let w_uname = null;
     let img_path = "assets/imgs/";
 
+    let STARTING_SPEED = 0.1;
+
     // function addGame(game){
     //     games[Object.keys(games).length] = game;
     // }
@@ -19,8 +21,8 @@ async function gameRoute (fastify, options) {
     function createGame(l_name, r_name) {
         const gameId = Object.keys(games).length;
         console.log(gameId);
+        const angle = randomIntFromInterval(45, 135);
         const neg = randomIntFromInterval(0,1);
-        const vx = randomIntFromInterval(5, 8) * (neg ? -1 : 1);
         console.log(gameId);
         games[gameId] = {
             id: gameId,
@@ -35,8 +37,9 @@ async function gameRoute (fastify, options) {
             ball: {
                 x: 400,
                 y: 200,
-                vx: vx,
-                vy: 10-vx*(randomIntFromInterval(0,1) ? -1 : 1)
+                dx: Math.cos(angle) * (neg ? -1 : 1),
+                dy: Math.sin(angle),
+                v: STARTING_SPEED
             },
             paddles: {
                 left: {
@@ -242,8 +245,8 @@ async function gameRoute (fastify, options) {
 
     setInterval(() => {
         Object.values(games).forEach(game => {
-            game.ball.x += game.ball.vx;
-            game.ball.y += game.ball.vy;
+            game.ball.x += game.ball.vx * game.ball.v;
+            game.ball.y += game.ball.vy * game.ball.v;
 
             if (game.ball.y <= 110 || game.ball.y >= 590)
                 game.ball.vy *= -1;
@@ -255,18 +258,21 @@ async function gameRoute (fastify, options) {
                     // iy = game.ball.y
                     let dist = Math.abs(game.ball.y, game.paddles.left.y)
 
-
+                    
                     game.ball.vx *= -1;
+                    game.ball.v += 0.1;
                 }
             else if (game.ball.x >= game.paddles.right.x - 10
                 && game.ball.y >= game.paddles.right.y - 50
                 && game.ball.y <= game.paddles.right.y + 50) {
                     let dist = Math.abs(game.ball.y, game.paddles.left.y)
                     game.ball.vx *= -1;
+                    game.ball.v += 0.1;
                 }
 
             if (game.ball.x <= game.paddles.left.x - 10 || game.ball.x >= game.paddles.right.x + 10) {
                 game.scores[game.ball.x <= game.paddles.left.x - 10 ? "right" : "left"]++;
+                game.ball.v = STARTING_SPEED;
                 Object.assign(game.ball, { x: 385, y: 300 });
             }
                     

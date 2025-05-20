@@ -6,7 +6,7 @@
 #    By: ggiboury <ggiboury@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/22 15:00:40 by ggiboury          #+#    #+#              #
-#    Updated: 2025/05/20 16:58:26 by ggiboury         ###   ########.fr        #
+#    Updated: 2025/05/20 17:57:31 by ggiboury         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -102,7 +102,7 @@ $(VOLUME_WEBSITE_SCRIPTS): $(VOLUME_WEBSITE)/src
 	cp -r $(@:${VOLUME_WEBSITE}/src%=$(SRCS_DIR)services/fastify/src%) $@
 	
 $(VOLUME_WEBSITE_CONFIG): $(VOLUME_WEBSITE)
-	cp $(@:${VOLUME_WEBSITE}%=$(SRCS_DIR)services/fastify/%) $@
+	cp $(@:${VOLUME_WEBSITE}%=$(SRCS_DIR)services/fastify%) $@
 
 $(VOLUME_WEBSITE_ASSETS): $(VOLUME_WEBSITE)/dist/assets
 	cp -r $(@:${VOLUME_WEBSITE}/dist/assets%=$(SRCS_DIR)assets%) $@

@@ -1,6 +1,8 @@
 
 // import createGame from "./gameRoute.js"; // relative to this file
 
+import { request } from "node:http";
+
 async function websocketRoute(fastify, options) {
     const db = options.db;
     let waiting_list = null;
