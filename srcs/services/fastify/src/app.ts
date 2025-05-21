@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const loginForm = document.getElementById("login-form") as HTMLDivElement;
                 const pongGame = document.getElementById("site") as HTMLDivElement;
                 loginForm.style.display = "none";
-                pongGame.style.display = "flex";
+                pongGame.classList.replace("hidden", "flex");
                 init();
                 fillCanvas();
             } else {
@@ -246,7 +246,7 @@ async function display_profile(username) {
             console.log("player not found.");
             return ;
         }
-        (document.getElementById("profile_picture") as HTMLImageElement).src = profile.datas.picture_path + "?" + new Date().getTime();
+        (document.getElementById("profile_picture") as HTMLImageElement).src = "assets/" + profile.datas.picture_path + "?" + new Date().getTime();
         document.getElementById("profile_username").innerText = profile.datas.username;
         document.getElementById("profile_creation").innerText = `member since: ${profile.datas.created_at}`;
         const friendDiv = document.getElementById("friend_div");
@@ -314,7 +314,6 @@ async function display_profile(username) {
                 if (item.winner_username == profile.datas.username)
                     w++;
             });
-            document.getElementById("winrate").innerHTML = `${cpt} games (${w}/${cpt-w})`
         }
         // change les a (lien) de l'historique par des liens qui menent a la page de profile
         document.querySelectorAll("a#profileDisplay").forEach((item) => { 
@@ -323,7 +322,7 @@ async function display_profile(username) {
                     await display_profile(item.textContent);
                 });
         });
-        document.getElementById("player_profile").style.display = "block";
+        document.getElementById("player_profile").classList.replace("hidden", "block");
         if (cpt > 0) {
             document.getElementById("wr").textContent = `${w} / ${cpt}` ;
             let wr = w/(cpt)*100;
@@ -341,14 +340,15 @@ async function display_profile(username) {
 
 // afficher le profile
 document.getElementById("profile_button").addEventListener("click", async (event) => {
+    document.getElementById("menu").classList.replace("block", "hidden");
     await display_profile(_username);
 });
 
 // afficher le menu du jeu
 async function displayMenu() {
-    document.getElementById("player_profile").style.display = "none";
-    fillCanvas();
-    document.getElementById("scoreboard").style.display = "none";
+    document.getElementById("player_profile").classList.add("hidden");
+    document.getElementById("game_box").classList.replace("flex", "hidden");
+    document.getElementById("menu").classList.replace("hidden", "block");
 }
 
 // retourner au menu
@@ -484,36 +484,36 @@ document.getElementById("profile_username").addEventListener("click", async (eve
     document.getElementById("profile_username_overlay").style.display = "flex";
 });
 
-document.getElementById("username_btn").addEventListener("click", async (event) => {
-    event.preventDefault();
+// document.getElementById("username_btn").addEventListener("click", async (event) => {
+//     event.preventDefault();
 
-    const newusername = (document.getElementById("username_input") as HTMLInputElement).value;
-    console.log(newusername);
-    const body = {
-        username: _username,
-        newusername: newusername
-    };
-    console.log(JSON.stringify(body));
-    if (newusername != "") {
-        try {
-            const response = await fetch(`/upload/username/${_username}`, {
-                method: 'POST',
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(body),
-            });
-            if (!response.ok)
-                console.log("error in username upload.");
-            else {
-                console.log("username uploaded.");
-                document.getElementById("profile_username_overlay").style.display = "none";
-                _username = newusername;
-                display_profile(_username);
-            }
-        } catch (error) {
-          console.error("error: ", error);
-        }
-    }
-});
+//     const newusername = (document.getElementById("username_input") as HTMLInputElement).value;
+//     console.log(newusername);
+//     const body = {
+//         username: _username,
+//         newusername: newusername
+//     };
+//     console.log(JSON.stringify(body));
+//     if (newusername != "") {
+//         try {
+//             const response = await fetch(`/upload/username/${_username}`, {
+//                 method: 'POST',
+//                 headers: { "Content-Type": "application/json" },
+//                 body: JSON.stringify(body),
+//             });
+//             if (!response.ok)
+//                 console.log("error in username upload.");
+//             else {
+//                 console.log("username uploaded.");
+//                 document.getElementById("profile_username_overlay").style.display = "none";
+//                 _username = newusername;
+//                 display_profile(_username);
+//             }
+//         } catch (error) {
+//           console.error("error: ", error);
+//         }
+//     }
+// });
 
 document.getElementById("friend_btn").addEventListener("click", async (event) => {
     const friend_uname = document.getElementById("profile_username").textContent;
