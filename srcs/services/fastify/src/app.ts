@@ -53,6 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 sessionStorage.setItem('userId', data.id);
                 const loginForm = document.getElementById("login-form") as HTMLDivElement;
                 const pongGame = document.getElementById("site") as HTMLDivElement;
+
                 loginForm.classList.replace("flex", "hidden");
                 pongGame.classList.replace("hidden", "block");
                 init();
