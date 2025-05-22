@@ -53,7 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 sessionStorage.setItem('userId', data.id);
                 const loginForm = document.getElementById("login-form") as HTMLDivElement;
                 const pongGame = document.getElementById("site") as HTMLDivElement;
-
+                document.body.classList.remove("justify-center", "align-center", "flex");
                 loginForm.classList.replace("flex", "hidden");
                 pongGame.classList.replace("hidden", "block");
                 init();
@@ -225,6 +225,8 @@ checkIfLoggedIn().then((isLoggedIn) => {
     if (isLoggedIn) {
         pongGame.classList.replace("hidden", "block");
         initFriendlist();
+        console.log("COUCOU");
+        document.body.classList.remove("justify-center", "align-center", "flex");
     }
     else
         loginForm.classList.replace("hidden", "flex");
@@ -251,8 +253,11 @@ async function display_profile(username) {
         document.getElementById("profile_username").innerText = profile.datas.username;
         document.getElementById("profile_creation").innerText = `member since: ${profile.datas.created_at}`;
         const friendDiv = document.getElementById("friend_div");
-        if (profile.datas.username == _username)
+        const faBtn = document.getElementById("fa_btn");
+        if (profile.datas.username == _username) {
             friendDiv.classList.replace("flex", "hidden");
+            faBtn.classList.replace("hidden", "relative");
+        }
         else {
             const responseFriends = await fetch(`/db/friends/${_username}/${username}`, {
                 method: 'GET',
@@ -272,6 +277,7 @@ async function display_profile(username) {
 
             console.log(friends.message);
             friendDiv.classList.replace("hidden", "flex");
+            faBtn.classList.replace("relative", "hidden");
         }
 
         // requete des games
@@ -287,20 +293,20 @@ async function display_profile(username) {
         // affiche l'historique
         if (data.success) {
             var cpt = 0;
-            var w = 0;;
+            var w = 0;
             data.datas.forEach((item) => {
                 cpt++;
-                if (cpt < 20) {
+                if (cpt < 6) {
                     let li = document.createElement("li");
                     let a = document.createElement("a");
                     a.innerText = item.winner_username;
-                    a.style.color = "blue";
+                    a.classList.add("text-green-500", "underline");
                     a.href="#";
                     a.id="profileDisplay";
 
                     let a2 = document.createElement("a");
                     a2.innerText = item.loser_username;
-                    a2.style.color = "blue";
+                    a2.classList.add("text-green-500", "underline");
                     a2.href="#";
                     a2.id="profileDisplay";
 
@@ -314,6 +320,7 @@ async function display_profile(username) {
                 }
                 if (item.winner_username == profile.datas.username)
                     w++;
+                document.getElementById("wr_card").textContent = `Winrate : ${(w / cpt * 100).toFixed(0)}%`;
             });
         }
         // change les a (lien) de l'historique par des liens qui menent a la page de profile
@@ -323,7 +330,7 @@ async function display_profile(username) {
                     await display_profile(item.textContent);
                 });
         });
-        document.getElementById("player_profile").classList.replace("hidden", "block");
+        document.getElementById("player_profile").classList.replace("hidden", "flex");
         if (cpt > 0) {
             document.getElementById("wr").textContent = `${w} / ${cpt}` ;
             let wr = w/(cpt)*100;
@@ -350,6 +357,7 @@ async function displayMenu() {
     document.getElementById("player_profile").classList.add("hidden");
     document.getElementById("game_box").classList.replace("flex", "hidden");
     document.getElementById("menu").classList.replace("hidden", "block");
+    document.getElementById("about").classList.replace("flex", "hidden");
 }
 
 // retourner au menu
@@ -403,11 +411,6 @@ pp.addEventListener('mouseout', () => {
         ci.classList.replace("opacity-60", "opacity-0");
 });
 pp.addEventListener("mouseover", async (event) => {
-    const user_page = document.getElementById("profile_username").textContent;
-    if (user_page == _username)
-        ci.classList.replace("opacity-0", "opacity-60");
-});
-ci.addEventListener("mouseover", async (event) => {
     const user_page = document.getElementById("profile_username").textContent;
     if (user_page == _username)
         ci.classList.replace("opacity-0", "opacity-60");
@@ -619,4 +622,11 @@ document.getElementById("offline").addEventListener("click", async (event) => {
     } catch (error) {
         console.log("error: ", error);
     }
+});
+
+document.getElementById("about_button").addEventListener("click", async (event) => {
+    event.preventDefault();
+
+    document.getElementById("menu").classList.replace("block", "hidden");
+    document.getElementById("about").classList.replace("hidden", "flex");
 });

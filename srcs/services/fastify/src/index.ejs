@@ -6,73 +6,88 @@
     <link href="style.css" rel="stylesheet">
     <title>Trong</title>
 </head>
-<body class="h-screen bg-gradient-to-br from-purple-600 to-blue-500">
+<body class="h-screen flex items-center justify-center bg-gradient-to-br from-purple-600 to-blue-500">
 
     <!-- LOGIN FORM -->
-    <div id="login-form" class="hidden flex-col p-6 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 max-w-sm mx-auto mb-5">
-        <h1 class="underline text-white text-4xl text-center" id="form-title">Connexion</h1>
+    <div id="login-form" class="hidden flex-col p-6 items-center justify-center bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 max-w-sm w-full">
+        <h1 class="underline text-white text-4xl text-center mb-4" id="form-title">Connexion</h1>
 
-        <form class="max-w-sm mx-auto" id="form">
+        <form class="w-full" id="form">
             <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="username">Username</label>
-            <input class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" id="username" name="username" required />
+            <input class="mb-4 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" id="username" name="username" required />
 
             <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="password">Password</label>
-            <input class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" id="password" name="password" type="password" required />
+            <input class="mb-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" id="password" name="password" type="password" required />
 
-            <p style="display:none;" class="text-red-600" id="errorAuth"></p>
+            <p class="hidden text-red-600 mb-2" id="errorAuth"></p>
 
-            <a class="font-medium text-blue-600 hover:underline dark:text-blue-500" id="register-view" href="#">S'inscrire</a>
-            <button id="login_btn" class="my-2 w-full text-white bg-gradient-to-br from-green-400 to-blue-600 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-green-200 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2" type="submit">Se connecter</button>
+            <a class="font-medium text-blue-600 hover:underline dark:text-blue-500 block mb-2 text-right" id="register-view" href="#">S'inscrire</a>
+
+            <button id="login_btn" class="w-full text-white bg-gradient-to-br from-green-400 to-blue-600 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-green-200 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center" type="submit">Se connecter</button>
         </form>
-        
     </div>
 
     <div id="site" class="hidden">
         <div id="pong-game">
             <div id="gameContainer">
-                <h1 class="mb-50 underline text-white text-7xl text-center cursor-pointer" id="game_title">Trong the Game</h1>
+                <h1 class="mb-50 underline text-white text-7xl font-serif text-center cursor-pointer" id="game_title">Trong the Game</h1>
                 <!-- MENU -->
                 <div id="pageContent" class="flex w-full justify-between">
                     <!-- Premier UL : 70% -->
-                    <ul id="menu" class="block w-[70%] space-y-6 text-gray-500 list-none dark:text-gray-400">
-                        <li>
-                            <button id="offline" class="w-[90%] hover:w-full transition-all duration-500 ease-in-out cursor-pointer p-12 text-5xl italic font-medium dark:text-black bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg border-4 border-purple-600 flex items-center justify-center text-center">
-                                Play local
-                            </button>
-                        </li>
-                        <li>
-                            <button id="matchmaking" class="w-[90%] hover:w-full transition-all duration-500 ease-in-out cursor-pointer p-12 text-5xl italic font-medium dark:text-black bg-gradient-to-r from-teal-200 to-lime-200 hover:from-lime-200 hover:to-teal-200 rounded-lg border-4 border-green-800 flex items-center justify-center text-center">
-                                Play online
-                            </button>
-                        </li>
-                        <li>
-                            <button id="matchmaking" class="w-[90%] hover:w-full transition-all duration-500 ease-in-out cursor-pointer p-12 text-5xl italic font-medium dark:text-black bg-gradient-to-br from-green-400 to-blue-600 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-green-200 dark:focus:ring-green-800 rounded-lg border-4 border-green-800 flex items-center justify-center text-center">
-                                Tournament
-                            </button>
-                        </li>
-                        <li>
-                            <button id="profile_button" class="w-[90%] hover:w-full transition-all duration-500 ease-in-out cursor-pointer p-12 text-5xl italic font-medium dark:text-black bg-gradient-to-r from-red-200 via-red-300 to-yellow-200 hover:from-yellow-200 hover:to-red-300 rounded-lg border-4 border-red-600 flex items-center justify-center text-center">
-                                Profile
-                            </button>
-                        </li>
-                        <li>
-                            <button class="w-[90%] hover:w-full transition-all duration-500 ease-in-out cursor-pointer p-12 text-5xl italic font-medium dark:text-black bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-blue-500 hover:to-cyan-500 rounded-lg border-4 border-blue-700 flex items-center justify-center text-center">
-                                About
-                            </button>
-                        </li>
-                    </ul>
+ <ul id="menu" class="block w-[70%] space-y-6 text-gray-500 list-none dark:text-gray-400">
+    <li>
+        <button id="offline" class="animate-bounce hover:animate-pulse relative w-[90%] hover:w-full transition-all duration-500 ease-in-out cursor-pointer p-12 text-5xl italic font-medium dark:text-black text-white bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg border-4 border-purple-600 flex items-center justify-center text-center
+        hover:scale-105 hover:shadow-[0_0_40px_rgba(236,72,153,0.9)] hover:bg-gradient-to-r hover:from-pink-400 hover:via-purple-400 hover:to-red-400">
+            Play local
+            <span class="absolute inset-0 rounded-lg bg-white opacity-0 hover:opacity-10 blur-md transition-opacity duration-500"></span>
+        </button>
+    </li>
+
+    <li>
+        <button id="matchmaking" class="animate-bounce hover:animate-spin relative w-[90%] hover:w-full transition-all duration-500 ease-in-out cursor-pointer p-12 text-5xl italic font-medium dark:text-black text-white bg-gradient-to-r from-teal-200 to-lime-200 rounded-lg border-4 border-green-800 flex items-center justify-center text-center
+        hover:scale-105 hover:shadow-[0_0_40px_rgba(132,204,22,0.9)] hover:bg-gradient-to-r hover:from-lime-300 hover:via-teal-300 hover:to-green-400">
+            Play online
+            <span class="absolute inset-0 rounded-lg bg-white opacity-0 hover:opacity-10 blur-md transition-opacity duration-500"></span>
+        </button>
+    </li>
+
+    <li>
+        <button id="tournament_button" class="animate-bounce hover:animate-ping relative w-[90%] hover:w-full transition-all duration-500 ease-in-out cursor-pointer p-12 text-5xl italic font-medium dark:text-black text-white bg-gradient-to-br from-green-400 to-blue-600 rounded-lg border-4 border-green-800 flex items-center justify-center text-center
+        hover:scale-105 hover:shadow-[0_0_40px_rgba(59,130,246,0.9)] hover:bg-gradient-to-tr hover:from-blue-400 hover:via-green-400 hover:to-teal-400">
+            Tournament
+            <span class="absolute inset-0 rounded-lg bg-white opacity-0 hover:opacity-10 blur-md transition-opacity duration-500"></span>
+        </button>
+    </li>
+
+    <li>
+        <button id="profile_button" class="animate-bounce hover:animate-spin relative w-[90%] hover:w-full transition-all duration-500 ease-in-out cursor-pointer p-12 text-5xl italic font-medium dark:text-black text-white bg-gradient-to-r from-red-200 via-red-300 to-yellow-200 rounded-lg border-4 border-red-600 flex items-center justify-center text-center
+        hover:scale-105 hover:shadow-[0_0_40px_rgba(251,191,36,0.9)] hover:bg-gradient-to-r hover:from-yellow-400 hover:via-red-400 hover:to-orange-400">
+            Profile
+            <span class="absolute inset-0 rounded-lg bg-white opacity-0 hover:opacity-10 blur-md transition-opacity duration-500"></span>
+        </button>
+    </li>
+
+    <li>
+        <button id="about_button" class="animate-bounce hover:animate-none relative w-[90%] hover:w-full transition-all duration-500 ease-in-out cursor-pointer p-12 text-5xl italic font-medium dark:text-black text-white bg-gradient-to-r from-cyan-500 to-blue-500 rounded-lg border-4 border-blue-700 flex items-center justify-center text-center
+        hover:scale-105 hover:shadow-[0_0_40px_rgba(34,211,238,0.9)] hover:bg-gradient-to-r hover:from-blue-400 hover:via-cyan-300 hover:to-purple-400">
+            About
+            <span class="absolute inset-0 rounded-lg bg-white opacity-0 hover:opacity-10 blur-md transition-opacity duration-500"></span>
+        </button>
+    </li>
+</ul>
+
                 </div >
 
 <!-- PROFILE -->
 <div id="player_profile" class="hidden w-full justify-center flex-col items-center py-8 bg-gradient-to-r from-purple-700 via-indigo-600 to-blue-500 text-white">
 
     <!-- Carte de Profil -->
-    <div id="profile_card" class="flex flex-col items-center justify-center w-full max-w-sm mx-auto bg-gradient-to-br from-pink-400 via-red-500 to-yellow-500 p-6 rounded-xl shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
+    <div id="profile_card" class="animate-bounce flex flex-col items-center justify-center w-full max-w-sm mx-auto bg-gradient-to-br from-pink-400 via-red-500 to-yellow-500 p-6 rounded-xl shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
         
         <!-- Image de profil avec icône et ID conservés -->
         <div class="relative w-32 h-32 mb-4">
-            <img id="profile_picture" class="w-full h-full rounded-full shadow-lg object-cover" src="assets/imgs/standart.jpg" alt="Profile Image"/>
-            <img src="assets/imgs/hoverPicture.png" id="camera_icon" class="absolute inset-0 top-1/4 mx-auto w-1/2 h-1/2 opacity-80 cursor-pointer transition-all duration-200 hover:opacity-100" />
+            <img id="profile_picture" class="animate-ping w-full h-full rounded-full shadow-lg object-cover" src="assets/imgs/standart.jpg"/>
+            <img src="assets/imgs/hoverPicture.png" id="camera_icon" class="absolute inset-0 top-1/4 mx-auto w-1/2 h-1/2 opacity-0 cursor-pointer transition-all duration-200 hover:opacity-80" />
         </div>
 
         <!-- Overlay pour changement de photo -->
@@ -89,14 +104,19 @@
 
         <!-- Infos utilisateur -->
         <h5 class="mb-1 text-2xl font-semibold text-center" id="profile_username">Username</h5>
-        <span class="text-sm font-medium">Visual Designer</span>
-        <span class="text-sm text-gray-300">Creative Gamer</span>
+        <span id="wr_card" class="text-sm font-medium">Visual Designer</span>
+
 
         <!-- Boutons -->
         <div id="friend_div" class="flex mt-6 space-x-4">
             <button id="friend_btn" class="px-6 py-2 bg-gradient-to-r from-green-400 to-blue-600 text-white rounded-lg hover:bg-gradient-to-bl transition-all duration-300">Add Friend</button>
             <button id="block_btn" class="px-6 py-2 bg-gradient-to-r from-red-400 to-yellow-600 text-white rounded-lg hover:bg-gradient-to-bl transition-all duration-300">Block</button>
+
         </div>
+        <button id="fa_btn" class="animate-spin relative px-6 py-3 text-white font-bold text-lg rounded-lg bg-gradient-to-r from-pink-500 via-yellow-400 to-green-500 animate-pulse shadow-lg hover:shadow-xl transition duration-300">
+            <span class="relative z-10">2FA</span>
+            <span class="absolute inset-0 bg-white opacity-10 rounded-lg blur-sm"></span>
+        </button>
 
         <!-- Date de création -->
         <p id="profile_creation" class="mt-4 text-sm text-gray-300"></p>
@@ -114,7 +134,7 @@
         <svg id="wr_graph" viewBox="0 0 36 36" class="mx-auto mb-4" style="max-height: 120px;">
             <path class="around" style="stroke: #960e0e; fill: none; stroke-width: 2.8;" stroke-dasharray="100, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
             <path id="percent" class="percent" style="stroke: #6f6fff; fill: none; stroke-width: 2.8; stroke-linecap: round;" stroke-dasharray="30, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
-            <text id="wr" x="18" y="14" text-anchor="middle" dy="7" font-size="20">3/10</text>
+            <text id="wr" x="18" y="14" text-anchor="middle" dy="7" font-size="10">3/10</text>
         </svg>
         <ul id="histo_list" class="space-y-2 text-sm text-gray-300">
         </ul>
@@ -153,8 +173,26 @@
     <!-- CANVAS -->
     <canvas id="pong" width="1490" height="880" class="self-center" autofocus></canvas>
 </div>
+    
+<div id="about" class="hidden whitespace-pre-line text-white font-bold flex-col items-center justify-center px-2 w-3/4 mx-auto bg-gradient-to-br from-green-400 via-cyan-500 to-blue-500 p-6 rounded-xl shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
+    
 
-        </div>
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin id sagittis felis. Fusce hendrerit, justo et iaculis egestas, nisl sem ornare arcu, at ornare ex quam sed mi. Aliquam quis felis congue, imperdiet felis vitae, elementum felis. Nam vitae dui auctor, placerat velit non, sodales nibh. Nunc eleifend eros vehicula erat auctor, ultricies volutpat purus pretium. Aenean lectus turpis, tempor hendrerit placerat ac, congue quis lectus. Fusce eu consequat lectus. Etiam eu augue a nunc facilisis venenatis ac placerat neque.
+
+Sed luctus justo in accumsan dapibus. Aenean lobortis urna vel hendrerit tempus. Aliquam nec neque venenatis, lobortis justo ac, pharetra libero. Nullam ornare nisi at varius posuere. Vestibulum venenatis ex in turpis auctor accumsan. Proin at urna lectus. Vivamus enim odio, ultricies in varius ut, tempus eget arcu. Morbi sed ex neque. Quisque massa diam, maximus et viverra vitae, condimentum in purus. Vestibulum egestas vehicula vulputate.
+
+Duis lacus tortor, posuere eget tempor eu, mattis quis velit. Maecenas magna arcu, congue ut arcu sed, rhoncus tincidunt nibh. Donec eros elit, efficitur non sem sed, tempor pellentesque diam. Nam a scelerisque nulla. Pellentesque vehicula nulla vel enim vestibulum, quis sodales leo scelerisque. Nullam elit dui, dignissim id euismod ut, volutpat nec dui. Proin at fermentum risus.
+
+Phasellus in nulla ac turpis dapibus gravida et semper orci. Nulla vitae posuere tellus. Integer sodales ex tortor. Integer tellus sapien, pellentesque vel leo ut, bibendum pretium sapien. Nulla vitae nisi at nibh ornare tristique in id diam. Duis in mi sit amet justo pulvinar scelerisque. Suspendisse potenti. Integer rhoncus leo at elit pellentesque, et bibendum mauris dignissim. Fusce et luctus urna. Vivamus scelerisque mattis porttitor. Morbi eget lacinia ante. Cras laoreet leo neque, sed scelerisque ante imperdiet sit amet. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.
+
+Donec porttitor massa eu nisi sollicitudin pretium. Donec non iaculis sem, ut rhoncus nibh. Pellentesque condimentum tincidunt volutpat. Nam quis blandit erat. Etiam a quam est. Nam a volutpat dui, non eleifend orci. Pellentesque pellentesque, tellus sed auctor vulputate, ex ipsum eleifend urna, at mattis tellus ex vel dolor. 
+    Projet Transcendance
+    Équipe Golem Grenouille Loup Escrime
+    Romartin
+    Dgoubin
+    Ktaplin
+    Ggiboury
+</div>
         <!-- CHAT -->
         <!-- <div id="chat" style="flex: 1; display: none; flex-direction: column; align-items: center; margin-bottom: 20px; padding-left: 10px; border: 2px solid #ccc; overflow: hidden; background-color: black">
             <div id="chatbox" style="height: 100%; padding: 12px; background-color: rgb(99, 123, 145); overflow-y: scroll; width: 100%;"></div>
