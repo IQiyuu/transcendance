@@ -9,8 +9,8 @@ const ballRadius = 5;
 
 let leftPaddleY = canvas.height / 2 - paddleHeight / 2;
 let rightPaddleY = canvas.height / 2 - paddleHeight / 2;
-let ballX = canvas.width / 2;
-let ballY = canvas.height / 2;
+let canvasCenterX = canvas.width / 2;
+let canvasCenterY = canvas.height / 2;
 let ballSpeedX = 5;
 let ballSpeedY = 3;
 
@@ -80,23 +80,46 @@ async function draw(ws, local) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = "rgb(160, 94, 204)";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // Dimensions du rectangle
+        const rectWidth = 700;
+        const rectHeight = 500;
+        // Calcul pour centrer
+        const x = (canvas.width - rectWidth) / 2;
+        const y = (canvas.height - rectHeight) / 2;
+
+        console.log(game.ball);
 
         ctx.fillStyle = "black";
-        ctx.fillRect(game.paddles.left.x - paddleWidth, game.paddles.left.y - paddleHeight / 2, paddleWidth, paddleHeight);
-        ctx.fillRect(game.paddles.right.x - paddleWidth, game.paddles.right.y - paddleHeight / 2, paddleWidth, paddleHeight);
+        // Paddles
+        ctx.fillRect(
+            x + game.paddles.left.x,
+            y + game.paddles.left.y,
+            paddleWidth,
+            paddleHeight
+        );
+        ctx.fillRect(
+            x + game.paddles.right.x,
+            y + game.paddles.right.y,
+            paddleWidth,
+            paddleHeight
+        );
 
+        // Balle
         ctx.beginPath();
-        ctx.arc(game.ball.x, game.ball.y, ballRadius, 0, Math.PI * 2);
+        ctx.arc(x + game.ball.x, y + game.ball.y, ballRadius, 0, Math.PI * 2);
         ctx.fill();
         ctx.closePath();
 
         
+
+
+        // Dessin du rectangle centré
         ctx.beginPath();
-        ctx.moveTo(100, 100);
-        ctx.lineTo(800, 100);
-        ctx.lineTo(800, 600);
-        ctx.lineTo(100, 600);
-        ctx.lineTo(100, 100);
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + rectWidth, y);
+        ctx.lineTo(x + rectWidth, y + rectHeight);
+        ctx.lineTo(x, y + rectHeight);
+        ctx.closePath();
         ctx.stroke();
 
     } catch (error) {
@@ -162,19 +185,17 @@ async function moves(local) {
 
 // Lance la partie
 function startGame(oponnent, ws, local) {
-    document.addEventListener("keydown",  keyHandler);
-    document.addEventListener("keyup",  keyHandler);
-    document.addEventListener("S",  keyHandler);
-    document.addEventListener("W",  keyHandler);
+    canvas.addEventListener("keydown",  keyHandler);
+    canvas.addEventListener("keyup",  keyHandler);
+    canvas.addEventListener("S",  keyHandler);
+    canvas.addEventListener("W",  keyHandler);
     keyState["KeyW"] = false;
     keyState["KeyS"] = false;
     keyState["ArrowUp"] = false;
     keyState["ArrowDown"] = false;
-    document.getElementById("scoreboard").style.display = "flex"
-    document.getElementById("menu").style.display = "none"
-    canvas.style.display = "flex";
+    document.getElementById("menu").classList.replace("block", "hidden");
+    document.getElementById("game_box").classList.replace("hidden", "flex");
     canvas.tabIndex = 1000;
-    canvas.style.outline = "none";
     console.log("moves available, playing against: ", oponnent);
     console.log(local);
     draw(ws, local);
@@ -194,10 +215,8 @@ async function endGame(ws) {
     } catch (error) {
         console.log("error: ", error);
     }
-    canvas.removeEventListener("keydown", moves);
-    document.getElementById("scoreboard").style.display = "none";
-    document.getElementById("menu").style.display = "flex";
-    canvas.style.display = "none";
+    document.getElementById("menu").classList.replace("hidden", "block");
+    document.getElementById("game_box").classList.replace("flex", "hidden");
     _gameId = -1;
     console.log("moves unavaible");
     if (ws instanceof WebSocket)

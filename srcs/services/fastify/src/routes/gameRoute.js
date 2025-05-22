@@ -7,7 +7,7 @@ async function gameRoute (fastify, options) {
     let games = {};
     let waiting_list = null;
     let w_uname = null;
-    let img_path = "assets/imgs/";
+    let img_path = "dist/assets/imgs/";
 
     // Creer un objet game cote server
     function createGame(l_name, r_name) {
@@ -27,18 +27,18 @@ async function gameRoute (fastify, options) {
                 right: 0
             },
             ball: {
-                x: 400,
-                y: 200,
+                x: 350,
+                y: 250,
                 vx: vx,
-                vy: 10-vx*(randomIntFromInterval(0,1) ? -1 : 1)
+                vy: 10-Math.abs(vx)*(randomIntFromInterval(0,1) ? -1 : 1)
             },
             paddles: {
                 left: {
-                    x: 120,
+                    x: 10,
                     y: 300
                 },
                 right: {
-                    x: 780,
+                    x: 680,
                     y: 300
                 }
             }
@@ -102,7 +102,7 @@ async function gameRoute (fastify, options) {
     fastify.post('/upload/picture/:username', async (request, reply) => {
         const data = await request.parts();
         let uploadedFile;
-        const username = params.username;
+        const username = request.params.username;
         for await (const part of data) {
             if (part.file) {
                 console.log(username);
@@ -190,12 +190,12 @@ async function gameRoute (fastify, options) {
         var game = games[request.params.id];
         if (request.body.moveRight != null)
             var newY1 = game.paddles["right"].y + (request.body.moveRight ? -4 : 4);
-            if (newY1 > 120 && newY1 < 580)
+            if (newY1 > 0 && newY1 < 400)
                 game.paddles["right"].y = newY1;
 
         if (request.body.moveLeft != null)
             var newY2 = game.paddles["left"].y + (request.body.moveLeft ? -4 : 4);
-            if (newY2 > 120 && newY2 < 580)
+            if (newY2 > 0 && newY2 < 400)
                 game.paddles["left"].y = newY2;
     })
 
@@ -239,29 +239,29 @@ async function gameRoute (fastify, options) {
             game.ball.x += game.ball.vx;
             game.ball.y += game.ball.vy;
 
-            if (game.ball.y <= 110 || game.ball.y >= 590)
+            if (game.ball.y <= 10 || game.ball.y >= 480)
                 game.ball.vy *= -1;
 
-            if (game.ball.x <= game.paddles.left.x + 10
-                && game.ball.y >= game.paddles.left.y - 50
-                && game.ball.y <= game.paddles.left.y + 50) {
+            if (game.ball.x < game.paddles.left.x + 10
+                && game.ball.y > game.paddles.left.y
+                && game.ball.y < game.paddles.left.y + 100) {
                     // ix = game.ball.x
                     // iy = game.ball.y
                     let dist = Math.abs(game.ball.y, game.paddles.left.y)
 
 
-                    game.ball.vx *= -1;
+                    game.ball.vx = Math.abs(game.ball.vx);
                 }
-            else if (game.ball.x >= game.paddles.right.x - 10
-                && game.ball.y >= game.paddles.right.y - 50
-                && game.ball.y <= game.paddles.right.y + 50) {
+            else if (game.ball.x > game.paddles.right.x
+                && game.ball.y > game.paddles.right.y
+                && game.ball.y < game.paddles.right.y + 100) {
                     let dist = Math.abs(game.ball.y, game.paddles.left.y)
-                    game.ball.vx *= -1;
+                    game.ball.vx = Math.abs(game.ball.vx) * -1;
                 }
 
-            if (game.ball.x <= game.paddles.left.x - 10 || game.ball.x >= game.paddles.right.x + 10) {
+            if (game.ball.x <= game.paddles.left.x - 10 || game.ball.x >= game.paddles.right.x + 20) {
                 game.scores[game.ball.x <= game.paddles.left.x - 10 ? "right" : "left"]++;
-                Object.assign(game.ball, { x: 385, y: 300 });
+                Object.assign(game.ball, { x: 350, y: 200 });
             }
                     
         });
