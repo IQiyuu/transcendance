@@ -9,7 +9,7 @@
 <body class="h-screen bg-gradient-to-br from-purple-600 to-blue-500">
 
     <!-- LOGIN FORM -->
-    <div id="login-form" class="flex flex-col p-6 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 max-w-sm mx-auto mb-5"  style="display:none">
+    <div id="login-form" class="hidden flex-col p-6 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 max-w-sm mx-auto mb-5">
         <h1 class="underline text-white text-4xl text-center" id="form-title">Connexion</h1>
 
         <form class="max-w-sm mx-auto" id="form">
@@ -76,7 +76,8 @@
         </div>
 
         <!-- Overlay pour changement de photo -->
-        <div id="profile_picture_overlay" class="fixed inset-0 items-center justify-center bg-black bg-opacity-50 hidden z-50">
+        <div id="profile_picture_overlay" class="fixed inset-0 items-center justify-center bg-black bg-opacity-0 hidden z-50">
+
             <form id="profil_picture_square" class="flex flex-col items-center bg-gray-800 p-6 rounded-lg shadow-lg relative">
                 <p id="div_title" class="text-lg text-white mb-4">Upload your profile picture</p>
                 <button id="profile_cross" type="button" class="absolute top-2 right-2 text-white text-lg">✖</button>

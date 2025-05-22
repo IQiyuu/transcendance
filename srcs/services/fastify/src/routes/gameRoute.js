@@ -7,7 +7,7 @@ async function gameRoute (fastify, options) {
     let games = {};
     let waiting_list = null;
     let w_uname = null;
-    let img_path = "assets/imgs/";
+    let img_path = "dist/assets/imgs/";
 
     // Creer un objet game cote server
     function createGame(l_name, r_name) {
@@ -102,7 +102,7 @@ async function gameRoute (fastify, options) {
     fastify.post('/upload/picture/:username', async (request, reply) => {
         const data = await request.parts();
         let uploadedFile;
-        const username = params.username;
+        const username = request.params.username;
         for await (const part of data) {
             if (part.file) {
                 console.log(username);

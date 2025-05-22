@@ -185,10 +185,10 @@ async function moves(local) {
 
 // Lance la partie
 function startGame(oponnent, ws, local) {
-    document.addEventListener("keydown",  keyHandler);
-    document.addEventListener("keyup",  keyHandler);
-    document.addEventListener("S",  keyHandler);
-    document.addEventListener("W",  keyHandler);
+    canvas.addEventListener("keydown",  keyHandler);
+    canvas.addEventListener("keyup",  keyHandler);
+    canvas.addEventListener("S",  keyHandler);
+    canvas.addEventListener("W",  keyHandler);
     keyState["KeyW"] = false;
     keyState["KeyS"] = false;
     keyState["ArrowUp"] = false;
@@ -196,7 +196,6 @@ function startGame(oponnent, ws, local) {
     document.getElementById("menu").classList.replace("block", "hidden");
     document.getElementById("game_box").classList.replace("hidden", "flex");
     canvas.tabIndex = 1000;
-    canvas.style.outline = "none";
     console.log("moves available, playing against: ", oponnent);
     console.log(local);
     draw(ws, local);
@@ -216,7 +215,6 @@ async function endGame(ws) {
     } catch (error) {
         console.log("error: ", error);
     }
-    canvas.removeEventListener("keydown", moves);
     document.getElementById("menu").classList.replace("hidden", "block");
     document.getElementById("game_box").classList.replace("flex", "hidden");
     _gameId = -1;
