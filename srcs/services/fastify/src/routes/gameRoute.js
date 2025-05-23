@@ -5,6 +5,10 @@ function randomIntFromInterval(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
+function degToRad(degree){
+    return ((degree * Math.PI) / 180)
+}
+
 async function gameRoute (fastify, options) {
     let games = {};
     let waiting_list = null;
@@ -23,7 +27,7 @@ async function gameRoute (fastify, options) {
     function createGame(l_name, r_name) {
         const gameId = Object.keys(games).length;
         console.log(gameId);
-        const angle = (randomIntFromInterval(45, 90) * Math.PI) / 180;
+        const angle = degToRad(randomIntFromInterval(45, 90)); // not still right
         const neg_x = randomIntFromInterval(0,1);
         const neg_y = randomIntFromInterval(0,1);
         games[gameId] = {
@@ -255,16 +259,34 @@ async function gameRoute (fastify, options) {
             if (game.ball.x <= game.paddles.left.x + 10
                 && game.ball.y >= game.paddles.left.y - 50
                 && game.ball.y <= game.paddles.left.y + 50) {
-                    let dist = Math.abs(game.ball.y, game.paddles.left.y)
-
+                    let dist = Math.abs(game.ball.y, game.paddles.left.y);
                     
+    
                     game.ball.dx *= -1;
                     game.ball.v += 1;
                 }
-            else if (game.ball.x >= game.paddles.right.x - 10
-                && game.ball.y >= game.paddles.right.y - 50
-                && game.ball.y <= game.paddles.right.y + 50) {
-                    let dist = Math.abs(game.ball.y, game.paddles.left.y)
+                else if (game.ball.x >= game.paddles.right.x - 10
+                    && game.ball.y >= game.paddles.right.y - 50
+                    && game.ball.y <= game.paddles.right.y + 50) {
+                    // There are 8 zone considered for the bouncing, so we round to the closest quarter
+                    /*
+                        let dist = Math.abs(game.ball.y, game.paddles.right.y) / Math.abs(game.paddles.right.y_len)
+                        dist = floor(dist);
+                        let angle = 0;
+                        switch (dist)
+                        case 0
+                            angle = 90;
+                        case 1
+                            angle = 80;
+                        case 2
+                            angle = 65;
+                        case 3
+                            angle = 45;
+                        dx = Math.cos(degToRad(angle)) // ? * -1
+                        dy = Math.sin(degToRad(angle))
+
+                        same for the other pad
+                    */
                     game.ball.dx *= -1;
                     game.ball.v += 1;
                 }
