@@ -1,0 +1,13 @@
+{
+  "title": "Trong",
+  "connect": "Connexion",
+  "username": "Nom d'utilisateur",
+  "password": "Mot de passe",
+  "login": "Se connecter",
+  "register": "S'inscrire",
+  "play_local": "Jouer localement",
+  "play_online": "Jouer en ligne",
+  "tournament": "Tournoi",
+  "profile": "Profil",
+  "about": "À propos"
+}

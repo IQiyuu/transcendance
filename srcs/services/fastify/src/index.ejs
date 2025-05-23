@@ -104,7 +104,7 @@
 
         <!-- Infos utilisateur -->
         <h5 class="mb-1 text-2xl font-semibold text-center" id="profile_username">Username</h5>
-        <span id="wr_card" class="text-sm font-medium">Visual Designer</span>
+        <span id="wr_card" class="text-sm font-medium">Winrate N/A</span>
 
 
         <!-- Boutons -->
@@ -124,13 +124,13 @@
 
     <!-- Search barre -->
     <div id="search_container" class="flex items-center mt-10 space-x-4">
-        <input id="search_player_in" type="text" placeholder="Search player..." class="p-3 rounded-lg w-64 bg-gray-800 text-white placeholder-gray-400 outline-none focus:ring-2 focus:ring-purple-400" />
+        <input id="search_player_in" type="text" placeholder="" class="p-3 rounded-lg w-64 bg-gray-800 text-white placeholder-gray-400 outline-none focus:ring-2 focus:ring-purple-400" />
         <button id="search_player_btn" class="py-3 px-4 bg-gradient-to-r from-teal-500 to-lime-500 text-white rounded-lg hover:scale-105 transition-all duration-300">🔎</button>
     </div>
 
     <!-- Historique -->
     <div id="histo" class="w-full max-w-md bg-gray-700 p-6 rounded-lg mt-10 shadow-lg text-white">
-        <p class="text-lg font-semibold mb-4">Historique</p>
+        <p id="histo_text" class="text-lg font-semibold mb-4">Historique</p>
         <svg id="wr_graph" viewBox="0 0 36 36" class="mx-auto mb-4" style="max-height: 120px;">
             <path class="around" style="stroke: #960e0e; fill: none; stroke-width: 2.8;" stroke-dasharray="100, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
             <path id="percent" class="percent" style="stroke: #6f6fff; fill: none; stroke-width: 2.8; stroke-linecap: round;" stroke-dasharray="30, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
@@ -150,7 +150,7 @@
                 <!-- Friendlist box -->
                     <div class="w-[20%] absolute bottom-4 right-4 overflow-y-auto bg-gray-100 dark:bg-gray-800 rounded-lg p-4 border border-gray-300 dark:border-gray-700 shadow-inner">
                         <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">Amis connectés</h2>
+                            <h2 id="friend_text" class="text-xl font-bold text-gray-800 dark:text-gray-100">Amis connectés</h2>
                         </div>
                         
                         <div id="friendlist" class="w-[20%] h-[80vh] overflow-y-auto bg-gray-100 dark:bg-gray-800 rounded-lg p-4 border border-gray-300 dark:border-gray-700 shadow-inner transform transition-transform duration-300 ease-in-out translate-x-full fixed top-20 right-0 z-40 hidden md:block">

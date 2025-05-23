@@ -228,19 +228,18 @@ async function endGame(ws) {
 
 let count = 0;
 let interval;
-const matchmakingText = ['Waiting an opponent', 'Waiting an opponent.', 'Waiting an opponent..', 'Waiting an opponent...'];
 // Animation du boutton
 function startMatchmakingAnimation() {
     count = 0;
     interval = setInterval(() => {
         count++;
-        matchmaking_btn.textContent = matchmakingText[count % matchmakingText.length];
+        matchmaking_btn.textContent = lang_file['waiting'] + '.'.repeat(count % 3);
     }, 500);
 }
   
 function stopMatchmakingAnimation() {
     clearInterval(interval);
-    matchmaking_btn.textContent = 'Play online';
+    matchmaking_btn.textContent = lang_file['play_online'];
 }
 
 let searching = false;

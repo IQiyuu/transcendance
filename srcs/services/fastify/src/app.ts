@@ -1,4 +1,6 @@
 let _username = sessionStorage.username;
+let lang_file = null;
+
 document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById("form");
     const formTitle = document.getElementById("form-title");
@@ -12,16 +14,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
         isRegisterMode = !isRegisterMode;
         if (isRegisterMode) {
-            formTitle.textContent = "Inscription";
-            registerLink.textContent = "Se connecter";
-            logginBtn.textContent = "Register";
+            formTitle.textContent = lang_file["register_title"];
+            registerLink.textContent = lang_file["connexion_text"];
+            logginBtn.textContent = lang_file["register_title"];
 
         } else {
-            formTitle.textContent = "Connexion";
-            registerLink.textContent = "Register";
-            logginBtn.textContent = "Se connecter";
+            formTitle.textContent = lang_file["connexion_title"];
+            registerLink.textContent = lang_file["register_text"];
+            logginBtn.textContent = lang_file["connexion_title"];
         }
     });
+
     // formulaire de connexion / inscription
     form.addEventListener("submit", async (event) => {
         event.preventDefault();
@@ -60,7 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 fillCanvas();
             } else {
                 const error = document.getElementById("errorAuth") as HTMLParagraphElement;
-                error.textContent = data.message;
+                error.textContent = lang_file[data.message];
                 error.classList.replace("hidden", "block");
                 console.log("Auth error");
             }
@@ -251,7 +254,7 @@ async function display_profile(username) {
         }
         (document.getElementById("profile_picture") as HTMLImageElement).src = "assets/imgs/" + profile.datas.picture_path + "?" + new Date().getTime();
         document.getElementById("profile_username").innerText = profile.datas.username;
-        document.getElementById("profile_creation").innerText = `member since: ${profile.datas.created_at}`;
+        document.getElementById("profile_creation").innerText = `${lang_file["member_since"]}: ${profile.datas.created_at}`;
         const friendDiv = document.getElementById("friend_div");
         const faBtn = document.getElementById("fa_btn");
         if (profile.datas.username == _username) {
@@ -271,7 +274,7 @@ async function display_profile(username) {
                 console.log("error: ", friends.error);
             else {
                 console.log(friends);
-                document.getElementById("friend_btn").textContent = friends.message;
+                document.getElementById("friend_btn").textContent = lang_file[friends.message];
                 document.getElementById("block_btn").textContent = friends.emoji;
             }
 
@@ -320,8 +323,10 @@ async function display_profile(username) {
                 }
                 if (item.winner_username == profile.datas.username)
                     w++;
-                document.getElementById("wr_card").textContent = `Winrate : ${(w / cpt * 100).toFixed(0)}%`;
+                document.getElementById("wr_card").textContent = `${lang_file["wr"]} : ${(w / cpt * 100).toFixed(0)}%`;
             });
+            if (cpt == 0)
+                document.getElementById("wr_card").textContent = `${lang_file["wr"]} : N/a`;
         }
         // change les a (lien) de l'historique par des liens qui menent a la page de profile
         document.querySelectorAll("a#profileDisplay").forEach((item) => { 
@@ -536,7 +541,7 @@ document.getElementById("friend_btn").addEventListener("click", async (event) =>
     const data = await friend_req.json();
     console.log("reponse du server: ", data);
     if (data.success) {
-        document.getElementById("friend_btn").textContent = data.message;
+        document.getElementById("friend_btn").textContent = lang_file[data.message];
         if (data.status == "accepted") {
             try {
                 const friend = data.friend;
@@ -585,7 +590,7 @@ document.getElementById("block_btn").addEventListener("click", async (event) => 
     console.log(data);
     if (data.success) {
         document.getElementById("block_btn").textContent = data.blocking ? "🔓" : "🔒";
-        document.getElementById("friend_btn").textContent = data.blocking ? "Blocked" : "Send invite";
+        document.getElementById("friend_btn").textContent = data.blocking ? lang_file["send_yblock"] : lang_file["send_inv"];
         if (data.blocking) {
             _ws.send(JSON.stringify({
                 type: "removeFriend",
@@ -630,3 +635,30 @@ document.getElementById("about_button").addEventListener("click", async (event) 
     document.getElementById("menu").classList.replace("block", "hidden");
     document.getElementById("about").classList.replace("hidden", "flex");
 });
+
+
+function updateContent() {
+  document.getElementById('form-title').textContent = lang_file['connexion_title'];
+  document.querySelector("label[for='username']").textContent = lang_file['username'];
+  document.querySelector("label[for='password']").textContent = lang_file['password'];
+  document.getElementById('register-view').textContent = lang_file['register_text'];
+  document.getElementById('game_title').textContent = lang_file['title'];
+  document.getElementById('div_title').textContent = lang_file['change_pp'];
+  document.getElementById('login_btn').textContent = lang_file['connexion_title'];
+  document.getElementById('offline').textContent = lang_file['play_local'];
+  document.getElementById('matchmaking').textContent = lang_file['play_online'];
+  document.getElementById('tournament_button').textContent = lang_file['tournament'];
+  document.getElementById('profile_button').textContent = lang_file['profile'];
+  document.getElementById('upload_btn').textContent = lang_file['upload_txt'];
+  document.getElementById('about_button').textContent = lang_file['about'];
+  document.getElementById('friend_text').textContent = lang_file['friends'];
+  document.getElementById('histo_text').textContent = lang_file['historique'];
+  (document.getElementById('search_player_in') as HTMLInputElement).placeholder = lang_file["search"];
+}
+
+async function swapLang(lang) {
+  const file = await fetch(`/locales/${lang}/translation.json`);
+  lang_file = await file.json();
+  console.log("OUI"+ lang_file);
+}
+

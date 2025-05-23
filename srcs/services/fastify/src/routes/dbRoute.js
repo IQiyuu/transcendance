@@ -138,25 +138,25 @@ async function dbRoute (fastify, options) {
             const datas = getFriendRelation(userId, friendId);
             if (datas) {
                 if (datas.status === "blocked") {
-                    const message = datas.user == userId ? "You blocked this user" : "You are blocked";
+                    const message = datas.user == userId ? "send_yblock" : "send_block";
                     return { success: true,  message: message };
                 } else if (datas.status === "pending") {
                     if (datas.user == userId) {
                         deleteRelation(userId, friendId);
-                        return { success: true, message: "Send invitation", status: null };
+                        return { success: true, message: "send_inv", status: null };
                     } else {
                         updateStatus(userId, friendId, "accepted");
-                        return { success: true, message: "Remove friend", status: "accepted", user: getUserInfo(userId), friend: getUserInfo(friendId) };
+                        return { success: true, message: "send_rem", status: "accepted", user: getUserInfo(userId), friend: getUserInfo(friendId) };
                     }
                 } else {
                     deleteRelation(userId, friendId);
-                    return { success: true, message: "Send invitation", status: null };
+                    return { success: true, message: "send_inv", status: null };
                 }
         
             } else {
                 // on creer la relation
                 createRelation(userId, friendId, 'pending');
-                return { success: true, message: "Cancel invitation", status: 'pending' };
+                return { success: true, message: "send_canc", status: 'pending' };
             }
         } catch (error) {
 
@@ -221,20 +221,20 @@ async function dbRoute (fastify, options) {
             const friendship = getFriendRelation(userId, friendId);
             if (friendship) {
                 if (friendship.status == "pending") {
-                    const message = friendship.user == userId ? "Cancel invitation" : "Accept invitation";
+                    const message = friendship.user == userId ? "send_canc" : "send_acc";
                     reply.send({ success: true, message: message, status: friendship.status, emoji: "🔒" });
                 } else if (friendship.status == "blocked") {
-                    const message = friendship.user == userId ? "Unblock" : "Send invitation";
+                    const message = friendship.user == userId ? "unblock" : "send_inv";
                     const emoji = friendship.user == userId ? "🔓" : "🔒";
                     reply.send({ success: true, message: message, status: friendship.status, emoji: emoji });
                 } else if (friendship.status == "both_blocking") {
                     const emoji = friendship.user == userId ? "🔓" : "🔒";
                     reply.send({ success: true, message: "Unblock", status: friendship.status, emoji: emoji });
                 } else {
-                    reply.send({ success: true, message: "Remove friend", status: friendship.status, emoji: "🔒" });
+                    reply.send({ success: true, message: "send_rem", status: friendship.status, emoji: "🔒" });
                 }
             } else {
-                reply.send({ success: true, message: "Send invitation", status: null, emoji: "🔒" });
+                reply.send({ success: true, message: "send_inv", status: null, emoji: "🔒" });
             }
         } catch (error) {
             reply.send({ success: false, error: error.message });
