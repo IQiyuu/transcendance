@@ -7,9 +7,9 @@ DONE :
 DOING :
 - Tournament
 - favicon.ico
+- Trajectory of the ball
 
 TODO :
-- Trajectory of the ball
 - Configure grafana
 - Configure Prometheus
 - Historic to add

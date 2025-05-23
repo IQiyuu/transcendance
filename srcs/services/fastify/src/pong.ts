@@ -9,10 +9,10 @@ const ballRadius = 5;
 
 let leftPaddleY = canvas.height / 2 - paddleHeight / 2;
 let rightPaddleY = canvas.height / 2 - paddleHeight / 2;
-let ballX = canvas.width / 2;
-let ballY = canvas.height / 2;
-let ballSpeedX = 5;
-let ballSpeedY = 3;
+// let ballX = canvas.width / 2;
+// let ballY = canvas.height / 2;
+// let ballSpeedX = 5;
+// let ballSpeedY = 3;
 
 let leftScore = 0;
 let rightScore = 0;
@@ -64,6 +64,7 @@ async function draw(ws, local) {
 
         const game = await response.json();
 
+        console.log("Ball vec: " + game.ball.dx + " " + game.ball.dy);
         document.getElementById("player-left").textContent = game.players.left || "Player 1";
         document.getElementById("player-right").textContent = game.players.right || "Player 2";
         document.getElementById("score-left").textContent = game.scores.left;
@@ -137,7 +138,7 @@ async function moves(local) {
         }
     }
     else {
-        console.log(keyState);
+        // console.log(keyState);
         if (keyState["KeyW"] || keyState["KeyS"] || keyState["ArrowUp"] || keyState["ArrowDown"]) {
             const body = { 
                 gameId: _gameId, 
