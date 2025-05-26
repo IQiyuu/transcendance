@@ -9,10 +9,7 @@ const ballRadius = 5;
 
 let leftPaddleY = canvas.height / 2 - paddleHeight / 2;
 let rightPaddleY = canvas.height / 2 - paddleHeight / 2;
-// let ballX = canvas.width / 2;
-// let ballY = canvas.height / 2;
-// let ballSpeedX = 5;
-// let ballSpeedY = 3;
+
 
 let leftScore = 0;
 let rightScore = 0;

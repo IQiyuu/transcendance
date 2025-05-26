@@ -27,7 +27,7 @@ async function gameRoute (fastify, options) {
     function createGame(l_name, r_name) {
         const gameId = Object.keys(games).length;
         console.log(gameId);
-        const angle = degToRad(randomIntFromInterval(45, 90)); // not still right
+        const angle = degToRad(randomIntFromInterval(45, 90)); // still not right
         const neg_x = randomIntFromInterval(0,1);
         const neg_y = randomIntFromInterval(0,1);
         games[gameId] = {

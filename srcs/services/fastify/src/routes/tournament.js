@@ -32,7 +32,7 @@ async function tournamentRoute (fastify, options) {
 */
 
     //Create a tournament
-
+    
 
     //Join a tournament
 
