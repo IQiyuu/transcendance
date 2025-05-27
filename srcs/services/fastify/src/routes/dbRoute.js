@@ -1,4 +1,3 @@
-import { stat } from "fs";
 
 async function dbRoute (fastify, options) {
     let db = options.db;

@@ -10,10 +10,11 @@ async function tournamentRoute (fastify, options) {
         tournaments[tournamentId] = newT;
     };
     
-    function createTournament(owner, id) {
+    function createTournament(owner, id, name) {
         console.log("Creating a tournament")
         newT = {
             id : id,
+            name : name,
             owner : owner,
             players : {owner}
         };

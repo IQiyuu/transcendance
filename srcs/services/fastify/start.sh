@@ -6,7 +6,7 @@ cd /home/fastify
 
 shutdown(){
 	echo "Shutting down the container"
-	rm -rf node_modules
+	rm -rf /home/fastify/node_modules
 	exit
 };
 

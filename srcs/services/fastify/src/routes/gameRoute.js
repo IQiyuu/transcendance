@@ -15,21 +15,27 @@ async function gameRoute (fastify, options) {
     let w_uname = null;
     let img_path = "assets/imgs/";
 
-    let STARTING_SPEED = 5;
-    let STARTING_X = 400;
-    let STARTING_Y = 200;
+    const STARTING_SPEED = 5;
+    const ACCELERATION = 1;
+    const LIMIT_SPEED = 15;
+
+    const STARTING_X = 400;
+    const STARTING_Y = 200;
 
     // function addGame(game){
     //     games[Object.keys(games).length] = game;
     // }
 
+    /**
+     * 
+    const paddleWidth = 10, paddleHeight = 100;
+     */
     // Creer un objet game cote server
     function createGame(l_name, r_name) {
         const gameId = Object.keys(games).length;
+        const angle = degToRad(randomIntFromInterval(0, 45));
+        const neg_x = randomIntFromInterval(0,1), neg_y = randomIntFromInterval(0,1);
         console.log(gameId);
-        const angle = degToRad(randomIntFromInterval(45, 90)); // still not right
-        const neg_x = randomIntFromInterval(0,1);
-        const neg_y = randomIntFromInterval(0,1);
         games[gameId] = {
             id: gameId,
             players: {  
@@ -45,7 +51,18 @@ async function gameRoute (fastify, options) {
                 y: STARTING_Y,
                 dx: Math.cos(angle) * (neg_x ? -1 : 1),
                 dy: Math.sin(angle) * (neg_y ? -1 : 1),
-                v: STARTING_SPEED
+                dist: -1,
+                v: STARTING_SPEED,
+                accelerate: function() {
+                    if (this.v < LIMIT_SPEED)
+                        this.v += ACCELERATION;
+                },
+                randomizeVector: function() {
+                    const angle = degToRad(randomIntFromInterval(0, 45));
+                    const neg_x = randomIntFromInterval(0,1), neg_y = randomIntFromInterval(0,1);
+                    this.dx = Math.cos(angle) * (neg_x ? -1 : 1);
+                    this.dy = Math.sin(angle) * (neg_y ? -1 : 1);
+                }
             },
             paddles: {
                 left: {
@@ -259,36 +276,44 @@ async function gameRoute (fastify, options) {
             if (game.ball.x <= game.paddles.left.x + 10
                 && game.ball.y >= game.paddles.left.y - 50
                 && game.ball.y <= game.paddles.left.y + 50) {
-                    let dist = Math.abs(game.ball.y, game.paddles.left.y);
-                    
-    
-                    game.ball.dx *= -1;
-                    game.ball.v += 1;
+                    // There are 8 zone considered for the bouncing, so we round to the closest quarter
+                    let dist = Math.abs(game.ball.y - game.paddles.left.y);
+                    let sign = game.ball.dy < 0 ? -1 : 1;
+
+                    let angle = 90;
+                    if (dist > (3 * 50) / 4)
+                        angle += 45;
+                    else if (dist > (2 * 50) / 4)
+                        angle += 65;
+                    else if (dist > 50 / 4)
+                        angle += 80;
+                    else
+                        angle += 90;
+
+                    game.ball.dx = Math.cos(degToRad(angle)) * -1;
+                    game.ball.dy = Math.sin(degToRad(angle)) * sign;
+                    game.ball.accelerate();
                 }
                 else if (game.ball.x >= game.paddles.right.x - 10
                     && game.ball.y >= game.paddles.right.y - 50
                     && game.ball.y <= game.paddles.right.y + 50) {
                     // There are 8 zone considered for the bouncing, so we round to the closest quarter
-                    /*
-                        let dist = Math.abs(game.ball.y, game.paddles.right.y) / Math.abs(game.paddles.right.y_len)
-                        dist = floor(dist);
-                        let angle = 0;
-                        switch (dist)
-                        case 0
-                            angle = 90;
-                        case 1
-                            angle = 80;
-                        case 2
-                            angle = 65;
-                        case 3
-                            angle = 45;
-                        dx = Math.cos(degToRad(angle)) // ? * -1
-                        dy = Math.sin(degToRad(angle))
+                    let dist = Math.abs(game.ball.y - game.paddles.right.y);
+                    let sign = game.ball.dy < 0 ? -1 : 1;
 
-                        same for the other pad
-                    */
-                    game.ball.dx *= -1;
-                    game.ball.v += 1;
+                    let angle = 90;
+                    if (dist > (3 * 50) / 4)
+                        angle += 45;
+                    else if (dist > (2 * 50) / 4)
+                        angle += 65;
+                    else if (dist > 50 / 4)
+                        angle += 80;
+                    else
+                        angle += 90;
+
+                    game.ball.dx = Math.cos(degToRad(angle));
+                    game.ball.dy = Math.sin(degToRad(angle)) * sign;
+                    game.ball.accelerate();
                 }
 
             if (game.ball.x <= game.paddles.left.x - 10 || game.ball.x >= game.paddles.right.x + 10) {
@@ -296,8 +321,8 @@ async function gameRoute (fastify, options) {
                 game.ball.v = STARTING_SPEED;
                 game.ball.x = STARTING_X;
                 game.ball.y = STARTING_Y;
+                game.ball.randomizeVector();
             }
-                    
         });
     }, 30);
 }
