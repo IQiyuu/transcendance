@@ -69,7 +69,6 @@ db.exec(`
 `)
 
 const schema = db.prepare("PRAGMA table_info(friends);").all();
-// console.log(schema);
 
 fastify.register(fastifyWebsocket);
 

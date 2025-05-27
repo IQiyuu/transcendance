@@ -19,6 +19,7 @@ npm run buildcss
 
 cp src/server.js dist
 cp -r src/routes dist
+cp dist/assets/favicon.ico dist/favicon.ico
 
 echo "Starting website"
 npm start

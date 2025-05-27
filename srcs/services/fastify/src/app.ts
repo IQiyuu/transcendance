@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
             password: password.value,
         };
 
-        console.log(`Envoi vers ${url}`, body);
+        // console.log(`Envoi vers ${url}`, body);
 
         try {
             const response = await fetch(url, {
@@ -45,7 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
 
             const data = await response.json();
-            console.log("Réponse du serveur :", data);
+            // console.log("Réponse du serveur :", data);
 
             if (data.success) {
                 _username = data.username;
@@ -570,7 +570,7 @@ document.getElementById("block_btn").addEventListener("click", async (event) => 
         friend: toBlock,
     }
 
-    console.log("body: ", body);
+    // console.log("body: ", body);
 
     const friend_req = await fetch(`/db/friends/block`, {
         method: 'POST',
@@ -599,7 +599,6 @@ document.getElementById("block_btn").addEventListener("click", async (event) => 
 document.getElementById("offline").addEventListener("click", async (event) => {
     event.preventDefault();
 
-    console.log("STARTING");
     document.getElementById("menu").classList.replace("flex", "hidden");
     try {
         const body = {
@@ -617,6 +616,39 @@ document.getElementById("offline").addEventListener("click", async (event) => {
             startGame(null, _ws, true);
         }
     } catch (error) {
+        console.log("error: ", error);
+    }
+});
+
+class Tournament {
+    owner : string;
+
+    constructor(owner: string) {
+        this.owner = owner;
+    }
+}
+
+document.getElementById("tournament_creation").addEventListener("click", async (event) => {
+    event.preventDefault();
+
+    document.getElementById("tournament_creation").append(document.createTextNode("Processing formulaire ;)"));
+    // document.getElementById("tour");
+
+    const name = document.getElementById("tournament_name") as HTMLInputElement;
+
+    console.log("Creator of tournament: " + _username);
+    try {
+        const body = {
+            owner: _username,
+            tournament_name: name.value
+        }
+        const resp = await fetch('/tournament', {
+            method: 'POST',
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+        });
+        
+    } catch(error) {
         console.log("error: ", error);
     }
 });

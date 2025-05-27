@@ -62,7 +62,7 @@ async function draw(ws, local) {
         const game = await response.json();
 
         // console.log("Ball vec: " + game.ball.dx + " " + game.ball.dy);
-        console.log("Ball dist: " + game.ball.dist);
+        // console.log("Ball dist: " + game.ball.dist);
         document.getElementById("player-left").textContent = game.players.left || "Player 1";
         document.getElementById("player-right").textContent = game.players.right || "Player 2";
         document.getElementById("score-left").textContent = game.scores.left;

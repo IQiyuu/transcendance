@@ -35,7 +35,6 @@ async function gameRoute (fastify, options) {
         const gameId = Object.keys(games).length;
         const angle = degToRad(randomIntFromInterval(0, 45));
         const neg_x = randomIntFromInterval(0,1), neg_y = randomIntFromInterval(0,1);
-        console.log(gameId);
         games[gameId] = {
             id: gameId,
             players: {  
@@ -81,13 +80,10 @@ async function gameRoute (fastify, options) {
     // Stocke la game dans la db
     fastify.post('/game/storeGame', async (request, reply) => {
         const { winner_username, loser_username, loser_score } = request.body;
-        console.log("LOL ", winner_username, " VS ", loser_username, loser_score);
         try {
-            console.log(winner_username, loser_username);
             const insert = options.db.prepare('INSERT INTO games (winner_id, loser_id, loser_score) SELECT u1.user_id AS winner_id, u2.user_id AS loser_id, ? AS loser_score FROM users u1, users u2 WHERE u1.username = ? AND u2.username = ?');
             insert.run(loser_score, winner_username, loser_username);
 
-            console.log(`Game registered to db`);
             return { success: true, message: `Game registered` };
         } catch (error) {
             console.error('Error insert data in db.', error);
@@ -103,10 +99,10 @@ async function gameRoute (fastify, options) {
     fastify.get('/profile/:username', async (request, reply) => {
         try {
             const username = request.params.username;
-            console.log(username);
+            // console.log(username);
             // ajouter l'image de profile
             const datas = options.db.prepare('SELECT username, created_at, picture_path FROM users WHERE username = ?').get(username);
-            console.log(`Profile fetched from db: `, datas);
+            // console.log(`Profile fetched from db: `, datas);
             return { success: true, message: `Profile fetched`, datas: datas };
         } catch (error) {
             console.log("error: ", error);
@@ -119,10 +115,10 @@ async function gameRoute (fastify, options) {
 
         try {
             const username = request.params.username;
-            console.log(username);
+            // console.log(username);
             const datas = options.db.prepare('SELECT g.game_id, uw.username AS winner_username, ul.username AS loser_username, g.loser_score, g.created_at FROM games g JOIN users uw ON g.winner_id = uw.user_id JOIN users ul ON g.loser_id = ul.user_id WHERE uw.username = ? OR ul.username = ? ORDER BY g.created_at DESC;').all(username,username);
 
-            console.log(`historic fetched from db: `, datas);
+            // console.log(`historic fetched from db: `, datas);
             return { success: true, message: `Game fetched`, datas: datas };
         } catch (error) {
             console.error('Error data db.', error);
@@ -137,7 +133,7 @@ async function gameRoute (fastify, options) {
         const username = params.username;
         for await (const part of data) {
             if (part.file) {
-                console.log(username);
+                // console.log(username);
                 uploadedFile = part;
         
                 const filename = username + ".jpg";
@@ -151,7 +147,7 @@ async function gameRoute (fastify, options) {
                     try {
                         options.db.prepare('UPDATE users SET picture_path = ? WHERE username = ?').run(filename, username);
                     
-                        console.log('Picture uploaded in db for: ', username);
+                        // console.log('Picture uploaded in db for: ', username);
                         return { success: true, message: 'File uploaded' };
                     } catch (error) {
                         console.error('Error updating data in db.', error);
@@ -166,7 +162,7 @@ async function gameRoute (fastify, options) {
     // Route qui recupere une game l'upload dans ./dist/img et change le path dans la db
     fastify.post('/upload/username/:username', async (request, reply) => {
         const { username, newusername } = request.body;
-        console.log(username);
+        // console.log(username);
         
         if (newusername == username) {
             return { success: false, message: 'Same username' };
@@ -189,7 +185,7 @@ async function gameRoute (fastify, options) {
         try {
             options.db.prepare('UPDATE users SET username = ? WHERE username = ?').run(newusername, username);
                 
-            console.log('Username modified in db for: ', newusername);
+            // console.log('Username modified in db for: ', newusername);
             return { success: true, message: 'Username uploaded' };
         } catch (error) {
             console.error('Error updating data in db.', error);
@@ -238,7 +234,7 @@ async function gameRoute (fastify, options) {
 
             if (waiting_list && w_uname != req.query.username) {
                 const gameId = createGame(w_uname, req.query.username);
-                console.log("game created: ", gameId);
+                // console.log("game created: ", gameId);
                 waiting_list.send(JSON.stringify({ state: "found", gameId: gameId, role: "left", opponent: w_uname }));
                 socket.send(JSON.stringify({ state: "found", gameId: gameId, role: "right", opponent: req.query.username }));
     
@@ -253,12 +249,12 @@ async function gameRoute (fastify, options) {
             } else if (w_uname == req.query.username) {
                 waiting_list = null;
                 w_uname = null;
-                console.log("someone left.");
+                // console.log("someone left.");
             } else {
                 waiting_list = socket;
                 w_uname = req.query.username;
                 socket.on('close', () => {
-                    console.log("someone left.");
+                    // console.log("someone left.");
                     waiting_list = null;
                     w_uname = null;
                 });
