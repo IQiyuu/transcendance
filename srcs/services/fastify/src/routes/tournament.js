@@ -1,7 +1,7 @@
 import Fastify from 'fastify';
 
 async function tournamentRoute (fastify, options) {
-    let tournaments = {};
+    let tournaments = [];
     const TOURNAMENT_SIZE = 8;
 
     const tournamentId = Object.keys(tournaments).length;
@@ -16,12 +16,16 @@ async function tournamentRoute (fastify, options) {
         this.name = name;
         this.owner = owner;
         this.players = [owner];
-        return (newT);
     };
 
     function addPlayer(tournament, player) {
         if (tournament.players.length < TOURNAMENT_SIZE)
             tournament.players.append(player);
+    }
+
+    function    getAvailableTournaments(tournaments, username){
+
+        return (tournaments);
     }
 
 /*
@@ -35,8 +39,8 @@ async function tournamentRoute (fastify, options) {
         console.log("--------------");
         console.log(reply);
         try {
-            // createTournament
-            return {success: true};
+            tournaments[tournamentId] = new Tournament(owner, tournamentId, request.body.tournament_name);
+            return (reply.code(201).send({success: true}));
         } catch (error) {
             console.log("error: ", error);
             return (reply.code(500).send({success: false, message: error}));
@@ -46,6 +50,17 @@ async function tournamentRoute (fastify, options) {
     
 
     //Join a tournament
+
+    //Printing the list of tournaments
+    fastify.get('/tournaments', async (request, reply) => {
+        try {
+            let res = getAvailableTournaments(tournaments);
+            return (reply.send({res}));
+        } catch (error) {
+            console.log(error);
+            return (reply.code(500).send({success: false, message: error}));
+        }
+    });
 
 
     //Leave a tournament

@@ -158,13 +158,20 @@
                         <ul id="histo_list"></ul>
                     </div>
                 </div>
-                <div>
+                <!--CREATION OF A TOURNAMENT-->
+                <div id="tournament_form">
                     <h3>Creating a tournament</h3>
                     <form>
                         <label>Tournament's name</label>
                         <input type="text" name="tname" id="tournament_name"/>
                         <input type="submit" value="Submit" id="tournament_creation"/>
                     </form>
+                </div>
+                <!--LIST OF TOURNAMENTS-->
+                <div id="tournaments_join" style="display: none;">
+                    <h3>Tournaments</h3>
+                    <search id="tournaments_list">
+                    </search>
                 </div>
             </div>
             <!-- JEU -->

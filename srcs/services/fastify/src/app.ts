@@ -206,7 +206,7 @@ async function initFriendlist() {
         if (!data.success) {
             console.log("error: ", data);
         } else {
-            console.log(data);
+            // console.log(data);
             for (let user of data.friends) {
                 addFriend(user.username, user.pp);
             }
@@ -493,7 +493,7 @@ document.getElementById("username_btn").addEventListener("click", async (event) 
         username: _username,
         newusername: newusername
     };
-    console.log(JSON.stringify(body));
+    // console.log(JSON.stringify(body));
     if (newusername != "") {
         try {
             const response = await fetch(`/upload/username/${_username}`, {
@@ -579,7 +579,7 @@ document.getElementById("block_btn").addEventListener("click", async (event) => 
     });
 
     const data = await friend_req.json();
-    console.log(data);
+    // console.log(data);
     if (data.success) {
         document.getElementById("block_btn").textContent = data.blocking ? "🔓" : "🔒";
         document.getElementById("friend_btn").textContent = data.blocking ? "Blocked" : "Send invite";
@@ -620,11 +620,28 @@ document.getElementById("offline").addEventListener("click", async (event) => {
     }
 });
 
-class Tournament {
-    owner : string;
+// class Tournament {
+//     owner : string;
 
-    constructor(owner: string) {
-        this.owner = owner;
+//     constructor(owner: string) {
+//         this.owner = owner;
+//     }
+// }
+
+function    hide_menu(){
+    let menu = document.getElementById("menu");
+    if (menu != null)
+        menu.classList.replace("flex", "hidden");
+}
+
+function    print_tournaments(data){
+    hide_menu();
+    let tournaments_list = document.getElementById('tournaments_list');
+    if (tournaments_list != null){
+        tournaments_list.append(document.createTextNode("tournamentssssssss"));
+    }
+    else{
+        tournaments_list.append(document.createTextNode("No tournament found. Try creating one !"));
     }
 }
 
@@ -645,8 +662,14 @@ document.getElementById("tournament_creation").addEventListener("click", async (
         const resp = await fetch('/tournament', {
             method: 'POST',
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body),
+            body: JSON.stringify(body)
         });
+        const data = await resp.json();
+        if (data.success) {
+            print_tournaments(data);
+        }
+        else
+            throw (Error("Something unknowed occured"));
         
     } catch(error) {
         console.log("error: ", error);
