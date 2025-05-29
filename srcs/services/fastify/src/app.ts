@@ -634,22 +634,44 @@ function    hide_menu(){
         menu.classList.replace("flex", "hidden");
 }
 
+function    print_tournament(data){
+    let page = document.getElementById('tournament');
+    page.style.display = "flex";
+}
+
 function    print_tournaments(data){
     hide_menu();
     let tournaments_list = document.getElementById('tournaments_list');
     if (tournaments_list != null){
         tournaments_list.append(document.createTextNode("tournamentssssssss"));
+        data.tournaments.foreach((element => tournaments_list.append(document.createTextNode(element.name))));
     }
     else{
         tournaments_list.append(document.createTextNode("No tournament found. Try creating one !"));
     }
+    tournaments_list.style.display = "flex";
 }
 
-document.getElementById("tournament_creation").addEventListener("click", async (event) => {
+document.getElementById("tournament_creation_button").addEventListener("click", async(event) => {
+    event.preventDefault();
+    hide_menu();
+    let tournament_creation_div = document.getElementById('tournament_form');
+
+    tournament_creation_div.style.display = "flex";
+})
+
+document.getElementById("tournament_join_button").addEventListener("click", async(event) => {
+    event.preventDefault();
+    hide_menu();
+    let tournament_join_div = document.getElementById('tournament_join');
+
+    tournament_join_div.style.display = "flex";
+})
+
+document.getElementById("tournament_creation_form").addEventListener("click", async (event) => {
     event.preventDefault();
 
     document.getElementById("tournament_creation").append(document.createTextNode("Processing formulaire ;)"));
-    // document.getElementById("tour");
 
     const name = document.getElementById("tournament_name") as HTMLInputElement;
 
@@ -666,12 +688,27 @@ document.getElementById("tournament_creation").addEventListener("click", async (
         });
         const data = await resp.json();
         if (data.success) {
-            print_tournaments(data);
+            print_tournament(data);
         }
         else
-            throw (Error("Something unknowed occured"));
-        
+        throw (Error("Something unknowed occured"));
+    
     } catch(error) {
         console.log("error: ", error);
     }
+});
+
+document.getElementById("tournament_list").addEventListener("click", async (event) => {
+    event.preventDefault();
+    try {
+        const resp = await fetch('/tournaments', {
+            method: 'GET'
+            // headers: { "Content-Type": "application/json" }
+        });
+        const data = await resp.json();
+        print_tournaments(data);
+    } catch (error){
+        console.log("error: ", error);
+    }
+
 });

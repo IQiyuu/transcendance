@@ -39,7 +39,7 @@ async function tournamentRoute (fastify, options) {
         console.log("--------------");
         console.log(reply);
         try {
-            tournaments[tournamentId] = new Tournament(owner, tournamentId, request.body.tournament_name);
+            tournaments[tournamentId] = new Tournament(request.body.owner, tournamentId, request.body.tournament_name);
             return (reply.code(201).send({success: true}));
         } catch (error) {
             console.log("error: ", error);
@@ -55,7 +55,7 @@ async function tournamentRoute (fastify, options) {
     fastify.get('/tournaments', async (request, reply) => {
         try {
             let res = getAvailableTournaments(tournaments);
-            return (reply.send({res}));
+            return (reply.send({tournaments: res}));
         } catch (error) {
             console.log(error);
             return (reply.code(500).send({success: false, message: error}));
