@@ -2,7 +2,7 @@ let _ws = null;
 
 async function init() {
     // Se connecter a la socket
-    await swapLang("fr");
+    await swapLang("en");
     updateContent();
     _ws = new WebSocket(`wss://${window.location.host}/ws?username=${_username}`);
     console.log(_username);
