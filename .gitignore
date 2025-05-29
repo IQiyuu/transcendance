@@ -133,3 +133,5 @@ out
 
 # Docker secrets
 srcs/secrets/
+
+err.txt

@@ -7,7 +7,7 @@ async function logginRoute (fastify, options) {
   // Route pour s'inscrire, verifie que le username n'existe pas
   fastify.post('/register', async (request, reply) => {
     const { username, password } = request.body;
-    console.log("Données REGISTER reçues :", username, password);
+    // console.log("Données REGISTER reçues :", username, password);
 
     try {
       const userExists = options.db.prepare('SELECT * FROM users WHERE username = ?').get(username);
@@ -19,7 +19,7 @@ async function logginRoute (fastify, options) {
       const insert = options.db.prepare('INSERT INTO users (username, password) VALUES (?, ?)');
       insert.run(username, hash_pass);
 
-      console.log(`User '${username}' added to db`);
+      // console.log(`User '${username}' added to db`);
 
       const payload = {
         username: username,
@@ -35,7 +35,7 @@ async function logginRoute (fastify, options) {
         maxAge: 86400000,
       });
       
-      return { success: true, message: `Welcome ${username}` };
+      return reply.code(205).send({ success: true, message: `Welcome ${username}` });
     } catch (error) {
       console.error('Error insert data in db.', error);
       return { success: false, message: 'Error insert data in db.' };
@@ -45,7 +45,7 @@ async function logginRoute (fastify, options) {
   // Route pour se connecter verifier le username et password dans la db
   fastify.post('/login', async (request, reply) => {
     const { username, password } = request.body;
-    console.log("Données LOGIN reçues :", username, password);
+    // console.log("Données LOGIN reçues :", username, password);
 
     try {
         const user = options.db.prepare('SELECT * FROM users WHERE username = ?').get(username);
@@ -91,6 +91,8 @@ async function logginRoute (fastify, options) {
 
     try {
         const decoded = fastify.jwt.verify(token, secretKey);
+        if (decoded == null)
+            throw Error("Cookie not recognized");
         request.user = decoded.username;
     } catch (error) {
         return reply.send({ success: false });
@@ -101,7 +103,6 @@ async function logginRoute (fastify, options) {
   fastify.get('/protected', {
     preHandler: isAuthenticated,
     }, async (request, reply) => {
-      console.log("TRUE");
         return reply.send({ success: true, username: request.user });
     });
 

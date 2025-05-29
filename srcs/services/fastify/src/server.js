@@ -5,12 +5,12 @@ import fastifyWebsocket from '@fastify/websocket';
 import fastifyMultipart from '@fastify/multipart';
 import jwt from '@fastify/jwt';
 
-import ejs from 'ejs' // to remove
+import ejs from 'ejs'
 import fs from 'fs';
-import os from 'os';
 
 import LogginRoute from './routes/loggingRoute.js'
 import GameRoute from './routes/gameRoute.js'
+import tournamentRoute from './routes/tournament.js'
 import websocketRoute from './routes/webSocketRoute.js';
 import DbRoute from './routes/dbRoute.js';
 
@@ -21,19 +21,6 @@ import fastifyBcrypt from 'fastify-bcrypt';
 
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from "node:path";
-
-// Recup l'ip
-const networkInterfaces = os.networkInterfaces();
-let localIP = 'localhost';
-
-if (networkInterfaces.enp3s0f0) {
-  for (let details of networkInterfaces.enp3s0f0) {
-    if (details.family === 'IPv4' && !details.internal) {
-      localIP = details.address;
-      break;
-    }
-  }
-}
 
 // Removing mongodb, to remove view 
 
@@ -82,7 +69,6 @@ db.exec(`
 `)
 
 const schema = db.prepare("PRAGMA table_info(friends);").all();
-// console.log(schema);
 
 fastify.register(fastifyWebsocket);
 
@@ -111,6 +97,8 @@ fastify.register(GameRoute, {
   db: db,
 });
 
+fastify.register(tournamentRoute);
+
 fastify.register(websocketRoute, {
   db: db
 });
@@ -123,7 +111,7 @@ fastify.register(FastifyStatic, {
   root: join(rootDir, 'dist')
 })
 
-fastify.register(FastifyView, { // To remplace/remove
+fastify.register(FastifyView, {
   engine: {
     ejs
   },

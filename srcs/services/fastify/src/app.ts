@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
             password: password.value,
         };
 
-        console.log(`Envoi vers ${url}`, body);
+        // console.log(`Envoi vers ${url}`, body);
 
         try {
             const response = await fetch(url, {
@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
 
             const data = await response.json();
-            console.log("Réponse du serveur :", data);
+            // console.log("Réponse du serveur :", data);
 
             if (data.success) {
                 _username = data.username;
@@ -210,7 +210,7 @@ async function initFriendlist() {
         if (!data.success) {
             console.log("error: ", data);
         } else {
-            console.log(data);
+            // console.log(data);
             for (let user of data.friends) {
                 addFriend(user.username, user.pp);
             }
@@ -578,7 +578,7 @@ document.getElementById("block_btn").addEventListener("click", async (event) => 
         friend: toBlock,
     }
 
-    console.log("body: ", body);
+    // console.log("body: ", body);
 
     const friend_req = await fetch(`/db/friends/block`, {
         method: 'POST',
@@ -587,7 +587,7 @@ document.getElementById("block_btn").addEventListener("click", async (event) => 
     });
 
     const data = await friend_req.json();
-    console.log(data);
+    // console.log(data);
     if (data.success) {
         document.getElementById("block_btn").textContent = data.blocking ? "🔓" : "🔒";
         document.getElementById("friend_btn").textContent = data.blocking ? lang_file["send_yblock"] : lang_file["send_inv"];
@@ -607,7 +607,6 @@ document.getElementById("block_btn").addEventListener("click", async (event) => 
 document.getElementById("offline").addEventListener("click", async (event) => {
     event.preventDefault();
 
-    console.log("STARTING");
     document.getElementById("menu").classList.replace("flex", "hidden");
     try {
         const body = {
@@ -662,3 +661,111 @@ async function swapLang(lang="fr") {
   console.log("OUI"+ lang_file);
 }
 
+function    hide_menu(){
+    let menu = document.getElementById("menu");
+    if (menu != null)
+        menu.classList.replace("flex", "hidden");
+}
+
+function    print_tournament(data){
+    let page = document.getElementById('tournament');
+    page.style.display = "flex";
+}
+
+
+document.getElementById("tournament_create_button").addEventListener("click", async(event) => {
+    event.preventDefault();
+    hide_menu();
+    let tournament_creation_div = document.getElementById('tournament_form');
+
+    tournament_creation_div.style.display = "flex";
+})
+
+document.getElementById("tournament_join_button").addEventListener("click", async(event) => {
+    event.preventDefault();
+
+    hide_menu();
+
+    try {
+        const resp = await fetch('/tournaments', {
+            method: 'GET',
+            headers: { "Content-Type": "application/json" }
+        });
+        
+        const data = await resp.json();
+        console.log(data);
+        if (data.success) {
+            let tournaments_list = document.getElementById('tournaments_list');
+            if (data.tournaments){
+                let i = 0, size = data.tournaments.length;
+                let list = document.createElement("ul");
+                if (size == 0)
+                    tournaments_list.append(document.createTextNode("No tournament found. Try creating one !"));
+                else {
+                    list.appendChild(document.createTextNode("List of tournaments available")); // maybe with an h3 instead
+                    while (i < size){
+                        let el = document.createElement("li");
+                        el.appendChild(document.createTextNode(data.tournaments[i].name)); // Maybe I'll have to add a link ?
+                        el.appendChild(document.createTextNode(data.tournaments[i].id));
+                        list.append(el);
+                        i++;
+                    }
+                    tournaments_list.appendChild(list);
+                }
+            }
+            else
+                throw (Error("No tournament list sent by the server"));
+        }
+    } catch (err){
+        console.log(err);
+    }
+    document.getElementById('tournaments_join').style.display = "flex";
+});
+
+document.getElementById('tournaments_list').addEventListener("click", async(event) => {
+    console.log("Capter le click sur quel element il est");
+
+    console.log("Fetch le tournoi correspondant");
+    // try {
+    //     const resp = await fetch('/tournament:', {
+    //         method: 'GET',
+    //         headers: { "Content-Type": "application/json" }
+    //     });
+        
+    //     const data = await resp.json();
+    //     if (data.success) {
+    //         print_tournament(data);
+    //     }
+    // }
+});
+
+document.getElementById("tournament_form").addEventListener("submit", async(event) => {
+    event.preventDefault();
+
+    //Verifier que l'input est valide avant de l'envoyer !
+    console.log("Creator of tournament: " + _username);
+    document.getElementById("tournament_creation").append(document.createTextNode("Processing formulaire ;)"));
+    
+    const name = document.getElementById("tournament_name") as HTMLInputElement;
+    try {
+        const body = {
+            owner: _username,
+            tournament_name: name.value
+        }
+        const resp = await fetch('/tournament', {
+            method: 'POST',
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body)
+        });
+        const data = await resp.json();
+        if (data.success) {
+            print_tournament(data);
+        }
+        else
+            throw (Error("Something unknowed occured"));
+    
+    } catch(error) {
+        console.log("error: ", error);
+    }
+
+});

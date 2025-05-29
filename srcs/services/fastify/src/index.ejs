@@ -42,7 +42,6 @@
             <span class="absolute inset-0 rounded-lg bg-white opacity-0 hover:opacity-10 blur-md transition-opacity duration-500"></span>
         </button>
     </li>
-
     <li>
         <button id="matchmaking" class="animate-bounce hover:animate-spin relative w-[90%] hover:w-full transition-all duration-500 ease-in-out cursor-pointer p-12 text-5xl italic font-medium dark:text-black text-white bg-gradient-to-r from-teal-200 to-lime-200 rounded-lg border-4 border-green-800 flex items-center justify-center text-center
         hover:scale-105 hover:shadow-[0_0_40px_rgba(132,204,22,0.9)] hover:bg-gradient-to-r hover:from-lime-300 hover:via-teal-300 hover:to-green-400">
@@ -50,11 +49,23 @@
             <span class="absolute inset-0 rounded-lg bg-white opacity-0 hover:opacity-10 blur-md transition-opacity duration-500"></span>
         </button>
     </li>
-
+    
     <li>
         <button id="tournament_button" class="animate-bounce hover:animate-ping relative w-[90%] hover:w-full transition-all duration-500 ease-in-out cursor-pointer p-12 text-5xl italic font-medium dark:text-black text-white bg-gradient-to-br from-green-400 to-blue-600 rounded-lg border-4 border-green-800 flex items-center justify-center text-center
         hover:scale-105 hover:shadow-[0_0_40px_rgba(59,130,246,0.9)] hover:bg-gradient-to-tr hover:from-blue-400 hover:via-green-400 hover:to-teal-400">
             Tournament
+            <span class="absolute inset-0 rounded-lg bg-white opacity-0 hover:opacity-10 blur-md transition-opacity duration-500"></span>
+        </button>
+        
+        <button id="tournament_create_button" class="animate-bounce hover:animate-ping relative w-[90%] hover:w-full transition-all duration-500 ease-in-out cursor-pointer p-12 text-5xl italic font-medium dark:text-black text-white bg-gradient-to-br from-green-400 to-blue-600 rounded-lg border-4 border-green-800 flex items-center justify-center text-center
+        hover:scale-105 hover:shadow-[0_0_40px_rgba(59,130,246,0.9)] hover:bg-gradient-to-tr hover:from-blue-400 hover:via-green-400 hover:to-teal-400">
+            Create
+            <span class="absolute inset-0 rounded-lg bg-white opacity-0 hover:opacity-10 blur-md transition-opacity duration-500"></span>
+        </button>
+        
+        <button id="tournament_join_button" class="animate-bounce hover:animate-ping relative w-[90%] hover:w-full transition-all duration-500 ease-in-out cursor-pointer p-12 text-5xl italic font-medium dark:text-black text-white bg-gradient-to-br from-green-400 to-blue-600 rounded-lg border-4 border-green-800 flex items-center justify-center text-center
+        hover:scale-105 hover:shadow-[0_0_40px_rgba(59,130,246,0.9)] hover:bg-gradient-to-tr hover:from-blue-400 hover:via-green-400 hover:to-teal-400">
+            Join
             <span class="absolute inset-0 rounded-lg bg-white opacity-0 hover:opacity-10 blur-md transition-opacity duration-500"></span>
         </button>
     </li>
@@ -141,11 +152,36 @@
     </div>
 </div>
 <!-- FIN PROFILE -->
+         
+                <!--CREATION OF A TOURNAMENT-->
+                <div id="tournament_form" style="display: none">
+                    <h3>Creating a tournament</h3>
+                    <form>
+                        <label>Tournament's name</label>
+                        <input type="text" name="tname" id="tournament_name"/>
+                        <input type="submit" value="Submit" id="tournament_creation"/>
+                    </form>
+                </div>
 
+                <!--LIST OF TOURNAMENTS-->
+                <div id="tournaments_join" style="display: none;">
+                    <h3>Tournaments</h3>
+                    <search id="tournaments_list">
+                    </search>
+                </div>
 
-
-
-                    
+                <!-- Tournament home's page -->
+                <div id="tournament" style="display: none;">
+                    <h3>Tournament's name</h3>
+                    <table>
+                        <tr>
+                            <th>User</th>
+                            <th>   </th>
+                        </tr>
+                    </table>
+                    <button>Start</button>
+                    <button>Leave</button>
+                </div>
                 
                 <!-- Friendlist box -->
                     <div class="w-[20%] absolute bottom-4 right-4 overflow-y-auto bg-gray-100 dark:bg-gray-800 rounded-lg p-4 border border-gray-300 dark:border-gray-700 shadow-inner">
@@ -193,6 +229,9 @@ Donec porttitor massa eu nisi sollicitudin pretium. Donec non iaculis sem, ut rh
     Ktaplin
     Ggiboury
 </div>
+
+                
+
         <!-- CHAT -->
         <!-- <div id="chat" style="flex: 1; display: none; flex-direction: column; align-items: center; margin-bottom: 20px; padding-left: 10px; border: 2px solid #ccc; overflow: hidden; background-color: black">
             <div id="chatbox" style="height: 100%; padding: 12px; background-color: rgb(99, 123, 145); overflow-y: scroll; width: 100%;"></div>

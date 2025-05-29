@@ -6,7 +6,7 @@
 #    By: ggiboury <ggiboury@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/22 15:00:40 by ggiboury          #+#    #+#              #
-#    Updated: 2025/05/29 17:49:10 by ggiboury         ###   ########.fr        #
+#    Updated: 2025/05/20 17:57:31 by ggiboury         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -39,6 +39,7 @@ SRCS			= $(SRCS_FASTIFY) $(SRCS_ASSETS) $(SRCS_DB)
 #Full path scripts and assets
 SRCS_DIR		= ./srcs/
 SRCS_FASTIFY	= $(SCRIPTS:%=$(SRCS_DIR)services/fastify/src%)
+SRCS_CONFIG		= $(SCRIPTS:%=$(SRCS_DIR)services/fastify/src%)
 SRCS_ASSETS		= $(ASSETS:%=$(SRCS_DIR)assets%)
 SRCS_DB			= $(SRCS_DIR)services/sqlite/transcendence.db
 
@@ -47,15 +48,16 @@ SRCS_DB			= $(SRCS_DIR)services/sqlite/transcendence.db
 # Setting up volumes
 
 VOLUME	= /goinfre/$(USER)/pong/data
-
 VOLUME_WEBSITE			= /goinfre/$(USER)/pong/data/fastify
 VOLUME_WEBSITE_DIRS		= $(VOLUME_WEBSITE)/dist $(VOLUME_WEBSITE)/src $(VOLUME_WEBSITE)/dist/assets
-VOLUME_WEBSITE_SCRIPTS	:= $(SCRIPTS:%=$(VOLUME_WEBSITE)/src%)
-VOLUME_WEBSITE_ASSETS	:= $(ASSETS:%=$(VOLUME_WEBSITE)/dist/assets%)
-VOLUME_WEBSITE_FILES	:= $(VOLUME_WEBSITE_ASSETS) $(VOLUME_WEBSITE_SCRIPTS)
-
-
 VOLUME_DATABASE			= /goinfre/$(USER)/pong/data/sqlite
+
+VOLUME_WEBSITE_SCRIPTS	:= $(SCRIPTS:%=$(VOLUME_WEBSITE)/src%)
+VOLUME_WEBSITE_CONFIG	= package.json tsconfig.json
+VOLUME_WEBSITE_CONFIG	:= $(VOLUME_WEBSITE_CONFIG:%=$(VOLUME_WEBSITE)/%)
+VOLUME_WEBSITE_ASSETS	:= $(ASSETS:%=$(VOLUME_WEBSITE)/dist/assets%)
+
+VOLUME_WEBSITE_FILES	:= $(VOLUME_WEBSITE_ASSETS) $(VOLUME_WEBSITE_SCRIPTS) $(VOLUME_WEBSITE_CONFIG)
 VOLUME_DATABASE_FILES	:= $(VOLUME_DATABASE)/transcendence.db
 
 
@@ -69,7 +71,7 @@ SSL_CERTIFICATE	= ${SECRETS}ssl.crt $(SECRETS)ssl.key
 #
 
 # test:
-#	@echo $(ASSETS)
+# 	@echo $(VOLUME_WEBSITE_CONFIG)
 #	@echo $(SRCS_FASTIFY)
 #	@echo $(SRCS_ASSETS)
 #	@echo $(SRCS)
@@ -98,6 +100,9 @@ $(VOLUME) $(VOLUME_WEBSITE) $(VOLUME_WEBSITE_DIRS):
 
 $(VOLUME_WEBSITE_SCRIPTS): $(VOLUME_WEBSITE)/src
 	cp -r $(@:${VOLUME_WEBSITE}/src%=$(SRCS_DIR)services/fastify/src%) $@
+	
+$(VOLUME_WEBSITE_CONFIG): $(VOLUME_WEBSITE)
+	cp $(@:${VOLUME_WEBSITE}%=$(SRCS_DIR)services/fastify%) $@
 
 $(VOLUME_WEBSITE_ASSETS): $(VOLUME_WEBSITE)/dist/assets
 	cp -r $(@:${VOLUME_WEBSITE}/dist/assets%=$(SRCS_DIR)assets%) $@
@@ -113,10 +118,8 @@ re : fclean $(NAME)
 clean : down
 	docker container prune -f
 
-# docker image prune -af
-
 fclean : clean
-	rm -rf $(VOLUME)
+	rm -rf $(VOLUME) 2> err.txt
 
 down :
 	docker compose -f $(COMPOSE_FILE) down -v
@@ -187,6 +190,6 @@ reload :
 # #Config files
 
 # SRCS_MONITORING_CONFIG=${SRCS}monitoring/prometheus.yml
+# SRCS_MONITORING_VIS_CONFIG=${SRCS}monitoring/grafana.ini
 # SRCS_FASTIFY_CONFIG=${SRCS}fastify/package.json
-# SRCS_FASTIFY_TSCONFIG=${SRCS}fastify/tsconfig.json
 # SRCS_FASTIFY_TSCONFIG=${SRCS}fastify/tsconfig.json
