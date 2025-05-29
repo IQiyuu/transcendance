@@ -91,6 +91,8 @@ async function logginRoute (fastify, options) {
 
     try {
         const decoded = fastify.jwt.verify(token, secretKey);
+        if (decoded == null)
+            throw Error("Cookie not recognized");
         request.user = decoded.username;
     } catch (error) {
         return reply.send({ success: false });

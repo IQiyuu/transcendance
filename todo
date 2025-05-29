@@ -10,6 +10,8 @@ DOING :
 - favicon.ico
 
 TODO :
+- Merge with current branch
+
 - Configure grafana
 - Configure Prometheus
 - Historic to add

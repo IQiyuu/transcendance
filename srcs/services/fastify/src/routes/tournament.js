@@ -4,7 +4,7 @@ async function tournamentRoute (fastify, options) {
     let tournaments = [];
     const TOURNAMENT_SIZE = 8;
 
-    const tournamentId = Object.keys(tournaments).length;
+    let tournamentId = Object.keys(tournaments).length;
     
     function addTournament(tournaments, newT, tournamentId){
         tournaments[tournamentId] = newT;
@@ -28,40 +28,59 @@ async function tournamentRoute (fastify, options) {
         return (tournaments);
     }
 
-/*
-    Owner create a room
-    Player can rejoin or leave as they want
-    Once the owner start, the tournament starts (tounament will start in 3 2 1 )
-*/
+    /*
+        Owner create a room
+        Player can rejoin or leave as they want
+        Once the owner start, the tournament starts (tounament will start in 3 2 1 )
+    */
 
+    //Create a tournament
     fastify.post('/tournament', async (request, reply) => {
-        console.log(request);
-        console.log("--------------");
-        console.log(reply);
+        // console.log(request);
+        // console.log("--------------");
+        // console.log(reply);
         try {
             tournaments[tournamentId] = new Tournament(request.body.owner, tournamentId, request.body.tournament_name);
-            return (reply.code(201).send({success: true}));
+            tournamentId++;
+            return {success: true};
         } catch (error) {
             console.log("error: ", error);
-            return (reply.code(500).send({success: false, message: error}));
+            return {success: false, message: error};
         }
     });
-    //Create a tournament
-    
+
 
     //Join a tournament
+    fastify.get('/tournament/join_:id', async (request, reply) => {
+        // Checking user
+
+        // Checking tournament
+        const tournament = tournaments[request.params.id];
+
+        //Adding user to tournament
+
+        //returning the tournament info
+        return tournament;
+    });
 
     //Printing the list of tournaments
     fastify.get('/tournaments', async (request, reply) => {
+        // VERIFIER SI l'USER EST AUTHENTIFIER
         try {
             let res = getAvailableTournaments(tournaments);
-            return (reply.send({tournaments: res}));
+            return {success: true, tournaments: tournaments};
         } catch (error) {
             console.log(error);
-            return (reply.code(500).send({success: false, message: error}));
+            return {success: false, message: error};
         }
     });
 
+    //Tournament's info
+    fastify.get('/tournament/:id', async (request, reply) => {
+        const tournament = tournaments[request.params.id];
+        if (!tournament) return reply.status(404).send({ error: 'Tournament not found' });
+        return tournament;
+    });
 
     //Leave a tournament
 
