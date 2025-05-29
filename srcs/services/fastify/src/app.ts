@@ -1,4 +1,6 @@
 let _username = sessionStorage.username;
+let lang_file = null;
+
 document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById("form");
     const formTitle = document.getElementById("form-title");
@@ -12,16 +14,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
         isRegisterMode = !isRegisterMode;
         if (isRegisterMode) {
-            formTitle.textContent = "Inscription";
-            registerLink.textContent = "Se connecter";
-            logginBtn.textContent = "Register";
+            formTitle.textContent = lang_file["register_title"];
+            registerLink.textContent = lang_file["connexion_text"];
+            logginBtn.textContent = lang_file["register_title"];
 
         } else {
-            formTitle.textContent = "Connexion";
-            registerLink.textContent = "Register";
-            logginBtn.textContent = "Se connecter";
+            formTitle.textContent = lang_file["connexion_title"];
+            registerLink.textContent = lang_file["register_text"];
+            logginBtn.textContent = lang_file["connexion_title"];
         }
     });
+
     // formulaire de connexion / inscription
     form.addEventListener("submit", async (event) => {
         event.preventDefault();
@@ -53,14 +56,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 sessionStorage.setItem('userId', data.id);
                 const loginForm = document.getElementById("login-form") as HTMLDivElement;
                 const pongGame = document.getElementById("site") as HTMLDivElement;
-                loginForm.style.display = "none";
-                pongGame.style.display = "flex";
+                document.body.classList.remove("justify-center", "align-center", "flex");
+                loginForm.classList.replace("flex", "hidden");
+                pongGame.classList.replace("hidden", "block");
                 init();
                 fillCanvas();
             } else {
                 const error = document.getElementById("errorAuth") as HTMLParagraphElement;
-                error.textContent = data.message;
-                error.style.display = "block";
+                error.textContent = lang_file[data.message];
+                error.classList.replace("hidden", "block");
                 console.log("Auth error");
             }
         } catch (error) {
@@ -153,22 +157,22 @@ function addFriend(username, pp) {
         popup.id = "profile_window";
         
         // positionne la ou est la souris
-        popup.style.position = "absolute";
+        popup.classList.add("absolute");
         popup.style.left = `${event.clientX}px`;
         popup.style.top = `${event.clientY}px`;
         popup.style.backgroundColor = "grey";
     
         popup_img.src = pp;
-        popup_img.style.cursor = "pointer";
+        popup_img.classList.add("cursor-pointer");
     
         popup_name.textContent = usname;
     
         add_btn.textContent = "Add Friend";
-        add_btn.style.cursor = "pointer";
+        add_btn.classList.add("cursor-pointer");
     
         close_btn.textContent = "×";
         close_btn.style.color = "red";
-        close_btn.style.cursor = "pointer";
+        close_btn.classList.add("cursor-pointer");
     
         close_btn.addEventListener("click", () => {
             popup.remove();
@@ -222,11 +226,13 @@ checkIfLoggedIn().then((isLoggedIn) => {
     const pongGame = document.getElementById("site") as HTMLDivElement;
 
     if (isLoggedIn) {
-        pongGame.style.display = "block";
+        pongGame.classList.replace("hidden", "block");
         initFriendlist();
+        console.log("COUCOU");
+        document.body.classList.remove("justify-center", "align-center", "flex");
     }
     else
-        loginForm.style.display = "block";
+        loginForm.classList.replace("hidden", "flex");
 
 });
 
@@ -246,12 +252,15 @@ async function display_profile(username) {
             console.log("player not found.");
             return ;
         }
-        (document.getElementById("profile_picture") as HTMLImageElement).src = profile.datas.picture_path + "?" + new Date().getTime();
+        (document.getElementById("profile_picture") as HTMLImageElement).src = "assets/imgs/" + profile.datas.picture_path + "?" + new Date().getTime();
         document.getElementById("profile_username").innerText = profile.datas.username;
-        document.getElementById("profile_creation").innerText = `member since: ${profile.datas.created_at}`;
+        document.getElementById("profile_creation").innerText = `${lang_file["member_since"]}: ${profile.datas.created_at}`;
         const friendDiv = document.getElementById("friend_div");
-        if (profile.datas.username == _username)
-            friendDiv.style.display = "none";
+        const faBtn = document.getElementById("fa_btn");
+        if (profile.datas.username == _username) {
+            friendDiv.classList.replace("flex", "hidden");
+            faBtn.classList.replace("hidden", "relative");
+        }
         else {
             const responseFriends = await fetch(`/db/friends/${_username}/${username}`, {
                 method: 'GET',
@@ -265,12 +274,13 @@ async function display_profile(username) {
                 console.log("error: ", friends.error);
             else {
                 console.log(friends);
-                document.getElementById("friend_btn").textContent = friends.message;
+                document.getElementById("friend_btn").textContent = lang_file[friends.message];
                 document.getElementById("block_btn").textContent = friends.emoji;
             }
 
             console.log(friends.message);
-            friendDiv.style.display = "flex";
+            friendDiv.classList.replace("hidden", "flex");
+            faBtn.classList.replace("relative", "hidden");
         }
 
         // requete des games
@@ -286,20 +296,20 @@ async function display_profile(username) {
         // affiche l'historique
         if (data.success) {
             var cpt = 0;
-            var w = 0;;
+            var w = 0;
             data.datas.forEach((item) => {
                 cpt++;
-                if (cpt < 20) {
+                if (cpt < 6) {
                     let li = document.createElement("li");
                     let a = document.createElement("a");
                     a.innerText = item.winner_username;
-                    a.style.color = "blue";
+                    a.classList.add("text-green-500", "underline");
                     a.href="#";
                     a.id="profileDisplay";
 
                     let a2 = document.createElement("a");
                     a2.innerText = item.loser_username;
-                    a2.style.color = "blue";
+                    a2.classList.add("text-green-500", "underline");
                     a2.href="#";
                     a2.id="profileDisplay";
 
@@ -313,8 +323,10 @@ async function display_profile(username) {
                 }
                 if (item.winner_username == profile.datas.username)
                     w++;
+                document.getElementById("wr_card").textContent = `${lang_file["wr"]} : ${(w / cpt * 100).toFixed(0)}%`;
             });
-            document.getElementById("winrate").innerHTML = `${cpt} games (${w}/${cpt-w})`
+            if (cpt == 0)
+                document.getElementById("wr_card").textContent = `${lang_file["wr"]} : N/a`;
         }
         // change les a (lien) de l'historique par des liens qui menent a la page de profile
         document.querySelectorAll("a#profileDisplay").forEach((item) => { 
@@ -323,7 +335,7 @@ async function display_profile(username) {
                     await display_profile(item.textContent);
                 });
         });
-        document.getElementById("player_profile").style.display = "block";
+        document.getElementById("player_profile").classList.replace("hidden", "flex");
         if (cpt > 0) {
             document.getElementById("wr").textContent = `${w} / ${cpt}` ;
             let wr = w/(cpt)*100;
@@ -331,9 +343,9 @@ async function display_profile(username) {
         } else {
             document.getElementById("wr").textContent = "N/A" ;
             document.getElementById("percent").setAttribute("stroke-dasharray", `50, 100`);
-            document.getElementById("histo").style.display = "block";
+            document.getElementById("histo").classList.replace("hidden", "block");
         }
-        document.getElementById("histo").style.display = "block";
+        document.getElementById("histo").classList.replace("hidden", "block");
     } catch (error) {
         console.log("error fetching db: ", error);
     }
@@ -341,14 +353,16 @@ async function display_profile(username) {
 
 // afficher le profile
 document.getElementById("profile_button").addEventListener("click", async (event) => {
+    document.getElementById("menu").classList.replace("block", "hidden");
     await display_profile(_username);
 });
 
 // afficher le menu du jeu
 async function displayMenu() {
-    document.getElementById("player_profile").style.display = "none";
-    fillCanvas();
-    document.getElementById("scoreboard").style.display = "none";
+    document.getElementById("player_profile").classList.add("hidden");
+    document.getElementById("game_box").classList.replace("flex", "hidden");
+    document.getElementById("menu").classList.replace("hidden", "block");
+    document.getElementById("about").classList.replace("flex", "hidden");
 }
 
 // retourner au menu
@@ -381,8 +395,8 @@ const ci = document.getElementById("camera_icon");
 pp.addEventListener("click", async (event) => {
     const user_page = document.getElementById("profile_username").textContent;
     if (user_page == _username) {
-        document.getElementById("profile_picture_overlay").style.display = "flex";
-        ci.style.opacity = "0";
+        document.getElementById("profile_picture_overlay").classList.replace("hidden", "flex");
+        ci.classList.replace("opacity-60", "opacity-0");
     }
 });
 
@@ -390,8 +404,8 @@ pp.addEventListener("click", async (event) => {
 ci.addEventListener("click", async (event) => {
     const user_page = document.getElementById("profile_username").textContent;
     if (user_page == _username) {
-        ci.style.opacity = "0";
-        document.getElementById("profile_picture_overlay").style.display = "flex";
+        ci.classList.replace("opacity-60", "opacity-0");
+        document.getElementById("profile_picture_overlay").classList.replace("hidden", "flex");
     }
 });
 
@@ -399,34 +413,28 @@ ci.addEventListener("click", async (event) => {
 pp.addEventListener('mouseout', () => {
     const user_page = document.getElementById("profile_username").textContent;
     if (user_page == _username)
-        ci.style.opacity = "0";
+        ci.classList.replace("opacity-60", "opacity-0");
 });
 pp.addEventListener("mouseover", async (event) => {
     const user_page = document.getElementById("profile_username").textContent;
     if (user_page == _username)
-        ci.style.opacity = "0.6";
-});
-ci.addEventListener("mouseover", async (event) => {
-    const user_page = document.getElementById("profile_username").textContent;
-    if (user_page == _username)
-        ci.style.opacity = "0.6";
+        ci.classList.replace("opacity-0", "opacity-60");
 });
 
 // croix du changement de photo de profile
 document.getElementById("profile_cross").addEventListener("click", async (event) => {
     event.preventDefault();
-    document.getElementById("profile_picture_overlay").style.display = "none";
+    document.getElementById("profile_picture_overlay").classList.replace("flex", "hidden");
     (document.getElementById("previsu_picture") as HTMLImageElement).src = "";
     (document.getElementById("file_input") as HTMLInputElement).value = "";
 });
 
 // echape du changement de photo de profile
 document.addEventListener("keydown", async (event) => {
-    if (document.getElementById("profile_picture_overlay").style.display !== "none") {
+    if (!document.getElementById("profile_picture_overlay").classList.contains("hidden")) {
         event.preventDefault();
-
         if (event.key === "Escape") {
-            document.getElementById("profile_picture_overlay").style.display = "none";
+            document.getElementById("profile_picture_overlay").classList.replace("flex", "hidden");
             (document.getElementById("previsu_picture") as HTMLImageElement).src = "";
             (document.getElementById("file_input") as HTMLInputElement).value = "";
         }
@@ -465,7 +473,7 @@ document.getElementById("upload_btn").addEventListener("click", async (event) =>
                 console.log("error in file upload.");
             else {
                 console.log("file uploaded.");
-                document.getElementById("profile_picture_overlay").style.display = "none";
+                document.getElementById("profile_picture_overlay").classList.replace("flex", "hidden");
                 (document.getElementById("previsu_picture") as HTMLImageElement).src = "";
                 (document.getElementById("file_input") as HTMLInputElement).value = "";
                 pp.src = "assets/imgs/" + _username + ".jpg?" + new Date().getTime();
@@ -481,39 +489,39 @@ document.getElementById("upload_btn").addEventListener("click", async (event) =>
 document.getElementById("profile_username").addEventListener("click", async (event) => {
     event.preventDefault();
 
-    document.getElementById("profile_username_overlay").style.display = "flex";
+    document.getElementById("profile_picture_overlay").classList.replace("hidden", "flex");
 });
 
-document.getElementById("username_btn").addEventListener("click", async (event) => {
-    event.preventDefault();
+// document.getElementById("username_btn").addEventListener("click", async (event) => {
+//     event.preventDefault();
 
-    const newusername = (document.getElementById("username_input") as HTMLInputElement).value;
-    console.log(newusername);
-    const body = {
-        username: _username,
-        newusername: newusername
-    };
-    // console.log(JSON.stringify(body));
-    if (newusername != "") {
-        try {
-            const response = await fetch(`/upload/username/${_username}`, {
-                method: 'POST',
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(body),
-            });
-            if (!response.ok)
-                console.log("error in username upload.");
-            else {
-                console.log("username uploaded.");
-                document.getElementById("profile_username_overlay").style.display = "none";
-                _username = newusername;
-                display_profile(_username);
-            }
-        } catch (error) {
-          console.error("error: ", error);
-        }
-    }
-});
+//     const newusername = (document.getElementById("username_input") as HTMLInputElement).value;
+//     console.log(newusername);
+//     const body = {
+//         username: _username,
+//         newusername: newusername
+//     };
+//     console.log(JSON.stringify(body));
+//     if (newusername != "") {
+//         try {
+//             const response = await fetch(`/upload/username/${_username}`, {
+//                 method: 'POST',
+//                 headers: { "Content-Type": "application/json" },
+//                 body: JSON.stringify(body),
+//             });
+//             if (!response.ok)
+//                 console.log("error in username upload.");
+//             else {
+//                 console.log("username uploaded.");
+//                 document.getElementById("profile_username_overlay").style.display = "none";
+//                 _username = newusername;
+//                 display_profile(_username);
+//             }
+//         } catch (error) {
+//           console.error("error: ", error);
+//         }
+//     }
+// });
 
 document.getElementById("friend_btn").addEventListener("click", async (event) => {
     const friend_uname = document.getElementById("profile_username").textContent;
@@ -533,7 +541,7 @@ document.getElementById("friend_btn").addEventListener("click", async (event) =>
     const data = await friend_req.json();
     console.log("reponse du server: ", data);
     if (data.success) {
-        document.getElementById("friend_btn").textContent = data.message;
+        document.getElementById("friend_btn").textContent = lang_file[data.message];
         if (data.status == "accepted") {
             try {
                 const friend = data.friend;
@@ -582,7 +590,7 @@ document.getElementById("block_btn").addEventListener("click", async (event) => 
     // console.log(data);
     if (data.success) {
         document.getElementById("block_btn").textContent = data.blocking ? "🔓" : "🔒";
-        document.getElementById("friend_btn").textContent = data.blocking ? "Blocked" : "Send invite";
+        document.getElementById("friend_btn").textContent = data.blocking ? lang_file["send_yblock"] : lang_file["send_inv"];
         if (data.blocking) {
             _ws.send(JSON.stringify({
                 type: "removeFriend",
@@ -620,13 +628,38 @@ document.getElementById("offline").addEventListener("click", async (event) => {
     }
 });
 
-// class Tournament {
-//     owner : string;
+document.getElementById("about_button").addEventListener("click", async (event) => {
+    event.preventDefault();
 
-//     constructor(owner: string) {
-//         this.owner = owner;
-//     }
-// }
+    document.getElementById("menu").classList.replace("block", "hidden");
+    document.getElementById("about").classList.replace("hidden", "flex");
+});
+
+
+function updateContent() {
+  document.getElementById('form-title').textContent = lang_file['connexion_title'];
+  document.querySelector("label[for='username']").textContent = lang_file['username'];
+  document.querySelector("label[for='password']").textContent = lang_file['password'];
+  document.getElementById('register-view').textContent = lang_file['register_text'];
+  document.getElementById('game_title').textContent = lang_file['title'];
+  document.getElementById('div_title').textContent = lang_file['change_pp'];
+  document.getElementById('login_btn').textContent = lang_file['connexion_title'];
+  document.getElementById('offline').textContent = lang_file['play_local'];
+  document.getElementById('matchmaking').textContent = lang_file['play_online'];
+  document.getElementById('tournament_button').textContent = lang_file['tournament'];
+  document.getElementById('profile_button').textContent = lang_file['profile'];
+  document.getElementById('upload_btn').textContent = lang_file['upload_txt'];
+  document.getElementById('about_button').textContent = lang_file['about'];
+  document.getElementById('friend_text').textContent = lang_file['friends'];
+  document.getElementById('histo_text').textContent = lang_file['historique'];
+  (document.getElementById('search_player_in') as HTMLInputElement).placeholder = lang_file['search'];
+}
+
+async function swapLang(lang="fr") {
+  const file = await fetch(`/assets/locales/${lang}/translation.json`);
+  lang_file = await file.json();
+  console.log("OUI"+ lang_file);
+}
 
 function    hide_menu(){
     let menu = document.getElementById("menu");

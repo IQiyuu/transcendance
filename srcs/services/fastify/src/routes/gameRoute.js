@@ -13,7 +13,7 @@ async function gameRoute (fastify, options) {
     let games = {};
     let waiting_list = null;
     let w_uname = null;
-    let img_path = "assets/imgs/";
+    let img_path = "dist/assets/imgs/";
 
     const STARTING_SPEED = 5;
     const ACCELERATION = 1;
@@ -65,11 +65,11 @@ async function gameRoute (fastify, options) {
             },
             paddles: {
                 left: {
-                    x: 120,
+                    x: 10,
                     y: 300
                 },
                 right: {
-                    x: 780,
+                    x: 680,
                     y: 300
                 }
             }
@@ -130,7 +130,7 @@ async function gameRoute (fastify, options) {
     fastify.post('/upload/picture/:username', async (request, reply) => {
         const data = await request.parts();
         let uploadedFile;
-        const username = params.username;
+        const username = request.params.username;
         for await (const part of data) {
             if (part.file) {
                 // console.log(username);
@@ -218,12 +218,12 @@ async function gameRoute (fastify, options) {
         var game = games[request.params.id];
         if (request.body.moveRight != null)
             var newY1 = game.paddles["right"].y + (request.body.moveRight ? -4 : 4);
-            if (newY1 > 120 && newY1 < 580)
+            if (newY1 > 0 && newY1 < 400)
                 game.paddles["right"].y = newY1;
 
         if (request.body.moveLeft != null)
             var newY2 = game.paddles["left"].y + (request.body.moveLeft ? -4 : 4);
-            if (newY2 > 120 && newY2 < 580)
+            if (newY2 > 0 && newY2 < 400)
                 game.paddles["left"].y = newY2;
     })
 
@@ -264,18 +264,18 @@ async function gameRoute (fastify, options) {
 
     setInterval(() => {
         Object.values(games).forEach(game => {
+
             game.ball.x += game.ball.dx * game.ball.v;
             game.ball.y += game.ball.dy * game.ball.v;
-            if (game.ball.y <= 110 || game.ball.y >= 590)
+            if (game.ball.y <= 10 || game.ball.y >= 480)
                 game.ball.dy *= -1;
 
             if (game.ball.x <= game.paddles.left.x + 10
-                && game.ball.y >= game.paddles.left.y - 50
-                && game.ball.y <= game.paddles.left.y + 50) {
+                && game.ball.y >= game.paddles.left.y // on passe de -50 a 0
+                && game.ball.y <= game.paddles.left.y + 100) {
                     // There are 8 zone considered for the bouncing, so we round to the closest quarter
                     let dist = Math.abs(game.ball.y - game.paddles.left.y);
                     let sign = game.ball.dy < 0 ? -1 : 1;
-
                     let angle = 90;
                     if (dist > (3 * 50) / 4)
                         angle += 45;
@@ -285,14 +285,13 @@ async function gameRoute (fastify, options) {
                         angle += 80;
                     else
                         angle += 90;
-
                     game.ball.dx = Math.cos(degToRad(angle)) * -1;
                     game.ball.dy = Math.sin(degToRad(angle)) * sign;
                     game.ball.accelerate();
                 }
-                else if (game.ball.x >= game.paddles.right.x - 10
-                    && game.ball.y >= game.paddles.right.y - 50
-                    && game.ball.y <= game.paddles.right.y + 50) {
+                else if (game.ball.x > game.paddles.right.x
+                    && game.ball.y > game.paddles.right.y // same here
+                    && game.ball.y < game.paddles.right.y + 100) {
                     // There are 8 zone considered for the bouncing, so we round to the closest quarter
                     let dist = Math.abs(game.ball.y - game.paddles.right.y);
                     let sign = game.ball.dy < 0 ? -1 : 1;
@@ -312,7 +311,7 @@ async function gameRoute (fastify, options) {
                     game.ball.accelerate();
                 }
 
-            if (game.ball.x <= game.paddles.left.x - 10 || game.ball.x >= game.paddles.right.x + 10) {
+            if (game.ball.x <= game.paddles.left.x - 10 || game.ball.x >= game.paddles.right.x + 20) {
                 game.scores[game.ball.x <= game.paddles.left.x - 10 ? "right" : "left"]++;
                 game.ball.v = STARTING_SPEED;
                 game.ball.x = STARTING_X;

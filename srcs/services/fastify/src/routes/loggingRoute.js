@@ -13,7 +13,7 @@ async function logginRoute (fastify, options) {
       const userExists = options.db.prepare('SELECT * FROM users WHERE username = ?').get(username);
 
       if (userExists) {
-        return { success: false, message: 'Username already used' };
+        return { success: false, message: 'errReg' };
       }
       const hash_pass = await fastify.bcrypt.hash(password);
       const insert = options.db.prepare('INSERT INTO users (username, password) VALUES (?, ?)');
@@ -50,13 +50,13 @@ async function logginRoute (fastify, options) {
     try {
         const user = options.db.prepare('SELECT * FROM users WHERE username = ?').get(username);
         if (!user) {
-            return reply.send({ success: false, message: 'Wrong username or password.' });
+            return reply.send({ success: false, message: 'errAuth' });
         }
 
         const isMatch = await fastify.bcrypt.compare(password, user.password);
 
         if (!isMatch) {
-            return reply.send({ success: false, message: 'Wrong username or password.' });
+            return reply.send({ success: false, message: 'errAuth' });
         }
 
         const payload = {
