@@ -4,13 +4,15 @@ DONE :
 - Fix node sqlite3 dependancy (cannot be removed)
   Can remove it in docker with another user (or su)
 - Trajectory of the ball
+- favicon.ico
+- Grafana to install
+- Prometheus to install
 
 DOING :
+- Merge with current branch
 - Tournament
-- favicon.ico
 
 TODO :
-- Merge with current branch
 
 - Configure grafana
 - Configure Prometheus
