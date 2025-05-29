@@ -6,7 +6,7 @@
 #    By: ggiboury <ggiboury@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/22 15:00:40 by ggiboury          #+#    #+#              #
-#    Updated: 2025/05/14 14:49:36 by ggiboury         ###   ########.fr        #
+#    Updated: 2025/05/29 17:49:10 by ggiboury         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -188,4 +188,5 @@ reload :
 
 # SRCS_MONITORING_CONFIG=${SRCS}monitoring/prometheus.yml
 # SRCS_FASTIFY_CONFIG=${SRCS}fastify/package.json
+# SRCS_FASTIFY_TSCONFIG=${SRCS}fastify/tsconfig.json
 # SRCS_FASTIFY_TSCONFIG=${SRCS}fastify/tsconfig.json

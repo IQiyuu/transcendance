@@ -653,11 +653,11 @@ function updateContent() {
   document.getElementById('about_button').textContent = lang_file['about'];
   document.getElementById('friend_text').textContent = lang_file['friends'];
   document.getElementById('histo_text').textContent = lang_file['historique'];
-  (document.getElementById('search_player_in') as HTMLInputElement).placeholder = lang_file["search"];
+  (document.getElementById('search_player_in') as HTMLInputElement).placeholder = lang_file['search'];
 }
 
-async function swapLang(lang) {
-  const file = await fetch(`/locales/${lang}/translation.json`);
+async function swapLang(lang="fr") {
+  const file = await fetch(`/assets/locales/${lang}/translation.json`);
   lang_file = await file.json();
   console.log("OUI"+ lang_file);
 }
