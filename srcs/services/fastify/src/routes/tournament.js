@@ -36,9 +36,6 @@ async function tournamentRoute (fastify, options) {
 
     //Create a tournament
     fastify.post('/tournament', async (request, reply) => {
-        // console.log(request);
-        // console.log("--------------");
-        // console.log(reply);
         try {
             tournaments[tournamentId] = new Tournament(request.body.owner, tournamentId, request.body.tournament_name);
             tournamentId++;
