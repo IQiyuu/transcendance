@@ -9,10 +9,11 @@ const ballRadius = 5;
 
 let leftPaddleY = canvas.height / 2 - paddleHeight / 2;
 let rightPaddleY = canvas.height / 2 - paddleHeight / 2;
-let canvasCenterX = canvas.width / 2;
-let canvasCenterY = canvas.height / 2;
-let ballSpeedX = 5;
-let ballSpeedY = 3;
+//let canvasCenterX = canvas.width / 2;
+//let canvasCenterY = canvas.height / 2;
+//let ballSpeedX = 5;
+//let ballSpeedY = 3;
+
 
 let leftScore = 0;
 let rightScore = 0;
@@ -107,10 +108,9 @@ async function draw(ws, local) {
         // Balle
         ctx.beginPath();
         ctx.arc(x + game.ball.x, y + game.ball.y, ballRadius, 0, Math.PI * 2);
+
         ctx.fill();
         ctx.closePath();
-
-        
 
 
         // Dessin du rectangle centré
@@ -120,6 +120,7 @@ async function draw(ws, local) {
         ctx.lineTo(x + rectWidth, y + rectHeight);
         ctx.lineTo(x, y + rectHeight);
         ctx.closePath();
+
         ctx.stroke();
 
     } catch (error) {
@@ -160,7 +161,7 @@ async function moves(local) {
         }
     }
     else {
-        console.log(keyState);
+        // console.log(keyState);
         if (keyState["KeyW"] || keyState["KeyS"] || keyState["ArrowUp"] || keyState["ArrowDown"]) {
             const body = { 
                 gameId: _gameId, 

@@ -5,7 +5,7 @@
   "main": "dist/server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prepare": "npx tsc && npx @tailwindcss/cli -i ./src/input.css -o ./dist/style.css --watch ",
+    "buildcss": "npx tsc ; npx @tailwindcss/cli -i ./src/input.css -o ./dist/style.css --watch ",
     "start": "node --watch dist/server.js",
     "run": "node --watch dist/server.js"
   },
@@ -22,7 +22,7 @@
     "@fastify/websocket": "^11.0.2",
     "@tailwindcss/cli": "^4.1.4",
     "bcrypt": "^5.1.1",
-    "better-sqlite3": "^11.9.1",
+    "better-sqlite3": "^11.10.0",
     "ejs": "^3.1.10",
     "fastify": "^5.3.2", 
     "fastify-bcrypt": "^1.0.1",
@@ -31,7 +31,6 @@
     "fastify-plugin": "^5.0.1",
     "jsonwebtoken": "^9.0.2",
     "socket.io": "^4.8.1",
-    "sqlite3": "^5.1.7",
     "tailwindcss": "^4.1.4",
     "fastify-metrics": "^10.x"
   },

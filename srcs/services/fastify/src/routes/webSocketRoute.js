@@ -1,3 +1,8 @@
+
+// import createGame from "./gameRoute.js"; // relative to this file
+
+import { request } from "node:http";
+
 async function websocketRoute(fastify, options) {
     const db = options.db;
     let waiting_list = null;
@@ -25,7 +30,7 @@ async function websocketRoute(fastify, options) {
         fastify.get('/ws', { websocket: true }, (socket, req) => {
             const username = req.query.username;
 
-            console.log(`${username} connected.`);
+            // console.log(`${username} connected.`);
 
             // Diffuser un message à tout le monde
             function broadcast(message) {
@@ -105,7 +110,7 @@ async function websocketRoute(fastify, options) {
                     }
                     if (waiting_list && w_uname !== data.uname) {
                         const gameId = createGame(w_uname, data.uname);
-                        console.log(`Game created: ${gameId}`);
+                        // console.log(`Game created: ${gameId}`);
                         waiting_list.send(JSON.stringify({
                             type: 'matchmaking',
                             state: 'found',
@@ -131,11 +136,9 @@ async function websocketRoute(fastify, options) {
                         });
                     } 
                 } else if (type == "disconnection") {
-                    console.log("OUIIIIIIIIIIIIIIIIIIIIIIIIII");
                     if (gameId != -1) {
-                        console.log(games[gameId]);
+                        // console.log(games[gameId]);
                         delete games[gameId];
-                        console.log("OUIIIIIIIIIIIIIIIIIIIIIIIIII");
                     }
                 }
             });
