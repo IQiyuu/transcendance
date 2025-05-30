@@ -56,10 +56,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 sessionStorage.setItem('userId', data.id);
                 const loginForm = document.getElementById("login-form") as HTMLDivElement;
                 const pongGame = document.getElementById("site") as HTMLDivElement;
+                (document.getElementById("username") as HTMLInputElement).value = "";
+                (document.getElementById("password") as HTMLInputElement).value = "";
+
                 document.body.classList.remove("justify-center", "align-center", "flex");
                 loginForm.classList.replace("flex", "hidden");
                 pongGame.classList.replace("hidden", "block");
-                init();
+                initSocket();
                 fillCanvas();
             } else {
                 const error = document.getElementById("errorAuth") as HTMLParagraphElement;
@@ -89,7 +92,7 @@ async function checkIfLoggedIn() {
             sessionStorage.setItem('userId', data.id);
             _username = data.username;
             console.log('Utilisateur connecté:', data.username);
-            init();
+            initSocket();
             return true;
         } else {
             console.log('Utilisateur non connecté');
@@ -655,10 +658,9 @@ function updateContent() {
   (document.getElementById('search_player_in') as HTMLInputElement).placeholder = lang_file['search'];
 }
 
-async function swapLang(lang="fr") {
+async function swapLang(lang="en") {
   const file = await fetch(`/assets/locales/${lang}/translation.json`);
   lang_file = await file.json();
-  console.log("OUI"+ lang_file);
 }
 
 function    hide_menu(){
@@ -666,7 +668,6 @@ function    hide_menu(){
     if (menu != null)
         menu.classList.replace("flex", "hidden");
 }
-
 function    print_tournament(data){
     let page = document.getElementById('tournament');
     page.style.display = "flex";
@@ -768,4 +769,37 @@ document.getElementById("tournament_form").addEventListener("submit", async(even
         console.log("error: ", error);
     }
 
+});
+
+document.getElementById("lang_select").addEventListener("change", async (event) => {
+    event.preventDefault();
+    var val = (event.target as HTMLSelectElement).value;
+    await swapLang(val);
+    updateContent();
+
+    const body = {
+        user: _username,
+        lang: val
+    };
+    const resp = await fetch(`/db/update/lang`, {
+        method: 'POST',
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+    });
+    const data = await resp.json();
+    if (!data.success)
+        console.log("error: ", data.error);
+});
+
+document.getElementById("logout_btn").addEventListener("click", async (event) => {
+    event.preventDefault();
+
+    const response = await fetch("/logout", {
+        method: "POST",
+    });
+    sessionStorage.clear();
+    
+    document.getElementById("site").classList.replace("block", "hidden");
+    document.getElementById("login-form").classList.replace("hidden", "flex");
+    document.body.classList.add("justify-center", "align-center", "flex");
 });

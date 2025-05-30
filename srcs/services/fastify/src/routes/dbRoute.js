@@ -13,6 +13,30 @@ async function dbRoute (fastify, options) {
         }
     });
 
+    fastify.get('/db/select/lang/:user' , async (request, reply) => {
+        try {
+            const datas = db.prepare(`SELECT lang FROM users WHERE username=?`).get(request.params.user);
+            reply.send({success:true, lang: datas.lang});
+        } catch (error) {
+            console.log("error: ", error);
+            return { success: false, error: error };
+        }
+    });
+
+    fastify.post('/db/update/lang' , async (request, reply) => {
+        const body = request.body;
+        try {
+            db.prepare(`UPDATE users
+                SET lang = ?
+                WHERE username = ?;
+            `).run(body.lang, body.user);
+            reply.send({success: true});
+        } catch (error) {
+            console.log("error: ", error);
+            return { success: false, error: error };
+        }
+    });
+
     // retourne les infos du user demande
     fastify.get('/db/select/users/:username' , async (request, reply) => {
         try {

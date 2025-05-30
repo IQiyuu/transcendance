@@ -99,6 +99,14 @@ async function logginRoute (fastify, options) {
     }
   };
 
+
+  fastify.post('/logout', {
+    preHandler: isAuthenticated,
+  }, async (req, rep) => {
+    rep.clearCookie('auth_token');
+    rep.send({success: true});
+  });
+
   // Je sais plus mais c'est une route qui verifie si on est deja connecter
   fastify.get('/protected', {
     preHandler: isAuthenticated,

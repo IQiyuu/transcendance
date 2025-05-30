@@ -7,7 +7,13 @@
     <title>Trong</title>
 </head>
 <body class="h-screen flex items-center justify-center bg-gradient-to-br from-purple-600 to-blue-500">
-
+    <select id="lang_select">
+        <option value="jp">🇯🇵 日本語</option>
+        <option value="fr">🇫🇷 Français</option>
+        <option value="en">🇺🇸 English</option>
+      </select>
+      
+    <button id="logout_btn" class="cursor-pointer">Logout</button>
     <!-- LOGIN FORM -->
     <div id="login-form" class="hidden flex-col p-6 items-center justify-center bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 max-w-sm w-full">
         <h1 class="underline text-white text-4xl text-center mb-4" id="form-title">Connexion</h1>
@@ -242,11 +248,10 @@ Donec porttitor massa eu nisi sollicitudin pretium. Donec non iaculis sem, ut rh
         <!-- </div> -->
       
       </div>
-      
-      
-
+    
     <script src="app.js"></script>
     <script src="pong.js"></script>
     <script src="chat.js"></script>
+    <script src="init.js"></script>
 </body>
 </html>

@@ -1,9 +1,7 @@
 let _ws = null;
 
-async function init() {
+async function initSocket() {
     // Se connecter a la socket
-    await swapLang("en");
-    updateContent();
     _ws = new WebSocket(`wss://${window.location.host}/ws?username=${_username}`);
     console.log(_username);
     _ws.onmessage = (message) => {
@@ -47,5 +45,3 @@ async function init() {
         console.log("Connected to WS server!");
     });
 };
-
-init();
