@@ -29,7 +29,7 @@ const secretKey = 'bommerang-fleche-upair'; // pas sur de ce que je fais la
 const rootDir = dirname(dirname(fileURLToPath(import.meta.url))); // Root of the website
 
 const fastify = Fastify({
-  logger: true,
+  logger: false,
   https: {
     key: fs.readFileSync('/run/secrets/SSL-key'),
     cert: fs.readFileSync('/run/secrets/SSL-certificate')

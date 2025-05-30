@@ -28,6 +28,17 @@ async function tournamentRoute (fastify, options) {
         return (tournaments);
     }
 
+    function    existsTournament(tournaments, id){
+        let i = 0, size = tournaments.length;
+        while (i < size){
+            if (tournaments[i].id == id)
+                return (true);
+            i++;
+        }
+
+        return (false);
+    }
+
     /*
         Owner create a room
         Player can rejoin or leave as they want
@@ -38,8 +49,7 @@ async function tournamentRoute (fastify, options) {
     fastify.post('/tournament', async (request, reply) => {
         try {
             tournaments[tournamentId] = new Tournament(request.body.owner, tournamentId, request.body.tournament_name);
-            tournamentId++;
-            return {success: true};
+            return {success: true, tournamentId: tournamentId++};
         } catch (error) {
             console.log("error: ", error);
             return {success: false, message: error};
@@ -47,15 +57,25 @@ async function tournamentRoute (fastify, options) {
     });
 
 
+
     //Join a tournament
     fastify.get('/tournament/join_:id', async (request, reply) => {
         // Checking user
-
+        /*
+        try{
+            let username = request.params.;
+            if (!existsUser(username))
+                throw Error("Error, no user nammed " + username);
+            if (!existsTournament(tournaments, request.params.id))
+                throw Error("Error, no tournament with id " + request.params.id);
+        } catch (error){
+            return {success: false, error: error}
+        }
         // Checking tournament
+        */
         const tournament = tournaments[request.params.id];
-
         //Adding user to tournament
-
+        tournament.players.addPlayer();
         //returning the tournament info
         return tournament;
     });

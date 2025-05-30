@@ -9,10 +9,6 @@ const ballRadius = 5;
 
 let leftPaddleY = canvas.height / 2 - paddleHeight / 2;
 let rightPaddleY = canvas.height / 2 - paddleHeight / 2;
-//let canvasCenterX = canvas.width / 2;
-//let canvasCenterY = canvas.height / 2;
-//let ballSpeedX = 5;
-//let ballSpeedY = 3;
 
 
 let leftScore = 0;
@@ -87,8 +83,6 @@ async function draw(ws, local) {
         // Calcul pour centrer
         const x = (canvas.width - rectWidth) / 2;
         const y = (canvas.height - rectHeight) / 2;
-
-        console.log(game.ball);
 
         ctx.fillStyle = "black";
         // Paddles

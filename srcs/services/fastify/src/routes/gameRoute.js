@@ -227,40 +227,40 @@ async function gameRoute (fastify, options) {
                 game.paddles["left"].y = newY2;
     })
 
-    fastify.register(async function (fastify) {
-        // Gere le matchmaking et la deconnexion en pleine partie (Le deconnecte perd automatiquement)
-        // marche en socket
-        fastify.get('/matchmaking', { websocket: true }, (socket, req) => {
+    // fastify.register(async function (fastify) {
+    //     // Gere le matchmaking et la deconnexion en pleine partie (Le deconnecte perd automatiquement)
+    //     // marche en socket
+    //     fastify.get('/matchmaking', { websocket: true }, (socket, req) => {
 
-            if (waiting_list && w_uname != req.query.username) {
-                const gameId = createGame(w_uname, req.query.username);
-                // console.log("game created: ", gameId);
-                waiting_list.send(JSON.stringify({ state: "found", gameId: gameId, role: "left", opponent: w_uname }));
-                socket.send(JSON.stringify({ state: "found", gameId: gameId, role: "right", opponent: req.query.username }));
+    //         if (waiting_list && w_uname != req.query.username) {
+    //             const gameId = createGame(w_uname, req.query.username);
+    //             // console.log("game created: ", gameId);
+    //             waiting_list.send(JSON.stringify({ state: "found", gameId: gameId, role: "left", opponent: w_uname }));
+    //             socket.send(JSON.stringify({ state: "found", gameId: gameId, role: "right", opponent: req.query.username }));
     
-                socket.on('close', () => {
-                    games[gameId].scores["left"] = 11;
-                });
-                waiting_list.on('close', () => {
-                    games[gameId].scores["right"] = 11;
-                });
-                waiting_list = null;
-                w_uname = null;
-            } else if (w_uname == req.query.username) {
-                waiting_list = null;
-                w_uname = null;
-                // console.log("someone left.");
-            } else {
-                waiting_list = socket;
-                w_uname = req.query.username;
-                socket.on('close', () => {
-                    // console.log("someone left.");
-                    waiting_list = null;
-                    w_uname = null;
-                });
-            }
-        });
-    });
+    //             socket.on('close', () => {
+    //                 games[gameId].scores["left"] = 11;
+    //             });
+    //             waiting_list.on('close', () => {
+    //                 games[gameId].scores["right"] = 11;
+    //             });
+    //             waiting_list = null;
+    //             w_uname = null;
+    //         } else if (w_uname == req.query.username) {
+    //             waiting_list = null;
+    //             w_uname = null;
+    //             // console.log("someone left.");
+    //         } else {
+    //             waiting_list = socket;
+    //             w_uname = req.query.username;
+    //             socket.on('close', () => {
+    //                 // console.log("someone left.");
+    //                 waiting_list = null;
+    //                 w_uname = null;
+    //             });
+    //         }
+    //     });
+    // });
 
     setInterval(() => {
         Object.values(games).forEach(game => {
@@ -274,7 +274,7 @@ async function gameRoute (fastify, options) {
                 && game.ball.y >= game.paddles.left.y // on passe de -50 a 0
                 && game.ball.y <= game.paddles.left.y + 100) {
                     // There are 8 zone considered for the bouncing, so we round to the closest quarter
-                    let dist = Math.abs(game.ball.y - game.paddles.left.y);
+                    let dist = Math.abs(game.ball.y - (game.paddles.left.y + 50));
                     let sign = game.ball.dy < 0 ? -1 : 1;
                     let angle = 90;
                     if (dist > (3 * 50) / 4)
@@ -293,7 +293,7 @@ async function gameRoute (fastify, options) {
                     && game.ball.y > game.paddles.right.y // same here
                     && game.ball.y < game.paddles.right.y + 100) {
                     // There are 8 zone considered for the bouncing, so we round to the closest quarter
-                    let dist = Math.abs(game.ball.y - game.paddles.right.y);
+                    let dist = Math.abs(game.ball.y - (game.paddles.right.y + 50));
                     let sign = game.ball.dy < 0 ? -1 : 1;
 
                     let angle = 90;

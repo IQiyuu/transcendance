@@ -658,18 +658,29 @@ function updateContent() {
 async function swapLang(lang="fr") {
   const file = await fetch(`/assets/locales/${lang}/translation.json`);
   lang_file = await file.json();
-  console.log("OUI"+ lang_file);
 }
 
 function    hide_menu(){
     let menu = document.getElementById("menu");
     if (menu != null)
-        menu.classList.replace("flex", "hidden");
+        menu.classList.replace("block", "hidden");
+}
+
+function    hide_tournament_form(){
+    let el = document.getElementById("tournament_form");
+    if (el != null)
+        el.classList.replace("block", "hidden");
+}
+
+function    remove_tournaments_join(){
+    let el = document.getElementById("tournaments_list");
+    if (el != null)
+        el.removeChild(el.children[0]);
 }
 
 function    print_tournament(data){
     let page = document.getElementById('tournament');
-    page.style.display = "flex";
+    page.style.display = "block";
 }
 
 
@@ -677,15 +688,14 @@ document.getElementById("tournament_create_button").addEventListener("click", as
     event.preventDefault();
     hide_menu();
     let tournament_creation_div = document.getElementById('tournament_form');
-
-    tournament_creation_div.style.display = "flex";
+    tournament_creation_div.style.display = "block";
 })
 
 document.getElementById("tournament_join_button").addEventListener("click", async(event) => {
     event.preventDefault();
 
     hide_menu();
-
+    remove_tournaments_join();
     try {
         const resp = await fetch('/tournaments', {
             method: 'GET',
@@ -727,7 +737,7 @@ document.getElementById('tournaments_list').addEventListener("click", async(even
 
     console.log("Fetch le tournoi correspondant");
     // try {
-    //     const resp = await fetch('/tournament:', {
+    //     const resp = await fetch('/tournament/', {
     //         method: 'GET',
     //         headers: { "Content-Type": "application/json" }
     //     });
@@ -759,6 +769,7 @@ document.getElementById("tournament_form").addEventListener("submit", async(even
         });
         const data = await resp.json();
         if (data.success) {
+            hide_tournament_form();
             print_tournament(data);
         }
         else

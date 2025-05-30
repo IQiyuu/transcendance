@@ -6,7 +6,7 @@
 #    By: ggiboury <ggiboury@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/22 15:00:40 by ggiboury          #+#    #+#              #
-#    Updated: 2025/05/20 17:57:31 by ggiboury         ###   ########.fr        #
+#    Updated: 2025/05/30 15:14:22 by ggiboury         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -146,8 +146,8 @@ infow : status
 	docker compose -f $(COMPOSE_FILE) logs website
 
 #Apply changes on the scripts
-reload : 
-	@echo "NOT WORKING"
+restart : 
+	docker compose -f $(COMPOSE_FILE) restart
 #	cp -r ${SRCS_FASTIFY} ${VOLUME_WEBSITE}/src
 #	docker compose -f $(COMPOSE_FILE) restart
 
