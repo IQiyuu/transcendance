@@ -34,8 +34,9 @@ async function logginRoute (fastify, options) {
         SameSite: 'Strict',
         maxAge: 86400000,
       });
-      
-      return reply.code(205).send({ success: true, message: `Welcome ${username}` });
+      // reply.header('Content-Type', 'application/json');
+      // reply.code(205).send({ success: true, message: `Welcome ${username}` });
+      return { success: true, message: `Welcome ${username}` };
     } catch (error) {
       console.error('Error insert data in db.', error);
       return { success: false, message: 'Error insert data in db.' };

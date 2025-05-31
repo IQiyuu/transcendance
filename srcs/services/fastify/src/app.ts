@@ -47,6 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 body: JSON.stringify(body),
             });
 
+            console.log(response);
             const data = await response.json();
             // console.log("Réponse du serveur :", data);
 

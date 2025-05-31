@@ -20,11 +20,6 @@ services:
     secrets:
       - SSL-certificate
       - SSL-key
-    # configs:
-    #   - source: fastify-config
-    #     target: ${LOCATION_SCRIPTS}package.json
-    #   - source: fastify-tsconfig
-    #     target: ${LOCATION_SCRIPTS}tsconfig.json
     networks:
       - pong
     hostname : "Trong"
