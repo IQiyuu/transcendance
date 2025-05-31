@@ -661,6 +661,9 @@ async function swapLang(lang="fr") {
   lang_file = await file.json();
 }
 
+import * as utils from "utils.js";
+
+utils.hide_menu();
 function    hide_menu(){
     let menu = document.getElementById("menu");
     if (menu != null)
@@ -684,12 +687,33 @@ function    print_tournament(data){
     page.style.display = "block";
 }
 
+function    print_tournament_page(){
+    let el = document.getElementById("tournament_page");
+    el.classList.replace("hidden", "flex");
+}
+
+function    hide_tournament_page(){
+    let el = document.getElementById("tournament_page");
+    el.classList.replace("flex", "hidden");
+}
+
+function    print_tournament_form(){
+    let tournament_creation_div = document.getElementById('tournament_form');
+    tournament_creation_div.style.display = "block";
+}
+
+document.getElementById("tournament_button").addEventListener("click", async(event) => {
+    event.preventDefault();
+
+    hide_menu();
+    print_tournament_page();
+});
 
 document.getElementById("tournament_create_button").addEventListener("click", async(event) => {
     event.preventDefault();
+
     hide_menu();
-    let tournament_creation_div = document.getElementById('tournament_form');
-    tournament_creation_div.style.display = "block";
+    print_tournament_form();
 })
 
 document.getElementById("tournament_join_button").addEventListener("click", async(event) => {
@@ -704,7 +728,7 @@ document.getElementById("tournament_join_button").addEventListener("click", asyn
         });
         
         const data = await resp.json();
-        console.log(data);
+        // console.log(data);
         if (data.success) {
             let tournaments_list = document.getElementById('tournaments_list');
             if (data.tournaments){
@@ -730,7 +754,7 @@ document.getElementById("tournament_join_button").addEventListener("click", asyn
     } catch (err){
         console.log(err);
     }
-    document.getElementById('tournaments_join').style.display = "flex";
+    document.getElementById('tournaments_join').classList.replace("hidden", "flex");
 });
 
 document.getElementById('tournaments_list').addEventListener("click", async(event) => {
