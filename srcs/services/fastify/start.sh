@@ -15,6 +15,7 @@ trap shutdown SIGTERM
 
 echo "Setting up website"
 npm install
+npm run compile
 npm run buildcss
 
 cp src/server.js dist

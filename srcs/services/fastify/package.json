@@ -4,8 +4,8 @@
   "description": "",
   "main": "dist/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "buildcss": "npx tsc ; npx @tailwindcss/cli -i ./src/input.css -o ./dist/style.css --watch ",
+    "buildcss": "npx @tailwindcss/cli -i ./src/input.css -o ./dist/style.css --watch ",
+    "compile": "npx tsc",
     "start": "node --watch dist/server.js",
     "run": "node --watch dist/server.js"
   },
