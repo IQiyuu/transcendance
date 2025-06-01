@@ -36,7 +36,7 @@ async function logginRoute (fastify, options) {
       });
       // reply.header('Content-Type', 'application/json');
       // reply.code(205).send({ success: true, message: `Welcome ${username}` });
-      return { success: true, message: `Welcome ${username}` };
+      return { success: true, message: `Welcome ${username}`, username: username };
     } catch (error) {
       console.error('Error insert data in db.', error);
       return { success: false, message: 'Error insert data in db.' };

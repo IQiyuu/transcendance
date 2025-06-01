@@ -240,22 +240,6 @@ export class   Game{
 // }
 
 
-// let count = 0;
-// let interval;
-// // Animation du boutton
-// function startMatchmakingAnimation() {
-//     count = 0;
-//     interval = setInterval(() => {
-//         count++;
-//         matchmaking_btn.textContent = lang_file['waiting'] + '.'.repeat(count % 3);
-//     }, 500);
-// }
-  
-// function stopMatchmakingAnimation() {
-//     clearInterval(interval);
-//     matchmaking_btn.textContent = lang_file['play_online'];
-// }
-
 // let searching = false;
 
 // // Se connecte en socket avec le serveur et attend un autre utilisateur.

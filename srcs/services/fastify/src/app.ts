@@ -1,5 +1,4 @@
-import {ClientSocket} from "./chat.js";
-import {SiteView} from "./chat.js";
+import {SiteView} from "./SiteView.js";
 
 // import * as utils from "./utils.js";
 
@@ -7,7 +6,7 @@ async function load_lang_file(lang="fr") {
     let lang_file;
     try {
         const file = await fetch(`/assets/locales/${lang}/translation.json`);
-        if (file == null)
+        if (file == null) // verify
             throw (Error("Lang file wasnt fetched"));
         lang_file = await file.json();
         if (lang_file == null)
@@ -25,29 +24,22 @@ async function load_lang_file(lang="fr") {
     return lang_file;
 }
 
-let _username;
-// I still have to test if it fails
-if (sessionStorage.username)
-    _username = sessionStorage.username;
-
 
 async function main(){
     let lang_file = await load_lang_file("en");
     let view = new SiteView(lang_file);
     
     view.addEvents();
-    
-    let cws = null;
-    
-    //to be created after connection
 
-    view.print_register_page();
+    if (await view.is_logged())
+        view.connect(localStorage.username);
+
+    view.print_current_page();
 }
 
 await main();
 
 /******---------------------------------------------------------------------------------------------*******/
-// check si l'utilisateur est connecte
 
 
 // function removeFriend(username) {
@@ -177,7 +169,6 @@ await main();
 //     if (isLoggedIn) {
 //         pongGame.classList.replace("hidden", "block");
 //         initFriendlist();
-//         console.log("COUCOU");
 //         document.body.classList.remove("justify-center", "align-center", "flex");
 //     }
 //     else
@@ -307,12 +298,6 @@ await main();
 // });
 
 
-
-// // retourner au menu
-// document.getElementById("game_title").addEventListener("click", async (event) => {
-//     console.log("back to menu");
-//     await displayMenu();
-// });
 
 // // input recherche de joueur
 // document.getElementById("search_player_in").addEventListener("keydown", async (event) => {
@@ -569,13 +554,6 @@ await main();
 //     } catch (error) {
 //         console.log("error: ", error);
 //     }
-// });
-
-// document.getElementById("about_button").addEventListener("click", async (event) => {
-//     event.preventDefault();
-
-//     document.getElementById("menu").classList.replace("block", "hidden");
-//     document.getElementById("about").classList.replace("hidden", "flex");
 // });
 
 
