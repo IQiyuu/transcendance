@@ -3,22 +3,26 @@ import {ClientSocket} from "./ClientSocket.js";
 export class SiteView{
 
     //Controler attributes
-    private lang_file;
+    private lang_file = null;
     private isRegisterMode = false;
     private cws : ClientSocket = null;
+
+    private is_searching : boolean = false;
 
     //View attributes
     private register_link;
     private login_form
     private main_page;
     private menu;
+    private profile_page;
     private about;
     
     //      Buttons
+    private profile_btn;
     private online_play_btn;
     
     //      Interval for timings
-    private interval;
+    private interval_id;
     
     constructor(lang){
         this.lang_file = lang;
@@ -27,8 +31,11 @@ export class SiteView{
         this.login_form = document.getElementById("form");
         this.main_page = document.getElementById("site");
         this.menu = document.getElementById("menu");
+        this.profile_page = document.getElementById("player_profile");
         this.about = document.getElementById("about");
+
         this.online_play_btn = document.getElementById("matchmaking");
+        this.profile_btn = document.getElementById("profile_button");
     }
 
     // Controller part
@@ -144,9 +151,33 @@ export class SiteView{
             console.log("LOADING DOM");
         });
 
-        this.online_play_btn.addEventListener("click", this.start_matchmaking_animation);
+        //Matchmaking
+        this.online_play_btn.addEventListener("click", () => {
+            if (this.is_searching){
+                this.stop_matchmaking();
+            } else{
+                this.start_matchmaking();
+            }
+            this.is_searching = !this.is_searching;
+        });
+
+        // // afficher le profile
+        this.profile_btn.addEventListener("click", async (event) => {
+            this.hide_menu();
+            //Set dynamiquemnt here
+            // ...
+            this.print_profile_page();
+        });
     }
     
+    start_matchmaking(){
+        this.start_matchmaking_animation();
+    }
+
+    stop_matchmaking(){
+        this.stop_matchmaking_animation();
+    }
+
     // check if we have username and cookie auth
     async is_logged(){
         if (localStorage != null && localStorage.getItem("username") === null)
@@ -207,17 +238,28 @@ export class SiteView{
         this.menu.classList.replace("hidden", "block");
     }
 
+    // anim_matchmaking_handler(count){
+    //     count++;
+    //     this.online_play_btn.textContent = this.lang_file['waiting'] + '.'.repeat(count % 3);
+    // }
+
     // Animation du boutton
     start_matchmaking_animation(){
         let count = 0;
-        this.interval = setInterval((waiting) => {
+
+        // good luck ! (waiting is not the locales version of website, try changing language to see)
+        // maybe by getting current value then adding in the handler ?
+        this.interval_id = window.setInterval(() => {
             count++;
-            this.online_play_btn.textContent = waiting + '.'.repeat(count % 3);
-        }, 500, this.lang_file['waiting']);  
+            document.getElementById("matchmaking").textContent = "waiting" + '.'.repeat(count % 3);
+        }, 500);
+        // this.interval_id = setInterval(() => {
+        //     btn.textContent = waiting + '.'.repeat(count % 3);
+        // }, 500);
     }
 
     stop_matchmaking_animation(){
-        clearInterval(this.interval);
+        clearInterval(this.interval_id);
         this.online_play_btn.textContent = this.lang_file['play_online'];
     }
 
@@ -233,6 +275,14 @@ export class SiteView{
         this.about.classList.replace("flex", "hidden");
     }
 
+    print_profile_page(){
+        this.profile_page.classList.replace("hidden", "flex");
+    }
+
+    hide_profile_page(){
+        this.profile_page.classList.replace("flex", "hidden");
+    }
+
     print_error_page(){
         console.log("error");
     }
@@ -242,6 +292,7 @@ export class SiteView{
         this.hide_main_page();
         this.hide_menu();
         this.hide_about_page();
+        this.hide_profile_page();
     }
 
     print_current_page(){

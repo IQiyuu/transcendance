@@ -275,7 +275,6 @@ await main();
 //                     await display_profile(item.textContent);
 //                 });
 //         });
-//         document.getElementById("player_profile").classList.replace("hidden", "flex");
 //         if (cpt > 0) {
 //             document.getElementById("wr").textContent = `${w} / ${cpt}` ;
 //             let wr = w/(cpt)*100;
@@ -290,13 +289,6 @@ await main();
 //         console.log("error fetching db: ", error);
 //     }
 // }
-
-// // afficher le profile
-// document.getElementById("profile_button").addEventListener("click", async (event) => {
-//     document.getElementById("menu").classList.replace("block", "hidden");
-//     await display_profile(_username);
-// });
-
 
 
 // // input recherche de joueur
