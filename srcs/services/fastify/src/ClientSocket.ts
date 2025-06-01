@@ -4,6 +4,7 @@
 export class ClientSocket{
     private ws : WebSocket = null;
     private username : string;
+    private user_id : number = -1;
     private view;
 
     // protected _game : Game = null;
@@ -15,29 +16,29 @@ export class ClientSocket{
         this.view = view;
     }
 
-    async isLoggedIn() { // maybe useless, as I copied it to controller
-        try {
-            const response = await fetch('/protected', {
-                method: 'GET',
-                credentials: 'include',
-            });
+    // async isLoggedIn() { // maybe useless, as I copied it to controller
+    //     try {
+    //         const response = await fetch('/protected', {
+    //             method: 'GET',
+    //             credentials: 'include',
+    //         });
 
-            const data = await response.json();
+    //         const data = await response.json();
 
-            if (response.ok && data.success) {
-                sessionStorage.setItem('username', data.username);
-                sessionStorage.setItem('userId', data.id);
-                this.username = data.username;
-                console.log('Utilisateur connecté:', data.username);
-                return (true);
-            }
-            console.log('Utilisateur non connecté');
-            return (false);
-        } catch (error) {
-            console.error('Erreur lors de la vérification de la connexion:', error);
-            return (false);
-        }
-    }
+    //         if (response.ok && data.success) {
+    //             sessionStorage.setItem('username', data.username);
+    //             sessionStorage.setItem('userId', data.id);
+    //             this.username = data.username;
+    //             console.log('Utilisateur connecté:', data.username);
+    //             return (true);
+    //         }
+    //         console.log('Utilisateur non connecté');
+    //         return (false);
+    //     } catch (error) {
+    //         console.error('Erreur lors de la vérification de la connexion:', error);
+    //         return (false);
+    //     }
+    // }
 
     _setSocket(){
         this.ws.onopen = (event) => {
@@ -69,6 +70,7 @@ export class ClientSocket{
             } else if (data.type == "matchmaking") {
                 if (data.state == "found") {
                     this.view.stop_matchmaking_animation();
+                    this.view.createGame(data.gameId, data.role, data.opponent);
                     // this._role = data.role;
                     // this._gameId = data.gameId;
                     // console.log("game starting ", this._gameId);
@@ -90,6 +92,21 @@ export class ClientSocket{
         // }
     }
     
+    start_matchmaking(){
+        this.ws.send(JSON.stringify({
+            type: "matchmaking",
+            uname: this.username,
+            state: "enter"
+        }));
+    }
+
+    stop_matchmaking(){
+        this.ws.send(JSON.stringify({
+            type: "matchmaking",
+            state: "left"
+        }));
+    }
+
     print_info(){
         console.log("Websocket for : " + this.username);
     }

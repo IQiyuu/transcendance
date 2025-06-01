@@ -100,11 +100,11 @@ async function logginRoute (fastify, options) {
     }
   };
 
-  // Check wheter the user is connected
+  // Check whether the user is connected
   fastify.get('/protected', {
     preHandler: isAuthenticated,
     }, async (request, reply) => {
-        return reply.send({ success: true, username: request.user });
+        return reply.send({ success: true, username: request.user});
     });
 
 }

@@ -1,4 +1,5 @@
 import {ClientSocket} from "./ClientSocket.js";
+import {Game} from "./pong.js";
 
 export class SiteView{
 
@@ -6,6 +7,8 @@ export class SiteView{
     private lang_file = null;
     private isRegisterMode = false;
     private cws : ClientSocket = null;
+
+    private game : Game = null;
 
     private is_searching : boolean = false;
 
@@ -15,11 +18,13 @@ export class SiteView{
     private main_page;
     private menu;
     private profile_page;
+    private play_page;
     private about;
     
     //      Buttons
     private profile_btn;
     private online_play_btn;
+    private offline_play_btn;
     
     //      Interval for timings
     private interval_id;
@@ -32,9 +37,11 @@ export class SiteView{
         this.main_page = document.getElementById("site");
         this.menu = document.getElementById("menu");
         this.profile_page = document.getElementById("player_profile");
+        this.play_page = document.getElementById("game_page");
         this.about = document.getElementById("about");
 
         this.online_play_btn = document.getElementById("matchmaking");
+        this.offline_play_btn = document.getElementById("offline");
         this.profile_btn = document.getElementById("profile_button");
     }
 
@@ -151,8 +158,10 @@ export class SiteView{
             console.log("LOADING DOM");
         });
 
-        //Matchmaking
-        this.online_play_btn.addEventListener("click", () => {
+        //Online making
+        this.online_play_btn.addEventListener("click", (event) => {
+            event.preventDefault();
+
             if (this.is_searching){
                 this.stop_matchmaking();
             } else{
@@ -161,10 +170,39 @@ export class SiteView{
             this.is_searching = !this.is_searching;
         });
 
-        // // afficher le profile
+        //Local play
+        this.offline_play_btn.addEventListener("click", async (event) => {
+            event.preventDefault();
+
+            this.hide_menu();
+            this.print_play_page();
+
+            this.game = new Game(null, null, null, null);
+        });
+
+//     try {
+//         const body = {
+//             username: _username,
+//         }
+//         const resp = await fetch(`/game/local/create`, {
+//             method: 'POST',
+//             headers: { "Content-Type": "application/json" },
+//             body: JSON.stringify(body),
+//         });
+//         const data = await resp.json();
+//         if (data.success) {
+//             _gameId = data.id;
+//             _mod = 'l';
+//             startGame(null, _ws, true);
+//         }
+//     } catch (error) {
+//         console.log("error: ", error);
+//     }
+// });
+        // Profile display
         this.profile_btn.addEventListener("click", async (event) => {
             this.hide_menu();
-            //Set dynamiquemnt here
+            //Set dynamiquement here
             // ...
             this.print_profile_page();
         });
@@ -172,15 +210,17 @@ export class SiteView{
     
     start_matchmaking(){
         this.start_matchmaking_animation();
+        this.cws.start_matchmaking();
     }
 
     stop_matchmaking(){
         this.stop_matchmaking_animation();
+        this.cws.stop_matchmaking();
     }
 
     // check if we have username and cookie auth
     async is_logged(){
-        if (localStorage != null && localStorage.getItem("username") === null)
+        if (sessionStorage != null && sessionStorage.getItem("username") === null)
             return (false);
         try {
             console.log("fetching protected");
@@ -201,7 +241,7 @@ export class SiteView{
     }
     
     store_session(username){
-        localStorage.setItem('username', username);
+        sessionStorage.setItem('username', username);
     }
 
     connect(username){
@@ -211,6 +251,12 @@ export class SiteView{
         this.hide_register_page();
         document.body.classList.remove("justify-center", "align-center", "flex");
         this.print_main_page();
+    }
+
+    createGame(gameId, role, opponent){
+        console.log("Match with ", opponent);
+        this.game = new Game(this.cws, gameId, role, opponent);
+
     }
 
     /**
@@ -283,6 +329,14 @@ export class SiteView{
         this.profile_page.classList.replace("flex", "hidden");
     }
 
+    print_play_page(){
+        this.play_page.classList.replace("hidden", "flex");
+    }
+
+    hide_play_page(){
+        this.play_page.classList.replace("flex", "hidden");
+    }
+
     print_error_page(){
         console.log("error");
     }
@@ -292,6 +346,7 @@ export class SiteView{
         this.hide_main_page();
         this.hide_menu();
         this.hide_about_page();
+        this.hide_play_page();
         this.hide_profile_page();
     }
 

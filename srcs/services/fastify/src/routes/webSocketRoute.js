@@ -140,6 +140,10 @@ async function websocketRoute(fastify, options) {
                         // console.log(games[gameId]);
                         delete games[gameId];
                     }
+                    // Client asking for game infos, instead of a fetch
+                } else if (type === "game_info") {
+                    // const targetSocket = connectedClients.get(data.target);
+                    
                 }
             });
 

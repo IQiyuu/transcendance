@@ -1,16 +1,30 @@
+import {ClientSocket} from "./ClientSocket.js";
+
 // Game for a given client
 export class   Game{
-    private _userId : number;
-    private _gameId : number;
-    private _role = null;
-    private _keyState = null;
+    private game_id : number;
+    private side = null;
+    private key_state = null;
+    private opponent = null;
 
-    constructor(){
-        // this._userId = sessionStorage.userId;
+    // private canvas = document.getElementById("pong") as HTMLCanvasElement;
+    private canvas = document.getElementById("pong");
+
+    private cws : ClientSocket = null;
+
+
+    constructor(socket, id, side, opponent){
+        this.cws = socket;
+        this.side = side;
+        this.opponent = opponent;
+        this.game_id = id;
     }
 
-    update(){
-        
+    is_local(){
+        return (this.cws === null);
+    }
+    update(state){
+
     }
 
     // Fait une requete qui va bouger les paddles (raquettes)
@@ -62,7 +76,6 @@ export class   Game{
 };
 
 // /*----------------------------------------------------------------------------------------*/
-// const canvas = document.getElementById("pong") as HTMLCanvasElement;
 // const matchmaking_btn = document.getElementById("matchmaking");
 // const ctx = canvas.getContext("2d");
 // let _userId = sessionStorage.userId;
@@ -240,30 +253,21 @@ export class   Game{
 // }
 
 
-// let searching = false;
 
 // // Se connecte en socket avec le serveur et attend un autre utilisateur.
 // async function matchmaking(event) {
 //     if (!searching) {
 //         startMatchmakingAnimation();
 //         searching = true;
-//         _ws.send(JSON.stringify({
-//             type: "matchmaking",
-//             uname: _username,
-//             state: "enter"
-//         }));
+
 //     }
 //     else {
 //         searching = false;
 //         console.log("queue stopped.");
 //         stopMatchmakingAnimation();
-//         _ws.send(JSON.stringify({
-//             type: "matchmaking",
-//             state: "left"
-//         }));
+
 //     }
 // }
-// matchmaking_btn.addEventListener("click", matchmaking);
 
 // function fillCanvas() {
 //     ctx.fillStyle = "rgb(160, 94, 204)";

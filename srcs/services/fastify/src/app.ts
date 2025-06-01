@@ -32,7 +32,7 @@ async function main(){
     view.addEvents();
 
     if (await view.is_logged())
-        view.connect(localStorage.username);
+        view.connect(sessionStorage.username);
 
     view.print_current_page();
 }
@@ -522,30 +522,6 @@ await main();
 //     }
 //     else
 //         console.log("error: ", data.error);
-// });
-
-// document.getElementById("offline").addEventListener("click", async (event) => {
-//     event.preventDefault();
-
-//     document.getElementById("menu").classList.replace("flex", "hidden");
-//     try {
-//         const body = {
-//             username: _username,
-//         }
-//         const resp = await fetch(`/game/local/create`, {
-//             method: 'POST',
-//             headers: { "Content-Type": "application/json" },
-//             body: JSON.stringify(body),
-//         });
-//         const data = await resp.json();
-//         if (data.success) {
-//             _gameId = data.id;
-//             _mod = 'l';
-//             startGame(null, _ws, true);
-//         }
-//     } catch (error) {
-//         console.log("error: ", error);
-//     }
 // });
 
 
