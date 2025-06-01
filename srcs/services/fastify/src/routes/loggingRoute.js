@@ -100,7 +100,7 @@ async function logginRoute (fastify, options) {
     }
   };
 
-  // Je sais plus mais c'est une route qui verifie si on est deja connecter
+  // Check wheter the user is connected
   fastify.get('/protected', {
     preHandler: isAuthenticated,
     }, async (request, reply) => {

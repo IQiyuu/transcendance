@@ -1,11 +1,17 @@
 import {ClientSocket} from "./chat.js";
+import {SiteView} from "./chat.js";
+
 // import * as utils from "./utils.js";
 
-async function loadLang(lang="fr") {
+async function load_lang_file(lang="fr") {
     let lang_file;
     try {
         const file = await fetch(`/assets/locales/${lang}/translation.json`);
+        if (file == null)
+            throw (Error("Lang file wasnt fetched"));
         lang_file = await file.json();
+        if (lang_file == null)
+            throw (Error("Not parsed"));
     } catch (error) {     
         console.error("ERROR : Lang files could not be parsed, en will be set by default");
         console.log("LOG : Lang files could not be parsed, en will be set by default");
@@ -19,123 +25,30 @@ async function loadLang(lang="fr") {
     return lang_file;
 }
 
-let _username = sessionStorage.username;
-let lang_file = loadLang("en");
+let _username;
 // I still have to test if it fails
+if (sessionStorage.username)
+    _username = sessionStorage.username;
 
-function    init(){
 
+async function main(){
+    let lang_file = await load_lang_file("en");
+    let view = new SiteView(lang_file);
+    
+    view.addEvents();
+    
+    let cws = null;
+    
+    //to be created after connection
+
+    view.print_register_page();
 }
 
+await main();
 
-function addEvents(){
-    document.addEventListener("DOMContentLoaded", () => {
-        const form = document.getElementById("form");
-        const formTitle = document.getElementById("form-title");
-        const registerLink = document.getElementById("register-view");
-        const logginBtn = document.getElementById("login_btn");
-        let isRegisterMode = false;
-    
-        // swap entre connexion et inscription
-        registerLink.addEventListener("click", (event) => {
-            event.preventDefault();
-    
-            isRegisterMode = !isRegisterMode;
-            if (isRegisterMode) {
-                formTitle.textContent = lang_file["register_title"];
-                registerLink.textContent = lang_file["connexion_text"];
-                logginBtn.textContent = lang_file["register_title"];
-    
-            } else {
-                formTitle.textContent = lang_file["connexion_title"];
-                registerLink.textContent = lang_file["register_text"];
-                logginBtn.textContent = lang_file["connexion_title"];
-            }
-        });
-    
-        // formulaire de connexion / inscription
-        form.addEventListener("submit", async (event) => {
-            event.preventDefault();
-    
-            const username = document.getElementById("username") as HTMLInputElement;
-            const password = document.getElementById("password") as HTMLInputElement;
-    
-            const url = isRegisterMode ? "/register" : "/login";
-            const body = { 
-                username: username.value, 
-                password: password.value,
-            };
-    
-            // console.log(`Envoi vers ${url}`, body);
-    
-            // try {
-            //     const response = await fetch(url, {
-            //         method: "POST",
-            //         headers: { "Content-Type": "application/json" },
-            //         body: JSON.stringify(body),
-            //     });
-    
-            //     console.log(response);
-            //     const data = await response.json();
-            //     // console.log("Réponse du serveur :", data);
-    
-            //     if (data.success) {
-            //         _username = data.username;
-            //         sessionStorage.setItem('username', data.username);
-            //         sessionStorage.setItem('userId', data.id);
-            //         const loginForm = document.getElementById("login-form") as HTMLDivElement;
-            //         const pongGame = document.getElementById("site") as HTMLDivElement;
-            //         document.body.classList.remove("justify-center", "align-center", "flex");
-            //         loginForm.classList.replace("flex", "hidden");
-            //         pongGame.classList.replace("hidden", "block");
-            //         init();
-            //         fillCanvas();
-            //     } else {
-            //         const error = document.getElementById("errorAuth") as HTMLParagraphElement;
-            //         error.textContent = lang_file[data.message];
-            //         error.classList.replace("hidden", "block");
-            //         console.log("Auth error");
-            //     }
-            // } catch (error) {
-            //     console.error("error ", error);
-            //     alert("Une erreur est survenue.");
-            // }
-        });
-    });
+/******---------------------------------------------------------------------------------------------*******/
+// check si l'utilisateur est connecte
 
-}
-let username = "testing";
-// Need to have lang_file setted before;
-let cws = new ClientSocket(username, lang_file);
-cws.print_info();
-
-
-// // check si l'utilisateur est connecte
-// async function checkIfLoggedIn() {
-//     try {
-//         const response = await fetch('/protected', {
-//             method: 'GET',
-//             credentials: 'include',
-//         });
-
-//         const data = await response.json();
-
-//         if (response.ok && data.success) {
-//             sessionStorage.setItem('username', data.username);
-//             sessionStorage.setItem('userId', data.id);
-//             _username = data.username;
-//             console.log('Utilisateur connecté:', data.username);
-//             init();
-//             return true;
-//         } else {
-//             console.log('Utilisateur non connecté');
-//             return false;
-//         }
-//     } catch (error) {
-//         console.error('Erreur lors de la vérification de la connexion:', error);
-//         return false;
-//     }
-// }
 
 // function removeFriend(username) {
 //     const list = document.getElementById("friendlist");
@@ -393,13 +306,7 @@ cws.print_info();
 //     await display_profile(_username);
 // });
 
-// // afficher le menu du jeu
-// async function displayMenu() {
-//     document.getElementById("player_profile").classList.add("hidden");
-//     document.getElementById("game_box").classList.replace("flex", "hidden");
-//     document.getElementById("menu").classList.replace("hidden", "block");
-//     document.getElementById("about").classList.replace("flex", "hidden");
-// }
+
 
 // // retourner au menu
 // document.getElementById("game_title").addEventListener("click", async (event) => {

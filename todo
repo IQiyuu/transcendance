@@ -19,3 +19,4 @@ TODO :
 - Configure Prometheus
 - Historic to add
 - Script for database queries (from server.js)
+- Protection des routes

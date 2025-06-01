@@ -3,14 +3,62 @@ export class   Game{
     private _userId : number;
     private _gameId : number;
     private _role = null;
+    private _keyState = null;
 
     constructor(){
         // this._userId = sessionStorage.userId;
     }
 
     update(){
-
+        
     }
+
+    // Fait une requete qui va bouger les paddles (raquettes)
+    // async moves(local) {
+    //     if (!local) {
+    //         if (this._keyState["ArrowUp"] || this._keyState["ArrowDown"]) {
+    //             const body = { 
+    //                 gameId: _gameId, 
+    //                 role: _role,
+    //                 moveUp: this._keyState["ArrowUp"],
+    //             };
+    //             try {
+    //                 const response = await fetch(`/game/${_gameId}/move`, {
+    //                     method: "POST",
+    //                     headers: { "Content-Type": "application/json" },
+    //                     body: JSON.stringify(body),
+    //                 });
+    
+    //                 if (!response.ok)
+    //                     console.log("error in movement request");
+    //             } catch (error) {
+    //                 console.log("error: ", error);
+    //             }
+    //         }
+    //     }
+    //     else {
+    //         // console.log(keyState);
+    //         if (keyState["KeyW"] || keyState["KeyS"] || keyState["ArrowUp"] || keyState["ArrowDown"]) {
+    //             const body = { 
+    //                 gameId: _gameId, 
+    //                 moveRight: (keyState["ArrowUp"] || keyState["ArrowDown"]) ? keyState["ArrowUp"] : null,
+    //                 moveLeft: (keyState["KeyW"] || keyState["KeyS"]) ? keyState["KeyW"] : null,
+    //             };
+    //             try {
+    //                 const response = await fetch(`/game/local/${_gameId}/move`, {
+    //                     method: "POST",
+    //                     headers: { "Content-Type": "application/json" },
+    //                     body: JSON.stringify(body),
+    //                 });
+    
+    //                 if (!response.ok)
+    //                     console.log("error in movement request");
+    //             } catch (error) {
+    //                 console.log("error: ", error);
+    //             }
+    //         }
+    //     }
+    // };
 };
 
 // /*----------------------------------------------------------------------------------------*/
@@ -148,52 +196,6 @@ export class   Game{
 // }
  
 
-// // Fait une requete qui va bouger les paddles (raquettes)
-// async function moves(local) {
-//     if (!local) {
-//         if (keyState["ArrowUp"] || keyState["ArrowDown"]) {
-//             const body = { 
-//                 gameId: _gameId, 
-//                 role: _role,
-//                 moveUp: keyState["ArrowUp"],
-//             };
-//             try {
-//                 const response = await fetch(`/game/${_gameId}/move`, {
-//                     method: "POST",
-//                     headers: { "Content-Type": "application/json" },
-//                     body: JSON.stringify(body),
-//                 });
-
-//                 if (!response.ok)
-//                     console.log("error in movement request");
-//             } catch (error) {
-//                 console.log("error: ", error);
-//             }
-//         }
-//     }
-//     else {
-//         // console.log(keyState);
-//         if (keyState["KeyW"] || keyState["KeyS"] || keyState["ArrowUp"] || keyState["ArrowDown"]) {
-//             const body = { 
-//                 gameId: _gameId, 
-//                 moveRight: (keyState["ArrowUp"] || keyState["ArrowDown"]) ? keyState["ArrowUp"] : null,
-//                 moveLeft: (keyState["KeyW"] || keyState["KeyS"]) ? keyState["KeyW"] : null,
-//             };
-//             try {
-//                 const response = await fetch(`/game/local/${_gameId}/move`, {
-//                     method: "POST",
-//                     headers: { "Content-Type": "application/json" },
-//                     body: JSON.stringify(body),
-//                 });
-
-//                 if (!response.ok)
-//                     console.log("error in movement request");
-//             } catch (error) {
-//                 console.log("error: ", error);
-//             }
-//         }
-//     }
-// };
 
 // // Lance la partie
 // function startGame(oponnent, ws, local) {
