@@ -19,6 +19,7 @@ export class SiteView{
     private menu;
     private profile_page;
     private play_page;
+    private tournament_page;
     private about;
     
     //      Buttons
@@ -38,6 +39,7 @@ export class SiteView{
         this.menu = document.getElementById("menu");
         this.profile_page = document.getElementById("player_profile");
         this.play_page = document.getElementById("game_page");
+        this.tournament_page = document.getElementById("tournament_page");
         this.about = document.getElementById("about");
 
         this.online_play_btn = document.getElementById("matchmaking");
@@ -66,7 +68,7 @@ export class SiteView{
         (document.getElementById('search_player_in') as HTMLInputElement).placeholder = lang['search'];
     }
 
-    addEvents(){
+    add_events(){
         // Register/login page
         this.register_link.addEventListener("click", (event) => {
             event.preventDefault();
@@ -97,7 +99,7 @@ export class SiteView{
             
             const url = this.isRegisterMode ? "/register" : "/login";
             const body = { 
-                username: username.value, 
+                username: username.value,
                 password: password.value,
             };
 
@@ -177,28 +179,25 @@ export class SiteView{
             this.hide_menu();
             this.print_play_page();
 
-            this.game = new Game(null, null, null, null);
+            try {
+                const body = {
+                    username: this.cws.get_username(),
+                }
+                const resp = await fetch(`/game/local/create`, {
+                    method: 'POST',
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(body),
+                });
+                const data = await resp.json();
+                if (data.success) {
+                    // startGame(null, this._ws, true);
+                    this.game = new Game(this.cws, data.id, null, null);
+                }
+            } catch (error) {
+                console.log("error: ", error);
+            }
         });
 
-//     try {
-//         const body = {
-//             username: _username,
-//         }
-//         const resp = await fetch(`/game/local/create`, {
-//             method: 'POST',
-//             headers: { "Content-Type": "application/json" },
-//             body: JSON.stringify(body),
-//         });
-//         const data = await resp.json();
-//         if (data.success) {
-//             _gameId = data.id;
-//             _mod = 'l';
-//             startGame(null, _ws, true);
-//         }
-//     } catch (error) {
-//         console.log("error: ", error);
-//     }
-// });
         // Profile display
         this.profile_btn.addEventListener("click", async (event) => {
             this.hide_menu();
@@ -253,10 +252,12 @@ export class SiteView{
         this.print_main_page();
     }
 
+    // Creating a game for online players
     createGame(gameId, role, opponent){
         console.log("Match with ", opponent);
         this.game = new Game(this.cws, gameId, role, opponent);
 
+        this.game.start();
     }
 
     /**
@@ -336,10 +337,19 @@ export class SiteView{
     hide_play_page(){
         this.play_page.classList.replace("flex", "hidden");
     }
+    
+    print_tournament_page(){
+        this.tournament_page.classList.replace("hidden", "flex");
+    }
+
+    hide_tournament_page(){
+        this.tournament_page.classList.replace("flex", "hidden");
+    }
 
     print_error_page(){
         console.log("error");
     }
+
 
     hide_all(){
         this.hide_register_page();
@@ -356,4 +366,5 @@ export class SiteView{
         else
             this.print_register_page();
     }
+    
 };

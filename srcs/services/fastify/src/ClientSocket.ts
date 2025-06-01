@@ -1,3 +1,5 @@
+import {Game} from "./pong.js";
+
 /**
  * Class used for connected client
  */
@@ -7,15 +9,16 @@ export class ClientSocket{
     private user_id : number = -1;
     private view;
 
-    // protected _game : Game = null;
+    protected _game : Game = null;
 
     constructor(username, view){
         this.username = username;
         this.ws = new WebSocket(`wss://${window.location.host}/ws?username=${this.username}`);
-        this._setSocket();
+        this.set_socket();
         this.view = view;
     }
 
+    get_username(){}
     // async isLoggedIn() { // maybe useless, as I copied it to controller
     //     try {
     //         const response = await fetch('/protected', {
@@ -40,7 +43,7 @@ export class ClientSocket{
     //     }
     // }
 
-    _setSocket(){
+    set_socket(){
         this.ws.onopen = (event) => {
             console.log("Auth connected");
         }
@@ -76,6 +79,8 @@ export class ClientSocket{
                     // console.log("game starting ", this._gameId);
                     // startGame(data.opponent, this._ws, false);
                 }
+            } else if (data.type === "game_info"){
+                // if (data.)
             }
         };
 

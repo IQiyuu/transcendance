@@ -9,73 +9,72 @@ function degToRad(degree){
     return ((degree * Math.PI) / 180)
 }
 
-async function gameRoute (fastify, options) {
-    let games = {};
+const STARTING_SPEED = 5;
+const ACCELERATION = 1;
+const LIMIT_SPEED = 15;
+
+const STARTING_X = 400;
+const STARTING_Y = 200;
+
+export let games = {};
+
+// Creer un objet game cote server
+export function createGame(l_name, r_name) {
+    const gameId = Object.keys(games).length;
+    const angle = degToRad(randomIntFromInterval(0, 45));
+    const neg_x = randomIntFromInterval(0,1), neg_y = randomIntFromInterval(0,1);
+    games[gameId] = {
+        id: gameId,
+            players: {  
+            left: l_name,
+            right: r_name
+        },
+        scores: {
+            left: 0,
+            right: 0
+        },
+        ball: {
+            x: STARTING_X,
+            y: STARTING_Y,
+            dx: Math.cos(angle) * (neg_x ? -1 : 1),
+            dy: Math.sin(angle) * (neg_y ? -1 : 1),
+            dist: -1,
+            v: STARTING_SPEED,
+            accelerate: function() {
+                if (this.v < LIMIT_SPEED)
+                    this.v += ACCELERATION;
+            },
+            randomizeVector: function() {
+                const angle = degToRad(randomIntFromInterval(0, 45));
+                const neg_x = randomIntFromInterval(0,1), neg_y = randomIntFromInterval(0,1);
+                this.dx = Math.cos(angle) * (neg_x ? -1 : 1);
+                this.dy = Math.sin(angle) * (neg_y ? -1 : 1);
+            }
+        },
+        paddles: {
+            left: {
+                x: 10,
+                y: 300
+            },
+            right: {
+                x: 680,
+                y: 300
+            }
+        }
+    }
+    return gameId;
+};
+
+export async function gameRoute (fastify, options) {
     let waiting_list = null;
     let w_uname = null;
     let img_path = "dist/assets/imgs/";
 
-    const STARTING_SPEED = 5;
-    const ACCELERATION = 1;
-    const LIMIT_SPEED = 15;
-
-    const STARTING_X = 400;
-    const STARTING_Y = 200;
 
     // function addGame(game){
     //     games[Object.keys(games).length] = game;
     // }
-
-    /**
-     * 
-    const paddleWidth = 10, paddleHeight = 100;
-     */
-    // Creer un objet game cote server
-    function createGame(l_name, r_name) {
-        const gameId = Object.keys(games).length;
-        const angle = degToRad(randomIntFromInterval(0, 45));
-        const neg_x = randomIntFromInterval(0,1), neg_y = randomIntFromInterval(0,1);
-        games[gameId] = {
-            id: gameId,
-            players: {  
-                left: l_name,
-                right: r_name
-            },
-            scores: {
-                left: 0,
-                right: 0
-            },
-            ball: {
-                x: STARTING_X,
-                y: STARTING_Y,
-                dx: Math.cos(angle) * (neg_x ? -1 : 1),
-                dy: Math.sin(angle) * (neg_y ? -1 : 1),
-                dist: -1,
-                v: STARTING_SPEED,
-                accelerate: function() {
-                    if (this.v < LIMIT_SPEED)
-                        this.v += ACCELERATION;
-                },
-                randomizeVector: function() {
-                    const angle = degToRad(randomIntFromInterval(0, 45));
-                    const neg_x = randomIntFromInterval(0,1), neg_y = randomIntFromInterval(0,1);
-                    this.dx = Math.cos(angle) * (neg_x ? -1 : 1);
-                    this.dy = Math.sin(angle) * (neg_y ? -1 : 1);
-                }
-            },
-            paddles: {
-                left: {
-                    x: 10,
-                    y: 300
-                },
-                right: {
-                    x: 680,
-                    y: 300
-                }
-            }
-        }
-        return gameId;
-    };
+    
 
     // Stocke la game dans la db
     fastify.post('/game/storeGame', async (request, reply) => {
@@ -321,7 +320,6 @@ async function gameRoute (fastify, options) {
         });
     }, 30);
 }
-
 
 
 export default fastifyPlugin(gameRoute);

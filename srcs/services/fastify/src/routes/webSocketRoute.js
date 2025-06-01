@@ -1,5 +1,6 @@
 
-// import createGame from "./gameRoute.js"; // relative to this file
+import * as gameRoute from "./gameRoute.js"; // relative to this file
+import fastifyPlugin from 'fastify-plugin';
 
 import { request } from "node:http";
 
@@ -109,8 +110,8 @@ async function websocketRoute(fastify, options) {
                         w_uname = null;
                     }
                     if (waiting_list && w_uname !== data.uname) {
-                        const gameId = createGame(w_uname, data.uname);
-                        // console.log(`Game created: ${gameId}`);
+                        const gameId = gameRoute.createGame(w_uname, data.uname);
+                        console.log(`Game created: ${gameId}`);
                         waiting_list.send(JSON.stringify({
                             type: 'matchmaking',
                             state: 'found',
@@ -129,21 +130,22 @@ async function websocketRoute(fastify, options) {
 
                         // Sur deconnexion
                         socket.on('close', () => {
-                            games[gameId].scores["left"] = 11;
+                            gameRoute.games[gameId].scores["left"] = 11;
                         });
                         waiting_list.on('close', () => {
-                            games[gameId].scores["right"] = 11;
+                            gameRoute.games[gameId].scores["right"] = 11;
                         });
                     } 
                 } else if (type == "disconnection") {
                     if (gameId != -1) {
                         // console.log(games[gameId]);
-                        delete games[gameId];
+                        delete gameRoute.games[gameId];
                     }
                     // Client asking for game infos, instead of a fetch
                 } else if (type === "game_info") {
-                    // const targetSocket = connectedClients.get(data.target);
-                    
+                    const targetSocket = connectedClients.get(data.target);
+                    // return saa game
+                    console.log(gameRoute.games);
                 }
             });
 
@@ -153,6 +155,4 @@ async function websocketRoute(fastify, options) {
     });
 }
 
-export default websocketRoute;
-
-
+export default fastifyPlugin(websocketRoute);

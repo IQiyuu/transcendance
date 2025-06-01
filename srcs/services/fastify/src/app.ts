@@ -29,7 +29,7 @@ async function main(){
     let lang_file = await load_lang_file("en");
     let view = new SiteView(lang_file);
     
-    view.addEvents();
+    view.add_events();
 
     if (await view.is_logged())
         view.connect(sessionStorage.username);

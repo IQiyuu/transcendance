@@ -2,13 +2,21 @@ import {ClientSocket} from "./ClientSocket.js";
 
 // Game for a given client
 export class   Game{
+    /**
+     * Controller
+     */
     private game_id : number;
     private side = null;
     private key_state = null;
     private opponent = null;
 
+    /**
+     * View
+    */
     // private canvas = document.getElementById("pong") as HTMLCanvasElement;
     private canvas = document.getElementById("pong");
+    private left_player_tag = document.getElementById("player-left");
+    private right_player_tag = document.getElementById("player-right");
 
     private cws : ClientSocket = null;
 
@@ -18,15 +26,50 @@ export class   Game{
         this.side = side;
         this.opponent = opponent;
         this.game_id = id;
+
+        //Launch the animation
+        requestAnimationFrame(() => this.update_state());
+    }
+
+    key_handler(e){
+        this.key_state[e.code] = (e.type === "keydown");
+    }
+
+    moves(wcs){
+        if (this.key_state["ArrowUp"] || this.key_state["ArrowDown"]) {
+            // wsc
+        }
+    }
+
+
+    init(){
+        // this.left_player_tag.textContent = game.players.left || "Player 1";
+        // this.right_player_tag.textContent = game.players.right || "Player 2";
+
+        this.canvas.addEventListener("keydown",  this.key_handler);
+        this.canvas.addEventListener("keyup",  this.key_handler);
+        this.canvas.addEventListener("S",  this.key_handler);
+        this.canvas.addEventListener("W",  this.key_handler);
+        this.key_state["KeyW"] = false;
+        this.key_state["KeyS"] = false;
+        this.key_state["ArrowUp"] = false;
+        this.key_state["ArrowDown"] = false;
+
+        setInterval(this.moves, 10, this.cws);
     }
 
     is_local(){
         return (this.cws === null);
     }
-    update(state){
 
+    update_state(){
+        
     }
 
+    start(){
+        //say to server we are ready
+
+    }
     // Fait une requete qui va bouger les paddles (raquettes)
     // async moves(local) {
     //     if (!local) {
@@ -53,7 +96,7 @@ export class   Game{
     //     else {
     //         // console.log(keyState);
     //         if (keyState["KeyW"] || keyState["KeyS"] || keyState["ArrowUp"] || keyState["ArrowDown"]) {
-    //             const body = { 
+    //             const body = {
     //                 gameId: _gameId, 
     //                 moveRight: (keyState["ArrowUp"] || keyState["ArrowDown"]) ? keyState["ArrowUp"] : null,
     //                 moveLeft: (keyState["KeyW"] || keyState["KeyS"]) ? keyState["KeyW"] : null,
@@ -97,10 +140,6 @@ export class   Game{
 
 // let _gameId = -1;
 
-// var keyState = {};
-
-// let _mod = null;
-
 
 // // Rentre la game dans la db
 // async function saveGame(game) {
@@ -139,8 +178,7 @@ export class   Game{
 
 //         const game = await response.json();
 
-//         document.getElementById("player-left").textContent = game.players.left || "Player 1";
-//         document.getElementById("player-right").textContent = game.players.right || "Player 2";
+
 //         document.getElementById("score-left").textContent = game.scores.left;
 //         document.getElementById("score-right").textContent = game.scores.right;
 
@@ -203,23 +241,13 @@ export class   Game{
 //     requestAnimationFrame(() => draw(ws, local));
 // }
 
-// // Recupere les touches enfoncees
-// function keyHandler(e){
-//     keyState[e.code] = (e.type === "keydown");
-// }
+
  
 
 
 // // Lance la partie
 // function startGame(oponnent, ws, local) {
-//     canvas.addEventListener("keydown",  keyHandler);
-//     canvas.addEventListener("keyup",  keyHandler);
-//     canvas.addEventListener("S",  keyHandler);
-//     canvas.addEventListener("W",  keyHandler);
-//     keyState["KeyW"] = false;
-//     keyState["KeyS"] = false;
-//     keyState["ArrowUp"] = false;
-//     keyState["ArrowDown"] = false;
+
 //     document.getElementById("menu").classList.replace("block", "hidden");
 //     document.getElementById("game_box").classList.replace("hidden", "flex");
 //     canvas.tabIndex = 1000;
