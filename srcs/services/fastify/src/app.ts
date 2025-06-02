@@ -545,23 +545,6 @@ await main();
 // }
 
 
-// // const utils = require("./utils.js");
-// // utils.hide_menu();
-
-
-// document.getElementById("tournament_button").addEventListener("click", async(event) => {
-//     event.preventDefault();
-
-//     utils.hide_menu();
-//     utils.print_tournament_page();
-// });
-
-// document.getElementById("tournament_create_button").addEventListener("click", async(event) => {
-//     event.preventDefault();
-
-//     utils.hide_menu();
-//     utils.print_tournament_form();
-// })
 
 // document.getElementById("tournament_join_button").addEventListener("click", async(event) => {
 //     event.preventDefault();
@@ -621,34 +604,3 @@ await main();
 //     // }
 // });
 
-// document.getElementById("tournament_form").addEventListener("submit", async(event) => {
-//     event.preventDefault();
-
-//     //Verifier que l'input est valide avant de l'envoyer !
-//     console.log("Creator of tournament: " + _username);
-//     document.getElementById("tournament_creation").append(document.createTextNode("Processing formulaire ;)"));
-    
-//     const name = document.getElementById("tournament_name") as HTMLInputElement;
-//     try {
-//         const body = {
-//             owner: _username,
-//             tournament_name: name.value
-//         }
-//         const resp = await fetch('/tournament', {
-//             method: 'POST',
-//             headers: { "Content-Type": "application/json" },
-//             body: JSON.stringify(body)
-//         });
-//         const data = await resp.json();
-//         if (data.success) {
-//             utils.hide_tournament_form();
-//             utils.print_tournament(data);
-//         }
-//         else
-//             throw (Error("Something unknowed occured"));
-    
-//     } catch(error) {
-//         console.log("error: ", error);
-//     }
-
-// });

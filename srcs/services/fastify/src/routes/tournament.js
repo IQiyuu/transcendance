@@ -46,7 +46,9 @@ async function tournamentRoute (fastify, options) {
     */
 
     //Create a tournament
-    fastify.post('/tournament', async (request, reply) => {
+    fastify.post('/tournament/create', async (request, reply) => {
+        // securiser la route !!
+        // ..
         try {
             tournaments[tournamentId] = new Tournament(request.body.owner, tournamentId, request.body.tournament_name);
             return {success: true, tournamentId: tournamentId++};
@@ -73,6 +75,8 @@ async function tournamentRoute (fastify, options) {
         }
         // Checking tournament
         */
+        // securiser la route !!
+        // ..
         const tournament = tournaments[request.params.id];
         //Adding user to tournament
         tournament.players.addPlayer();
@@ -82,7 +86,8 @@ async function tournamentRoute (fastify, options) {
 
     //Printing the list of tournaments
     fastify.get('/tournaments', async (request, reply) => {
-        // VERIFIER SI l'USER EST AUTHENTIFIER
+        // securiser la route !!
+        // ..
         try {
             let res = getAvailableTournaments(tournaments);
             return {success: true, tournaments: tournaments};
@@ -94,6 +99,8 @@ async function tournamentRoute (fastify, options) {
 
     //Tournament's info
     fastify.get('/tournament/:id', async (request, reply) => {
+        // securiser la route !!
+        // ..
         const tournament = tournaments[request.params.id];
         if (!tournament) return reply.status(404).send({ error: 'Tournament not found' });
         return tournament;

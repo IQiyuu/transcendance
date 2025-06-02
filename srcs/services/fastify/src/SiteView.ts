@@ -1,5 +1,6 @@
 import {ClientSocket} from "./ClientSocket.js";
 import {Game} from "./pong.js";
+import {Tournament} from "./Tournament.js";
 
 export class SiteView{
 
@@ -9,7 +10,7 @@ export class SiteView{
     private cws : ClientSocket = null;
 
     private game : Game = null;
-
+    private tournament : Tournament = null;
     private is_searching : boolean = false;
 
     //View attributes
@@ -26,6 +27,10 @@ export class SiteView{
     private profile_btn;
     private online_play_btn;
     private offline_play_btn;
+    private tournament_btn;
+    private tournament_create_btn;
+    private tournament_join_btn;
+    private about_btn;
     
     //      Interval for timings
     private interval_id;
@@ -45,6 +50,12 @@ export class SiteView{
         this.online_play_btn = document.getElementById("matchmaking");
         this.offline_play_btn = document.getElementById("offline");
         this.profile_btn = document.getElementById("profile_button");
+        this.tournament_btn = document.getElementById("tournament");
+        this.tournament_create_btn = document.getElementById("tournament_create_button");
+        this.tournament_join_btn = document.getElementById("tournament_join_button");
+        this.about_btn = document.getElementById("about_button");
+
+        this.tournament = new Tournament(this, this.cws);
     }
 
     // Controller part
@@ -144,7 +155,7 @@ export class SiteView{
         });
 
         // Show about page
-        document.getElementById("about_button").addEventListener("click", async (event) => {
+        this.about_btn.addEventListener("click", async (event) => {
             event.preventDefault();
 
             this.hide_menu();
@@ -207,6 +218,14 @@ export class SiteView{
             // ...
             this.print_profile_page();
         });
+
+        //Tournament menu
+        this.tournament_btn.addEventListener("click", async(event) => {
+            event.preventDefault();
+            this.hide_btn_menu();
+            this.print_tournament_btns();
+        });
+        this.tournament.addEvents();
     }
     
     start_matchmaking(){
@@ -335,19 +354,20 @@ export class SiteView{
     hide_play_page(){
         this.play_page.classList.replace("block", "hidden");
     }
-    
-    print_tournament_page(){
-        this.tournament_page.classList.replace("hidden", "flex");
+
+    print_tournament_btns(){
+        this.tournament_create_btn.classList.replace("hidden", "flex");
+        this.tournament_join_btn.classList.replace("hidden", "flex");
     }
 
-    hide_tournament_page(){
-        this.tournament_page.classList.replace("flex", "hidden");
+    hide_tournament_btns(){
+        this.tournament_create_btn.classList.replace("flex", "hidden");
+        this.tournament_join_btn.classList.replace("flex", "hidden");
     }
 
     print_error_page(){
         console.log("error");
     }
-
 
     hide_all(){
         this.hide_register_page();
@@ -356,6 +376,16 @@ export class SiteView{
         this.hide_about_page();
         this.hide_play_page();
         this.hide_profile_page();
+        this.tournament.hide_all();
+    }
+
+    hide_btn_menu(){
+        this.online_play_btn.classList.replace("flex", "hidden");
+        this.offline_play_btn.classList.replace("flex", "hidden");
+        this.profile_btn.classList.replace("flex", "hidden");
+        this.tournament_btn.classList.replace("flex", "hidden");
+        this.hide_tournament_btns();
+        this.about_btn.classList.replace("flex", "hidden");
     }
 
     print_current_page(){
