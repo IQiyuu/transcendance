@@ -9,7 +9,7 @@ export class ClientSocket{
     private user_id : number = -1;
     private view;
 
-    protected _game : Game = null;
+    protected game : Game = null;
 
     constructor(username, view){
         this.username = username;
@@ -18,7 +18,14 @@ export class ClientSocket{
         this.view = view;
     }
 
-    get_username(){}
+    get_username(){
+        return (this.username);
+    }
+
+    set_game(g : Game){
+        this.game = g;
+    }
+
     // async isLoggedIn() { // maybe useless, as I copied it to controller
     //     try {
     //         const response = await fetch('/protected', {
@@ -49,10 +56,11 @@ export class ClientSocket{
         }
         
         this.ws.onmessage = (message) => {
+            console.log("msg recu");
             const data = JSON.parse(message.data);
-            if (data)
+            if (data === null)
                 return ; // ERROR
-            console.log("You got a mail, ", data.user);
+            // console.log("You got a mail, ", data.type);
             // appendMessage(message);
             if (data.type == "connection") {
                 // this.view.friend_connect();
@@ -73,14 +81,15 @@ export class ClientSocket{
             } else if (data.type == "matchmaking") {
                 if (data.state == "found") {
                     this.view.stop_matchmaking_animation();
-                    this.view.createGame(data.gameId, data.role, data.opponent);
-                    // this._role = data.role;
-                    // this._gameId = data.gameId;
-                    // console.log("game starting ", this._gameId);
-                    // startGame(data.opponent, this._ws, false);
+                    this.view.hide_all();
+                    this.game = this.view.createGame(data.gameId, data.role, data.opponent);
+                    this.view.print_play_page();
+                    // this.game.start();
                 }
             } else if (data.type === "game_info"){
-                // if (data.)
+                // if valid
+                // ...
+                this.game.update_state(data.game);
             }
         };
 
@@ -109,6 +118,24 @@ export class ClientSocket{
         this.ws.send(JSON.stringify({
             type: "matchmaking",
             state: "left"
+        }));
+    }
+
+    // Tell the server game is ready to start
+    say_ready(){
+        this.ws.send(JSON.stringify({
+            type : "game_start"
+        }));
+    }
+
+    // Update the server with movements
+    update_pos(game_id, key, side){
+        console.log("Sending " +  game_id + key + side);
+        this.ws.send(JSON.stringify({
+            type : "game_update",
+            game_id : game_id,
+            moveUp : key,
+            side : side
         }));
     }
 

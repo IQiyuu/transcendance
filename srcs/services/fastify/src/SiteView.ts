@@ -160,7 +160,7 @@ export class SiteView{
             console.log("LOADING DOM");
         });
 
-        //Online making
+        //Online playing
         this.online_play_btn.addEventListener("click", (event) => {
             event.preventDefault();
 
@@ -191,7 +191,9 @@ export class SiteView{
                 const data = await resp.json();
                 if (data.success) {
                     // startGame(null, this._ws, true);
-                    this.game = new Game(this.cws, data.id, null, null);
+                    this.game = new Game(this.cws, data.id, null, this.cws.get_username().concat("-2"), true);
+                    this.cws.set_game(this.game);
+                    // this.game.start();
                 }
             } catch (error) {
                 console.log("error: ", error);
@@ -222,16 +224,12 @@ export class SiteView{
         if (sessionStorage != null && sessionStorage.getItem("username") === null)
             return (false);
         try {
-            console.log("fetching protected");
             const response = await fetch('/protected', {
                 method: 'GET',
                 credentials: 'include'
             });
-            console.log("response is" + response);
     
             const data = await response.json();
-            console.log("data is" + data);
-            console.log("1 " + response.ok + " 2 " + data.success);
 
             return (response.ok === true && data.success === true);
         } catch (error) {
@@ -255,9 +253,9 @@ export class SiteView{
     // Creating a game for online players
     createGame(gameId, role, opponent){
         console.log("Match with ", opponent);
-        this.game = new Game(this.cws, gameId, role, opponent);
-
-        this.game.start();
+        this.game = new Game(this.cws, gameId, role, opponent, false);
+        // this.game.start();
+        return (this.game);
     }
 
     /**

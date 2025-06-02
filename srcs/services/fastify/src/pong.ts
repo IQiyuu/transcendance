@@ -1,5 +1,7 @@
 import {ClientSocket} from "./ClientSocket.js";
 
+const paddleWidth = 10, paddleHeight = 100;
+
 // Game for a given client
 export class   Game{
     /**
@@ -7,138 +9,150 @@ export class   Game{
      */
     private game_id : number;
     private side = null;
-    private key_state = null;
+    public key_state = {};
     private opponent = null;
+    private is_local : boolean = false;
+
+    private l_score : number = 0;
+    private r_score : number = 0;
+
+    private l_paddle_x : number = 10;
+    private l_paddle_y : number = 0;
+
+    private r_paddle_x : number = 680;
+    private r_paddle_y : number = 0;
+
+    private ball_x : number = 0;
+    private ball_y : number = 0;
+    
 
     /**
      * View
     */
-    // private canvas = document.getElementById("pong") as HTMLCanvasElement;
-    private canvas = document.getElementById("pong");
+    private canvas = document.getElementById("pong") as HTMLCanvasElement;
+    private ctx = this.canvas.getContext("2d");
+
     private left_player_tag = document.getElementById("player-left");
     private right_player_tag = document.getElementById("player-right");
 
+    private score_left = document.getElementById("score-left");
+    private score_right = document.getElementById("score-right");
     private cws : ClientSocket = null;
 
 
-    constructor(socket, id, side, opponent){
+    constructor(socket, id, side, opponent, is_local){
+        console.log("Client game created !");
         this.cws = socket;
         this.side = side;
         this.opponent = opponent;
         this.game_id = id;
+        this.is_local = is_local;
+
+        this.init();
 
         //Launch the animation
-        requestAnimationFrame(() => this.update_state());
+        requestAnimationFrame(() => this.draw());
+    }
+
+    getSide(){
+        return this.side;
+    }
+
+    isLocal(){
+        return this.is_local;
     }
 
     key_handler(e){
         this.key_state[e.code] = (e.type === "keydown");
     }
 
-    moves(wcs){
-        if (this.key_state["ArrowUp"] || this.key_state["ArrowDown"]) {
-            // wsc
+    /** W and S for left player if 2 player, else UP and DOWN */
+    moves(obj, cws){
+        if (obj.key_state["ArrowUp"] || obj.key_state["ArrowDown"]) {
+            cws.update_pos(obj.getGameId(), obj.key_state["ArrowUp"], obj.isLocal() ? "right" : obj.get_side());
+        }
+        if (obj.isLocal() && (obj.key_state["KeyW"] || obj.key_state["KeyS"])){
+            cws.update_pos(obj.getGameId(), obj.key_state["KeyW"], "left");
         }
     }
 
 
     init(){
-        // this.left_player_tag.textContent = game.players.left || "Player 1";
-        // this.right_player_tag.textContent = game.players.right || "Player 2";
-
-        this.canvas.addEventListener("keydown",  this.key_handler);
-        this.canvas.addEventListener("keyup",  this.key_handler);
-        this.canvas.addEventListener("S",  this.key_handler);
-        this.canvas.addEventListener("W",  this.key_handler);
-        this.key_state["KeyW"] = false;
-        this.key_state["KeyS"] = false;
+        this.canvas.addEventListener("keyup", this.key_handler);
+        this.canvas.addEventListener("keydown", this.key_handler);
+        if (this.is_local){
+            this.canvas.addEventListener("W",  this.key_handler);
+            this.canvas.addEventListener("S",  this.key_handler);
+        }
         this.key_state["ArrowUp"] = false;
         this.key_state["ArrowDown"] = false;
+        this.key_state["KeyW"] = false;
+        this.key_state["KeyS"] = false;
 
-        setInterval(this.moves, 10, this.cws);
-    }
-
-    is_local(){
-        return (this.cws === null);
-    }
-
-    update_state(){
         
+        this.l_paddle_y = this.canvas.height / 2 - paddleHeight / 2;
+        this.r_paddle_y = this.canvas.height / 2 - paddleHeight / 2;
+        
+        this.print_player_names();
+        
+        //testing
+        setInterval(this.moves, 10, this, this.cws);
     }
 
-    start(){
-        //say to server we are ready
+    // Update every game values
+    update_state(game){
+        this.l_score = game.scores.left;
+        this.r_score = game.scores.right;
 
+        this.ball_x = game.ball.x;
+        this.ball_y = game.ball.y;
+
+        this.l_paddle_x = game.paddles.left.x;
+        this.l_paddle_y = game.paddles.left.y;
+
+        this.r_paddle_x = game.paddles.right.x;
+        this.r_paddle_y = game.paddles.right.y;
     }
-    // Fait une requete qui va bouger les paddles (raquettes)
-    // async moves(local) {
-    //     if (!local) {
-    //         if (this._keyState["ArrowUp"] || this._keyState["ArrowDown"]) {
-    //             const body = { 
-    //                 gameId: _gameId, 
-    //                 role: _role,
-    //                 moveUp: this._keyState["ArrowUp"],
-    //             };
-    //             try {
-    //                 const response = await fetch(`/game/${_gameId}/move`, {
-    //                     method: "POST",
-    //                     headers: { "Content-Type": "application/json" },
-    //                     body: JSON.stringify(body),
-    //                 });
-    
-    //                 if (!response.ok)
-    //                     console.log("error in movement request");
-    //             } catch (error) {
-    //                 console.log("error: ", error);
-    //             }
-    //         }
-    //     }
-    //     else {
-    //         // console.log(keyState);
-    //         if (keyState["KeyW"] || keyState["KeyS"] || keyState["ArrowUp"] || keyState["ArrowDown"]) {
-    //             const body = {
-    //                 gameId: _gameId, 
-    //                 moveRight: (keyState["ArrowUp"] || keyState["ArrowDown"]) ? keyState["ArrowUp"] : null,
-    //                 moveLeft: (keyState["KeyW"] || keyState["KeyS"]) ? keyState["KeyW"] : null,
-    //             };
-    //             try {
-    //                 const response = await fetch(`/game/local/${_gameId}/move`, {
-    //                     method: "POST",
-    //                     headers: { "Content-Type": "application/json" },
-    //                     body: JSON.stringify(body),
-    //                 });
-    
-    //                 if (!response.ok)
-    //                     console.log("error in movement request");
-    //             } catch (error) {
-    //                 console.log("error: ", error);
-    //             }
-    //         }
-    //     }
-    // };
+
+    // start(){
+    //     //say to server we are ready
+    //     this.cws.say_ready();
+    // }
+
+    /**
+     * View part
+    */
+
+    // draw the canva with values
+    draw(){
+        this.score_left.textContent = String(this.l_score);
+        this.score_right.textContent = String(this.r_score);
+
+        // paddles
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+//         ctx.fillStyle = "rgb(160, 94, 204)";
+//         ctx.fillRect(0, 0, canvas.width, canvas.height);
+        //ball
+    }
+
+    print_player_names(){
+        if (this.side === "left"){
+            this.left_player_tag.textContent = this.cws.get_username() || "Player 1";
+            this.right_player_tag.textContent = this.opponent || "Player 2";
+        }
+        else{
+            this.left_player_tag.textContent = this.opponent || "Player 1";
+            this.right_player_tag.textContent = this.cws.get_username() || "Player 2";
+        }
+    }
 };
 
 // /*----------------------------------------------------------------------------------------*/
-// const matchmaking_btn = document.getElementById("matchmaking");
-// const ctx = canvas.getContext("2d");
 // let _userId = sessionStorage.userId;
-// let _role = null;
 
-// const paddleWidth = 10, paddleHeight = 100;
 // const ballRadius = 5;
 
-// let leftPaddleY = canvas.height / 2 - paddleHeight / 2;
-// let rightPaddleY = canvas.height / 2 - paddleHeight / 2;
-
-
-// let leftScore = 0;
-// let rightScore = 0;
-// let leftUsername = null;
-// let rightUsername = null;
-
 // let _winningScore = 11; // const ??
-
-// let _gameId = -1;
 
 
 // // Rentre la game dans la db
@@ -179,9 +193,6 @@ export class   Game{
 //         const game = await response.json();
 
 
-//         document.getElementById("score-left").textContent = game.scores.left;
-//         document.getElementById("score-right").textContent = game.scores.right;
-
 //         if (game.scores.left == _winningScore || game.scores.right == _winningScore) {
 //             const winner = game.scores.left == 11 ? "left" : "right";
 //             if (ws && _role == winner)
@@ -190,9 +201,7 @@ export class   Game{
 //             return ;
 //         }
 
-//         ctx.clearRect(0, 0, canvas.width, canvas.height);
-//         ctx.fillStyle = "rgb(160, 94, 204)";
-//         ctx.fillRect(0, 0, canvas.width, canvas.height);
+
 //         // Dimensions du rectangle
 //         const rectWidth = 700;
 //         const rectHeight = 500;
@@ -248,11 +257,7 @@ export class   Game{
 // // Lance la partie
 // function startGame(oponnent, ws, local) {
 
-//     document.getElementById("menu").classList.replace("block", "hidden");
-//     document.getElementById("game_box").classList.replace("hidden", "flex");
 //     canvas.tabIndex = 1000;
-//     console.log("moves available, playing against: ", oponnent);
-//     console.log(local);
 //     draw(ws, local);
 // }
 
@@ -280,22 +285,6 @@ export class   Game{
 //     await displayMenu();
 // }
 
-
-
-// // Se connecte en socket avec le serveur et attend un autre utilisateur.
-// async function matchmaking(event) {
-//     if (!searching) {
-//         startMatchmakingAnimation();
-//         searching = true;
-
-//     }
-//     else {
-//         searching = false;
-//         console.log("queue stopped.");
-//         stopMatchmakingAnimation();
-
-//     }
-// }
 
 // function fillCanvas() {
 //     ctx.fillStyle = "rgb(160, 94, 204)";

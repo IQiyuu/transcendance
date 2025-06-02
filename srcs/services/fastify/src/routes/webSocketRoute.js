@@ -136,16 +136,25 @@ async function websocketRoute(fastify, options) {
                             gameRoute.games[gameId].scores["right"] = 11;
                         });
                     } 
-                } else if (type == "disconnection") {
+                } else if (data.type === "disconnection") {
                     if (gameId != -1) {
                         // console.log(games[gameId]);
                         delete gameRoute.games[gameId];
                     }
                     // Client asking for game infos, instead of a fetch
-                } else if (type === "game_info") {
+                } else if (data.type === "game_info") {
+                    // If valid
+                    // ...
                     const targetSocket = connectedClients.get(data.target);
-                    // return saa game
-                    console.log(gameRoute.games);
+                    socket.send(JSON.stringify({
+                        type: 'game_info',
+                        game: game.games[data.game_id]
+                    }));
+                } else if (data.type === "game_update") {
+                    //if Valid
+                    //...
+                    var game = game.games[data.game_id];
+                    gameRoute.movePaddle(game, data.side, data.moveUp);
                 }
             });
 

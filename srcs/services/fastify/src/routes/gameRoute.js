@@ -25,7 +25,7 @@ export function createGame(l_name, r_name) {
     const neg_x = randomIntFromInterval(0,1), neg_y = randomIntFromInterval(0,1);
     games[gameId] = {
         id: gameId,
-            players: {  
+        players: {  
             left: l_name,
             right: r_name
         },
@@ -64,6 +64,16 @@ export function createGame(l_name, r_name) {
     }
     return gameId;
 };
+
+export function movePaddle(game, side, moveUp){
+    if (side === null)
+        return ;
+    if (side === "left"){
+        game.paddles.left.y += moveUp ? -4 : 4;
+    } else {
+        game.paddles.right.y += moveUp ? -4 : 4;
+    }
+}
 
 export async function gameRoute (fastify, options) {
     let waiting_list = null;
