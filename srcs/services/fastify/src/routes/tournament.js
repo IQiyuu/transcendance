@@ -1,4 +1,5 @@
 import Fastify from 'fastify';
+// import {} from './webSocketRoute.js';
 
 async function tournamentRoute (fastify, options) {
     let tournaments = [];
@@ -9,12 +10,19 @@ async function tournamentRoute (fastify, options) {
     function addTournament(tournaments, newT, tournamentId){
         tournaments[tournamentId] = newT;
     };
+
+    function needAuthRoute(route){
+        return (route === '/tournaments'|| route === '/tournament/leave')
+    }
     
     //Securising all tournaments routes :
     fastify.addHook('preValidation', async (request, reply) => {
-        if (request.routerPath === '/tournaments' && (request.query.username === null || request.query.username === undefined)) {
-            reply.code(403).send('Connection rejected: missing username');
+        if (needAuthRoute(request.routerPath) && (request.query.username === null || request.query.username === undefined)) {
+            reply.code(403).send('Tournament op rejected: missing username');
         }
+
+        if (request.routerPath === "/tournament/kick" && (request.query.username2 === null || request.query.username2 === undefined))
+            reply.code(403).send('Tournament op rejected: missing username');
         /**
         if (!isAuthentificated())
          */
@@ -32,6 +40,11 @@ async function tournamentRoute (fastify, options) {
             tournament.players.push(player);
     }
 
+    function addPlayer(tournament, player) {
+        if (tournament.players.length < TOURNAMENT_SIZE && !tournament.players.includes(player))
+            tournament.players.push(player);
+    }
+
     function    getAvailableTournaments(tournaments, username){
         let res = [];
         tournaments.forEach(element => {
@@ -43,12 +56,23 @@ async function tournamentRoute (fastify, options) {
     }
 
     function    existsTournament(tournaments, id){
+        if (tournaments === null || tournaments === undefined)
+            return (false);
+
         let i = 0, size = tournaments.length;
         while (i < size){
             if (tournaments[i].id == id)
                 return (true);
             i++;
         }
+        return (false);
+    }
+
+    function    inTournament(tournament, player){
+        tournament.players.forEach((p) => {
+            if (p === player)
+                return (true);
+        })
         return (false);
     }
 
@@ -70,8 +94,6 @@ async function tournamentRoute (fastify, options) {
             return {success: false, message: error};
         }
     });
-
-
 
     //Join a tournament
     fastify.get('/tournament/join_:id', async (request, reply) => {
@@ -125,8 +147,43 @@ async function tournamentRoute (fastify, options) {
     });
 
     //Leave a tournament
+    fastify.get('/tournament/leave/:id', async (request, reply) => {
+        let t_id = request.params.id;
+        if (!existsTournament(tournaments, t_id))
+            return {success: false, error: "Tournament doesnt exists"}
+        
+        let t = tournaments[request.params.id];
+        if (!inTournament(t, username))
+            return {success: false, error: "Player not in the tournament"}
 
-    
+        if (request.username === t.owner && t.players.length > 1)
+            return {success: false, error: "Owner can't leave the room while other players are present"}
+
+        removePlayer(t, request.username);
+        sock.updatePlayers(t);
+        return {success: true};
+    });
+
+    //disband ? kick every player then leave
+
+    fastify.get('/tournament/kick/:id', async(request, reply) => {
+        let t_id = request.params.id;
+        let owner = request.query.username;
+        let player = request.query.username2;
+
+        if (!existsTournament(tournaments, t_id))
+            return {success: false, error: "Tournament doesnt exists"};
+        
+        let t = tournaments[request.params.id];
+        if (!inTournament(t, username2))
+            return {success: false, error: "Player not in the tournament"};
+
+        if (owner !== t.owner)
+            return {success: false, error: "You are not the owner"};
+
+        removePlayer(t, request.username);
+        sock.updatePlayers(t);
+    })
     //Starting the tournament
 
 }

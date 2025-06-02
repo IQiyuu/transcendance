@@ -1,18 +1,23 @@
 import {ClientSocket} from "./ClientSocket.js";
 import { SiteView } from "./SiteView.js";
 
+// class Tournament{
 
-export class Tournament{
+// }
+
+export class TournamentView{
     
     /**CONTROLER */
     private cws : ClientSocket = null;
     private site : SiteView = null;
+    // private tournament : Tournament = null;
+    private tournament : boolean = false;
 
     /**VIEW */
     private tournament_page;
     private tournaments_page;
     
-    private tournament;
+    private tournament_div;
     private tournaments_list;
 
     private tournament_form;
@@ -28,7 +33,7 @@ export class Tournament{
         this.tournaments_page = document.getElementById('tournaments_join');
 
         this.tournament_form = document.getElementById("tournament_form");
-        this.tournament = document.getElementById("tournament");
+        this.tournament_div = document.getElementById("tournament");
         this.tournaments_list = document.getElementById('tournaments_list');
 
         this.tournament_create_btn = document.getElementById("tournament_create_button");
@@ -43,6 +48,12 @@ export class Tournament{
         this.tournament_create_btn.addEventListener("click", (event) => {
             event.preventDefault();
 
+            // if (this.tournament !== null && this.tournament !== undefined){
+            if (this.tournament){
+                // print_error("You're already registered for a tournament");
+                alert("You're already registered for a tournament");
+                return ;
+            }
             this.site.hide_all();
 
             this.print_tournament_page();
@@ -68,6 +79,7 @@ export class Tournament{
                 if (data.success) {
                     this.hide_tournament_form();
                     this.print_tournament(data.tournament);
+                    this.tournament = true;
                 }
                 else
                     throw (Error("Data retrieved not successful (tournament.ts)"));
@@ -104,11 +116,11 @@ export class Tournament{
                             list.appendChild(document.createTextNode("List of tournaments available")); // maybe with an h3 instead
                             while (i < size){
                                 let el = document.createElement("li");
-                                el.appendChild(document.createTextNode(data.tournaments[i].name)); // Maybe I'll have to add a link ?
+                                el.appendChild(document.createTextNode(data.tournaments[i].name));
+                                el.appendChild(document.createTextNode(data.tournaments[i].players.length + "/" + "8"));
                                 el.setAttribute("tournament_id", data.tournaments[i].id);
                                 el.addEventListener("click", async(event) => {
                                     event.preventDefault();
-                                    console.log("Joinnig someone");
                                     try {
                                         let url = '/tournament/join_' + (event.target as Element).getAttribute("tournament_id") + "?username=" + this.cws.get_username();
                                         const resp = await fetch(url, {
@@ -120,6 +132,7 @@ export class Tournament{
                                             this.site.hide_all();
                                             this.clear_tournament();
                                             this.print_tournament_page();
+                                            this.tournament = true;
                                             this.print_tournament(data.tournament);
                                         }else
                                             throw Error("data not successful while joining tournament");
@@ -159,7 +172,7 @@ export class Tournament{
     }
 
     print_tournament(tournament){
-        this.tournament.classList.replace("hidden", "block");
+        this.tournament_div.classList.replace("hidden", "block");
         console.log("printing " + tournament);
 
         let title = document.createElement("h3");
@@ -181,9 +194,6 @@ export class Tournament{
 
         table.append(tr);
 
-        console.log("testing tournament");
-        console.log(tournament);
-    
         //Next lines
         tournament.players.forEach(p => {
             tr = document.createElement("tr");
@@ -203,12 +213,34 @@ export class Tournament{
             table.append(tr);
         });
 
-        this.tournament.append(title);
-        this.tournament.append(table);
+        this.tournament_div.append(title);
+        this.tournament_div.append(table);
+
+        if (this.cws.get_username() === tournament.owner){
+            let start_button = document.createElement("button");
+            start_button.append(document.createTextNode("Start"));
+            this.tournament_div.append(start_button);
+        }
+
+        let leave_button = document.createElement("button");
+        leave_button.append(document.createTextNode("Leave"));
+        leave_button.addEventListener("click", this.leaveTournamentHandler);
+        this.tournament_div.append(leave_button);
+    }
+
+    async leaveTournamentHandler(event){
+        event.preventDefault();
+        console.log("Trying to leave so soon ?");
+
+        try{
+            // fetch HERE TODO
+        } catch (error){
+            console.log(error);
+        }
     }
 
     hide_tournament(){
-        this.tournament.classList.replace("block", "hidden");
+        this.tournament_div.classList.replace("block", "hidden");
     }
 
     print_tournament_form(){
@@ -220,7 +252,7 @@ export class Tournament{
     }
 
     clear_tournament(){
-        this.tournament.textContent = '';
+        this.tournament_div.textContent = '';
     }
 
     clear_tournaments(){

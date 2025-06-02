@@ -1,6 +1,6 @@
 import {ClientSocket} from "./ClientSocket.js";
 import {Game} from "./pong.js";
-import {Tournament} from "./Tournament.js";
+import {TournamentView} from "./Tournament.js";
 
 export class SiteView{
 
@@ -10,7 +10,7 @@ export class SiteView{
     private cws : ClientSocket = null;
 
     private game : Game = null;
-    private tournament : Tournament = null;
+    private tournament : TournamentView = null;
     private is_searching : boolean = false;
 
     //View attributes
@@ -55,7 +55,7 @@ export class SiteView{
         this.tournament_join_btn = document.getElementById("tournament_join_button");
         this.about_btn = document.getElementById("about_button");
 
-        this.tournament = new Tournament(this, this.cws);
+        this.tournament = new TournamentView(this, this.cws);
     }
 
     // Controller part
