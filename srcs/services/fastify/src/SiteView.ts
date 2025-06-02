@@ -50,7 +50,7 @@ export class SiteView{
         this.online_play_btn = document.getElementById("matchmaking");
         this.offline_play_btn = document.getElementById("offline");
         this.profile_btn = document.getElementById("profile_button");
-        this.tournament_btn = document.getElementById("tournament");
+        this.tournament_btn = document.getElementById("tournament_button");
         this.tournament_create_btn = document.getElementById("tournament_create_button");
         this.tournament_join_btn = document.getElementById("tournament_join_button");
         this.about_btn = document.getElementById("about_button");
@@ -152,6 +152,7 @@ export class SiteView{
 
             this.hide_all();
             this.print_menu();
+            this.print_btn_menu();
         });
 
         // Show about page
@@ -225,6 +226,7 @@ export class SiteView{
             this.hide_btn_menu();
             this.print_tournament_btns();
         });
+
         this.tournament.addEvents();
     }
     
@@ -263,7 +265,7 @@ export class SiteView{
     connect(username){
         this.cws = new ClientSocket(username, this);
         this.store_session(username);
-
+        this.tournament.setSocket(this.cws);
         this.hide_register_page();
         document.body.classList.remove("justify-center", "align-center", "flex");
         this.print_main_page();
@@ -376,7 +378,16 @@ export class SiteView{
         this.hide_about_page();
         this.hide_play_page();
         this.hide_profile_page();
+        this.hide_tournament_btns();
         this.tournament.hide_all();
+    }
+
+    print_btn_menu(){
+        this.online_play_btn.classList.replace("hidden", "flex");
+        this.offline_play_btn.classList.replace("hidden", "flex");
+        this.profile_btn.classList.replace("hidden", "flex");
+        this.tournament_btn.classList.replace("hidden", "flex");
+        this.about_btn.classList.replace("hidden", "flex");
     }
 
     hide_btn_menu(){
@@ -394,5 +405,4 @@ export class SiteView{
         else
             this.print_register_page();
     }
-    
 };

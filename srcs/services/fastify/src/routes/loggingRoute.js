@@ -73,7 +73,6 @@ async function logginRoute (fastify, options) {
           maxAge: 3600,
         });
 
-
         return { success: true, message: `Welcome ${username}`, username: username };
 
     } catch (error) {

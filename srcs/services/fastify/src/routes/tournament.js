@@ -10,8 +10,17 @@ async function tournamentRoute (fastify, options) {
         tournaments[tournamentId] = newT;
     };
     
+    //Securising all tournaments routes :
+    fastify.addHook('preValidation', async (request, reply) => {
+        if (request.routerPath === '/tournaments' && (request.query.username === null || request.query.username === undefined)) {
+            reply.code(403).send('Connection rejected: missing username');
+        }
+        /**
+        if (!isAuthentificated())
+         */
+    });
+
     function Tournament(owner, id, name) {
-        console.log("Creating a tournament")
         this.id = id;
         this.name = name;
         this.owner = owner;
@@ -19,13 +28,18 @@ async function tournamentRoute (fastify, options) {
     };
 
     function addPlayer(tournament, player) {
-        if (tournament.players.length < TOURNAMENT_SIZE)
-            tournament.players.append(player);
+        if (tournament.players.length < TOURNAMENT_SIZE && !tournament.players.includes(player))
+            tournament.players.push(player);
     }
 
     function    getAvailableTournaments(tournaments, username){
-
-        return (tournaments);
+        let res = [];
+        tournaments.forEach(element => {
+            if (element.owner !== username && !element.players.includes(username) && element.players.length < TOURNAMENT_SIZE){
+                res.push(element);
+            }
+        });
+        return (res);
     }
 
     function    existsTournament(tournaments, id){
@@ -35,7 +49,6 @@ async function tournamentRoute (fastify, options) {
                 return (true);
             i++;
         }
-
         return (false);
     }
 
@@ -51,7 +64,7 @@ async function tournamentRoute (fastify, options) {
         // ..
         try {
             tournaments[tournamentId] = new Tournament(request.body.owner, tournamentId, request.body.tournament_name);
-            return {success: true, tournamentId: tournamentId++};
+            return {success: true, tournament : tournaments[tournamentId], tournamentId: tournamentId++};
         } catch (error) {
             console.log("error: ", error);
             return {success: false, message: error};
@@ -62,10 +75,11 @@ async function tournamentRoute (fastify, options) {
 
     //Join a tournament
     fastify.get('/tournament/join_:id', async (request, reply) => {
+        console.log(request.query.username);
         // Checking user
         /*
         try{
-            let username = request.params.;
+            let username = request.params.body;
             if (!existsUser(username))
                 throw Error("Error, no user nammed " + username);
             if (!existsTournament(tournaments, request.params.id))
@@ -73,24 +87,27 @@ async function tournamentRoute (fastify, options) {
         } catch (error){
             return {success: false, error: error}
         }
-        // Checking tournament
         */
         // securiser la route !!
         // ..
         const tournament = tournaments[request.params.id];
         //Adding user to tournament
-        tournament.players.addPlayer();
-        //returning the tournament info
-        return tournament;
+        addPlayer(tournament, request.query.username);
+        //ServerSocket.sendMsg(); // HERE to update connected clients
+        return {success: true, tournament : tournament};
     });
 
     //Printing the list of tournaments
     fastify.get('/tournaments', async (request, reply) => {
         // securiser la route !!
-        // ..
+        // .. Maybe on hooks YESSSS
+        if (request.query.username === null || request.query.username === undefined){
+            return {success: false, error: "No username provided"};
+        } // useless if hook works
+
         try {
-            let res = getAvailableTournaments(tournaments);
-            return {success: true, tournaments: tournaments};
+            let res = getAvailableTournaments(tournaments, request.query.username);
+            return {success: true, tournaments: res};
         } catch (error) {
             console.log(error);
             return {success: false, message: error};
@@ -102,7 +119,8 @@ async function tournamentRoute (fastify, options) {
         // securiser la route !!
         // ..
         const tournament = tournaments[request.params.id];
-        if (!tournament) return reply.status(404).send({ error: 'Tournament not found' });
+        if (tournament === null || tournament === undefined)
+            return reply.status(404).send({ error: 'Tournament not found' });
         return tournament;
     });
 
