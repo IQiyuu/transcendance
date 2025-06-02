@@ -1,5 +1,4 @@
 import fs from 'fs';
-import fastifyPlugin from 'fastify-plugin';
 
 function randomIntFromInterval(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
@@ -332,4 +331,4 @@ export async function gameRoute (fastify, options) {
 }
 
 
-export default fastifyPlugin(gameRoute);
+export default gameRoute;

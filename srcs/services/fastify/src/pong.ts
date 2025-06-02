@@ -7,6 +7,8 @@ export class   Game{
     /**
      * Controller
      */
+    private cws : ClientSocket = null;
+
     private game_id : number;
     private side = null;
     public key_state = {};
@@ -24,20 +26,22 @@ export class   Game{
 
     private ball_x : number = 0;
     private ball_y : number = 0;
-    
 
     /**
      * View
     */
-    private canvas = document.getElementById("pong") as HTMLCanvasElement;
-    private ctx = this.canvas.getContext("2d");
+    private game = document.getElementById("game");
 
     private left_player_tag = document.getElementById("player-left");
     private right_player_tag = document.getElementById("player-right");
 
     private score_left = document.getElementById("score-left");
     private score_right = document.getElementById("score-right");
-    private cws : ClientSocket = null;
+
+    private ball = document.getElementById("ball");
+    private l_paddle = document.getElementById("l_paddle");
+    private r_paddle = document.getElementById("r_paddle");
+    
 
 
     constructor(socket, id, side, opponent, is_local){
@@ -78,11 +82,17 @@ export class   Game{
 
 
     init(){
-        this.canvas.addEventListener("keyup", this.key_handler);
-        this.canvas.addEventListener("keydown", this.key_handler);
+        // this.canvas.addEventListener("keyup", this.key_handler);
+        // this.canvas.addEventListener("keydown", this.key_handler);
+        // if (this.is_local){
+        //     this.canvas.addEventListener("W",  this.key_handler);
+        //     this.canvas.addEventListener("S",  this.key_handler);
+        // }
+        this.game.addEventListener("keyup", this.key_handler);
+        this.game.addEventListener("keydown", this.key_handler);
         if (this.is_local){
-            this.canvas.addEventListener("W",  this.key_handler);
-            this.canvas.addEventListener("S",  this.key_handler);
+            this.game.addEventListener("W",  this.key_handler);
+            this.game.addEventListener("S",  this.key_handler);
         }
         this.key_state["ArrowUp"] = false;
         this.key_state["ArrowDown"] = false;
@@ -90,11 +100,15 @@ export class   Game{
         this.key_state["KeyS"] = false;
 
         
-        this.l_paddle_y = this.canvas.height / 2 - paddleHeight / 2;
-        this.r_paddle_y = this.canvas.height / 2 - paddleHeight / 2;
+        // this.l_paddle_y = this.game.height / 2 - paddleHeight / 2;
+        // this.r_paddle_y = this.game.height / 2 - paddleHeight / 2;
         
         this.print_player_names();
-        
+
+        this.ball.style.position="relative";
+        this.l_paddle.style.position="relative";
+        this.r_paddle.style.position="relative";
+
         //testing
         setInterval(this.moves, 10, this, this.cws);
     }
@@ -123,16 +137,65 @@ export class   Game{
      * View part
     */
 
+    cooToPos_x(x){
+        return x;
+    }
+
+    cooToPos_y(y){
+        return y;
+    }
+    // Move both paddles
+    move_paddles(){
+        // Distance
+        this.l_paddle.style.left = this.cooToPos_x(this.l_paddle_x) + "px";
+        this.l_paddle.style.top = this.cooToPos_y(this.l_paddle_y) + "px";
+
+        this.r_paddle.style.left = this.cooToPos_x(this.r_paddle_x) + "px";
+        this.r_paddle.style.top = this.cooToPos_y(this.r_paddle_y) + "px";
+    }
+
+    // Move ball
+    move_ball(){
+        
+    }
+
     // draw the canva with values
     draw(){
-        this.score_left.textContent = String(this.l_score);
-        this.score_right.textContent = String(this.r_score);
+        console.log("Moving paddles");
+        this.move_paddles();
+        this.move_ball();
+        // this.score_left.textContent = String(this.l_score);
+        // this.score_right.textContent = String(this.r_score);
 
-        // paddles
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-//         ctx.fillStyle = "rgb(160, 94, 204)";
-//         ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        // this.ctx.fillStyle = "rgb(160, 94, 204)";
+        // this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+        // // Calcul pour centrer
+        // const size_x = (this.canvas.width - rectWidth) / 2;
+        // const size_y = (this.canvas.height - rectHeight) / 2;
+
+        // // Dimensions du rectangle
+        // const rectWidth = 700;
+        // const rectHeight = 500;
+
+
+        // this.ctx.fillStyle = "black";
+        // // paddles
+        // this.ctx.fillRect(
+        //     size_x + game.paddles.left.x,
+        //     size_y + game.paddles.left.y,
+        //     paddleWidth,
+        //     paddleHeight
+        // );
+        // this.ctx.fillRect(
+        //     size_x + game.paddles.right.x,
+        //     size_y + game.paddles.right.y,
+        //     paddleWidth,
+        //     paddleHeight
+        // );
         //ball
+
     }
 
     print_player_names(){
@@ -202,27 +265,9 @@ export class   Game{
 //         }
 
 
-//         // Dimensions du rectangle
-//         const rectWidth = 700;
-//         const rectHeight = 500;
-//         // Calcul pour centrer
-//         const x = (canvas.width - rectWidth) / 2;
-//         const y = (canvas.height - rectHeight) / 2;
 
-//         ctx.fillStyle = "black";
 //         // Paddles
-//         ctx.fillRect(
-//             x + game.paddles.left.x,
-//             y + game.paddles.left.y,
-//             paddleWidth,
-//             paddleHeight
-//         );
-//         ctx.fillRect(
-//             x + game.paddles.right.x,
-//             y + game.paddles.right.y,
-//             paddleWidth,
-//             paddleHeight
-//         );
+
 
 //         // Balle
 //         ctx.beginPath();

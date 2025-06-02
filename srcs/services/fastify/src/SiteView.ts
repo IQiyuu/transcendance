@@ -329,11 +329,11 @@ export class SiteView{
     }
 
     print_play_page(){
-        this.play_page.classList.replace("hidden", "flex");
+        this.play_page.classList.replace("hidden", "block");
     }
 
     hide_play_page(){
-        this.play_page.classList.replace("flex", "hidden");
+        this.play_page.classList.replace("block", "hidden");
     }
     
     print_tournament_page(){

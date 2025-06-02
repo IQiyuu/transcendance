@@ -1,6 +1,5 @@
 
 import * as gameRoute from "./gameRoute.js"; // relative to this file
-import fastifyPlugin from 'fastify-plugin';
 
 import { request } from "node:http";
 
@@ -164,4 +163,4 @@ async function websocketRoute(fastify, options) {
     });
 }
 
-export default fastifyPlugin(websocketRoute);
+export default websocketRoute;
