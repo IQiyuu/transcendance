@@ -9,7 +9,7 @@ class Tournament{
         this.id = id;
         this.name = name;
         this.owner = owner;
-        this.players = [owner];
+        this.players = []; // {username, socket}
         this.readyToStart = false;
     }
 
@@ -25,8 +25,16 @@ class Tournament{
         return (this.players.length >= TOURNAMENT_SIZE);
     }
 
+    // Tournament is ready to start if at least three players are there, and all present players are connected to their server socket.
     isReadyToStart(){
-        return (this.readyToStart);
+        if (this.players.length < 3)
+            return (false);
+        let i = 0, len = this.players.length;
+        while (i < len){
+            if (this.players[i].socket === null)
+                return (false);
+        }
+        return (true);
     }
 
     hasNextRound(){
@@ -43,7 +51,7 @@ class Tournament{
 
     addPlayer(player) {
         if (!this.isFull() && !this.contains(player))
-            this.players.push(player);
+            this.players.push({username: player, socket: null});
         if (this.players.length >= 3)
             this.isReadyToStart = true;
     }
@@ -59,8 +67,31 @@ class Tournament{
         if (this.players.length < 3)
             this.isReadyToStart = false;
     }
+
+    connectPlayer(player, socket){
+        let pos = this.players.indexOf(player);
+        this.players.forEach(tuple => {
+            if (tuple.username === player){
+                tuple.socket = socket;
+            }
+        })
+    }
+
+    disconnectPlayer(player){
+        this.players.forEach(tuple => {
+            if (tuple.username === player){
+                tuple.socket.close();
+                tuple.socket = null;
+            }
+        });
+    }
+
     contains(player){
-        return (this.players.includes(player));
+        this.players.forEach(tuple => {
+            if (tuple.username === player)
+                return (true);
+        })
+        return (false);
     }
 
     start(){
@@ -88,6 +119,8 @@ function needAuthRoute(route){ // to recheck
     );
 }
 
+let clients_socket = new Map();
+
 async function tournamentRoute (fastify, options) {
     let tournaments = [];
     let tournamentId = Object.keys(tournaments).length;
@@ -95,7 +128,7 @@ async function tournamentRoute (fastify, options) {
     function addTournament(tournaments, t_id, owner, t_name){
         tournaments.push(new Tournament(owner, t_id, t_name));
     };
-    
+
     //Securising all private tournaments routes :
     fastify.addHook('preValidation', async (request, reply) => {
         if (needAuthRoute(request.url) && (request.query.username === null || request.query.username === undefined)) {
@@ -109,12 +142,27 @@ async function tournamentRoute (fastify, options) {
          */
     });
 
-    //Return all tournaments that username can join
+    function getMasked(t){
+        let players = [];
+        t.players.forEach(p =>{
+            players.push(p.username);
+        });
+
+        let tournoi = {
+            id : t.id,
+            name : t.name,
+            owner : t.owner,
+            players : players,
+            readyToStart : t.readyToStart
+        };
+        return (tournoi);
+    }
+    //Return all tournaments that username can join. Also mask every private info
     function    getAvailableTournaments(tournaments, username){
         let res = [];
         tournaments.forEach(t => {
             if (t.getOwner() !== username && !t.contains(username) && !t.isFull()){
-                res.push(t);
+                res.push(getMasked(t));
             }
         });
         return (res);
@@ -134,8 +182,6 @@ async function tournamentRoute (fastify, options) {
 
     //Create a tournament
     fastify.post('/tournament/create', async (request, reply) => {
-        // verification du form ?
-
         let player = request.body.owner;
         let t_name = request.body.tournament_name;
         if (inTournament(tournaments, player))
@@ -151,7 +197,6 @@ async function tournamentRoute (fastify, options) {
     });
     
     //Printing the list of tournaments
-    // Public route ?
     fastify.get('/tournament/list', async (request, reply) => {
         if (request.query.username === undefined || request.query.username === null)
             return {success: false};
@@ -165,14 +210,27 @@ async function tournamentRoute (fastify, options) {
         }
     });
 
-    //Join a tournament
+    //Tournament's info
+    fastify.get('/tournament/:id', async (request, reply) => {
+        const tournament = tournaments[request.params.id];
+        if (tournament === undefined || tournament === null)
+            return reply.status(404).send({ error: 'Tournament not found' });
+        return {success: true, tournament: tournament};
+    });
+    
+    // Declaring a match is over url to check
+    fastify.get('/tournament/:id/match_over', async (request, reply) => {
+        return ({success: true});
+    });
+
+        //Join a tournament
     fastify.get('/tournament/join/:id', async (request, reply) => {
         let t_id = request.params.id;
         let player = request.query.username;
 
         if (!existsTournament(tournaments, t_id))
             return {success: false, error: "Tournament doesnt exists"};
-        
+
         let t = tournaments[t_id];
         if (t.contains(player))
             return {success: false, error: "Player in the tournament"};
@@ -184,20 +242,6 @@ async function tournamentRoute (fastify, options) {
 
         //ServerSocket.sendMsg(); // HERE to update connected clients
         return {success: true, tournament : t};
-    });
-
-    //Tournament's info
-    // Public route ?
-    fastify.get('/tournament/:id', async (request, reply) => {
-        const tournament = tournaments[request.params.id];
-        if (tournament === undefined || tournament === null)
-            return reply.status(404).send({ error: 'Tournament not found' });
-        return {success: true, tournament: tournament};
-    });
-    
-    // Declaring a match is over url to check
-    fastify.get('/tournament/:id/match_over', async (request, reply) => {
-        return ({success: true});
     });
 
     //Leave a tournament
@@ -259,6 +303,27 @@ async function tournamentRoute (fastify, options) {
         return ({success: true});
     })
 
+    fastify.get('/tournament/:id/ws', { websocket: true }, (socket, req) => {
+        let username = req.query.username;
+        let t_id = req.params.id;
+        
+        if (!existsTournament(tournaments, t_id))
+            return {success: false, error: "Tournament doesnt exists"};
+
+        let t = tournaments[t_id];
+
+        console.log("New socket connection !");
+        
+        socket.on('message', message => {
+            console.log(message);
+        });
+
+        socket.on("close", () => {
+            tournament.disconnect(socket);
+        });
+
+        t.connect(username, socket);
+    });
     // setInterval(() => {
     //     Object.values(tournaments).forEach(tournament => {
     //         // if (tournament.isReadyToStart()){

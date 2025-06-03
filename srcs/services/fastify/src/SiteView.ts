@@ -1,4 +1,4 @@
-import {ClientSocket} from "./ClientSocket.js";
+import {GameClientSocket} from "./GameClientSocket.js";
 import {Game} from "./pong.js";
 import {TournamentView} from "./Tournament.js";
 
@@ -7,7 +7,8 @@ export class SiteView{
     //Controler attributes
     private lang_file = null;
     private isRegisterMode = false;
-    private cws : ClientSocket = null;
+    private cws : GameClientSocket = null;
+    private username : String;
 
     private game : Game = null;
     private tournament : TournamentView = null;
@@ -55,7 +56,7 @@ export class SiteView{
         this.tournament_join_btn = document.getElementById("tournament_join_button");
         this.about_btn = document.getElementById("about_button");
 
-        this.tournament = new TournamentView(this, this.cws);
+        this.tournament = new TournamentView(this);
     }
 
     // Controller part
@@ -263,10 +264,10 @@ export class SiteView{
     }
 
     connect(username){
-        this.cws = new ClientSocket(username, this);
+        this.cws = new GameClientSocket(username, this);
         this.store_session(username);
-        this.tournament.setSocket(this.cws);
         this.hide_register_page();
+        this.tournament.setUsername(username);
         document.body.classList.remove("justify-center", "align-center", "flex");
         this.print_main_page();
     }

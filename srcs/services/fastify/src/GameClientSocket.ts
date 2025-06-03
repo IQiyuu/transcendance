@@ -3,7 +3,7 @@ import {Game} from "./pong.js";
 /**
  * Class used for connected client
  */
-export class ClientSocket{
+export class GameClientSocket{
     private ws : WebSocket = null;
     private username : string;
     private user_id : number = -1;

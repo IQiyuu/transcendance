@@ -1,4 +1,4 @@
-import {ClientSocket} from "./ClientSocket.js";
+import {GameClientSocket} from "./GameClientSocket.js";
 
 const paddleWidth = 10, paddleHeight = 100;
 
@@ -7,7 +7,7 @@ export class   Game{
     /**
      * Controller
      */
-    private cws : ClientSocket = null;
+    private cws : GameClientSocket = null;
 
     private game_id : number;
     private side = null;

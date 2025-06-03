@@ -1,17 +1,40 @@
-import {ClientSocket} from "./ClientSocket.js";
+import {TournamentClientSocket} from "./TournamentClientSocket.js";
 import { SiteView } from "./SiteView.js";
 
-// class Tournament{
+export class Tournament{
+    private id;
+    private name;
+    private owner;
+    private players;
 
-// }
+    constructor(tournament){
+        this.id = tournament.id;
+        this.name = tournament.name;
+        this.owner = tournament.owner;
+        this.players = tournament.players;
+    }
+
+    getId(){
+        return (this.id);
+    }
+
+    getName(){
+        return (this.name);
+    }
+
+    getOwner(){
+        return (this.owner);
+    }
+
+}
 
 export class TournamentView{
     
     /**CONTROLER */
-    private cws : ClientSocket = null;
+    private cws : TournamentClientSocket = null;
     private site : SiteView = null;
-    // private tournament : Tournament = null;
-    private tournament : boolean = false;
+    private username : string = null;
+    private tournament : Tournament = null;
 
     /**VIEW */
     private tournament_page;
@@ -25,8 +48,7 @@ export class TournamentView{
     private tournament_create_btn;
     private tournament_join_btn;
 
-    constructor(site, cws){
-        this.cws = cws;
+    constructor(site){
         this.site = site;
 
         this.tournament_page = document.getElementById("tournament_page");
@@ -40,8 +62,8 @@ export class TournamentView{
         this.tournament_join_btn = document.getElementById("tournament_join_button");
     }
 
-    setSocket(cws){
-        this.cws = cws;
+    setUsername(username){
+        this.username = username;
     }
 
     addEvents(){
@@ -49,7 +71,7 @@ export class TournamentView{
             event.preventDefault();
 
             // if (this.tournament !== null && this.tournament !== undefined){
-            if (this.tournament){
+            if (this.tournament !== null){
                 // print_error("You're already registered for a tournament");
                 alert("You're already registered for a tournament");
                 return ;
@@ -67,7 +89,7 @@ export class TournamentView{
             const name = document.getElementById("tournament_name") as HTMLInputElement;
             try {
                 const body = {
-                    owner: this.cws.get_username(),
+                    owner: this.username,
                     tournament_name: name.value
                 }
                 const resp = await fetch('/tournament/create', {
@@ -77,9 +99,11 @@ export class TournamentView{
                 });
                 const data = await resp.json();
                 if (data.success) {
+                    this.tournament = new Tournament(data.tournament);
+                    this.cws = new TournamentClientSocket(data.tournament.id, this.username, this, this.tournament);
+                    console.log(this.tournament);
                     this.hide_tournament_form();
                     this.print_tournament(data.tournament);
-                    this.tournament = true;
                 }
                 else
                     throw (Error(data.error));
@@ -97,7 +121,7 @@ export class TournamentView{
             this.print_tournaments_page();
             this.clear_tournaments(); // view
             try {
-                const resp = await fetch('/tournament/list?username=' + this.cws.get_username(), {
+                const resp = await fetch('/tournament/list?username=' + this.username, {
                     method: 'GET',
                     headers: { "Content-Type": "application/json" }
                 });
@@ -122,7 +146,7 @@ export class TournamentView{
                                     event.preventDefault();
                                     try {
                                         let query = new URLSearchParams();
-                                        query.append("username", this.cws.get_username());
+                                        query.append("username", this.username);
                                         let url = '/tournament/join/' + (event.target as Element).getAttribute("tournament_id") + `?${query}`;
                                         const resp = await fetch(url, {
                                             method: 'GET',
@@ -130,10 +154,14 @@ export class TournamentView{
                                         });
                                         const data = await resp.json();
                                         if (data.success) {
+                                            this.tournament = new Tournament(data.tournament);
+                                            this.cws = new TournamentClientSocket(data.tournament.id, this.username, this, this.tournament);
+
+                                            console.log(this.tournament);
+
                                             this.site.hide_all();
                                             this.clear_tournament();
                                             this.print_tournament_page();
-                                            this.tournament = true;
                                             this.print_tournament(data.tournament);
                                         }else
                                             throw Error(data.error);
@@ -217,7 +245,7 @@ export class TournamentView{
         this.tournament_div.append(title);
         this.tournament_div.append(table);
 
-        if (this.cws.get_username() === tournament.owner){
+        if (this.username === tournament.owner){
             let start_button = document.createElement("button");
             start_button.append(document.createTextNode("Start"));
             this.tournament_div.append(start_button);
@@ -235,6 +263,25 @@ export class TournamentView{
 
         try{
             // fetch HERE TODO
+            let query = new URLSearchParams();
+            query.append("username", this.username);
+            let url = '/tournament/leave/' + this.tournament.getId() + `?${query}`;
+
+            const resp = await fetch(url, {
+                method: 'GET'
+            });
+
+            const data = await resp.json();
+            if (data.success){
+                this.tournament = null;
+                this.hide_all();
+                this.cws.close();
+                this.cws = null;
+                this.print_tournament_page();
+            }else{
+                console.log("Didnt leave");
+                throw (Error(data.error));
+            }
         } catch (error){
             console.log(error);
         }
