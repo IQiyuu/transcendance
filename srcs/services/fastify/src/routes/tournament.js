@@ -1,54 +1,120 @@
 import Fastify from 'fastify';
 // import {} from './webSocketRoute.js';
 
+const TOURNAMENT_SIZE = 8;
+
+class Tournament{
+
+    constructor(owner, id, name){
+        this.id = id;
+        this.name = name;
+        this.owner = owner;
+        this.players = [owner];
+        this.readyToStart = false;
+    }
+
+    getId(){
+        return (this.id);
+    }
+
+    getOwner(){
+        return (this.owner);
+    }
+
+    isFull(){
+        return (this.players.length >= TOURNAMENT_SIZE);
+    }
+
+    isReadyToStart(){
+        return (this.readyToStart);
+    }
+
+    hasNextRound(){
+        return (false);
+    }
+
+    currentRoundIsFinished(){
+        return (false);
+    }
+
+    isFinished(){
+        return (false);
+    }
+
+    addPlayer(player) {
+        if (!this.isFull() && !this.contains(player))
+            this.players.push(player);
+        if (this.players.length >= 3)
+            this.isReadyToStart = true;
+    }
+
+    removePlayer(player){
+        if (this.contains(player)){
+            console.log("Before removing :", this.players);
+            let pos = this.players.indexOf(player);
+            this.players.copyWithin(pos, pos + 1);
+            this.players.pop();
+            console.log("After removing :", this.players);
+        }
+        if (this.players.length < 3)
+            this.isReadyToStart = false;
+    }
+    contains(player){
+        return (this.players.includes(player));
+    }
+
+    start(){
+
+    }
+
+    end(){
+
+    }
+};
+
+function    inTournament(tournaments, player){
+    if (tournaments === null || tournaments === undefined)
+        return (false);
+    console.log("testing");
+    tournaments.forEach((t) => {
+        if (t.contains(player))
+            return (true);
+    });
+    return (false);
+}
+
+function needAuthRoute(route){ // to recheck
+    return (route === '/tournament/list'|| route === '/tournament/leave' || route === '/tournament/kick'
+        || route === '/tournament/join' || route === '/tournament/start'
+    );
+}
+
 async function tournamentRoute (fastify, options) {
     let tournaments = [];
-    const TOURNAMENT_SIZE = 8;
-
     let tournamentId = Object.keys(tournaments).length;
     
-    function addTournament(tournaments, newT, tournamentId){
-        tournaments[tournamentId] = newT;
+    function addTournament(tournaments, t_id, owner, t_name){
+        tournaments.push(new Tournament(owner, t_id, t_name));
     };
-
-    function needAuthRoute(route){
-        return (route === '/tournaments'|| route === '/tournament/leave')
-    }
     
-    //Securising all tournaments routes :
+    //Securising all private tournaments routes :
     fastify.addHook('preValidation', async (request, reply) => {
-        if (needAuthRoute(request.routerPath) && (request.query.username === null || request.query.username === undefined)) {
+        if (needAuthRoute(request.url) && (request.query.username === null || request.query.username === undefined)) {
             reply.code(403).send('Tournament op rejected: missing username');
         }
 
-        if (request.routerPath === "/tournament/kick" && (request.query.username2 === null || request.query.username2 === undefined))
+        if (request.url === "/tournament/kick" && (request.query.username2 === null || request.query.username2 === undefined))
             reply.code(403).send('Tournament op rejected: missing username');
         /**
         if (!isAuthentificated())
          */
     });
 
-    function Tournament(owner, id, name) {
-        this.id = id;
-        this.name = name;
-        this.owner = owner;
-        this.players = [owner];
-    };
-
-    function addPlayer(tournament, player) {
-        if (tournament.players.length < TOURNAMENT_SIZE && !tournament.players.includes(player))
-            tournament.players.push(player);
-    }
-
-    function addPlayer(tournament, player) {
-        if (tournament.players.length < TOURNAMENT_SIZE && !tournament.players.includes(player))
-            tournament.players.push(player);
-    }
-
+    //Return all tournaments that username can join
     function    getAvailableTournaments(tournaments, username){
         let res = [];
-        tournaments.forEach(element => {
-            if (element.owner !== username && !element.players.includes(username) && element.players.length < TOURNAMENT_SIZE){
+        tournaments.forEach(t => {
+            if (t.getOwner() !== username && !t.contains(username) && !t.isFull()){
                 res.push(element);
             }
         });
@@ -59,73 +125,36 @@ async function tournamentRoute (fastify, options) {
         if (tournaments === null || tournaments === undefined)
             return (false);
 
-        let i = 0, size = tournaments.length;
-        while (i < size){
-            if (tournaments[i].id == id)
+        tournaments.forEach((t) => {
+            if (t.getId() === id)
                 return (true);
-            i++;
-        }
+        });
         return (false);
     }
-
-    function    inTournament(tournament, player){
-        tournament.players.forEach((p) => {
-            if (p === player)
-                return (true);
-        })
-        return (false);
-    }
-
-    /*
-        Owner create a room
-        Player can rejoin or leave as they want
-        Once the owner start, the tournament starts (tounament will start in 3 2 1 )
-    */
 
     //Create a tournament
     fastify.post('/tournament/create', async (request, reply) => {
-        // securiser la route !!
-        // ..
+        // verification du form ?
+
+        let player = request.body.username;
+        let t_name = request.body.tournament_name;
+        if (inTournament(tournaments, player))
+            return {success: false, message: "Player can't create a tournament as he's already in one"};
+        
         try {
-            tournaments[tournamentId] = new Tournament(request.body.owner, tournamentId, request.body.tournament_name);
-            return {success: true, tournament : tournaments[tournamentId], tournamentId: tournamentId++};
+            addTournament(tournaments, tournamentId, player, t_name);
+            return {success: true, tournament : tournaments[tournamentId++]};
         } catch (error) {
             console.log("error: ", error);
             return {success: false, message: error};
         }
     });
-
-    //Join a tournament
-    fastify.get('/tournament/join_:id', async (request, reply) => {
-        console.log(request.query.username);
-        // Checking user
-        /*
-        try{
-            let username = request.params.body;
-            if (!existsUser(username))
-                throw Error("Error, no user nammed " + username);
-            if (!existsTournament(tournaments, request.params.id))
-                throw Error("Error, no tournament with id " + request.params.id);
-        } catch (error){
-            return {success: false, error: error}
-        }
-        */
-        // securiser la route !!
-        // ..
-        const tournament = tournaments[request.params.id];
-        //Adding user to tournament
-        addPlayer(tournament, request.query.username);
-        //ServerSocket.sendMsg(); // HERE to update connected clients
-        return {success: true, tournament : tournament};
-    });
-
+    
     //Printing the list of tournaments
-    fastify.get('/tournaments', async (request, reply) => {
-        // securiser la route !!
-        // .. Maybe on hooks YESSSS
-        if (request.query.username === null || request.query.username === undefined){
-            return {success: false, error: "No username provided"};
-        } // useless if hook works
+    // Public route ?
+    fastify.get('/tournament/list', async (request, reply) => {
+        if (request.query.username === undefined || request.query.username === null)
+            return {success: false};
 
         try {
             let res = getAvailableTournaments(tournaments, request.query.username);
@@ -135,57 +164,112 @@ async function tournamentRoute (fastify, options) {
             return {success: false, message: error};
         }
     });
-
+    
     //Tournament's info
+    // Public route ?
     fastify.get('/tournament/:id', async (request, reply) => {
-        // securiser la route !!
-        // ..
         const tournament = tournaments[request.params.id];
-        if (tournament === null || tournament === undefined)
+        if (tournament === undefined || tournament === null)
             return reply.status(404).send({ error: 'Tournament not found' });
-        return tournament;
+        return {success: true, tournament: tournament};
+    });
+    
+    // Declaring a match is over
+    fastify.get('/tournament/:id/match_over', async (request, reply) => {
+        return ({success: true});
+    });
+
+    //Join a tournament
+    fastify.get('/tournament/join/:id', async (request, reply) => {
+        let t_id = request.params.id;
+        let player = request.query.username;
+
+        if (!existsTournament(tournaments, t_id))
+            return {success: false, error: "Tournament doesnt exists"};
+        
+        let t = tournaments[t_id];
+        if (!t.contains(player))
+            return {success: false, error: "Player not in the tournament"};
+
+        if (t.isFull())
+            return {success: false, error: "Tournament full"};
+
+        t.addPlayer(player);
+
+        //ServerSocket.sendMsg(); // HERE to update connected clients
+        return {success: true, tournament : t};
     });
 
     //Leave a tournament
     fastify.get('/tournament/leave/:id', async (request, reply) => {
         let t_id = request.params.id;
+        let user = request.query.username;
         if (!existsTournament(tournaments, t_id))
             return {success: false, error: "Tournament doesnt exists"}
         
-        let t = tournaments[request.params.id];
-        if (!inTournament(t, username))
+        let t = tournaments[t_id];
+        if (!inTournament(t, user))
             return {success: false, error: "Player not in the tournament"}
-
-        if (request.username === t.owner && t.players.length > 1)
+        
+        if (user === t.getOwner() && t.getSize() > 1)
             return {success: false, error: "Owner can't leave the room while other players are present"}
-
-        removePlayer(t, request.username);
-        sock.updatePlayers(t);
+        
+        t.removePlayer(user);
+        // sock.updateTournamentPlayers(t);
         return {success: true};
     });
-
+    
     //disband ? kick every player then leave
-
     fastify.get('/tournament/kick/:id', async(request, reply) => {
         let t_id = request.params.id;
         let owner = request.query.username;
-        let player = request.query.username2;
+        let user = request.query.username2;
 
         if (!existsTournament(tournaments, t_id))
             return {success: false, error: "Tournament doesnt exists"};
         
-        let t = tournaments[request.params.id];
-        if (!inTournament(t, username2))
-            return {success: false, error: "Player not in the tournament"};
-
-        if (owner !== t.owner)
+        let t = tournaments[t_id];
+        if (owner !== t.getOwner())
             return {success: false, error: "You are not the owner"};
 
-        removePlayer(t, request.username);
-        sock.updatePlayers(t);
-    })
-    //Starting the tournament
+        if (!t.contains(user))
+            return {success: false, error: "Player not in the tournament"};
 
+        t.removePlayer(user);
+        // sock.updateTournamentPlayers(t);
+        return {success: true};
+    })
+
+    //Starting the tournament
+    fastify.get('/tournament/start/:id', async(request, reply) => {
+        let t_id = request.params.id;
+        let player = request.query.username;
+
+        if (!existsTournament(tournaments, t_id))
+            return {success: false, error: "Tournament doesnt exists"};
+
+        let t = tournaments[t_id];
+        if (player !== t.getOwner())
+            return {success: false, error: "Only owner can start tournament"};
+
+        if (!t.isReadyToStart())
+            return {success: false, error: "Not enough players to start tournament"};
+
+        t.start();
+        return ({success: true});
+    })
+
+    // setInterval(() => {
+    //     Object.values(tournaments).forEach(tournament => {
+    //         // if (tournament.isReadyToStart()){
+    //         //     tournament.start();
+    //         // }
+    //         if (tournament.hasNextRound() && tournament.currentRoundIsFinished())
+    //             tournament.startNextRound();
+    //         if (tournament.isFinished())
+    //             tournament.end();
+    //     });
+    // }, 30);
 }
 
 export default tournamentRoute;

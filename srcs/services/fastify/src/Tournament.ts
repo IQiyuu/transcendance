@@ -82,11 +82,10 @@ export class TournamentView{
                     this.tournament = true;
                 }
                 else
-                    throw (Error("Data retrieved not successful (tournament.ts)"));
+                    throw (Error(data.error));
             } catch(error) {
                 console.log("error: ", error);
             }
-
         });
 
         this.tournament_join_btn.addEventListener("click", async(event) => {
@@ -98,7 +97,7 @@ export class TournamentView{
             this.print_tournaments_page();
             this.clear_tournaments(); // view
             try {
-                const resp = await fetch('/tournaments?username=' + this.cws.get_username(), {
+                const resp = await fetch('/tournament/list?username=' + this.cws.get_username(), {
                     method: 'GET',
                     headers: { "Content-Type": "application/json" }
                 });
