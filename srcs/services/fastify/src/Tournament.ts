@@ -112,7 +112,7 @@ export class TournamentView{
                         if (size == 0)
                             this.tournaments_list.append(document.createTextNode("No tournament found. Try creating one !"));
                         else {
-                            list.appendChild(document.createTextNode("List of tournaments available")); // maybe with an h3 instead
+                            list.appendChild(document.createTextNode("List of tournaments available"));
                             while (i < size){
                                 let el = document.createElement("li");
                                 el.appendChild(document.createTextNode(data.tournaments[i].name));
@@ -121,7 +121,9 @@ export class TournamentView{
                                 el.addEventListener("click", async(event) => {
                                     event.preventDefault();
                                     try {
-                                        let url = '/tournament/join_' + (event.target as Element).getAttribute("tournament_id") + "?username=" + this.cws.get_username();
+                                        let query = new URLSearchParams();
+                                        query.append("username", this.cws.get_username());
+                                        let url = '/tournament/join/' + (event.target as Element).getAttribute("tournament_id") + `?${query}`;
                                         const resp = await fetch(url, {
                                             method: 'GET',
                                             headers: { "Content-Type": "application/json" }
@@ -134,7 +136,7 @@ export class TournamentView{
                                             this.tournament = true;
                                             this.print_tournament(data.tournament);
                                         }else
-                                            throw Error("data not successful while joining tournament");
+                                            throw Error(data.error);
                                     } catch (error){
                                         console.log(error);
                                     }
@@ -145,7 +147,7 @@ export class TournamentView{
                             this.tournaments_list.appendChild(list);
                         }
                     } else
-                        throw (Error("No tournament list sent by the server"));
+                        throw (Error(data.error));
                 }
             } catch (err){
                 console.log(err);
@@ -257,6 +259,7 @@ export class TournamentView{
     clear_tournaments(){
         this.tournaments_list.textContent = '';
     }
+
     hide_all(){
         this.hide_tournament_page();
         this.hide_tournaments_page();

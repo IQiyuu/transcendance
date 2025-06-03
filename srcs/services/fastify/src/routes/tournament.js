@@ -75,7 +75,6 @@ class Tournament{
 function    inTournament(tournaments, player){
     if (tournaments === null || tournaments === undefined)
         return (false);
-    console.log("testing");
     tournaments.forEach((t) => {
         if (t.contains(player))
             return (true);
@@ -115,7 +114,7 @@ async function tournamentRoute (fastify, options) {
         let res = [];
         tournaments.forEach(t => {
             if (t.getOwner() !== username && !t.contains(username) && !t.isFull()){
-                res.push(element);
+                res.push(t);
             }
         });
         return (res);
@@ -124,11 +123,12 @@ async function tournamentRoute (fastify, options) {
     function    existsTournament(tournaments, id){
         if (tournaments === null || tournaments === undefined)
             return (false);
-
-        tournaments.forEach((t) => {
-            if (t.getId() === id)
+        let i = 0, size = tournaments.length;
+        while (i < size){
+            if (id == tournaments[i].getId())
                 return (true);
-        });
+            i++;
+        }
         return (false);
     }
 
@@ -136,7 +136,7 @@ async function tournamentRoute (fastify, options) {
     fastify.post('/tournament/create', async (request, reply) => {
         // verification du form ?
 
-        let player = request.body.username;
+        let player = request.body.owner;
         let t_name = request.body.tournament_name;
         if (inTournament(tournaments, player))
             return {success: false, message: "Player can't create a tournament as he's already in one"};
@@ -164,20 +164,6 @@ async function tournamentRoute (fastify, options) {
             return {success: false, message: error};
         }
     });
-    
-    //Tournament's info
-    // Public route ?
-    fastify.get('/tournament/:id', async (request, reply) => {
-        const tournament = tournaments[request.params.id];
-        if (tournament === undefined || tournament === null)
-            return reply.status(404).send({ error: 'Tournament not found' });
-        return {success: true, tournament: tournament};
-    });
-    
-    // Declaring a match is over
-    fastify.get('/tournament/:id/match_over', async (request, reply) => {
-        return ({success: true});
-    });
 
     //Join a tournament
     fastify.get('/tournament/join/:id', async (request, reply) => {
@@ -188,8 +174,8 @@ async function tournamentRoute (fastify, options) {
             return {success: false, error: "Tournament doesnt exists"};
         
         let t = tournaments[t_id];
-        if (!t.contains(player))
-            return {success: false, error: "Player not in the tournament"};
+        if (t.contains(player))
+            return {success: false, error: "Player in the tournament"};
 
         if (t.isFull())
             return {success: false, error: "Tournament full"};
@@ -198,6 +184,20 @@ async function tournamentRoute (fastify, options) {
 
         //ServerSocket.sendMsg(); // HERE to update connected clients
         return {success: true, tournament : t};
+    });
+
+    //Tournament's info
+    // Public route ?
+    fastify.get('/tournament/:id', async (request, reply) => {
+        const tournament = tournaments[request.params.id];
+        if (tournament === undefined || tournament === null)
+            return reply.status(404).send({ error: 'Tournament not found' });
+        return {success: true, tournament: tournament};
+    });
+    
+    // Declaring a match is over url to check
+    fastify.get('/tournament/:id/match_over', async (request, reply) => {
+        return ({success: true});
     });
 
     //Leave a tournament
