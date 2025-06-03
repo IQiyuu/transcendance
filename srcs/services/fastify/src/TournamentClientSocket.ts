@@ -19,6 +19,7 @@ export class TournamentClientSocket{
         this.tournament = tournament;
         this.view = view;
 
+        console.log("Trying to connect : " + `wss://${window.location.host}/tournament/${this.id}/ws?username=${this.username}`);
         this.ws = new WebSocket(`wss://${window.location.host}/tournament/${this.id}/ws?username=${this.username}`);
         this.initSocket();
     }

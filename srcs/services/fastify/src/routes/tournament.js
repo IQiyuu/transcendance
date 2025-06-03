@@ -103,6 +103,7 @@ class Tournament{
     }
 };
 
+// Check whether the player is already in a tournament
 function    inTournament(tournaments, player){
     if (tournaments === null || tournaments === undefined)
         return (false);
@@ -119,14 +120,14 @@ function needAuthRoute(route){ // to recheck
     );
 }
 
-let clients_socket = new Map();
-
 async function tournamentRoute (fastify, options) {
     let tournaments = [];
     let tournamentId = Object.keys(tournaments).length;
     
     function addTournament(tournaments, t_id, owner, t_name){
-        tournaments.push(new Tournament(owner, t_id, t_name));
+        let t = new Tournament(owner, t_id, t_name);
+        t.addPlayer(t_name);
+        tournaments.push(t);
     };
 
     //Securising all private tournaments routes :
@@ -186,16 +187,17 @@ async function tournamentRoute (fastify, options) {
         let t_name = request.body.tournament_name;
         if (inTournament(tournaments, player))
             return {success: false, message: "Player can't create a tournament as he's already in one"};
-        
         try {
             addTournament(tournaments, tournamentId, player, t_name);
-            return {success: true, tournament : tournaments[tournamentId++]};
+            return {success: true, tournament : getMasked(tournaments[tournamentId++])};
         } catch (error) {
             console.log("error: ", error);
             return {success: false, message: error};
         }
     });
-    
+
+    // OnSend() ? to change if tournament, then tournament masked
+
     //Printing the list of tournaments
     fastify.get('/tournament/list', async (request, reply) => {
         if (request.query.username === undefined || request.query.username === null)
@@ -215,7 +217,7 @@ async function tournamentRoute (fastify, options) {
         const tournament = tournaments[request.params.id];
         if (tournament === undefined || tournament === null)
             return reply.status(404).send({ error: 'Tournament not found' });
-        return {success: true, tournament: tournament};
+        return {success: true, tournament: getMasked(tournament)};
     });
     
     // Declaring a match is over url to check
@@ -223,7 +225,7 @@ async function tournamentRoute (fastify, options) {
         return ({success: true});
     });
 
-        //Join a tournament
+    //Join a tournament
     fastify.get('/tournament/join/:id', async (request, reply) => {
         let t_id = request.params.id;
         let player = request.query.username;
@@ -241,7 +243,7 @@ async function tournamentRoute (fastify, options) {
         t.addPlayer(player);
 
         //ServerSocket.sendMsg(); // HERE to update connected clients
-        return {success: true, tournament : t};
+        return {success: true, tournament : getMasked(t)};
     });
 
     //Leave a tournament
@@ -306,23 +308,30 @@ async function tournamentRoute (fastify, options) {
     fastify.get('/tournament/:id/ws', { websocket: true }, (socket, req) => {
         let username = req.query.username;
         let t_id = req.params.id;
-        
+
+        console.log("New socket connection !");
+
+        //CHecking if user 
+        if (username === null || username === undefined || t_id === null || t_id === undefined)
+            return {success: false, error: "Need username and id"};
+
         if (!existsTournament(tournaments, t_id))
             return {success: false, error: "Tournament doesnt exists"};
 
         let t = tournaments[t_id];
+        if (!t.contains(username))
+            return {success: false, error: "Player not in this tournament"};
 
-        console.log("New socket connection !");
-        
+
         socket.on('message', message => {
             console.log(message);
         });
 
         socket.on("close", () => {
-            tournament.disconnect(socket);
+            t.disconnect(username, socket);
         });
 
-        t.connect(username, socket);
+        t.connectPlayer(username, socket);
     });
     // setInterval(() => {
     //     Object.values(tournaments).forEach(tournament => {
