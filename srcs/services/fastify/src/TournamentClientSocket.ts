@@ -19,7 +19,7 @@ export class TournamentClientSocket{
         this.tournament = tournament;
         this.view = view;
 
-        console.log("Trying to connect : " + `wss://${window.location.host}/tournament/${this.id}/ws?username=${this.username}`);
+        // console.log("Trying to connect : " + `wss://${window.location.host}/tournament/${this.id}/ws?username=${this.username}`);
         this.ws = new WebSocket(`wss://${window.location.host}/tournament/${this.id}/ws?username=${this.username}`);
         this.initSocket();
     }
@@ -30,6 +30,15 @@ export class TournamentClientSocket{
 
     setTournament(t : Tournament){
         this.tournament = t;
+    }
+
+    isReady(){
+        this.ws.send(JSON.stringify({
+            type: "matchmaking",
+            uname: this.username,
+            state: "enter"
+        }));
+        return (false);
     }
 
     initSocket(){
@@ -50,13 +59,17 @@ export class TournamentClientSocket{
 
         this.ws.onclose = (event) => {
             console.log("Closing " + this.username);
+            this.view.clear_tournament();
+            this.view.clear_tournaments();
+            this.view.hide_all();
+            this.view.print_menu();
             // if server closed, then parent.err
         }
     }
     
-    start_matchmaking(){
+    startTournament(){
         this.ws.send(JSON.stringify({
-            type: "matchmaking",
+            type: "start",
             uname: this.username,
             state: "enter"
         }));
@@ -73,17 +86,6 @@ export class TournamentClientSocket{
     say_ready(){
         this.ws.send(JSON.stringify({
             type : "game_start"
-        }));
-    }
-
-    // Update the server with movements
-    update_pos(game_id, key, side){
-        console.log("Sending " +  game_id + key + side);
-        this.ws.send(JSON.stringify({
-            type : "game_update",
-            game_id : game_id,
-            moveUp : key,
-            side : side
         }));
     }
 
