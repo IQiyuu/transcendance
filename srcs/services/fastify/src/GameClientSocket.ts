@@ -1,4 +1,4 @@
-import {Game} from "./pong.js";
+import {GameController} from "./pong.js";
 
 /**
  * Class used for connected client
@@ -9,7 +9,7 @@ export class GameClientSocket{
     private user_id : number = -1;
     private view;
 
-    protected game : Game = null;
+    protected game : GameController = null;
 
     constructor(username, view){
         this.username = username;
@@ -22,7 +22,7 @@ export class GameClientSocket{
         return (this.username);
     }
 
-    set_game(g : Game){
+    set_game(g : GameController){
         this.game = g;
     }
 

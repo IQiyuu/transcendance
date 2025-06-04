@@ -4,16 +4,18 @@ import {GameClientSocket} from "./GameClientSocket.js";
 import {GameController} from "./pong.js";
 import {TournamentController} from "./TournamentController.js";
 
-export class   ProfilController{
+export class   ProfileController{
 
     private username : string = null;
-
 
     //View
     private profile_page = document.getElementById("player_profile");
     private histo_list = document.getElementById("histo_list");
     private search_inp = document.getElementById("search_player_in");
     private search_btn = document.getElementById("search_player_btn");
+
+    private camera_icon = document.getElementById("camera_icon");
+    private profile_picture = document.getElementById("profile_picture");
 
     constructor(){
     }
@@ -32,8 +34,13 @@ export class   ProfilController{
             }
         });
 
-        this.search_btn.addEventListener("click", this.searchPlayerHandler);
+        this.search_btn.addEventListener("click", async (event) => {
+            event.preventDefault();
+            this.searchPlayerHandler()
+        });
 
+        //Changing profile's picture
+        this.profile_picture.addEventListener();
     }
 
     async searchPlayerHandler(){
@@ -48,6 +55,7 @@ export class   ProfilController{
             const data = await req.json();
             if (data.success) {
                 console.log(data);
+                
             } else{
                 throw (Error(data.message));
             }
@@ -69,6 +77,36 @@ export class   ProfilController{
     }
 };
 
+// // clique sur la photo de profile
+// pp.addEventListener("click", async (event) => {
+//     const user_page = document.getElementById("profile_username").textContent;
+//     if (user_page == _username) {
+//         document.getElementById("profile_picture_overlay").classList.replace("hidden", "flex");
+//         ci.classList.replace("opacity-60", "opacity-0");
+//     }
+// });
+
+// // clique sur la photo de profile
+// ci.addEventListener("click", async (event) => {
+//     const user_page = document.getElementById("profile_username").textContent;
+//     if (user_page == _username) {
+//         ci.classList.replace("opacity-60", "opacity-0");
+//         document.getElementById("profile_picture_overlay").classList.replace("hidden", "flex");
+//     }
+// });
+
+// // hover sur la photo de profile
+// pp.addEventListener('mouseout', () => {
+//     const user_page = document.getElementById("profile_username").textContent;
+//     if (user_page == _username)
+//         ci.classList.replace("opacity-60", "opacity-0");
+// });
+// pp.addEventListener("mouseover", async (event) => {
+//     const user_page = document.getElementById("profile_username").textContent;
+//     if (user_page == _username)
+//         ci.classList.replace("opacity-0", "opacity-60");
+// });
+
 export class SiteController{
 
     //Controller attributes
@@ -79,7 +117,7 @@ export class SiteController{
 
     private game : GameController = null;
     private tournament : TournamentController = null;
-    private profile: ProfilController = null;
+    private profile: ProfileController = null;
 
     //  View attributes
     private title_link = document.getElementById("game_title");
@@ -102,8 +140,9 @@ export class SiteController{
         this.lang_file = lang;
         this._load_lang(lang);
 
-        this.tournament = new TournamentController(this);
+        this.profile = new ProfileController();
         this.game = new GameController(this);
+        this.tournament = new TournamentController(this);
     }
 
     getLang(){
@@ -311,10 +350,6 @@ export class SiteController{
         this.about.classList.replace("flex", "hidden");
     }
 
-    // updateProfile(username, histo){
-    //     this;
-    // }
-
     // // GET et afficher les infos du profile / historique
 // async function display_profile(username) {
 //     const list =  as HTMLUListElement;
@@ -331,6 +366,7 @@ export class SiteController{
 //             console.log("player not found.");
 //             return ;
 //         }
+/******************************************* */
 //         (document.getElementById("profile_picture") as HTMLImageElement).src = "assets/imgs/" + profile.datas.picture_path + "?" + new Date().getTime();
 //         document.getElementById("profile_username").innerText = profile.datas.username;
 //         document.getElementById("profile_creation").innerText = `${lang_file["member_since"]}: ${profile.datas.created_at}`;

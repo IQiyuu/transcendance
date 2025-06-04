@@ -162,39 +162,6 @@ await main();
 // }
 
 
-// const pp = document.getElementById("profile_picture") as HTMLImageElement;
-// const ci = document.getElementById("camera_icon");
-
-// // clique sur la photo de profile
-// pp.addEventListener("click", async (event) => {
-//     const user_page = document.getElementById("profile_username").textContent;
-//     if (user_page == _username) {
-//         document.getElementById("profile_picture_overlay").classList.replace("hidden", "flex");
-//         ci.classList.replace("opacity-60", "opacity-0");
-//     }
-// });
-
-// // clique sur la photo de profile
-// ci.addEventListener("click", async (event) => {
-//     const user_page = document.getElementById("profile_username").textContent;
-//     if (user_page == _username) {
-//         ci.classList.replace("opacity-60", "opacity-0");
-//         document.getElementById("profile_picture_overlay").classList.replace("hidden", "flex");
-//     }
-// });
-
-// // hover sur la photo de profile
-// pp.addEventListener('mouseout', () => {
-//     const user_page = document.getElementById("profile_username").textContent;
-//     if (user_page == _username)
-//         ci.classList.replace("opacity-60", "opacity-0");
-// });
-// pp.addEventListener("mouseover", async (event) => {
-//     const user_page = document.getElementById("profile_username").textContent;
-//     if (user_page == _username)
-//         ci.classList.replace("opacity-0", "opacity-60");
-// });
-
 // // croix du changement de photo de profile
 // document.getElementById("profile_cross").addEventListener("click", async (event) => {
 //     event.preventDefault();
