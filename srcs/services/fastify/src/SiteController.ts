@@ -6,45 +6,89 @@ import {TournamentController} from "./TournamentController.js";
 
 export class   ProfileController{
 
-    private username : string = null;
+    private username : string = "default name";
+
+    private profile_username : string = null;
+
+    private picture_path : string = "standart.jpg";
+    private register_date : string = "placeholder";
+
+    private site : SiteController = null;
 
     //View
     private profile_page = document.getElementById("player_profile");
     private histo_list = document.getElementById("histo_list");
-    private search_inp = document.getElementById("search_player_in");
+    private search_inp = document.getElementById("search_player_in") as HTMLInputElement;
     private search_btn = document.getElementById("search_player_btn");
 
     private camera_icon = document.getElementById("camera_icon");
     private profile_picture = document.getElementById("profile_picture");
+    private profile_picture_overlay = document.getElementById("profile_picture_overlay");
 
-    constructor(){
+    private profile_username_tag = document.getElementById("profile_username");
+    private register_date_tag = document.getElementById("profile_creation");
+
+    constructor(site){
+        this.site = site;
     }
 
     setUsername(username){
         this.username = username;
     }
 
+    setProfileUsername(u){
+        this.profile_username = u;
+    }
+
     addEvents(){
 
         // Player's search
         this.search_inp.addEventListener("keydown", async (event) => {
-            event.preventDefault();
-            if(event.key == 'Enter') {
+            if (event.key == 'Enter') {
+                this.profile_username = this.search_inp.value;
                 this.searchPlayerHandler();
             }
         });
 
         this.search_btn.addEventListener("click", async (event) => {
             event.preventDefault();
+            this.profile_username = this.search_inp.value;
             this.searchPlayerHandler()
         });
 
-        //Changing profile's picture
-        this.profile_picture.addEventListener();
+
+        //Telling user we are changing profile's picture
+        this.profile_picture.addEventListener("click", () => {
+            if (this.username == this.profile_username) {
+                this.camera_icon.classList.replace("opacity-60", "opacity-0");
+                this.profile_picture_overlay.classList.replace("hidden", "flex");
+            }
+        });
+
+        this.camera_icon.addEventListener("click", async (event) => {
+            if (this.profile_username == this.username){
+                this.camera_icon.classList.replace("opacity-60", "opacity-0");
+                this.profile_picture_overlay.classList.replace("hidden", "flex");
+            }
+        });
+
+        // hover sur la photo de profile
+        this.profile_picture.addEventListener("mouseover", async (event) => {
+            const user_page = document.getElementById("profile_username").textContent;
+            if (this.profile_username == this.username)
+                this.camera_icon.classList.replace("opacity-0", "opacity-60");
+        });
+
+        this.profile_picture.addEventListener('mouseout', () => {
+            const user_page = document.getElementById("profile_username").textContent;
+            if (this.profile_username == this.username)
+                this.camera_icon.classList.replace("opacity-60", "opacity-0");
+        });
+
     }
 
+    //Search for the player, and store datas
     async searchPlayerHandler(){
-        console.log(this);
         try {
             const req = await fetch(`/profile/${this.username}`, {
                 method: 'GET',
@@ -55,7 +99,9 @@ export class   ProfileController{
             const data = await req.json();
             if (data.success) {
                 console.log(data);
-                
+                this.profile_username = data.data.username;
+                this.register_date = data.data.created_at;
+                this.picture_path = data.data.picture_path;
             } else{
                 throw (Error(data.message));
             }
@@ -64,8 +110,16 @@ export class   ProfileController{
         }
     }
 
-    print_page(){
+    async print_page(){
+        if (this.profile_username === null){
+            this.profile_username = this.username;
+            await this.searchPlayerHandler();
+        }
         this.profile_page.classList.replace("hidden", "flex");
+        this.profile_username_tag.innerText = this.profile_username;
+        (this.profile_picture as HTMLImageElement).src = "assets/imgs/" + this.picture_path + "?" + new Date().getTime(); // jsp ??
+        this.register_date_tag.innerText = `${this.site.getText("member_since")}: ${this.register_date}`;
+
     }
 
     hide_page(){
@@ -76,36 +130,6 @@ export class   ProfileController{
         this.hide_page();
     }
 };
-
-// // clique sur la photo de profile
-// pp.addEventListener("click", async (event) => {
-//     const user_page = document.getElementById("profile_username").textContent;
-//     if (user_page == _username) {
-//         document.getElementById("profile_picture_overlay").classList.replace("hidden", "flex");
-//         ci.classList.replace("opacity-60", "opacity-0");
-//     }
-// });
-
-// // clique sur la photo de profile
-// ci.addEventListener("click", async (event) => {
-//     const user_page = document.getElementById("profile_username").textContent;
-//     if (user_page == _username) {
-//         ci.classList.replace("opacity-60", "opacity-0");
-//         document.getElementById("profile_picture_overlay").classList.replace("hidden", "flex");
-//     }
-// });
-
-// // hover sur la photo de profile
-// pp.addEventListener('mouseout', () => {
-//     const user_page = document.getElementById("profile_username").textContent;
-//     if (user_page == _username)
-//         ci.classList.replace("opacity-60", "opacity-0");
-// });
-// pp.addEventListener("mouseover", async (event) => {
-//     const user_page = document.getElementById("profile_username").textContent;
-//     if (user_page == _username)
-//         ci.classList.replace("opacity-0", "opacity-60");
-// });
 
 export class SiteController{
 
@@ -140,7 +164,7 @@ export class SiteController{
         this.lang_file = lang;
         this._load_lang(lang);
 
-        this.profile = new ProfileController();
+        this.profile = new ProfileController(this);
         this.game = new GameController(this);
         this.tournament = new TournamentController(this);
     }
@@ -312,7 +336,6 @@ export class SiteController{
         this.print_main_page();
     }
 
-    //Profile and friends
     /**
      * VIEW PART
      */
@@ -367,9 +390,6 @@ export class SiteController{
 //             return ;
 //         }
 /******************************************* */
-//         (document.getElementById("profile_picture") as HTMLImageElement).src = "assets/imgs/" + profile.datas.picture_path + "?" + new Date().getTime();
-//         document.getElementById("profile_username").innerText = profile.datas.username;
-//         document.getElementById("profile_creation").innerText = `${lang_file["member_since"]}: ${profile.datas.created_at}`;
 //         const friendDiv = document.getElementById("friend_div");
 //         const faBtn = document.getElementById("fa_btn");
 //         if (profile.datas.username == _username) {

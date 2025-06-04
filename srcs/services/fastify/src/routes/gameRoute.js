@@ -109,9 +109,9 @@ export async function gameRoute (fastify, options) {
             const username = request.params.username;
             // console.log(username);
             // ajouter l'image de profile
-            const datas = options.db.prepare('SELECT username, created_at, picture_path FROM users WHERE username = ?').get(username);
-            // console.log(`Profile fetched from db: `, datas);
-            return { success: true, message: `Profile fetched`, datas: datas };
+            const data = options.db.prepare('SELECT username, created_at, picture_path FROM users WHERE username = ?').get(username);
+            // console.log(`Profile fetched from db: `, data);
+            return { success: true, message: `Profile fetched`, data: data };
         } catch (error) {
             console.log("error: ", error);
             return { success: false, message: 'Error data db.' };
@@ -124,10 +124,10 @@ export async function gameRoute (fastify, options) {
         try {
             const username = request.params.username;
             // console.log(username);
-            const datas = options.db.prepare('SELECT g.game_id, uw.username AS winner_username, ul.username AS loser_username, g.loser_score, g.created_at FROM games g JOIN users uw ON g.winner_id = uw.user_id JOIN users ul ON g.loser_id = ul.user_id WHERE uw.username = ? OR ul.username = ? ORDER BY g.created_at DESC;').all(username,username);
+            const data = options.db.prepare('SELECT g.game_id, uw.username AS winner_username, ul.username AS loser_username, g.loser_score, g.created_at FROM games g JOIN users uw ON g.winner_id = uw.user_id JOIN users ul ON g.loser_id = ul.user_id WHERE uw.username = ? OR ul.username = ? ORDER BY g.created_at DESC;').all(username,username);
 
-            // console.log(`historic fetched from db: `, datas);
-            return { success: true, message: `Game fetched`, datas: datas };
+            // console.log(`historic fetched from db: `, data);
+            return { success: true, message: `Game fetched`, data: data };
         } catch (error) {
             console.error('Error data db.', error);
             return { success: false, message: 'Error data db.' };
@@ -183,8 +183,8 @@ export async function gameRoute (fastify, options) {
             return { success: false, message: 'Username too long' };
         }
         try {
-            const datas = options.db.prepare('SELECT username FROM users WHERE username = ?').get(newusername);
-            if (datas != undefined)
+            const data = options.db.prepare('SELECT username FROM users WHERE username = ?').get(newusername);
+            if (data != undefined)
                 return { success: false, message: 'Username already taken' };
         } catch (error) {
             console.error('Error db.', error);

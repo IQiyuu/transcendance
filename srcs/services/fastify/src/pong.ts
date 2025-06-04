@@ -130,7 +130,7 @@ export class   GameController{
                 if (data.success) {
                     // startGame(null, this._ws, true);
                     // this.game = new Ga(this.ws, data.id, null, this.ws.get_username().concat("-2"), true); TODOO
-                    this.ws.set_game(this.game);
+                    // this.ws.set_game(this.game);
                     // this.game.start();
                 }
             } catch (error) {

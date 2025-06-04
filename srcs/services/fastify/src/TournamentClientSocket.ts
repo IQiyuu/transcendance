@@ -1,5 +1,5 @@
-import {Game} from "./pong.js";
-import {TournamentView, Tournament} from "./Tournament.js";
+import {GameController} from "./pong.js";
+import {TournamentController, Tournament} from "./TournamentController.js";
 
 /**
  * Class used for connected client
@@ -8,12 +8,12 @@ export class TournamentClientSocket{
     private ws : WebSocket = null;
     private username : string = null;
     private id : number = null;
-    private view = null;
 
+    private view : TournamentController = null;
     // protected game : Game = null;
     protected tournament : Tournament = null;
 
-    constructor(id : number, username : string, view : TournamentView, tournament : Tournament){
+    constructor(id : number, username : string, view : TournamentController, tournament : Tournament){
         this.id = id;
         this.username = username;
         this.tournament = tournament;
