@@ -1,5 +1,5 @@
 import { TournamentClientSocket } from "./TournamentClientSocket.js";
-import { SiteView } from "./SiteView.js";
+import { SiteController } from "./SiteController.js";
 
 export class Tournament {
     private id;
@@ -28,11 +28,11 @@ export class Tournament {
 
 }
 
-export class TournamentView {
+export class TournamentController {
 
     /**CONTROLER */
     private cws: TournamentClientSocket = null;
-    private site: SiteView = null;
+    private site: SiteController= null;
     private username: string = null;
     private tournament: Tournament = null;
 
@@ -120,7 +120,7 @@ export class TournamentView {
 
             this.print_tournament_page();
             this.print_tournaments_page();
-            this.clear_tournaments(); // view
+            this.clear_tournaments();
             try {
                 const resp = await fetch('/tournament/list?username=' + this.username, {
                     method: 'GET',

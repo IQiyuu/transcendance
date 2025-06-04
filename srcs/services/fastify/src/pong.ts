@@ -1,14 +1,21 @@
 import {GameClientSocket} from "./GameClientSocket.js";
+import { SiteController } from "./SiteController.js";
 
 const paddleWidth = 10, paddleHeight = 100;
 
 // Game for a given client
-export class   Game{
+export class   GameController{
     /**
      * Controller
      */
-    private cws : GameClientSocket = null;
+    private ws : GameClientSocket = null;
+    private site : SiteController= null;
 
+    private is_searching : boolean = false;
+
+    private username : string = "undefined";
+
+    // Game
     private game_id : number;
     private side = null;
     public key_state = {};
@@ -30,6 +37,11 @@ export class   Game{
     /**
      * View
     */
+    private game_page = document.getElementById("game_page");
+
+    private online_play_btn = document.getElementById("matchmaking");
+    private offline_play_btn = document.getElementById("offline");
+
     private game = document.getElementById("game");
 
     private left_player_tag = document.getElementById("player-left");
@@ -41,21 +53,31 @@ export class   Game{
     private ball = document.getElementById("ball");
     private l_paddle = document.getElementById("l_paddle");
     private r_paddle = document.getElementById("r_paddle");
-    
+
+    //      Interval for animations
+    private interval_id;
 
 
-    constructor(socket, id, side, opponent, is_local){
-        console.log("Client game created !");
-        this.cws = socket;
-        this.side = side;
-        this.opponent = opponent;
-        this.game_id = id;
-        this.is_local = is_local;
+    constructor(site){
+        this.site = site;
+    }
 
-        this.init();
+    // constructor(socket, id, side, opponent, is_local){
+    //     console.log("Client game created !");
+    //     this.ws = socket;
+    //     this.side = side;
+    //     this.opponent = opponent;
+    //     this.game_id = id;
+    //     this.is_local = is_local;
 
-        //Launch the animation
-        requestAnimationFrame(() => this.draw());
+    //     this.init();
+
+    //     //Launch the animation
+    //     requestAnimationFrame(() => this.draw());
+    // }
+
+    setUsername(username){
+        this.username = username;
     }
 
     getSide(){
@@ -70,18 +92,88 @@ export class   Game{
         this.key_state[e.code] = (e.type === "keydown");
     }
 
+
+    /**
+     * Controller
+     */
+
+    addEvents(){
+        //Online playing
+        this.online_play_btn.addEventListener("click", (event) => {
+            event.preventDefault();
+
+            if (this.is_searching){
+                this.stop_matchmaking();
+            } else{
+                this.start_matchmaking();
+            }
+            this.is_searching = !this.is_searching;
+        });
+
+        //Local play
+        this.offline_play_btn.addEventListener("click", async (event) => {
+            event.preventDefault();
+
+            this.site.hide_menu();
+            this.print_play_page();
+
+            try {
+                const body = {
+                    username: this.ws.get_username(),
+                }
+                const resp = await fetch(`/game/local/create`, {
+                    method: 'POST',
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(body),
+                });
+                const data = await resp.json();
+                if (data.success) {
+                    // startGame(null, this._ws, true);
+                    // this.game = new Ga(this.ws, data.id, null, this.ws.get_username().concat("-2"), true); TODOO
+                    this.ws.set_game(this.game);
+                    // this.game.start();
+                }
+            } catch (error) {
+                console.log("error: ", error);
+            }
+        });
+    }
+
+    /**
+     * Model
+     */
+
     /** W and S for left player if 2 player, else UP and DOWN */
-    moves(obj, cws){
+    moves(obj, ws){
+        //to check again
         if (obj.key_state["ArrowUp"] || obj.key_state["ArrowDown"]) {
-            cws.update_pos(obj.getGameId(), obj.key_state["ArrowUp"], obj.isLocal() ? "right" : obj.get_side());
+            ws.update_pos(obj.getGameId(), obj.key_state["ArrowUp"], obj.isLocal() ? "right" : obj.get_side());
         }
         if (obj.isLocal() && (obj.key_state["KeyW"] || obj.key_state["KeyS"])){
-            cws.update_pos(obj.getGameId(), obj.key_state["KeyW"], "left");
+            ws.update_pos(obj.getGameId(), obj.key_state["KeyW"], "left");
         }
     }
 
 
-    init(){
+    start_matchmaking(){
+        this.start_matchmaking_animation();
+        this.ws.start_matchmaking();
+    }
+
+    stop_matchmaking(){
+        this.stop_matchmaking_animation();
+        this.ws.stop_matchmaking();
+    }
+
+    // Creating a game for online players
+    createGame(gameId, role, opponent){
+        console.log("Match with ", opponent);
+        // this.game = new Game(this.ws, gameId, role, opponent, false); // TODOO
+        // this.game.start();
+        return (this.game);
+    }
+
+    gameInit(){
         // this.canvas.addEventListener("keyup", this.key_handler);
         // this.canvas.addEventListener("keydown", this.key_handler);
         // if (this.is_local){
@@ -110,9 +202,31 @@ export class   Game{
         this.r_paddle.style.position="relative";
 
         //testing
-        setInterval(this.moves, 10, this, this.cws);
+        setInterval(this.moves, 10, this, this.ws);
     }
 
+
+    /**
+     * VIEW
+     */
+    start_matchmaking_animation(){
+        let count = 0;
+
+        // good luck ! (need to have dynamcly inserted dialogue)
+        // maybe by getting current value then adding in the handler ?
+        this.interval_id = window.setInterval(() => {
+            count++;
+            document.getElementById("matchmaking").textContent = "waiting" + '.'.repeat(count % 3);
+        }, 500);
+        // this.interval_id = setInterval(() => {
+        //     btn.textContent = waiting + '.'.repeat(count % 3);
+        // }, 500);
+    }
+
+    stop_matchmaking_animation(){
+        clearInterval(this.interval_id);
+        this.online_play_btn.textContent = this.site.getText('play_online');
+    }
     // Update every game values
     update_state(game){
         this.l_score = game.scores.left;
@@ -130,7 +244,7 @@ export class   Game{
 
     // start(){
     //     //say to server we are ready
-    //     this.cws.say_ready();
+    //     this.ws.say_ready();
     // }
 
     /**
@@ -200,13 +314,25 @@ export class   Game{
 
     print_player_names(){
         if (this.side === "left"){
-            this.left_player_tag.textContent = this.cws.get_username() || "Player 1";
+            this.left_player_tag.textContent = this.ws.get_username() || "Player 1";
             this.right_player_tag.textContent = this.opponent || "Player 2";
         }
         else{
             this.left_player_tag.textContent = this.opponent || "Player 1";
-            this.right_player_tag.textContent = this.cws.get_username() || "Player 2";
+            this.right_player_tag.textContent = this.ws.get_username() || "Player 2";
         }
+    }
+
+    print_play_page(){
+        this.game_page.classList.replace("hidden", "block");
+    }
+
+    hide_play_page(){
+        this.game_page.classList.replace("block", "hidden");
+    }
+
+    hide_all(){
+        this.hide_play_page();
     }
 };
 

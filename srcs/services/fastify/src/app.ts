@@ -1,4 +1,4 @@
-import {SiteView} from "./SiteView.js";
+import {SiteController} from "./SiteController.js";
 
 // import * as utils from "./utils.js";
 
@@ -27,7 +27,7 @@ async function load_lang_file(lang="fr") {
 
 async function main(){
     let lang_file = await load_lang_file("en");
-    let view = new SiteView(lang_file);
+    let view = new SiteController(lang_file);
     
     view.add_events();
 
@@ -161,152 +161,6 @@ await main();
 //     }
 // }
 
-// // choisit l'affichage en fonction de l'utilisateur (connecte ou non)
-// checkIfLoggedIn().then((isLoggedIn) => {
-//     const loginForm = document.getElementById("login-form") as HTMLDivElement;
-//     const pongGame = document.getElementById("site") as HTMLDivElement;
-
-//     if (isLoggedIn) {
-//         pongGame.classList.replace("hidden", "block");
-//         initFriendlist();
-//         document.body.classList.remove("justify-center", "align-center", "flex");
-//     }
-//     else
-//         loginForm.classList.replace("hidden", "flex");
-
-// });
-
-// // GET et afficher les infos du profile / historique
-// async function display_profile(username) {
-//     const list = document.getElementById("histo_list") as HTMLUListElement;
-//     try {
-//         // requete des infos pour afficher le profile
-//         const profile_req = await fetch(`/profile/${username}`, {
-//             method: 'GET',
-//             credentials: 'include',
-//             headers: { "Content-Type": "application/json" },
-//         });
-
-//         const profile = await profile_req.json();
-//         if (!profile.datas) {
-//             console.log("player not found.");
-//             return ;
-//         }
-//         (document.getElementById("profile_picture") as HTMLImageElement).src = "assets/imgs/" + profile.datas.picture_path + "?" + new Date().getTime();
-//         document.getElementById("profile_username").innerText = profile.datas.username;
-//         document.getElementById("profile_creation").innerText = `${lang_file["member_since"]}: ${profile.datas.created_at}`;
-//         const friendDiv = document.getElementById("friend_div");
-//         const faBtn = document.getElementById("fa_btn");
-//         if (profile.datas.username == _username) {
-//             friendDiv.classList.replace("flex", "hidden");
-//             faBtn.classList.replace("hidden", "relative");
-//         }
-//         else {
-//             const responseFriends = await fetch(`/db/friends/${_username}/${username}`, {
-//                 method: 'GET',
-//                 credentials: 'include',
-//                 headers: { "Content-Type": "application/json" },
-//             });
-
-//             const friends = await responseFriends.json();
-
-//             if (!friends.success)
-//                 console.log("error: ", friends.error);
-//             else {
-//                 console.log(friends);
-//                 document.getElementById("friend_btn").textContent = lang_file[friends.message];
-//                 document.getElementById("block_btn").textContent = friends.emoji;
-//             }
-
-//             console.log(friends.message);
-//             friendDiv.classList.replace("hidden", "flex");
-//             faBtn.classList.replace("relative", "hidden");
-//         }
-
-//         // requete des games
-//         const histo_req = await fetch(`/historic/${username}`, {
-//             method: 'GET',
-//             credentials: 'include',
-//             headers: { "Content-Type": "application/json" },
-//         });
-//         const data = await histo_req.json();
-//         console.log(data);
-//         list.replaceChildren();
-
-//         // affiche l'historique
-//         if (data.success) {
-//             var cpt = 0;
-//             var w = 0;
-//             data.datas.forEach((item) => {
-//                 cpt++;
-//                 if (cpt < 6) {
-//                     let li = document.createElement("li");
-//                     let a = document.createElement("a");
-//                     a.innerText = item.winner_username;
-//                     a.classList.add("text-green-500", "underline");
-//                     a.href="#";
-//                     a.id="profileDisplay";
-
-//                     let a2 = document.createElement("a");
-//                     a2.innerText = item.loser_username;
-//                     a2.classList.add("text-green-500", "underline");
-//                     a2.href="#";
-//                     a2.id="profileDisplay";
-
-//                     li.appendChild(a);
-//                     li.innerHTML += ": 11 VS ";
-//                     li.appendChild(a2);
-//                     li.innerHTML += " : " + item.loser_score + " at " + item.created_at;
-            
-//                     list.appendChild(li);
-//                     li.style.fontSize = "16px";
-//                 }
-//                 if (item.winner_username == profile.datas.username)
-//                     w++;
-//                 document.getElementById("wr_card").textContent = `${lang_file["wr"]} : ${(w / cpt * 100).toFixed(0)}%`;
-//             });
-//             if (cpt == 0)
-//                 document.getElementById("wr_card").textContent = `${lang_file["wr"]} : N/a`;
-//         }
-//         // change les a (lien) de l'historique par des liens qui menent a la page de profile
-//         document.querySelectorAll("a#profileDisplay").forEach((item) => { 
-//             item.addEventListener("click", async (event) => {
-//                     event.preventDefault();
-//                     await display_profile(item.textContent);
-//                 });
-//         });
-//         if (cpt > 0) {
-//             document.getElementById("wr").textContent = `${w} / ${cpt}` ;
-//             let wr = w/(cpt)*100;
-//             document.getElementById("percent").setAttribute("stroke-dasharray", `${wr}, 100`);
-//         } else {
-//             document.getElementById("wr").textContent = "N/A" ;
-//             document.getElementById("percent").setAttribute("stroke-dasharray", `50, 100`);
-//             document.getElementById("histo").classList.replace("hidden", "block");
-//         }
-//         document.getElementById("histo").classList.replace("hidden", "block");
-//     } catch (error) {
-//         console.log("error fetching db: ", error);
-//     }
-// }
-
-
-// // input recherche de joueur
-// document.getElementById("search_player_in").addEventListener("keydown", async (event) => {
-//     if(event.key == 'Enter') {
-//         const input = (event.target as HTMLInputElement);
-//         await display_profile(input.value);
-//         input.value = "";
-//     }
-// });
-
-// // button recherche de profile de joueur
-// document.getElementById("search_player_btn").addEventListener("click", async (event) => {
-//     event.preventDefault();
-//     const input = ((document.getElementById("search_player_in")) as HTMLInputElement);
-//     await display_profile(input.value);
-//     input.value = "";
-// });
 
 // const pp = document.getElementById("profile_picture") as HTMLImageElement;
 // const ci = document.getElementById("camera_icon");
@@ -523,23 +377,3 @@ await main();
 //     else
 //         console.log("error: ", data.error);
 // });
-
-
-// function updateContent() {
-//   document.getElementById('form-title').textContent = lang_file['connexion_title'];
-//   document.querySelector("label[for='username']").textContent = lang_file['username'];
-//   document.querySelector("label[for='password']").textContent = lang_file['password'];
-//   document.getElementById('register-view').textContent = lang_file['register_text'];
-//   document.getElementById('game_title').textContent = lang_file['title'];
-//   document.getElementById('div_title').textContent = lang_file['change_pp'];
-//   document.getElementById('login_btn').textContent = lang_file['connexion_title'];
-//   document.getElementById('offline').textContent = lang_file['play_local'];
-//   document.getElementById('matchmaking').textContent = lang_file['play_online'];
-//   document.getElementById('tournament_button').textContent = lang_file['tournament'];
-//   document.getElementById('profile_button').textContent = lang_file['profile'];
-//   document.getElementById('upload_btn').textContent = lang_file['upload_txt'];
-//   document.getElementById('about_button').textContent = lang_file['about'];
-//   document.getElementById('friend_text').textContent = lang_file['friends'];
-//   document.getElementById('histo_text').textContent = lang_file['historique'];
-//   (document.getElementById('search_player_in') as HTMLInputElement).placeholder = lang_file['search'];
-// }
