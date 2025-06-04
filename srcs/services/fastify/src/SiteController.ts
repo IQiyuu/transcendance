@@ -47,13 +47,16 @@ export class   ProfileController{
             if (event.key == 'Enter') {
                 this.profile_username = this.search_inp.value;
                 this.searchPlayerHandler();
+                this.print_page();
             }
         });
 
         this.search_btn.addEventListener("click", async (event) => {
             event.preventDefault();
             this.profile_username = this.search_inp.value;
-            this.searchPlayerHandler()
+            console.log(this.profile_username); // HERE TO DO
+            this.searchPlayerHandler();
+            this.print_page();
         });
 
 
