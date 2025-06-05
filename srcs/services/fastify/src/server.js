@@ -108,7 +108,9 @@ fastify.register(DbRoute, {
 });
 
 fastify.register(FastifyStatic, {
-  root: join(rootDir, 'dist')
+  root: [join(rootDir, 'dist'),
+    join(rootDir, 'dist/assets')
+  ]
 })
 
 fastify.register(FastifyView, {

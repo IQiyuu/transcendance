@@ -74,10 +74,15 @@ export function movePaddle(game, side, moveUp){
     }
 }
 
+export function userExistsInDb(username, db){
+    let req = db.prepare("SELECT username FROM users WHERE username = ?").get(username);
+    return (req !== null && req !== undefined);
+}
+
 export async function gameRoute (fastify, options) {
     let waiting_list = null;
     let w_uname = null;
-    let img_path = "dist/assets/imgs/";
+    let img_path = "dist/assets/imgs/"; //to update 
 
 
     // function addGame(game){
@@ -109,9 +114,13 @@ export async function gameRoute (fastify, options) {
             const username = request.params.username;
             // console.log(username);
             // ajouter l'image de profile
+            if (!userExistsInDb(username, options.db))
+                return {success: false, message: "User doesn't exists"};
             const data = options.db.prepare('SELECT username, created_at, picture_path FROM users WHERE username = ?').get(username);
             // console.log(`Profile fetched from db: `, data);
-            return { success: true, message: `Profile fetched`, data: data };
+            if (data === null || data === undefined)
+                throw (Error("Unkown error while retreiving profile info in db"));
+            return { success: true, message: `Profile fetched`, profile: data };
         } catch (error) {
             console.log("error: ", error);
             return { success: false, message: 'Error data db.' };
@@ -127,7 +136,7 @@ export async function gameRoute (fastify, options) {
             const data = options.db.prepare('SELECT g.game_id, uw.username AS winner_username, ul.username AS loser_username, g.loser_score, g.created_at FROM games g JOIN users uw ON g.winner_id = uw.user_id JOIN users ul ON g.loser_id = ul.user_id WHERE uw.username = ? OR ul.username = ? ORDER BY g.created_at DESC;').all(username,username);
 
             // console.log(`historic fetched from db: `, data);
-            return { success: true, message: `Game fetched`, data: data };
+            return { success: true, message: `Game fetched`, histo: data };
         } catch (error) {
             console.error('Error data db.', error);
             return { success: false, message: 'Error data db.' };

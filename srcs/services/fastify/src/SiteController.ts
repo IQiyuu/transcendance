@@ -6,27 +6,32 @@ import {TournamentController} from "./TournamentController.js";
 
 export class   ProfileController{
 
-    private username : string = "default name";
+    private	username : string = "default name";
 
-    private profile_username : string = null;
+    private	profile_username : string = null;
 
-    private picture_path : string = "standart.jpg";
-    private register_date : string = "placeholder";
+    private	picture_path : string = "imgs/standart.jpg";
+    private	register_date : string = "placeholder";
 
-    private site : SiteController = null;
+    private	histo = null;
+
+    private	site : SiteController = null;
 
     //View
-    private profile_page = document.getElementById("player_profile");
-    private histo_list = document.getElementById("histo_list");
-    private search_inp = document.getElementById("search_player_in") as HTMLInputElement;
-    private search_btn = document.getElementById("search_player_btn");
+    private	profile_page = document.getElementById("player_profile");
+    private	search_btn = document.getElementById("search_player_btn");
+    private	search_inp = document.getElementById("search_player_in") as HTMLInputElement;
+    private	friend_div = document.getElementById("friend_div");
+    private	fa_btn = document.getElementById("fa_btn");
+	
+    private	histo_list = document.getElementById("histo_list");
 
-    private camera_icon = document.getElementById("camera_icon");
-    private profile_picture = document.getElementById("profile_picture");
-    private profile_picture_overlay = document.getElementById("profile_picture_overlay");
+    private	camera_icon = document.getElementById("camera_icon");
+    private	profile_picture = document.getElementById("profile_picture");
+    private	profile_picture_overlay = document.getElementById("profile_picture_overlay");
 
-    private profile_username_tag = document.getElementById("profile_username");
-    private register_date_tag = document.getElementById("profile_creation");
+    private	profile_username_tag = document.getElementById("profile_username");
+    private	register_date_tag = document.getElementById("profile_creation");
 
     constructor(site){
         this.site = site;
@@ -46,19 +51,18 @@ export class   ProfileController{
         this.search_inp.addEventListener("keydown", async (event) => {
             if (event.key == 'Enter') {
                 this.profile_username = this.search_inp.value;
-                this.searchPlayerHandler();
-                this.print_page();
+                await this.searchPlayerHandler();
+                this.printPage();
             }
         });
 
         this.search_btn.addEventListener("click", async (event) => {
             event.preventDefault();
             this.profile_username = this.search_inp.value;
-            console.log(this.profile_username); // HERE TO DO
-            this.searchPlayerHandler();
-            this.print_page();
+            console.log(this.profile_username);
+            await this.searchPlayerHandler();
+            this.printPage();
         });
-
 
         //Telling user we are changing profile's picture
         this.profile_picture.addEventListener("click", () => {
@@ -91,38 +95,77 @@ export class   ProfileController{
     }
 
     //Search for the player, and store datas
-    async searchPlayerHandler(){
+    async	searchPlayerHandler(){
         try {
-            const req = await fetch(`/profile/${this.username}`, {
+            const req = await fetch(`/profile/${this.profile_username}`, {
                 method: 'GET',
                 credentials: 'include',
                 headers: { "Content-Type": "application/json" },
             });
 
             const data = await req.json();
-            if (data.success) {
-                console.log(data);
-                this.profile_username = data.data.username;
-                this.register_date = data.data.created_at;
-                this.picture_path = data.data.picture_path;
-            } else{
-                throw (Error(data.message));
-            }
+
+            if (!data.success){
+				this.profile_username = this.username;
+                throw (Error(data.message)); // Fait du rouge, a modifier
+			}
+            console.log(data);
+            this.profile_username = data.profile.username;
+            this.register_date = data.profile.created_at;
+            this.picture_path = data.profile.picture_path;
         } catch (error){
             console.log(error);
         }
     }
 
-    async print_page(){
+    async	searchHistoricHandler(){
+        try {
+            const req = await fetch(`/historic/${this.profile_username}`, {
+                method: 'GET',
+                credentials: 'include',
+                headers: { "Content-Type": "application/json" },
+            });
+
+            const data = await req.json();
+
+            if (!data.success)
+                throw (Error(data.message));
+            console.log(data);
+            this.histo = data.histo;
+        } catch (error){
+            console.log(error);
+        }
+    }
+
+
+	//VIEW
+	printHisto(){
+
+	}
+
+    async	printPage(){
         if (this.profile_username === null){
             this.profile_username = this.username;
             await this.searchPlayerHandler();
         }
+
+        //profile
         this.profile_page.classList.replace("hidden", "flex");
         this.profile_username_tag.innerText = this.profile_username;
-        (this.profile_picture as HTMLImageElement).src = "assets/imgs/" + this.picture_path + "?" + new Date().getTime(); // jsp ??
+        (this.profile_picture as HTMLImageElement).src = this.picture_path + "?" + new Date().getTime(); // jsp ??
         this.register_date_tag.innerText = `${this.site.getText("member_since")}: ${this.register_date}`;
 
+		if (this.profile_username != this.username){
+			this.friend_div.classList.replace("hidden", "flex");
+			this.fa_btn.classList.replace("flex", "hidden");
+		}
+		else{
+			this.friend_div.classList.replace("flex", "hidden");
+			this.fa_btn.classList.replace("hidden", "flex");
+		}
+
+        //historic
+		this.printHisto();
     }
 
     hide_page(){
@@ -287,7 +330,7 @@ export class SiteController{
         // Profile display
         this.profile_btn.addEventListener("click", async (event) => {
             this.hide_menu();
-            this.profile.print_page();
+            this.profile.printPage();
         });
 
         // Tournament menu
@@ -297,6 +340,7 @@ export class SiteController{
             this.print_tournament_btns();
         });
 
+		//Registering children events
         this.game.addEvents();
         this.profile.addEvents();
         this.tournament.addEvents();
@@ -376,7 +420,7 @@ export class SiteController{
         this.about.classList.replace("flex", "hidden");
     }
 
-    // // GET et afficher les infos du profile / historique
+    // GET et afficher les infos du profile / historique
 // async function display_profile(username) {
 //     const list =  as HTMLUListElement;
 //     try {
@@ -435,7 +479,7 @@ export class SiteController{
 //         if (data.success) {
 //             var cpt = 0;
 //             var w = 0;
-//             data.datas.forEach((item) => {
+//             data.histo.forEach((item) => {
 //                 cpt++;
 //                 if (cpt < 6) {
 //                     let li = document.createElement("li");

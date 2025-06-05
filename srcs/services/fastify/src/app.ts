@@ -6,7 +6,7 @@ async function load_lang_file(lang="fr") {
     let lang_file;
     try {
         const file = await fetch(`/assets/locales/${lang}/translation.json`);
-        if (file == null) // verify
+        if (file == null)
             throw (Error("Lang file wasnt fetched"));
         lang_file = await file.json();
         if (lang_file == null)
@@ -23,7 +23,6 @@ async function load_lang_file(lang="fr") {
     }
     return lang_file;
 }
-
 
 async function main(){
     let lang_file = await load_lang_file("en");

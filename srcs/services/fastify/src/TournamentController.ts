@@ -184,7 +184,6 @@ export class TournamentController {
         });
     }
 
-
     /**
      * VIEW METHODS
      * 
