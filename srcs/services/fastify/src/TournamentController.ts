@@ -32,7 +32,7 @@ export class TournamentController {
 
     /**CONTROLLER */
     private cws: TournamentClientSocket = null;
-    private site: SiteController= null;
+    private site: SiteController = null;
     private username: string = null;
     private tournament: Tournament = null;
 

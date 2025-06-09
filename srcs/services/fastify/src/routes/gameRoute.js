@@ -244,6 +244,9 @@ export async function gameRoute (fastify, options) {
                 game.paddles["left"].y = newY2;
     })
 
+    fastify.get('/game/ws/', { websocket: true }, (socket, req) => {
+        query
+    });
     // fastify.register(async function (fastify) {
     //     // Gere le matchmaking et la deconnexion en pleine partie (Le deconnecte perd automatiquement)
     //     // marche en socket

@@ -103,9 +103,9 @@ export class   GameController{
             event.preventDefault();
 
             if (this.is_searching){
-                this.stop_matchmaking();
+                this.stopMatchmaking();
             } else{
-                this.start_matchmaking();
+                this.startMatchmaking();
             }
             this.is_searching = !this.is_searching;
         });
@@ -119,7 +119,7 @@ export class   GameController{
 
             try {
                 const body = {
-                    username: this.ws.get_username(),
+                    username: this.username,
                 }
                 const resp = await fetch(`/game/local/create`, {
                     method: 'POST',
@@ -128,15 +128,16 @@ export class   GameController{
                 });
                 const data = await resp.json();
                 if (data.success) {
+                    this.ws = new GameClientSocket(this.username, this);
+                    this.ws.startOfflineGame();
                     // startGame(null, this._ws, true);
-                    // this.game = new Ga(this.ws, data.id, null, this.ws.get_username().concat("-2"), true); TODOO
-                    // this.ws.set_game(this.game);
-                    // this.game.start();
                 }
             } catch (error) {
                 console.log("error: ", error);
             }
         });
+
+        
     }
 
     /**
@@ -155,14 +156,23 @@ export class   GameController{
     }
 
 
-    start_matchmaking(){
+    startMatchmaking(){
         this.start_matchmaking_animation();
-        this.ws.start_matchmaking();
+        if (this.ws !== null || this.ws !== undefined){
+            console.error("You cant start a matchmaking while having a match");
+            return ;
+        }
+        this.ws = new GameClientSocket(this.username, this);
+        this.ws.startMatchmaking();
     }
 
-    stop_matchmaking(){
+    stopMatchmaking(){
         this.stop_matchmaking_animation();
-        this.ws.stop_matchmaking();
+        if (this.ws !== null){
+            this.ws.startMatchmaking();
+            this.ws.close();
+            this.ws = null;
+        }
     }
 
     // Creating a game for online players
@@ -228,7 +238,7 @@ export class   GameController{
         this.online_play_btn.textContent = this.site.getText('play_online');
     }
     // Update every game values
-    update_state(game){
+    updateState(game){
         this.l_score = game.scores.left;
         this.r_score = game.scores.right;
 

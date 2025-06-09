@@ -6,25 +6,24 @@ import {GameController} from "./pong.js";
 export class GameClientSocket{
     private ws : WebSocket = null;
     private username : string;
-    private user_id : number = -1;
     private view;
 
     protected game : GameController = null;
 
-    constructor(username, view){
+    constructor(username, game){
         this.username = username;
-        this.ws = new WebSocket(`wss://${window.location.host}/ws?username=${this.username}`);
-        this.set_socket();
-        this.view = view;
+        this.ws = new WebSocket(`wss://${window.location.host}/game/ws/?username=${this.username}`);
+        this.game = game;
+        this.setSocket();
     }
 
     get_username(){
         return (this.username);
     }
 
-    set_game(g : GameController){
-        this.game = g;
-    }
+    // set_game(g : GameController){
+    //     this.game = g;
+    // }
 
     // async isLoggedIn() { // maybe useless, as I copied it to controller
     //     try {
@@ -50,7 +49,7 @@ export class GameClientSocket{
     //     }
     // }
 
-    set_socket(){
+    setSocket(){
         this.ws.onopen = (event) => {
             console.log("Auth connected");
         }
@@ -59,37 +58,22 @@ export class GameClientSocket{
             console.log("msg recu");
             const data = JSON.parse(message.data);
             if (data === null)
-                return ; // ERROR
-            // console.log("You got a mail, ", data.type);
-            // appendMessage(message);
-            if (data.type == "connection") {
-                // this.view.friend_connect();
-                const div = document.getElementById(`${data.user}_friendlist`);
-                const dot = div.getElementsByTagName("span")[0];
-                dot.classList.replace("bg-red-500", "bg-green-500");
-                console.log(dot.classList[4]);
-                console.log(div);
-                console.log(dot);
-            } else if (data.type == "disconnection") {
-                const div = document.getElementById(`${data.user}_friendlist`);
-                const dot = div.getElementsByTagName("span")[0];
-                dot.classList.replace("bg-green-500", "bg-red-500");
-            } else if (data.type == "addFriend") {
-                // addFriend(data.user, data.pp);
-            } else if (data.type == "removeFriend") {
-                // removeFriend(data.user);
-            } else if (data.type == "matchmaking") {
-                if (data.state == "found") {
-                    this.view.stop_matchmaking_animation();
-                    this.view.hide_all();
-                    this.game = this.view.createGame(data.gameId, data.role, data.opponent);
-                    this.view.print_play_page();
-                    // this.game.start();
-                }
-            } else if (data.type === "game_info"){
+                return ;
+
+            if (data.type === "game_info"){
                 // if valid
                 // ...
-                this.game.update_state(data.game);
+                this.game.updateState(data.game);
+            } else if (data.type === "matchmaking") {
+                if (data.state === "found") {
+                    this.game.stop_matchmaking_animation();
+                    this.game.hide_all();
+                    this.game.print_play_page();
+                }
+            }else if (data.type === "offlineGameCreated"){
+                this.game.hide_all();
+                this.game.print_play_page();
+        
             }
         };
 
@@ -106,7 +90,7 @@ export class GameClientSocket{
         // }
     }
     
-    start_matchmaking(){
+    startMatchmaking(){
         this.ws.send(JSON.stringify({
             type: "matchmaking",
             uname: this.username,
@@ -114,22 +98,31 @@ export class GameClientSocket{
         }));
     }
 
-    stop_matchmaking(){
+    stopMatchmaking(){
         this.ws.send(JSON.stringify({
             type: "matchmaking",
             state: "left"
         }));
     }
 
+    startOfflineGame(){
+        this.ws.send(
+            JSON.stringify({ // A revoir
+                type: "solo",
+                state: "create"
+            })
+        );
+    }
+
     // Tell the server game is ready to start
-    say_ready(){
+    sayReady(){
         this.ws.send(JSON.stringify({
             type : "game_start"
         }));
     }
 
     // Update the server with movements
-    update_pos(game_id, key, side){
+    updatePos(game_id, key, side){
         console.log("Sending " +  game_id + key + side);
         this.ws.send(JSON.stringify({
             type : "game_update",
