@@ -10,10 +10,15 @@ export class GameClientSocket{
     protected game : GameController = null;
     
     private should_search : boolean = false;
+    private should_start_solo : boolean = false;
 
     constructor(username, game){
         this.username = username;
-        this.ws = new WebSocket(`wss://${window.location.host}/game/ws/?username=${this.username}`);
+        this.ws = new WebSocket(`wss://${window.location.host}/game/ws?username=${this.username}`);
+        if (this.ws.readyState === this.ws.CLOSED || this.ws.readyState === this.ws.CLOSING){
+            //error handling to do !
+            return ;
+        }
         this.game = game;
         this.setSocket();
     }
@@ -26,33 +31,8 @@ export class GameClientSocket{
     //     this.game = g;
     // }
 
-    // async isLoggedIn() { // maybe useless, as I copied it to controller
-    //     try {
-    //         const response = await fetch('/protected', {
-    //             method: 'GET',
-    //             credentials: 'include',
-    //         });
-
-    //         const data = await response.json();
-
-    //         if (response.ok && data.success) {
-    //             sessionStorage.setItem('username', data.username);
-    //             sessionStorage.setItem('userId', data.id);
-    //             this.username = data.username;
-    //             console.log('Utilisateur connecté:', data.username);
-    //             return (true);
-    //         }
-    //         console.log('Utilisateur non connecté');
-    //         return (false);
-    //     } catch (error) {
-    //         console.error('Erreur lors de la vérification de la connexion:', error);
-    //         return (false);
-    //     }
-    // }
-
     setSocket(){
         this.ws.onopen = (event) => {
-            console.log("Game socket connected");
             if (this.should_search){
                 this.ws.send(JSON.stringify({
                     type: "matchmaking",
@@ -80,6 +60,7 @@ export class GameClientSocket{
                     this.game.print_play_page();
                 }
             }else if (data.type === "offline_game_created"){
+                this.game.gameInit();
                 this.game.updateState(data.game);
 
                 this.game.hide_all();
@@ -88,9 +69,9 @@ export class GameClientSocket{
         };
 
         this.ws.onclose = (event) => {
-            // console.log("Closing client " + this.username);
-            // Maybe we neeed to say bye to the server ?
-
+            console.log("closing socket");
+            console.log(event);
+            this.game.close();
         }
     }
     
@@ -115,8 +96,12 @@ export class GameClientSocket{
     }
 
     startOfflineGame(){
+        if (this.ws.readyState === 0){// CONNECTING state
+            this.should_start_solo = true;
+            return ;
+        }
         this.ws.send(
-            JSON.stringify({ // A revoir
+            JSON.stringify({
                 type: "offline_game",
                 state: "create"
             })
@@ -141,11 +126,9 @@ export class GameClientSocket{
         }));
     }
 
-    print_info(){
-        console.log("Websocket for : " + this.username);
-    }
-
     close(){
         this.ws.close();
+        this.should_search = false;
+        this.should_start_solo = false;
     }
 };

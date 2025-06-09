@@ -248,20 +248,27 @@ export async function gameRoute (fastify, options) {
 
     // Sub plugin for ws games;
     fastify.register(async function (fastify) {
+
+        fastify.addHook("preValidation", async (request, reply) => {
+            //Verification of the request
+        });
+
         fastify.get('/game/ws', { websocket: true }, (socket, req) => {
-
-            fastify.addHook("preValidation", async (request, reply) => {
-                //Verification of the request
-            });
-
-            console.log(websocket);
-            console.log("Creating a new game");
+            let username = req.query.username;
             socket.on('open', (event) => {
                 console.log("socket game created");
-                console.log(event);
+                console.log(username);
+                // if (solo)
+                // let new_game = createGame();
+                socket.send(JSON.stringify({
+                    type: "opppppppppeeened",
+                    game: new_game
+                })); // HERE
             });
             
             socket.on('message', (message) => {
+                console.log("You got a mail");
+                console.log(message);
                 if (message.type === "game_update"){
                     var game = games[message.game_id];
                     var newY = game.paddles[message.side].y + (message.move_up ? -4 : 4);
@@ -270,7 +277,7 @@ export async function gameRoute (fastify, options) {
                 }
             })
 
-            connectedClients.add(username, socket);
+            connectedClients.set(username, socket);
             console.log("Testing to add a game");
         });
     });

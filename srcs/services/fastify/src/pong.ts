@@ -99,7 +99,7 @@ export class   GameController{
 
     addEvents(){
         //Online playing
-        this.online_play_btn.addEventListener("click", (event) => {
+        this.online_play_btn.addEventListener("click", async (event) => {
             event.preventDefault();
 
             if (this.is_searching){
@@ -155,6 +155,7 @@ export class   GameController{
         if (obj.isLocal() && (obj.key_state["KeyW"] || obj.key_state["KeyS"])){
             ws.update_pos(obj.getGameId(), obj.key_state["KeyW"], "left");
         }
+        obj.draw(); // here for now, but maybe socket call it instead (after a move);
     }
 
 
@@ -173,6 +174,15 @@ export class   GameController{
         this.stop_matchmaking_animation();
         if (this.ws !== null){
             this.ws.stopMatchmaking();
+            this.ws.close();
+            this.ws = null;
+            console.log("Socket closed for pong");
+        }
+    }
+
+    close(){
+        this.stop_matchmaking_animation();
+        if (this.ws !== null){
             this.ws.close();
             this.ws = null;
         }
@@ -214,7 +224,7 @@ export class   GameController{
         this.l_paddle.style.position="relative";
         this.r_paddle.style.position="relative";
 
-        //testing
+        //testing maybe not here
         setInterval(this.moves, 10, this, this.ws);
     }
 
@@ -272,7 +282,7 @@ export class   GameController{
         return y;
     }
     // Move both paddles
-    move_paddles(){
+    draw_paddles(){
         // Distance
         this.l_paddle.style.left = this.cooToPos_x(this.l_paddle_x) + "px";
         this.l_paddle.style.top = this.cooToPos_y(this.l_paddle_y) + "px";
@@ -282,15 +292,21 @@ export class   GameController{
     }
 
     // Move ball
-    move_ball(){
+    draw_ball(){
         
+    }
+
+    draw_scores(){
+        this.score_left.innerText = this.l_score.toString();
+        this.score_right.innerText = this.r_score.toString();
     }
 
     // draw the canva with values
     draw(){
-        console.log("Moving paddles");
-        this.move_paddles();
-        this.move_ball();
+        console.log("Drawing");
+        this.draw_paddles();
+        this.draw_ball();
+        this.draw_scores();
         // this.score_left.textContent = String(this.l_score);
         // this.score_right.textContent = String(this.r_score);
 
@@ -327,12 +343,12 @@ export class   GameController{
 
     print_player_names(){
         if (this.side === "left"){
-            this.left_player_tag.textContent = this.ws.get_username() || "Player 1";
-            this.right_player_tag.textContent = this.opponent || "Player 2";
+            this.left_player_tag.innerText = this.username || "Player 1";
+            this.right_player_tag.innerText = this.opponent;
         }
         else{
-            this.left_player_tag.textContent = this.opponent || "Player 1";
-            this.right_player_tag.textContent = this.ws.get_username() || "Player 2";
+            this.left_player_tag.innerText = this.opponent;
+            this.right_player_tag.innerText = this.username;
         }
     }
 

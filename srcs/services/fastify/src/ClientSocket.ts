@@ -111,7 +111,7 @@ export class ClientSocket{
     }
 
     // Update the server with movements
-    update_pos(game_id, key, side){
+    updatePos(game_id, key, side){
         console.log("Sending " +  game_id + key + side);
         this.ws.send(JSON.stringify({
             type : "game_update",

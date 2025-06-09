@@ -64,6 +64,7 @@ async function websocketRoute(fastify, options) {
 
             // Quand un user ferme sa connexion
             socket.on('close', (rawMessage) => {
+                console.log("CLOSING SOCKET SITE");
                 const data = JSON.parse(rawMessage.toString());
                 if (data.gameId != -1) {
                     if (data.mod == 'l') {
