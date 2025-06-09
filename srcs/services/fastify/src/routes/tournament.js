@@ -263,12 +263,12 @@ async function tournamentRoute (fastify, options) {
         let t_id = request.params.id;
         let user = request.query.username;
         if (!existsTournament(tournaments, t_id))
-            return {success: false, error: "Tournament doesnt exists"}
+            return {success: false, error: "Tournament doesnt exists"};
         let t = tournaments[t_id];
         if (!t.contains(user))
-            return {success: false, error: "Player not in the tournament"}
+            return {success: false, error: "Player not in the tournament"};
         if (user === t.getOwner() && t.getSize() > 1)
-            return {success: false, error: "Owner can't leave the room while other players are present"}
+            return {success: false, error: "Owner can't leave the room while other players are present"};
         
         t.removePlayer(user);
         // sock.updateTournamentPlayers(t);

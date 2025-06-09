@@ -6,9 +6,10 @@ import {GameController} from "./pong.js";
 export class GameClientSocket{
     private ws : WebSocket = null;
     private username : string;
-    private view;
 
     protected game : GameController = null;
+    
+    private should_search : boolean = false;
 
     constructor(username, game){
         this.username = username;
@@ -51,7 +52,15 @@ export class GameClientSocket{
 
     setSocket(){
         this.ws.onopen = (event) => {
-            console.log("Auth connected");
+            console.log("Game socket connected");
+            if (this.should_search){
+                this.ws.send(JSON.stringify({
+                    type: "matchmaking",
+                    uname: this.username,
+                    state: "enter"
+                }));
+                this.should_search = false;
+            }
         }
         
         this.ws.onmessage = (message) => {
@@ -61,36 +70,36 @@ export class GameClientSocket{
                 return ;
 
             if (data.type === "game_info"){
-                // if valid
-                // ...
                 this.game.updateState(data.game);
             } else if (data.type === "matchmaking") {
                 if (data.state === "found") {
+                    this.game.updateState(data.game);
+
                     this.game.stop_matchmaking_animation();
                     this.game.hide_all();
                     this.game.print_play_page();
                 }
-            }else if (data.type === "offlineGameCreated"){
+            }else if (data.type === "offline_game_created"){
+                this.game.updateState(data.game);
+
                 this.game.hide_all();
                 this.game.print_play_page();
-        
             }
         };
 
         this.ws.onclose = (event) => {
             // console.log("Closing client " + this.username);
             // Maybe we neeed to say bye to the server ?
-        }
 
-        // if (this._ws && this._ws.readyState === WebSocket.CLOSING) {
-        //     _ws.close(JSON.stringify({
-        //         gameId:_gameId,
-        //         mod: _mod,
-        //         uname: _username}));
-        // }
+        }
     }
     
     startMatchmaking(){
+        console.log("Trying to start matchmaking");
+        if (this.ws.readyState === 0){// CONNECTING state
+            this.should_search = true;
+            return ;
+        }
         this.ws.send(JSON.stringify({
             type: "matchmaking",
             uname: this.username,
@@ -108,7 +117,7 @@ export class GameClientSocket{
     startOfflineGame(){
         this.ws.send(
             JSON.stringify({ // A revoir
-                type: "solo",
+                type: "offline_game",
                 state: "create"
             })
         );
@@ -127,7 +136,7 @@ export class GameClientSocket{
         this.ws.send(JSON.stringify({
             type : "game_update",
             game_id : game_id,
-            moveUp : key,
+            move_up : key,
             side : side
         }));
     }

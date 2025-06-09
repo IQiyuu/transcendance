@@ -116,25 +116,27 @@ export class   GameController{
 
             this.site.hide_menu();
             this.print_play_page();
+            this.ws = new GameClientSocket(this.username, this);
+            this.ws.startOfflineGame();
 
-            try {
-                const body = {
-                    username: this.username,
-                }
-                const resp = await fetch(`/game/local/create`, {
-                    method: 'POST',
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(body),
-                });
-                const data = await resp.json();
-                if (data.success) {
-                    this.ws = new GameClientSocket(this.username, this);
-                    this.ws.startOfflineGame();
-                    // startGame(null, this._ws, true);
-                }
-            } catch (error) {
-                console.log("error: ", error);
-            }
+            // try {
+            //     const body = {
+            //         username: this.username,
+            //     }
+            //     const resp = await fetch(`/game/local/create`, {
+            //         method: 'POST',
+            //         headers: { "Content-Type": "application/json" },
+            //         body: JSON.stringify(body),
+            //     });
+            //     const data = await resp.json();
+            //     if (data.success) {
+            //         this.ws = new GameClientSocket(this.username, this);
+            //         this.ws.startOfflineGame();
+            //         // startGame(null, this._ws, true);
+            //     }
+            // } catch (error) {
+            //     console.log("error: ", error);
+            // }
         });
 
         
@@ -158,18 +160,19 @@ export class   GameController{
 
     startMatchmaking(){
         this.start_matchmaking_animation();
-        if (this.ws !== null || this.ws !== undefined){
+        if (this.ws !== null && this.ws !== undefined){
             console.error("You cant start a matchmaking while having a match");
             return ;
         }
         this.ws = new GameClientSocket(this.username, this);
         this.ws.startMatchmaking();
+        console.log("Matchmaking started");
     }
 
     stopMatchmaking(){
         this.stop_matchmaking_animation();
         if (this.ws !== null){
-            this.ws.startMatchmaking();
+            this.ws.stopMatchmaking();
             this.ws.close();
             this.ws = null;
         }

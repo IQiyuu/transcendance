@@ -244,9 +244,41 @@ export async function gameRoute (fastify, options) {
                 game.paddles["left"].y = newY2;
     })
 
-    fastify.get('/game/ws/', { websocket: true }, (socket, req) => {
-        query
+    let connectedClients = new Map();
+
+    // Sub plugin for ws games;
+    fastify.register(async function (fastify) {
+        fastify.get('/game/ws', { websocket: true }, (socket, req) => {
+
+            fastify.addHook("preValidation", async (request, reply) => {
+                //Verification of the request
+            });
+
+            console.log(websocket);
+            console.log("Creating a new game");
+            socket.on('open', (event) => {
+                console.log("socket game created");
+                console.log(event);
+            });
+            
+            socket.on('message', (message) => {
+                if (message.type === "game_update"){
+                    var game = games[message.game_id];
+                    var newY = game.paddles[message.side].y + (message.move_up ? -4 : 4);
+                    if (newY > 120 && newY < 580)
+                        game.paddles[message.side].y = newY;
+                }
+            })
+
+            connectedClients.add(username, socket);
+            console.log("Testing to add a game");
+        });
     });
+
+        // let t_id = request.params.id;
+        // let user = request.query.username;
+
+
     // fastify.register(async function (fastify) {
     //     // Gere le matchmaking et la deconnexion en pleine partie (Le deconnecte perd automatiquement)
     //     // marche en socket
@@ -340,6 +372,9 @@ export async function gameRoute (fastify, options) {
             }
         });
     }, 30);
+    Object.values(connectedClients).forEach(client => {
+        console.log(client);
+    });
 }
 
 

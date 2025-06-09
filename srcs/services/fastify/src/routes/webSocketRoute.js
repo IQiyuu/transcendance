@@ -60,7 +60,7 @@ async function websocketRoute(fastify, options) {
                         }));
                     }
                 }
-            }          
+            }
 
             // Quand un user ferme sa connexion
             socket.on('close', (rawMessage) => {
