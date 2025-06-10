@@ -9,7 +9,7 @@ export class   GameController{
      * Controller
      */
     private ws : GameClientSocket = null;
-    private site : SiteController= null;
+    private site : SiteController = null;
 
     private is_searching : boolean = false;
 
@@ -17,7 +17,7 @@ export class   GameController{
 
     // Game
     private game_id : number;
-    private side = null;
+    private side = "left";
     public key_state = {};
     private opponent = null;
     private is_local : boolean = false;
@@ -83,6 +83,9 @@ export class   GameController{
     getSide(){
         return this.side;
     }
+    setSide(new_side){
+        this.side = new_side;
+    }
 
     isLocal(){
         return this.is_local;
@@ -118,6 +121,7 @@ export class   GameController{
             this.print_play_page();
             this.ws = new GameClientSocket(this.username, this);
             this.ws.startOfflineGame();
+            this.gameInit();
 
             // try {
             //     const body = {
@@ -186,14 +190,6 @@ export class   GameController{
             this.ws.close();
             this.ws = null;
         }
-    }
-
-    // Creating a game for online players
-    createGame(gameId, role, opponent){
-        console.log("Match with ", opponent);
-        // this.game = new Game(this.ws, gameId, role, opponent, false); // TODOO
-        // this.game.start();
-        return (this.game);
     }
 
     gameInit(){
@@ -281,6 +277,7 @@ export class   GameController{
     cooToPos_y(y){
         return y;
     }
+
     // Move both paddles
     draw_paddles(){
         // Distance
@@ -293,7 +290,8 @@ export class   GameController{
 
     // Move ball
     draw_ball(){
-        
+        this.ball.style.left = this.cooToPos_x(this.ball_x);
+        this.ball.style.top = this.cooToPos_x(this.ball_y);
     }
 
     draw_scores(){
@@ -303,7 +301,6 @@ export class   GameController{
 
     // draw the canva with values
     draw(){
-        console.log("Drawing");
         this.draw_paddles();
         this.draw_ball();
         this.draw_scores();
@@ -343,7 +340,7 @@ export class   GameController{
 
     print_player_names(){
         if (this.side === "left"){
-            this.left_player_tag.innerText = this.username || "Player 1";
+            this.left_player_tag.innerText = this.username;
             this.right_player_tag.innerText = this.opponent;
         }
         else{

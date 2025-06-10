@@ -36,32 +36,36 @@ export class GameClientSocket{
             if (this.should_search){
                 this.ws.send(JSON.stringify({
                     type: "matchmaking",
-                    uname: this.username,
+                    username: this.username,
                     state: "enter"
                 }));
                 this.should_search = false;
+            } else if (this.should_start_solo){
+                this.ws.send(JSON.stringify({
+                    type: "create_game_offline",
+                    username: this.username
+                }));
             }
         }
         
-        this.ws.onmessage = (message) => {
-            console.log("msg recu");
-            const data = JSON.parse(message.data);
-            if (data === null)
-                return ;
-
-            if (data.type === "game_info"){
-                this.game.updateState(data.game);
-            } else if (data.type === "matchmaking") {
-                if (data.state === "found") {
-                    this.game.updateState(data.game);
-
+        this.ws.onmessage = (data) => {
+            const message = JSON.parse(data.data);
+            // console.log(message);
+            if (message === null)
+                return ;            
+            if (message.type === "game_info"){
+                this.game.updateState(message.game);
+            } else if (message.type === "matchmaking") {
+                if (message.state === "found") {
+                    this.game.updateState(message.game);
+                    this.game.setSide(message.side);
                     this.game.stop_matchmaking_animation();
                     this.game.hide_all();
                     this.game.print_play_page();
                 }
-            }else if (data.type === "offline_game_created"){
+            } else if (message.type === "offline_game_created"){
                 this.game.gameInit();
-                this.game.updateState(data.game);
+                this.game.updateState(message.game);
 
                 this.game.hide_all();
                 this.game.print_play_page();
@@ -106,6 +110,7 @@ export class GameClientSocket{
                 state: "create"
             })
         );
+        
     }
 
     // Tell the server game is ready to start

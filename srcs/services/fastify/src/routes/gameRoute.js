@@ -244,7 +244,11 @@ export async function gameRoute (fastify, options) {
                 game.paddles["left"].y = newY2;
     })
 
-    let connectedClients = new Map();
+    /**
+     * Clients are put in the waiting map on connection, then are moved to the playing when the game start
+     */
+    let waiting_clients = new Map(); // username, socket
+    let playing_clients = new Map(); // socket, game_id as we have 2 socket sometimes for the same game_id
 
     // Sub plugin for ws games;
     fastify.register(async function (fastify) {
@@ -256,20 +260,34 @@ export async function gameRoute (fastify, options) {
         fastify.get('/game/ws', { websocket: true }, (socket, req) => {
             let username = req.query.username;
             socket.on('open', (event) => {
-                console.log("socket game created");
+                console.log("socket game created for");
                 console.log(username);
-                // if (solo)
-                // let new_game = createGame();
-                socket.send(JSON.stringify({
-                    type: "opppppppppeeened",
-                    game: new_game
-                })); // HERE
+                waiting_clients.set(username, socket);
             });
             
-            socket.on('message', (message) => {
-                console.log("You got a mail");
+            socket.on('message', (data) => {
+                let message;
+                try {
+                    message = JSON.parse(data.toString());
+                } catch (err) {
+                    console.error('Invalid JSON:', data.toString());
+                    return;
+                }
+                console.log("Receiving :");
                 console.log(message);
-                if (message.type === "game_update"){
+                if (message.type === "create_game_offline"){
+                    console.log("   SOCK : Creating new game");
+                    let new_game_id = createGame(message.username, message.username + "-2");
+                    // NE PAS OUBLIER DE MASKER AVEC UN HOOK
+                    socket.send(JSON.stringify({
+                        type: "game_offline_created",
+                        game: games[new_game_id], 
+                        game_id: new_game_id
+                    }));
+                    playing_clients.set(socket, new_game_id);
+                    waiting_clients.delete(username);
+                } else if (message.type === "game_update"){
+                    console.log("   SOCK : UPDATING new game");
                     var game = games[message.game_id];
                     var newY = game.paddles[message.side].y + (message.move_up ? -4 : 4);
                     if (newY > 120 && newY < 580)
@@ -277,8 +295,9 @@ export async function gameRoute (fastify, options) {
                 }
             })
 
-            connectedClients.set(username, socket);
-            console.log("Testing to add a game");
+            socket.on('close', (event) => {
+                // Closing properly and removing from maps
+            });
         });
     });
 
@@ -378,10 +397,17 @@ export async function gameRoute (fastify, options) {
                 game.ball.randomizeVector();
             }
         });
+        // sending to each socket infos
+        playing_clients.forEach((game_id, socket) => {
+            let game = games[game_id];// Tester que la game existe tjrs sinon crash possble
+            // NE PAS OUBLIER DE MASKER AVEC UN HOOK
+            socket.send(JSON.stringify({
+                type: "game_info",
+                game: game
+            }));
+        });
     }, 30);
-    Object.values(connectedClients).forEach(client => {
-        console.log(client);
-    });
+
 }
 
 
