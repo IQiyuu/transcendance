@@ -106,7 +106,7 @@ export class GameClientSocket{
         }
         this.ws.send(
             JSON.stringify({
-                type: "offline_game",
+                type: "create_game_offline",
                 state: "create"
             })
         );

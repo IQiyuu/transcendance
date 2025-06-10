@@ -183,7 +183,7 @@ export class SiteController{
     private lang_file = null;
     private isRegisterMode = false;
     private ws : ClientSocket = null;
-    private username : String;
+    private username : string;
 
     private game : GameController = null;
     private tournament : TournamentController = null;

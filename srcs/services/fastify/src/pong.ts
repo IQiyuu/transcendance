@@ -95,6 +95,7 @@ export class   GameController{
     }
 
     key_handler(e){
+        e.preventDefault();
         this.key_state[e.code] = (e.type === "keydown");
     }
 
@@ -233,7 +234,9 @@ export class   GameController{
 
     // Update every game values
     updateState(game){
-        console.log("Updating game");
+        // console.log("Updating game");
+        // console.log(game);
+
         this.l_score = game.scores.left;
         this.r_score = game.scores.right;
 
@@ -270,17 +273,19 @@ export class   GameController{
     // Move both paddles
     draw_paddles(){
         // Distance
-        this.l_paddle.style.left = this.cooToPos_x(this.l_paddle_x) + "px";
-        this.l_paddle.style.top = this.cooToPos_y(this.l_paddle_y) + "px";
+        this.l_paddle.style.left = this.cooToPos_x(this.l_paddle_x).toString() + "px";
+        this.l_paddle.style.top = this.cooToPos_y(this.l_paddle_y).toString() + "px";
 
-        this.r_paddle.style.left = this.cooToPos_x(this.r_paddle_x) + "px";
-        this.r_paddle.style.top = this.cooToPos_y(this.r_paddle_y) + "px";
+        this.r_paddle.style.left = this.cooToPos_x(this.r_paddle_x).toString() + "px";
+        this.r_paddle.style.top = this.cooToPos_y(this.r_paddle_y).toString() + "px";
     }
 
     // Move ball
     draw_ball(){
-        this.ball.style.left = this.cooToPos_x(this.ball_x);
-        this.ball.style.top = this.cooToPos_x(this.ball_y);
+        // console.log("Drawing ball");
+        // console.log("Ball : " + this.ball_x + this.ball_y);
+        this.ball.style.left = this.cooToPos_x(this.ball_x).toString() + "px";
+        this.ball.style.top = this.cooToPos_y(this.ball_y).toString() + "px";
     }
 
     draw_scores(){
@@ -290,6 +295,7 @@ export class   GameController{
 
     // draw the canva with values
     draw(){
+        // console.log("Drawing");
         this.draw_paddles();
         this.draw_ball();
         this.draw_scores();

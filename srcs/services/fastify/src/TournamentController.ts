@@ -5,7 +5,8 @@ export class Tournament {
     private id;
     private name;
     private owner;
-    private players;
+    private players; // image, win rate{}
+
 
     constructor(tournament) {
         this.id = tournament.id;

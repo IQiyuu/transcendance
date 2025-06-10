@@ -8,12 +8,13 @@ function degToRad(degree){
     return ((degree * Math.PI) / 180)
 }
 
-const STARTING_SPEED = 5;
-const ACCELERATION = 1;
-const LIMIT_SPEED = 15;
+const	SCORE_GOAL = 11;
+const	STARTING_SPEED = 5;
+const	ACCELERATION = 1;
+const	LIMIT_SPEED = 15;
 
-const STARTING_X = 400;
-const STARTING_Y = 200;
+const	STARTING_X = 400;
+const	STARTING_Y = 200;
 
 export let games = {};
 
@@ -342,6 +343,9 @@ export async function gameRoute (fastify, options) {
     setInterval(() => {
         Object.values(games).forEach(game => {
 
+            if (game.scores.left >= SCORE_GOAL || game.scores.right >= SCORE_GOAL){
+                return ;
+            }
             game.ball.x += game.ball.dx * game.ball.v;
             game.ball.y += game.ball.dy * game.ball.v;
             if (game.ball.y <= 10 || game.ball.y >= 480)
@@ -395,7 +399,9 @@ export async function gameRoute (fastify, options) {
                 game.ball.y = STARTING_Y;
                 game.ball.randomizeVector();
             }
+
         });
+
         // sending to each socket infos
         playing_clients.forEach((game_id, socket) => {
             let game = games[game_id];// Tester que la game existe tjrs sinon crash possble
@@ -408,6 +414,5 @@ export async function gameRoute (fastify, options) {
     }, 30);
 
 }
-
 
 export default gameRoute;
