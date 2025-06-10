@@ -89,7 +89,6 @@ export async function gameRoute (fastify, options) {
     //     games[Object.keys(games).length] = game;
     // }
     
-
     // Stocke la game dans la db
     fastify.post('/game/storeGame', async (request, reply) => {
         const { winner_username, loser_username, loser_score } = request.body;
@@ -280,7 +279,7 @@ export async function gameRoute (fastify, options) {
                     let new_game_id = createGame(message.username, message.username + "-2");
                     // NE PAS OUBLIER DE MASKER AVEC UN HOOK
                     socket.send(JSON.stringify({
-                        type: "game_offline_created",
+                        type: "offline_game_created",
                         game: games[new_game_id], 
                         game_id: new_game_id
                     }));

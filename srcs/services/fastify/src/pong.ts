@@ -19,8 +19,10 @@ export class   GameController{
     private game_id : number;
     private side = "left";
     public key_state = {};
-    private opponent = null;
     private is_local : boolean = false;
+    
+    private left_player : string = null;
+    private right_player : string = null;
 
     private l_score : number = 0;
     private r_score : number = 0;
@@ -33,6 +35,7 @@ export class   GameController{
 
     private ball_x : number = 0;
     private ball_y : number = 0;
+
 
     /**
      * View
@@ -119,31 +122,11 @@ export class   GameController{
 
             this.site.hide_menu();
             this.print_play_page();
+            this.is_local = true;
             this.ws = new GameClientSocket(this.username, this);
             this.ws.startOfflineGame();
-            this.gameInit();
-
-            // try {
-            //     const body = {
-            //         username: this.username,
-            //     }
-            //     const resp = await fetch(`/game/local/create`, {
-            //         method: 'POST',
-            //         headers: { "Content-Type": "application/json" },
-            //         body: JSON.stringify(body),
-            //     });
-            //     const data = await resp.json();
-            //     if (data.success) {
-            //         this.ws = new GameClientSocket(this.username, this);
-            //         this.ws.startOfflineGame();
-            //         // startGame(null, this._ws, true);
-            //     }
-            // } catch (error) {
-            //     console.log("error: ", error);
-            // }
+            // this.gameInit();
         });
-
-        
     }
 
     /**
@@ -165,6 +148,7 @@ export class   GameController{
 
     startMatchmaking(){
         this.start_matchmaking_animation();
+        this.is_local = false;
         if (this.ws !== null && this.ws !== undefined){
             console.error("You cant start a matchmaking while having a match");
             return ;
@@ -246,8 +230,10 @@ export class   GameController{
         clearInterval(this.interval_id);
         this.online_play_btn.textContent = this.site.getText('play_online');
     }
+
     // Update every game values
     updateState(game){
+        console.log("Updating game");
         this.l_score = game.scores.left;
         this.r_score = game.scores.right;
 
@@ -259,6 +245,9 @@ export class   GameController{
 
         this.r_paddle_x = game.paddles.right.x;
         this.r_paddle_y = game.paddles.right.y;
+
+        this.left_player = game.players.left;
+        this.right_player = game.players.right;
     }
 
     // start(){
@@ -339,14 +328,16 @@ export class   GameController{
     }
 
     print_player_names(){
-        if (this.side === "left"){
-            this.left_player_tag.innerText = this.username;
-            this.right_player_tag.innerText = this.opponent;
-        }
-        else{
-            this.left_player_tag.innerText = this.opponent;
-            this.right_player_tag.innerText = this.username;
-        }
+        this.left_player_tag.innerText = this.left_player;
+        this.right_player_tag.innerText = this.right_player;
+        // if (this.side === "left"){
+        //     this.left_player_tag.innerText = this.username;
+        //     this.right_player_tag.innerText = this.right_player;
+        // }
+        // else{
+        //     this.left_player_tag.innerText = this.opponent;
+        //     this.right_player_tag.innerText = this.username;
+        // }
     }
 
     print_play_page(){

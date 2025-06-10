@@ -58,15 +58,15 @@ export class GameClientSocket{
             } else if (message.type === "matchmaking") {
                 if (message.state === "found") {
                     this.game.updateState(message.game);
+                    this.game.gameInit();
                     this.game.setSide(message.side);
                     this.game.stop_matchmaking_animation();
                     this.game.hide_all();
                     this.game.print_play_page();
                 }
             } else if (message.type === "offline_game_created"){
-                this.game.gameInit();
                 this.game.updateState(message.game);
-
+                this.game.gameInit();
                 this.game.hide_all();
                 this.game.print_play_page();
             }
