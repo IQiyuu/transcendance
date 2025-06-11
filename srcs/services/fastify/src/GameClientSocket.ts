@@ -63,12 +63,14 @@ export class GameClientSocket{
                     this.game.stop_matchmaking_animation();
                     this.game.gameInit();
                     this.game.hide_all();
+                    this.game.hide_menu();
                     this.game.print_play_page();
                 }
             } else if (message.type === "offline_game_created"){
                 this.game.updateState(message.game);
                 this.game.gameInit();
                 this.game.hide_all();
+                this.game.hide_menu();
                 this.game.print_play_page();
             } else if (message.type === "game_finished"){
                 console.log("Game is finished");
@@ -81,6 +83,12 @@ export class GameClientSocket{
             console.log("closing socket");
             console.log(event);
             this.game.close();
+        }
+
+        this.ws.onerror = (event) => {
+            console.log("Error");
+            console.log(event);
+            alert("EOROROROROROR");
         }
     }
     

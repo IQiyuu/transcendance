@@ -97,14 +97,6 @@ class Tournament{
         }
         return (false);
     }
-
-    start(){
-
-    }
-
-    end(){
-
-    }
 };
 
 // Check whether the player is already in a tournament
@@ -311,10 +303,11 @@ async function tournamentRoute (fastify, options) {
         if (!t.isReadyToStart())
             return {success: false, error: "Not enough players to start tournament"};
 
-        t.start();
+        startTournament(t);
         return ({success: true});
     })
 
+    
     fastify.get('/tournament/:id/ws', { websocket: true }, (socket, req) => {
         let username = req.query.username;
         let t_id = req.params.id;
@@ -344,17 +337,17 @@ async function tournamentRoute (fastify, options) {
         t.connectPlayer(username, socket);
     });
 
-    // setInterval(() => {
-    //     Object.values(tournaments).forEach(tournament => {
-    //         // if (tournament.isReadyToStart()){
-    //         //     tournament.start();
-    //         // }
-    //         if (tournament.hasNextRound() && tournament.currentRoundIsFinished())
-    //             tournament.startNextRound();
-    //         if (tournament.isFinished())
-    //             tournament.end();
-    //     });
-    // }, 30);
+    setInterval(() => {
+        tournaments.forEach(tournament => {
+            if (tournament.isReadyToStart()){
+                tournament.start();
+            }
+            // if (tournament.hasNextRound() && tournament.currentRoundIsFinished())
+            //     tournament.startNextRound();
+            // if (tournament.isFinished())
+            //     tournament.end();
+        });
+    }, 30);
 }
 
 export default tournamentRoute;

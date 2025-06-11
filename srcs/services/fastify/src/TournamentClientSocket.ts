@@ -19,9 +19,8 @@ export class TournamentClientSocket{
         this.tournament = tournament;
         this.view = view;
 
-        // console.log("Trying to connect : " + `wss://${window.location.host}/tournament/${this.id}/ws?username=${this.username}`);
         this.ws = new WebSocket(`wss://${window.location.host}/tournament/${this.id}/ws?username=${this.username}`);
-        this.initSocket();
+        this.setSocket();
     }
 
     get_username(){
@@ -41,9 +40,10 @@ export class TournamentClientSocket{
         return (false);
     }
 
-    initSocket(){
+    setSocket(){
         this.ws.onopen = (event) => {
-            console.log("Tournament connected");
+            console.log("Connected to the tournament");
+            this.view.print_tournament_rejoin_btn();
         }
         
         this.ws.onmessage = (message) => {

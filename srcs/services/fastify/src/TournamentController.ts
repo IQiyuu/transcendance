@@ -27,6 +27,10 @@ export class Tournament {
         return (this.owner);
     }
 
+    getPlayers(){
+        return (this.players);
+    }
+
 }
 
 export class TournamentController {
@@ -38,35 +42,22 @@ export class TournamentController {
     private tournament: Tournament = null;
 
     /**VIEW */
-    private tournament_page;
-    private tournaments_page;
-
-    private tournament_div;
-    private tournaments_list;
-
-    private tournament_form;
-
-    private tournament_create_btn;
-    private tournament_join_btn;
+    private tournament_page = document.getElementById("tournament_page");
+    private tournaments_page = document.getElementById("tournaments_join");
+    private tournament_div = document.getElementById("tournament");
+    private tournaments_list = document.getElementById("tournaments_list");
+    private tournament_form = document.getElementById("tournament_form");
+    private tournament_create_btn = document.getElementById("tournament_create_button");
+    private tournament_join_btn = document.getElementById("tournament_join_button");
+    private tournament_rejoin_btn = document.getElementById("tournament_rejoin_button");
 
     constructor(site) {
         this.site = site;
-
-        this.tournament_page = document.getElementById("tournament_page");
-        this.tournaments_page = document.getElementById('tournaments_join');
-
-        this.tournament_form = document.getElementById("tournament_form");
-        this.tournament_div = document.getElementById("tournament");
-        this.tournaments_list = document.getElementById('tournaments_list');
-
-        this.tournament_create_btn = document.getElementById("tournament_create_button");
-        this.tournament_join_btn = document.getElementById("tournament_join_button");
     }
 
     setUsername(username) {
         this.username = username;
     }
-
 
     addEvents() {
         this.tournament_create_btn.addEventListener("click", (event) => {
@@ -105,7 +96,8 @@ export class TournamentController {
                     this.cws = new TournamentClientSocket(data.tournament.id, this.username, this, this.tournament);
                     console.log(this.tournament);
                     this.hide_tournament_form();
-                    this.print_tournament(data.tournament);
+                    this.print_tournament();
+                    this.print_tournament_rejoin_btn();
                 }
                 else
                     throw (Error(data.error));
@@ -183,6 +175,10 @@ export class TournamentController {
                 console.log(err);
             }
         });
+
+        this.tournament_rejoin_btn.addEventListener("click", async (event) => {
+            this.print_tournament();
+        });
     }
 
     /**
@@ -209,12 +205,16 @@ export class TournamentController {
         this.tournaments_page.classList.replace("flex", "hidden");
     }
 
-    print_tournament(tournament) {
+    print_tournament() {
+        if (this.tournament === null){
+            alert("Not implemented yet (print tournament)");
+            return ;
+        }
         this.tournament_div.classList.replace("hidden", "block");
-        console.log("printing " + tournament);
+        console.log("printing " + this.tournament);
 
         let title = document.createElement("h3");
-        title.append(document.createTextNode(tournament.name));
+        title.append(document.createTextNode(this.tournament.getName()));
 
         let table = document.createElement("table");
         table.append();
@@ -233,7 +233,7 @@ export class TournamentController {
         table.append(tr);
 
         //Next lines
-        tournament.players.forEach(p => {
+        this.tournament.getPlayers().forEach(p => {
             tr = document.createElement("tr");
             th = document.createElement("th");
 
@@ -241,7 +241,7 @@ export class TournamentController {
             tr.append(th);
 
             th = document.createElement("th");
-            if (p === tournament.owner) {
+            if (p === this.tournament.getOwner) {
                 th.append(document.createTextNode("Owner"));
             }
             else {
@@ -254,7 +254,7 @@ export class TournamentController {
         this.tournament_div.append(title);
         this.tournament_div.append(table);
 
-        if (this.username === tournament.owner) {
+        if (this.username === this.tournament.getOwner()) {
             let start_button = document.createElement("button");
             start_button.append(document.createTextNode("Start"));
             start_button.onclick = (event) => this.startTournamentHandler(event);
@@ -265,7 +265,6 @@ export class TournamentController {
         leave_button.append(document.createTextNode("Leave"));
 
         leave_button.onclick = (event) => this.leaveTournamentHandler(event);
-        // leave_button.addEventListener("click", this.leaveTournamentHandler);
 
         // leave_button.addEventListener("click", async(event) => {
         //     event.preventDefault();
@@ -351,6 +350,14 @@ export class TournamentController {
         this.tournament_form.classList.replace("flex", "hidden");
     }
 
+    print_tournament_rejoin_btn(){
+        this.tournament_rejoin_btn.classList.replace("hidden", "flex");
+    }
+
+    hide_tournament_rejoin_btn(){
+        this.tournament_rejoin_btn.classList.replace("flex", "hidden");
+    }
+
     clear_tournament() {
         this.tournament_div.textContent = '';
     }
@@ -363,6 +370,7 @@ export class TournamentController {
         this.hide_tournament_page();
         this.hide_tournaments_page();
         this.hide_tournament_form();
+        this.hide_tournament_rejoin_btn();
         this.hide_tournament();
     }
 };
