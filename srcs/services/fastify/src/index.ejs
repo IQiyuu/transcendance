@@ -7,7 +7,13 @@
     <title>Trong</title>
 </head>
 <body class="h-screen flex items-center justify-center bg-gradient-to-br from-purple-600 to-blue-500">
-
+    <select id="lang_select">
+        <option value="jp">🇯🇵 日本語</option>
+        <option value="fr">🇫🇷 Français</option>
+        <option value="en">🇺🇸 English</option>
+    </select>
+      
+    <button id="logout_btn" class="cursor-pointer">Logout</button>
     <!-- LOGIN FORM -->
     <div id="login-form" class="hidden flex-col p-6 items-center justify-center bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 max-w-sm w-full">
         <h1 class="underline text-white text-4xl text-center mb-4" id="form-title">Connexion</h1>
@@ -120,10 +126,9 @@
 
 
                         <!-- Boutons -->
-                        <div id="friend_div" class="hidden flex mt-6 space-x-4">
+                        <div id="friend_div" class="hidden mt-6 space-x-4">
                             <button id="friend_btn" class="px-6 py-2 bg-gradient-to-r from-green-400 to-blue-600 text-white rounded-lg hover:bg-gradient-to-bl transition-all duration-300">Add Friend</button>
                             <button id="block_btn" class="px-6 py-2 bg-gradient-to-r from-red-400 to-yellow-600 text-white rounded-lg hover:bg-gradient-to-bl transition-all duration-300">Block</button>
-
                         </div>
                         <button id="fa_btn" class="flex relative px-6 py-3 text-white font-bold text-lg rounded-lg bg-gradient-to-r from-pink-500 via-yellow-400 to-green-500 animate-pulse shadow-lg hover:shadow-xl transition duration-300">
                             <span class="relative z-10">2FA</span>

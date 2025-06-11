@@ -1,8 +1,10 @@
 import {ClientSocket} from "./ClientSocket.js";
+import { LangController } from "./LangContoller.js";
 import {GameClientSocket} from "./GameClientSocket.js";
 // import {Game} from "./pong.js";
 import {GameController} from "./pong.js";
 import {TournamentController} from "./TournamentController.js";
+import { FriendController } from "./FriendController.js";
 
 export class   ProfileController{
 
@@ -188,6 +190,8 @@ export class SiteController{
     private game : GameController = null;
     private tournament : TournamentController = null;
     private profile: ProfileController = null;
+    private lang: LangController = null;
+    private friends: FriendController = null;
 
     //  View attributes
     private title_link = document.getElementById("game_title");
@@ -205,14 +209,21 @@ export class SiteController{
     private tournament_create_btn = document.getElementById("tournament_create_button");
     private tournament_join_btn = document.getElementById("tournament_join_button");
     private about_btn = document.getElementById("about_button");
+    private logout_btn = document.getElementById("logout_btn");
 
-    constructor(lang){
-        this.lang_file = lang;
-        this._load_lang(lang);
-
+    constructor(){
         this.profile = new ProfileController(this);
         this.game = new GameController(this);
         this.tournament = new TournamentController(this);
+    }
+
+    async initLang() {
+        if (await this.is_logged())
+            this.connect();
+
+        this.lang = new LangController(this.username);
+        this.friends = new FriendController(this.username, this.lang, this.ws);
+        this.print_current_page();
     }
 
     getLang(){
@@ -226,27 +237,6 @@ export class SiteController{
     /**
      * CONTROLLER
      */
-
-    //Menu
-    _load_lang(lang){
-        document.getElementById('form-title').textContent = lang['connexion_title'];
-        document.querySelector("label[for='username']").textContent = lang['username'];
-        document.querySelector("label[for='password']").textContent = lang['password'];
-        document.getElementById('register-view').textContent = lang['register_text'];
-        document.getElementById('game_title').textContent = lang['title'];
-        document.getElementById('div_title').textContent = lang['change_pp'];
-        document.getElementById('login_btn').textContent = lang['connexion_title'];
-        document.getElementById('offline').textContent = lang['play_local'];
-        document.getElementById('matchmaking').textContent = lang['play_online'];
-        document.getElementById('tournament_button').textContent = lang['tournament'];
-        document.getElementById('profile_button').textContent = lang['profile'];
-        document.getElementById('upload_btn').textContent = lang['upload_txt'];
-        document.getElementById('about_button').textContent = lang['about'];
-        document.getElementById('friend_text').textContent = lang['friends'];
-        document.getElementById('histo_text').textContent = lang['historique'];
-        (document.getElementById('search_player_in') as HTMLInputElement).placeholder = lang['search'];
-    }
-
     add_events(){
         // Register/login page
         this.register_link.addEventListener("click", (event) => {
@@ -295,7 +285,8 @@ export class SiteController{
                 // console.log("Réponse du serveur :", data);
                 
                 if (data.success) {
-                    this.connect(data.username);
+                    this.username = data.username;
+                    this.connect();
                     // this.ws.print_info();
 
                 } else {
@@ -340,23 +331,35 @@ export class SiteController{
             this.print_tournament_btns();
         });
 
+
+        this.logout_btn.addEventListener("click", async (event) => {
+            event.preventDefault();
+
+            const response = await fetch("/logout", {
+                method: "POST",
+            });
+            sessionStorage.clear();
+            
+            document.getElementById("site").classList.replace("block", "hidden");
+            document.getElementById("login-form").classList.replace("hidden", "flex");
+            document.body.classList.add("justify-center", "align-center", "flex");
+        });
+
 		//Registering children events
         this.game.addEvents();
         this.profile.addEvents();
         this.tournament.addEvents();
+        this.lang.addEvents();
     }
 
     async is_logged(){
-        if (sessionStorage != null && sessionStorage.getItem("username") === null)
-            return (false);
         try {
             const response = await fetch('/protected', {
                 method: 'GET',
                 credentials: 'include'
             });
-    
             const data = await response.json();
-
+            this.username = data.username
             return (response.ok === true && data.success === true);
         } catch (error) {
             return (false);
@@ -367,13 +370,12 @@ export class SiteController{
         sessionStorage.setItem('username', username);
     }
 
-    connect(username){
-        this.username = username;
-        this.ws = new ClientSocket(username, this, this.profile);
-        this.game.setUsername(username);
-        this.profile.setUsername(username);
-        this.tournament.setUsername(username);
-        this.store_session(username);
+    connect(){
+        this.ws = new ClientSocket(this.username, this, this.profile);
+        this.game.setUsername(this.username);
+        this.profile.setUsername(this.username);
+        this.tournament.setUsername(this.username);
+        this.store_session(this.username);
 
         console.log("Connected, client socket :");
         console.log(this.ws);

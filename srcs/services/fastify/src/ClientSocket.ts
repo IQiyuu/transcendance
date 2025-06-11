@@ -128,4 +128,8 @@ export class ClientSocket{
     close(){
         this.ws.close();
     }
+
+    send(msg: string) {
+        this.ws.send(msg);
+    }
 };

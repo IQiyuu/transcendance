@@ -26,6 +26,43 @@ async function dbRoute (fastify, options) {
         }
     });
 
+    // add lang column in users
+    fastify.get('/db/tmp/lang', async (req, rep ) => {
+        try {
+            db.prepare(`ALTER TABLE users 
+                ADD COLUMN lang TEXT NOT NULL DEFAULT 'en'`).run();
+            return ({success: true});
+        } catch {
+            return ({success: false});
+        }
+    });
+
+    // get lang
+    fastify.get('/db/select/lang/:user' , async (request, reply) => {
+        try {
+            const datas = db.prepare(`SELECT lang FROM users WHERE username=?`).get(request.params.user);
+            reply.send({success:true, lang: datas.lang});
+        } catch (error) {
+            console.log("error: ", error);
+            return { success: false, error: error };
+        }
+    });
+
+    // modifiyng lang
+    fastify.post('/db/update/lang' , async (request, reply) => {
+        const body = request.body;
+        try {
+            db.prepare(`UPDATE users
+                SET lang = ?
+                WHERE username = ?;
+            `).run(body.lang, body.user);
+            reply.send({success: true});
+        } catch (error) {
+            console.log("error: ", error);
+            return { success: false, error: error };
+        }
+    });
+
     // retourne les tables de la db
     fastify.get('/db/tables' , async (request, reply) => {
         try {
