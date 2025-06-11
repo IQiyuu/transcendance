@@ -350,7 +350,9 @@ async function tournamentRoute (fastify, options) {
     setInterval(() => {
         tournaments.forEach(tournament => {
             // console.log(tournament);
-            if (tournament.getSize() === 0){
+            if (tournament === null){
+                return ;
+            } if (tournament.getSize() === 0){
                 tournaments[tournaments.indexOf(tournament)] = null;
             } else if (tournament.isReadyToStart()){
                 tournament.start();
