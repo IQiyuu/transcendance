@@ -54,12 +54,11 @@ export class GameClientSocket{
                 this.game.updateState(message.game);
             } else if (message.type === "matchmaking") {
                 console.log("Match found");
-                console.log(message);
+                // console.log(message);
                 if (message.state === "found") {
                     this.game.updateState(message.game);
-                    this.game.setSide((game) => {
-                        return (game.players.left === this.username ? "left" : "right");
-                    });
+                    let side = (message.game.players.left === this.username ? "left" : "right")
+                    this.game.setSide(side);
                     console.log("side = " + this.game.getSide());
                     this.game.stop_matchmaking_animation();
                     this.game.gameInit();

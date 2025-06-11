@@ -303,7 +303,8 @@ export async function gameRoute (fastify, options) {
                 } else if (message.type === "matchmaking"){
                     if (message.state === "join"){
                         console.log("A player is joining matchmaking");
-                        if (waiting_clients.length > 0){
+                        if (waiting_clients.size > 0){
+                            console.log("Match found");
                             //We take the 1st player that joined the queue
                             let second_player_name = waiting_clients.keys().next().value;
                             let second_player_socket = waiting_clients.get(second_player_name);
@@ -313,13 +314,19 @@ export async function gameRoute (fastify, options) {
                                 type: 'matchmaking',
                                 state: 'found',
                                 game: games[new_game_id],
-                                game_id: game_id
+                                game_id: new_game_id
                             }));
 
-                            second_player_socket.send();
+                            second_player_socket.send(JSON.stringify({
+                                type: 'matchmaking',
+                                state: 'found',
+                                game: games[new_game_id],
+                                game_id: new_game_id
+                            }));
+
                             playing_clients.set(socket, new_game_id);
                             playing_clients.set(second_player_socket, new_game_id);
-                            waiting_clients.delete(second_player);
+                            waiting_clients.delete(second_player_name);
                         }
                         else{
                             waiting_clients.set(message.username, socket);
