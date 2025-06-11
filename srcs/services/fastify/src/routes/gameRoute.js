@@ -17,6 +17,7 @@ const	STARTING_X = 400;
 const	STARTING_Y = 200;
 
 export let games = {};
+const finished_games = [];
 
 // Creer un objet game cote server
 export function createGame(l_name, r_name) {
@@ -81,8 +82,8 @@ export function userExistsInDb(username, db){
 }
 
 export async function gameRoute (fastify, options) {
-    let waiting_list = null;
-    let w_uname = null;
+    // let waiting_list = null;
+    // let w_uname = null;
     let img_path = "dist/assets/imgs/"; //to update 
 
 
@@ -296,13 +297,20 @@ export async function gameRoute (fastify, options) {
             })
 
             socket.on('close', (event) => {
-                // Closing properly and removing from maps
+                //If game is active, tell users the game is over
+
+
+                //At least, closing properly and removing from maps
+                console.log("Closing  socket");
+                console.log(socket);
+                playing_clients.delete(socket);
+                waiting_clients.forEach((sck, username) => {
+                    if (sck === socket)
+                        waiting_clients.delete(username);
+                });
             });
         });
     });
-
-        // let t_id = request.params.id;
-        // let user = request.query.username;
 
 
     // fastify.register(async function (fastify) {
@@ -341,9 +349,12 @@ export async function gameRoute (fastify, options) {
     // });
 
     setInterval(() => {
+        finished_games.length = 0; // clearing array
+    
         Object.values(games).forEach(game => {
 
             if (game.scores.left >= SCORE_GOAL || game.scores.right >= SCORE_GOAL){
+                finished_games.push(game.id);
                 return ;
             }
             game.ball.x += game.ball.dx * game.ball.v;
@@ -399,17 +410,33 @@ export async function gameRoute (fastify, options) {
                 game.ball.y = STARTING_Y;
                 game.ball.randomizeVector();
             }
-
         });
 
         // sending to each socket infos
         playing_clients.forEach((game_id, socket) => {
             let game = games[game_id];// Tester que la game existe tjrs sinon crash possble
+            
+            if (finished_games.includes(game_id)){
+                // end_game(game); // save into db
+                socket.send(JSON.stringify({
+                    type: "game_finished",
+                    game: game
+                }));
+                //client close the connection
+/*
+                delete(games[game_id]);
+                close(socket);
+                playing_clients.delete(socket); // to test if no problem arises
+*/
+                return ;
+            }
+
             // NE PAS OUBLIER DE MASKER AVEC UN HOOK
             socket.send(JSON.stringify({
                 type: "game_info",
                 game: game
             }));
+
         });
     }, 30);
 

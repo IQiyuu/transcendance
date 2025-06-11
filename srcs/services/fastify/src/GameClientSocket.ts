@@ -69,6 +69,10 @@ export class GameClientSocket{
                 this.game.gameInit();
                 this.game.hide_all();
                 this.game.print_play_page();
+            } else if (message.type === "game_finished"){
+                console.log("Game is finished");
+                this.game.finishGame();
+                this.ws.close();
             }
         };
 
@@ -113,19 +117,12 @@ export class GameClientSocket{
         
     }
 
-    // Tell the server game is ready to start
-    sayReady(){
-        this.ws.send(JSON.stringify({
-            type : "game_start"
-        }));
-    }
-
     // Update the server with movements
     updatePos(game_id, key, side){
-        console.log("Sending " +  game_id + key + side);
+        // console.log("Sending " +  game_id + key + side);
         this.ws.send(JSON.stringify({
             type : "game_update",
-            game_id : game_id,
+            game_id : game_id, // useless ? server should do with socket
             move_up : key,
             side : side
         }));

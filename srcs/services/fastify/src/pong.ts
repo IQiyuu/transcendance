@@ -16,7 +16,7 @@ export class   GameController{
     private username : string = "undefined";
 
     // Game
-    private game_id : number;
+    private game_id : number = -1;
     private side = "left";
     public key_state = {};
     private is_local : boolean = false;
@@ -86,8 +86,13 @@ export class   GameController{
     getSide(){
         return this.side;
     }
+
     setSide(new_side){
         this.side = new_side;
+    }
+
+    getGameId(){
+        return (this.game_id);
     }
 
     isLocal(){
@@ -95,8 +100,10 @@ export class   GameController{
     }
 
     key_handler(e){
+        //for accessibility, here too
         e.preventDefault();
-        this.key_state[e.code] = (e.type === "keydown");
+        if ("KeyW,KeyS,ArrowUp,ArrowDown".includes(e.code))
+            this.key_state[e.code] = (e.type === "keydown");
     }
 
 
@@ -121,12 +128,13 @@ export class   GameController{
         this.offline_play_btn.addEventListener("click", async (event) => {
             event.preventDefault();
 
+            this.stopMatchmaking();
+
             this.site.hide_menu();
             this.print_play_page();
             this.is_local = true;
             this.ws = new GameClientSocket(this.username, this);
             this.ws.startOfflineGame();
-            // this.gameInit();
         });
     }
 
@@ -134,14 +142,17 @@ export class   GameController{
      * Model
      */
 
-    /** W and S for left player if 2 player, else UP and DOWN */
+    /**
+     *  Handler function that tell the server when user move
+     * (W and S for left player if 2 player, else UP and DOWN)
+     *  */
     moves(obj, ws){
-        //to check again
+        // console.log("Moves");
         if (obj.key_state["ArrowUp"] || obj.key_state["ArrowDown"]) {
-            ws.update_pos(obj.getGameId(), obj.key_state["ArrowUp"], obj.isLocal() ? "right" : obj.get_side());
+            ws.updatePos(obj.getGameId(), obj.key_state["ArrowUp"], obj.isLocal() ? "right" : obj.getSide());
         }
         if (obj.isLocal() && (obj.key_state["KeyW"] || obj.key_state["KeyS"])){
-            ws.update_pos(obj.getGameId(), obj.key_state["KeyW"], "left");
+            ws.updatePos(obj.getGameId(), obj.key_state["KeyW"], "left");
         }
         obj.draw(); // here for now, but maybe socket call it instead (after a move);
     }
@@ -178,23 +189,24 @@ export class   GameController{
     }
 
     gameInit(){
-        // this.canvas.addEventListener("keyup", this.key_handler);
-        // this.canvas.addEventListener("keydown", this.key_handler);
-        // if (this.is_local){
-        //     this.canvas.addEventListener("W",  this.key_handler);
-        //     this.canvas.addEventListener("S",  this.key_handler);
-        // }
-        this.game.addEventListener("keyup", this.key_handler);
-        this.game.addEventListener("keydown", this.key_handler);
-        if (this.is_local){
-            this.game.addEventListener("W",  this.key_handler);
-            this.game.addEventListener("S",  this.key_handler);
-        }
         this.key_state["ArrowUp"] = false;
         this.key_state["ArrowDown"] = false;
         this.key_state["KeyW"] = false;
         this.key_state["KeyS"] = false;
 
+        this.key_handler = this.key_handler.bind(this); //to unbind ??
+        document.addEventListener("keyup", this.key_handler);
+        document.addEventListener("keydown", this.key_handler);
+
+        // this.game.addEventListener("keydown", this.key_handler);
+        // if (this.is_local){
+        //     this.game.addEventListener("W",  this.key_handler);
+        //     this.game.addEventListener("S",  this.key_handler);
+        // }
+
+
+        //Ball view
+        // this.ball.width();(x + game.ball.x, y + game.ball.y, ballRadius, 0, Math.PI * 2);
         
         // this.l_paddle_y = this.game.height / 2 - paddleHeight / 2;
         // this.r_paddle_y = this.game.height / 2 - paddleHeight / 2;
@@ -206,9 +218,16 @@ export class   GameController{
         this.r_paddle.style.position="relative";
 
         //testing maybe not here
-        setInterval(this.moves, 10, this, this.ws);
+        this.interval_id = setInterval(this.moves, 10, this, this.ws);
     }
 
+    finishGame(){
+        document.removeEventListener("keyup", this.key_handler)
+        document.removeEventListener("keydown", this.key_handler)
+        clearInterval(this.interval_id);
+        this.hide_game();
+        this.print_end_game();
+    }
 
     /**
      * VIEW
@@ -236,6 +255,8 @@ export class   GameController{
     updateState(game){
         // console.log("Updating game");
         // console.log(game);
+
+        this.game_id = game.id;
 
         this.l_score = game.scores.left;
         this.r_score = game.scores.right;
@@ -336,14 +357,6 @@ export class   GameController{
     print_player_names(){
         this.left_player_tag.innerText = this.left_player;
         this.right_player_tag.innerText = this.right_player;
-        // if (this.side === "left"){
-        //     this.left_player_tag.innerText = this.username;
-        //     this.right_player_tag.innerText = this.right_player;
-        // }
-        // else{
-        //     this.left_player_tag.innerText = this.opponent;
-        //     this.right_player_tag.innerText = this.username;
-        // }
     }
 
     print_play_page(){
@@ -354,17 +367,40 @@ export class   GameController{
         this.game_page.classList.replace("block", "hidden");
     }
 
+    print_scoreboard(){
+        this.game.classList.replace("hidden", "flex");
+    }
+
+    hide_scoreboard(){
+        this.game.classList.replace("flex", "hidden");
+    }
+
+    print_game(){
+        this.game.classList.replace("hidden", "flex");
+    }
+
+    hide_game(){
+        this.game.classList.replace("flex", "hidden");
+    }
+
+    print_end_game(){
+        alert("To do, but game finished");
+    }
+
+    hide_end_game(){
+        console.log("Maybe clearing the text ?");
+    }
+
     hide_all(){
         this.hide_play_page();
+        this.hide_game();
+        this.hide_scoreboard();
     }
 };
 
 // /*----------------------------------------------------------------------------------------*/
-// let _userId = sessionStorage.userId;
 
 // const ballRadius = 5;
-
-// let _winningScore = 11; // const ??
 
 
 // // Rentre la game dans la db
@@ -414,46 +450,13 @@ export class   GameController{
 //         }
 
 
-
-//         // Paddles
-
-
-//         // Balle
-//         ctx.beginPath();
-//         ctx.arc(x + game.ball.x, y + game.ball.y, ballRadius, 0, Math.PI * 2);
-
-//         ctx.fill();
-//         ctx.closePath();
-
-
 //         // Dessin du rectangle centré
 //         ctx.beginPath();
 //         ctx.moveTo(x, y);
 //         ctx.lineTo(x + rectWidth, y);
 //         ctx.lineTo(x + rectWidth, y + rectHeight);
 //         ctx.lineTo(x, y + rectHeight);
-//         ctx.closePath();
 
-//         ctx.stroke();
-
-//     } catch (error) {
-//         console.log("error: ", error);
-//     }
-
-//     moves(local);
-//     requestAnimationFrame(() => draw(ws, local));
-// }
-
-
- 
-
-
-// // Lance la partie
-// function startGame(oponnent, ws, local) {
-
-//     canvas.tabIndex = 1000;
-//     draw(ws, local);
-// }
 
 // // Termine la partie
 // async function endGame(ws) {
