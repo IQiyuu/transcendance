@@ -12,23 +12,33 @@ const	SCORE_GOAL = 11;
 const	STARTING_SPEED = 5;
 const	ACCELERATION = 1;
 const	LIMIT_SPEED = 15;
+const	BOARD_W = 700;
+const	BOARD_H = 480;
 
-const	STARTING_X = 400;
-const	STARTING_Y = 200;
+const   PADDLE_W = 10;
+const   PADDLE_H = 80;
+
+const	STARTING_X = BOARD_W / 2;
+const	STARTING_Y = BOARD_H / 2;
 
 export let games = {};
 const finished_games = [];
 
 // Creer un objet game cote server
-export function createGame(l_name, r_name) {
+export function createGame(user, user2) {
     const gameId = Object.keys(games).length;
     const angle = degToRad(randomIntFromInterval(0, 45));
+    if (randomIntFromInterval(0,1) === 0){
+        let tmp = user;
+        user = user2;
+        user2 = tmp;
+    }
     const neg_x = randomIntFromInterval(0,1), neg_y = randomIntFromInterval(0,1);
     games[gameId] = {
         id: gameId,
         players: {  
-            left: l_name,
-            right: r_name
+            left: user,
+            right: user2
         },
         scores: {
             left: 0,
@@ -55,11 +65,11 @@ export function createGame(l_name, r_name) {
         paddles: {
             left: {
                 x: 10,
-                y: 300
+                y: STARTING_Y
             },
             right: {
-                x: 680,
-                y: 300
+                x: BOARD_W - 20,
+                y: STARTING_Y
             }
         }
     }
@@ -253,7 +263,6 @@ export async function gameRoute (fastify, options) {
 
     // Sub plugin for ws games;
     fastify.register(async function (fastify) {
-
         fastify.addHook("preValidation", async (request, reply) => {
             //Verification of the request
         });
@@ -274,10 +283,9 @@ export async function gameRoute (fastify, options) {
                     console.error('Invalid JSON:', data.toString());
                     return;
                 }
-                console.log("Receiving :");
-                console.log(message);
+                // console.log("Receiving :");
+                // console.log(message);
                 if (message.type === "create_game_offline"){
-                    console.log("   SOCK : Creating new game");
                     let new_game_id = createGame(message.username, message.username + "-2");
                     // NE PAS OUBLIER DE MASKER AVEC UN HOOK
                     socket.send(JSON.stringify({
@@ -288,21 +296,48 @@ export async function gameRoute (fastify, options) {
                     playing_clients.set(socket, new_game_id);
                     waiting_clients.delete(username);
                 } else if (message.type === "game_update"){
-                    console.log("   SOCK : UPDATING new game");
                     var game = games[message.game_id];
                     var newY = game.paddles[message.side].y + (message.move_up ? -4 : 4);
-                    if (newY > 120 && newY < 580)
+                    if (newY > 15 && newY < BOARD_H - 15)
                         game.paddles[message.side].y = newY;
+                } else if (message.type === "matchmaking"){
+                    if (message.state === "join"){
+                        console.log("A player is joining matchmaking");
+                        if (waiting_clients.length > 0){
+                            //We take the 1st player that joined the queue
+                            let second_player_name = waiting_clients.keys().next().value;
+                            let second_player_socket = waiting_clients.get(second_player_name);
+                            let new_game_id = createGame(message.username, second_player_name);
+
+                            socket.send(JSON.stringify({
+                                type: 'matchmaking',
+                                state: 'found',
+                                game: games[new_game_id],
+                                game_id: game_id
+                            }));
+
+                            second_player_socket.send();
+                            playing_clients.set(socket, new_game_id);
+                            playing_clients.set(second_player_socket, new_game_id);
+                            waiting_clients.delete(second_player);
+                        }
+                        else{
+                            waiting_clients.set(message.username, socket);
+                        }
+                    } else if (message.state === "leave"){
+                        console.log("A player is leaving matchmaking");
+                        // if (isValid)
+                        waiting_clients.delete(s);
+                    }
                 }
             })
 
             socket.on('close', (event) => {
                 //If game is active, tell users the game is over
 
-
                 //At least, closing properly and removing from maps
                 console.log("Closing  socket");
-                console.log(socket);
+                // console.log(socket);
                 playing_clients.delete(socket);
                 waiting_clients.forEach((sck, username) => {
                     if (sck === socket)
@@ -359,14 +394,14 @@ export async function gameRoute (fastify, options) {
             }
             game.ball.x += game.ball.dx * game.ball.v;
             game.ball.y += game.ball.dy * game.ball.v;
-            if (game.ball.y <= 10 || game.ball.y >= 480)
+            if (game.ball.y <= 0 || game.ball.y >= BOARD_H)
                 game.ball.dy *= -1;
 
-            if (game.ball.x <= game.paddles.left.x + 10
+            if (game.ball.x <= game.paddles.left.x + PADDLE_W
                 && game.ball.y >= game.paddles.left.y // on passe de -50 a 0
-                && game.ball.y <= game.paddles.left.y + 100) {
+                && game.ball.y <= game.paddles.left.y + PADDLE_H) {
                     // There are 8 zone considered for the bouncing, so we round to the closest quarter
-                    let dist = Math.abs(game.ball.y - (game.paddles.left.y + 50));
+                    let dist = Math.abs(game.ball.y - (game.paddles.left.y + (PADDLE_H / 2)));
                     let sign = game.ball.dy < 0 ? -1 : 1;
                     let angle = 90;
                     if (dist > (3 * 50) / 4)
@@ -385,7 +420,7 @@ export async function gameRoute (fastify, options) {
                     && game.ball.y > game.paddles.right.y // same here
                     && game.ball.y < game.paddles.right.y + 100) {
                     // There are 8 zone considered for the bouncing, so we round to the closest quarter
-                    let dist = Math.abs(game.ball.y - (game.paddles.right.y + 50));
+                    let dist = Math.abs(game.ball.y - (game.paddles.right.y + (PADDLE_H / 2)));
                     let sign = game.ball.dy < 0 ? -1 : 1;
 
                     let angle = 90;
@@ -403,8 +438,8 @@ export async function gameRoute (fastify, options) {
                     game.ball.accelerate();
                 }
 
-            if (game.ball.x <= game.paddles.left.x - 10 || game.ball.x >= game.paddles.right.x + 20) {
-                game.scores[game.ball.x <= game.paddles.left.x - 10 ? "right" : "left"]++;
+            if (game.ball.x <= game.paddles.left.x - PADDLE_W || game.ball.x >= game.paddles.right.x + PADDLE_W + 10) {
+                game.scores[game.ball.x <= game.paddles.left.x - PADDLE_W ? "right" : "left"]++;
                 game.ball.v = STARTING_SPEED;
                 game.ball.x = STARTING_X;
                 game.ball.y = STARTING_Y;

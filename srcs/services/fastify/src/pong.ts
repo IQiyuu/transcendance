@@ -1,7 +1,7 @@
 import {GameClientSocket} from "./GameClientSocket.js";
 import { SiteController } from "./SiteController.js";
 
-const paddleWidth = 10, paddleHeight = 100;
+const PADDLE_W = 10, PADDLE_H = 80;
 
 // Game for a given client
 export class   GameController{

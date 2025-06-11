@@ -17,6 +17,7 @@ export class GameClientSocket{
         this.ws = new WebSocket(`wss://${window.location.host}/game/ws?username=${this.username}`);
         if (this.ws.readyState === this.ws.CLOSED || this.ws.readyState === this.ws.CLOSING){
             //error handling to do !
+            alert("ERROR WHILE CREAtING GAMESOCKET");
             return ;
         }
         this.game = game;
@@ -27,17 +28,13 @@ export class GameClientSocket{
         return (this.username);
     }
 
-    // set_game(g : GameController){
-    //     this.game = g;
-    // }
-
     setSocket(){
         this.ws.onopen = (event) => {
             if (this.should_search){
                 this.ws.send(JSON.stringify({
                     type: "matchmaking",
                     username: this.username,
-                    state: "enter"
+                    state: "join"
                 }));
                 this.should_search = false;
             } else if (this.should_start_solo){
@@ -56,11 +53,16 @@ export class GameClientSocket{
             if (message.type === "game_info"){
                 this.game.updateState(message.game);
             } else if (message.type === "matchmaking") {
+                console.log("Match found");
+                console.log(message);
                 if (message.state === "found") {
                     this.game.updateState(message.game);
-                    this.game.gameInit();
-                    this.game.setSide(message.side);
+                    this.game.setSide((game) => {
+                        return (game.players.left === this.username ? "left" : "right");
+                    });
+                    console.log("side = " + this.game.getSide());
                     this.game.stop_matchmaking_animation();
+                    this.game.gameInit();
                     this.game.hide_all();
                     this.game.print_play_page();
                 }
@@ -84,7 +86,6 @@ export class GameClientSocket{
     }
     
     startMatchmaking(){
-        console.log("Trying to start matchmaking");
         if (this.ws.readyState === 0){// CONNECTING state
             this.should_search = true;
             return ;
@@ -92,14 +93,14 @@ export class GameClientSocket{
         this.ws.send(JSON.stringify({
             type: "matchmaking",
             uname: this.username,
-            state: "enter"
+            state: "join"
         }));
     }
 
     stopMatchmaking(){
         this.ws.send(JSON.stringify({
             type: "matchmaking",
-            state: "left"
+            state: "leave"
         }));
     }
 
