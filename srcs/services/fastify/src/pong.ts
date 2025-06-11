@@ -128,9 +128,8 @@ export class   GameController{
         this.offline_play_btn.addEventListener("click", async (event) => {
             event.preventDefault();
 
-            this.stopMatchmaking();
+            this.stopMatchmaking(); // maybe to handle differently
 
-            this.site.hide_menu();
             this.print_play_page();
             this.is_local = true;
             this.ws = new GameClientSocket(this.username, this);
@@ -320,38 +319,6 @@ export class   GameController{
         this.draw_paddles();
         this.draw_ball();
         this.draw_scores();
-        // this.score_left.textContent = String(this.l_score);
-        // this.score_right.textContent = String(this.r_score);
-
-        // this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        // this.ctx.fillStyle = "rgb(160, 94, 204)";
-        // this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-        // // Calcul pour centrer
-        // const size_x = (this.canvas.width - rectWidth) / 2;
-        // const size_y = (this.canvas.height - rectHeight) / 2;
-
-        // // Dimensions du rectangle
-        // const rectWidth = 700;
-        // const rectHeight = 500;
-
-
-        // this.ctx.fillStyle = "black";
-        // // paddles
-        // this.ctx.fillRect(
-        //     size_x + game.paddles.left.x,
-        //     size_y + game.paddles.left.y,
-        //     paddleWidth,
-        //     paddleHeight
-        // );
-        // this.ctx.fillRect(
-        //     size_x + game.paddles.right.x,
-        //     size_y + game.paddles.right.y,
-        //     paddleWidth,
-        //     paddleHeight
-        // );
-        //ball
-
     }
 
     print_player_names(){
@@ -391,6 +358,11 @@ export class   GameController{
         console.log("Maybe clearing the text ?");
     }
 
+    // Not to be added to hide_all
+    hide_menu(){
+        this.site.hide_menu();
+    }
+
     hide_all(){
         this.hide_play_page();
         this.hide_game();
@@ -399,9 +371,6 @@ export class   GameController{
 };
 
 // /*----------------------------------------------------------------------------------------*/
-
-// const ballRadius = 5;
-
 
 // // Rentre la game dans la db
 // async function saveGame(game) {
@@ -424,67 +393,3 @@ export class   GameController{
 //         console.log("error: ", error);
 //     }
 // }
-
-// // Affiche le canvas
-// async function draw(ws, local) {
-//     try {
-//         const response = await fetch(`/game/${_gameId}`, {
-//             method: "GET",
-//             headers: { "Content-Type": "application/json" },
-//         });
-
-//         if (!response.ok) {
-//             console.log("error fetching game data");
-//             return;
-//         }
-
-//         const game = await response.json();
-
-
-//         if (game.scores.left == _winningScore || game.scores.right == _winningScore) {
-//             const winner = game.scores.left == 11 ? "left" : "right";
-//             if (ws && _role == winner)
-//                 await saveGame(game);
-//             endGame(ws);
-//             return ;
-//         }
-
-
-//         // Dessin du rectangle centré
-//         ctx.beginPath();
-//         ctx.moveTo(x, y);
-//         ctx.lineTo(x + rectWidth, y);
-//         ctx.lineTo(x + rectWidth, y + rectHeight);
-//         ctx.lineTo(x, y + rectHeight);
-
-
-// // Termine la partie
-// async function endGame(ws) {
-//     try {
-//         const body = { 
-//             gameId: _gameId, 
-//         };
-//         await fetch("game/stopGame", {
-//             method: "POST",
-//             headers: { "Content-Type": "application/json" },
-//             body: JSON.stringify(body),
-//         });
-//     } catch (error) {
-//         console.log("error: ", error);
-//     }
-//     document.getElementById("menu").classList.replace("hidden", "block");
-//     document.getElementById("game_box").classList.replace("flex", "hidden");
-//     _gameId = -1;
-//     console.log("moves unavaible");
-//     if (ws instanceof WebSocket)
-//         ws.close();
-//     _mod = null;
-//     await displayMenu();
-// }
-
-
-// function fillCanvas() {
-//     ctx.fillStyle = "rgb(160, 94, 204)";
-//     ctx.fillRect(0, 0, canvas.width, canvas.height);
-// }
-

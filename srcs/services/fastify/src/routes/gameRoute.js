@@ -9,9 +9,9 @@ function degToRad(degree){
 }
 
 const	SCORE_GOAL = 11;
-const	STARTING_SPEED = 5;
+const	STARTING_SPEED = 10;
 const	ACCELERATION = 1;
-const	LIMIT_SPEED = 15;
+const	LIMIT_SPEED = 20;
 const	BOARD_W = 700;
 const	BOARD_H = 480;
 
@@ -77,13 +77,11 @@ export function createGame(user, user2) {
 };
 
 export function movePaddle(game, side, moveUp){
-    if (side === null)
+    if (side !== "left" && side !== "right")
         return ;
-    if (side === "left"){
-        game.paddles.left.y += moveUp ? -4 : 4;
-    } else {
-        game.paddles.right.y += moveUp ? -4 : 4;
-    }
+    let new_y = game.paddles[side].y + (moveUp ? -4 : 4);
+    if (new_y > 15 && new_y < BOARD_H - 15)
+        game.paddles[side].y = new_y;
 }
 
 export function userExistsInDb(username, db){
@@ -296,10 +294,11 @@ export async function gameRoute (fastify, options) {
                     playing_clients.set(socket, new_game_id);
                     waiting_clients.delete(username);
                 } else if (message.type === "game_update"){
-                    var game = games[message.game_id];
-                    var newY = game.paddles[message.side].y + (message.move_up ? -4 : 4);
-                    if (newY > 15 && newY < BOARD_H - 15)
-                        game.paddles[message.side].y = newY;
+                    let game = games[message.game_id];
+                    movePaddle(game, message.side, message.move_up);
+
+                    // if (newY > 15 && newY < BOARD_H - 15)
+                    //     game.paddles[message.side].y = newY;
                 } else if (message.type === "matchmaking"){
                     if (message.state === "join"){
                         console.log("A player is joining matchmaking");
@@ -334,7 +333,11 @@ export async function gameRoute (fastify, options) {
                     } else if (message.state === "leave"){
                         console.log("A player is leaving matchmaking");
                         // if (isValid)
-                        waiting_clients.delete(s);
+                        waiting_clients.forEach((sck, username) => {
+                            if (sck === socket)
+                                waiting_clients.delete(username);
+                        });
+                        socket.close();
                     }
                 }
             })
