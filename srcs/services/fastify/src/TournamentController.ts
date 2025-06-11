@@ -211,7 +211,6 @@ export class TournamentController {
             return ;
         }
         this.tournament_div.classList.replace("hidden", "block");
-        console.log("printing " + this.tournament);
 
         let title = document.createElement("h3");
         title.append(document.createTextNode(this.tournament.getName()));

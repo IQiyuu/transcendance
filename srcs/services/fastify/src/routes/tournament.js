@@ -10,7 +10,6 @@ class Tournament{
         this.name = name;
         this.owner = owner;
         this.players = []; // {username, socket}
-        this.readyToStart = false;
     }
 
     getId(){
@@ -56,33 +55,39 @@ class Tournament{
     addPlayer(player) {
         if (!this.isFull() && !this.contains(player))
             this.players.push({username: player, socket: null});
-        if (this.players.length >= 3)
-            this.isReadyToStart = true;
+        // if (this.players.length >= 3)
+        //     this.isReadyToStart = true;
     }
 
     removePlayer(player){
-        if (this.contains(player)){
-            let pos = this.players.indexOf(player);
-            this.players.copyWithin(pos, pos + 1);
-            this.players.pop();
+        console.log("Trying to remove ");
+        console.log(player);
+        let pos = -1;
+        this.players.forEach(tuple => {
+            if (tuple.username === player){
+                pos = this.players.indexOf(tuple);
+            }
+        });
+        if (pos === -1){
+            console.log("Error");
+            return ;
         }
-        if (this.players.length < 3)
-            this.isReadyToStart = false;
+        this.players.splice(pos, 1);
     }
 
     connectPlayer(player, socket){
-        let pos = this.players.indexOf(player);
         this.players.forEach(tuple => {
             if (tuple.username === player){
                 tuple.socket = socket;
             }
-        })
+        });
     }
 
     disconnectPlayer(player){
         this.players.forEach(tuple => {
             if (tuple.username === player){
-                tuple.socket.close();
+                if (tuple.socket !== null)
+                    tuple.socket.close();
                 tuple.socket = null;
             }
         });
@@ -157,7 +162,6 @@ async function tournamentRoute (fastify, options) {
             name : t.name,
             owner : t.owner,
             players : players,
-            readyToStart : t.readyToStart
         };
         return (tournoi);
     }
@@ -261,9 +265,11 @@ async function tournamentRoute (fastify, options) {
             return {success: false, error: "Player not in the tournament"};
         if (user === t.getOwner() && t.getSize() > 1)
             return {success: false, error: "Owner can't leave the room while other players are present"};
-        
+        t.disconnectPlayer(user);
         t.removePlayer(user);
-        // sock.updateTournamentPlayers(t);
+        // if (t.getSize() === 0){
+        //     tournaments[t_id] = null;
+        // }
         return {success: true};
     });
     
@@ -284,7 +290,6 @@ async function tournamentRoute (fastify, options) {
             return {success: false, error: "Player not in the tournament"};
 
         t.removePlayer(user);
-        // sock.updateTournamentPlayers(t);
         return {success: true};
     })
 
@@ -303,7 +308,7 @@ async function tournamentRoute (fastify, options) {
         if (!t.isReadyToStart())
             return {success: false, error: "Not enough players to start tournament"};
 
-        startTournament(t);
+        // startTournament(t);
         return ({success: true});
     })
 
@@ -326,6 +331,11 @@ async function tournamentRoute (fastify, options) {
             return {success: false, error: "Player not in this tournament"};
 
 
+        socket.on("open", event => {
+            // console.log("Opening socket");
+            t.connectPlayer(username, socket);
+        });
+
         socket.on('message', message => {
             console.log(message);
         });
@@ -334,12 +344,15 @@ async function tournamentRoute (fastify, options) {
             t.disconnectPlayer(username, socket);
         });
 
-        t.connectPlayer(username, socket);
+        // t.connectPlayer(username, socket);
     });
 
     setInterval(() => {
         tournaments.forEach(tournament => {
-            if (tournament.isReadyToStart()){
+            // console.log(tournament);
+            if (tournament.getSize() === 0){
+                tournaments[tournaments.indexOf(tournament)] = null;
+            } else if (tournament.isReadyToStart()){
                 tournament.start();
             }
             // if (tournament.hasNextRound() && tournament.currentRoundIsFinished())
