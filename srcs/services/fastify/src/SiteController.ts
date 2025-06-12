@@ -406,6 +406,8 @@ export class SiteController{
     print_menu(){
         this.print_main_page();
         this.menu.classList.replace("hidden", "block");
+        if (this.tournament !== null && this.tournament.hasTournament())
+            this.tournament.print_tournament_rejoin_btn();
     }
 
     hide_menu(){

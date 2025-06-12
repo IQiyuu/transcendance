@@ -59,6 +59,10 @@ export class TournamentController {
         this.username = username;
     }
 
+    hasTournament(){
+        return (this.tournament !== null);
+    }
+
     addEvents() {
         this.tournament_create_btn.addEventListener("click", (event) => {
             event.preventDefault();
@@ -180,6 +184,8 @@ export class TournamentController {
         });
 
         this.tournament_rejoin_btn.addEventListener("click", async (event) => {
+            this.site.hide_all();
+            this.print_tournaments_page();
             this.print_tournament();
         });
     }
