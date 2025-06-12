@@ -101,7 +101,7 @@ export class TournamentController {
                 if (data.success) {
                     this.tournament = new Tournament(data.tournament);
                     this.cws = new TournamentClientSocket(this.username, this, this.tournament);
-                    console.log(this.tournament);
+                    // console.log(this.tournament);
                     this.hide_tournament_form();
                     this.print_tournament();
                     this.print_tournament_rejoin_btn();
@@ -128,7 +128,7 @@ export class TournamentController {
                 });
                 const data = await resp.json();
 
-                console.log(data);
+                // console.log(data);
 
                 if (data.success) {
                     if (data.tournaments !== null && data.tournaments !== undefined) {
@@ -155,10 +155,11 @@ export class TournamentController {
                                         });
                                         const data = await resp.json();
                                         if (data.success) {
+                            
                                             this.tournament = new Tournament(data.tournament);
                                             this.cws = new TournamentClientSocket(this.username, this, this.tournament);
 
-                                            console.log(this.tournament);
+                                            // console.log(this.tournament);
 
                                             this.site.hide_all();
                                             this.clear_tournament();
@@ -184,8 +185,9 @@ export class TournamentController {
         });
 
         this.tournament_rejoin_btn.addEventListener("click", async (event) => {
+            this.clear_tournament();
             this.site.hide_all();
-            this.print_tournaments_page();
+            this.print_tournament_page();
             this.print_tournament();
         });
     }
@@ -221,6 +223,8 @@ export class TournamentController {
     }
 
     print_tournament() {
+        console.log("Printing tournament");
+        console.log(this.tournament);
         if (this.tournament === null){
             alert("Not implemented yet (print tournament)");
             return ;
@@ -255,7 +259,7 @@ export class TournamentController {
             tr.append(th);
 
             th = document.createElement("th");
-            if (p === this.tournament.getOwner) {
+            if (p === this.tournament.getOwner()) {
                 th.append(document.createTextNode("Owner"));
             }
             else {
@@ -316,7 +320,7 @@ export class TournamentController {
 
     async leaveTournamentHandler(event) {
         event.preventDefault();
-        console.log("Trying to leave so soon ?");
+        // console.log("Trying to leave so soon ?");
 
         try {
             // fetch HERE TODO
@@ -373,10 +377,12 @@ export class TournamentController {
     }
 
     clear_tournament() {
+        // console.log(this.tournament_div.textContent);/
         this.tournament_div.textContent = '';
     }
 
     clear_tournaments() {
+        // console.log(this.tournaments_list.textContent);
         this.tournaments_list.textContent = '';
     }
 

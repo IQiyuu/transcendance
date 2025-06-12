@@ -13,8 +13,6 @@ class Tournament{
     }
 
     getId(){
-        console.log("Rules the work");
-        console.log(this.id);
         return (this.id);
     }
 
@@ -151,8 +149,10 @@ function getMasked(t){
 
 function    updateTournament(tournament){
     let res = getMasked(tournament);
+    console.log("Trying to update clients");
     tournament.getPlayers().forEach(tuple => {
         if (tuple.socket !== null){
+            console.log("   Socket found");
             tuple.socket.send(JSON.stringify({
                 type: "update",
                 tournament: res
@@ -366,7 +366,7 @@ async function tournamentRoute (fastify, options) {
 
         socket.on("open", event => {
             // console.log("Opening socket");
-            console.log("Player is connecting");
+            console.log("Player connected " + username.toString());
             t.connectPlayer(username, socket);
             updateTournament(t);
         });
@@ -376,8 +376,9 @@ async function tournamentRoute (fastify, options) {
         });
 
         socket.on("close", () => {
-            updateTournament(t);
+            console.log("Player disconnected " + username.toString());
             t.disconnectPlayer(username, socket);
+            updateTournament(t);
         });
 
         // t.connectPlayer(username, socket);

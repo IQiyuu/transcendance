@@ -9,7 +9,6 @@ export class TournamentClientSocket{
     private username : string = null;
 
     private view : TournamentController = null;
-    // protected game : Game = null;
     protected tournament : Tournament = null;
 
     constructor(username : string, view : TournamentController, tournament : Tournament){
@@ -51,7 +50,7 @@ export class TournamentClientSocket{
                 return ; // ERROR
             console.log("You got a mail, ", data.type);
             if (data.type === "update") {
-                console.log("   tournament is");
+                console.log("   tournament is has been updated,");
                 console.log(data.tournament);
                 this.view.updateTournament(data.tournament);
             }
