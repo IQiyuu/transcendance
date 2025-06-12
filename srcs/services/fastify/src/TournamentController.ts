@@ -77,9 +77,12 @@ export class TournamentController {
 
         this.tournament_form.addEventListener("submit", async (event) => {
             event.preventDefault();
-            //Verifier que l'input est valide avant de l'envoyer !
-            // ...
             const name = document.getElementById("tournament_name") as HTMLInputElement;
+            //Verifier que l'input est valide avant de l'envoyer !
+            if (name.value === null || name.value === ""){
+                alert("cant be empty");
+                return ;
+            }
             try {
                 const body = {
                     owner: this.username,
@@ -93,7 +96,7 @@ export class TournamentController {
                 const data = await resp.json();
                 if (data.success) {
                     this.tournament = new Tournament(data.tournament);
-                    this.cws = new TournamentClientSocket(data.tournament.id, this.username, this, this.tournament);
+                    this.cws = new TournamentClientSocket(this.username, this, this.tournament);
                     console.log(this.tournament);
                     this.hide_tournament_form();
                     this.print_tournament();
@@ -149,14 +152,14 @@ export class TournamentController {
                                         const data = await resp.json();
                                         if (data.success) {
                                             this.tournament = new Tournament(data.tournament);
-                                            this.cws = new TournamentClientSocket(data.tournament.id, this.username, this, this.tournament);
+                                            this.cws = new TournamentClientSocket(this.username, this, this.tournament);
 
                                             console.log(this.tournament);
 
                                             this.site.hide_all();
                                             this.clear_tournament();
                                             this.print_tournament_page();
-                                            this.print_tournament(data.tournament);
+                                            this.print_tournament();
                                         } else
                                             throw Error(data.error);
                                     } catch (error) {
@@ -179,6 +182,12 @@ export class TournamentController {
         this.tournament_rejoin_btn.addEventListener("click", async (event) => {
             this.print_tournament();
         });
+    }
+
+    updateTournament(tournament : Tournament){
+        this.tournament = tournament;
+        this.clear_tournament();
+        this.print_tournament();
     }
 
     /**

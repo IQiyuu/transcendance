@@ -7,19 +7,17 @@ import {TournamentController, Tournament} from "./TournamentController.js";
 export class TournamentClientSocket{
     private ws : WebSocket = null;
     private username : string = null;
-    private id : number = null;
 
     private view : TournamentController = null;
     // protected game : Game = null;
     protected tournament : Tournament = null;
 
-    constructor(id : number, username : string, view : TournamentController, tournament : Tournament){
-        this.id = id;
+    constructor(username : string, view : TournamentController, tournament : Tournament){
         this.username = username;
         this.tournament = tournament;
         this.view = view;
 
-        this.ws = new WebSocket(`wss://${window.location.host}/tournament/${this.id}/ws?username=${this.username}`);
+        this.ws = new WebSocket(`wss://${window.location.host}/tournament/${this.tournament.getId()}/ws?username=${this.username}`);
         this.setSocket();
     }
 
@@ -52,8 +50,10 @@ export class TournamentClientSocket{
             if (data === null)
                 return ; // ERROR
             console.log("You got a mail, ", data.type);
-            if (data.type == "connection") {
-
+            if (data.type === "update") {
+                console.log("   tournament is");
+                console.log(data.tournament);
+                this.view.updateTournament(data.tournament);
             }
         };
 
