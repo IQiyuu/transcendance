@@ -91,6 +91,11 @@ export class   ProfileController{
             if (this.profile_username == this.username)
                 this.camera_icon.classList.replace("opacity-60", "opacity-0");
         });
+        // Activate 2fa
+        this.fa_btn.addEventListener('click', async (event) => {
+            event.preventDefault();
+            window.open('/2fa', '42 AUTH');
+        });
 
     }
 
