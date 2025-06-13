@@ -48,7 +48,6 @@ export class TournamentClientSocket{
             const data = JSON.parse(message.data);
             if (data === null)
                 return ; // ERROR
-            console.log("You got a mail, ", data.type);
             if (data.type === "update") {
                 console.log("   tournament is has been updated,");
                 console.log(data.tournament);

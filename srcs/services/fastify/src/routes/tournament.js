@@ -327,6 +327,9 @@ function tournamentRoute (fastify, options) {
         if (!existsTournament(tournaments, t_id))
             return {success: false, error: "Tournament doesnt exists"};
 
+        if (inTournament(tournaments, player))
+            return {success: false, message: "Player can't join a tournament as he's already in one"};
+
         let t = getTournament(tournaments, t_id);
         if (t.contains(player))
             return {success: false, error: "Player in the tournament"};

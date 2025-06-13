@@ -106,8 +106,9 @@ export class TournamentController {
                     this.tournament = new Tournament(data.tournament);
                     this.cws = new TournamentClientSocket(this.username, this, this.tournament);
                     // console.log(this.tournament);
-                    this.hide_tournament_form();
+                    this.hide_all();
                     this.print_tournament();
+                    this.print_tournament_page();
                     this.print_tournament_rejoin_btn();
                 }
                 else
@@ -159,7 +160,6 @@ export class TournamentController {
                                         });
                                         const data = await resp.json();
                                         if (data.success) {
-                            
                                             this.tournament = new Tournament(data.tournament);
                                             this.cws = new TournamentClientSocket(this.username, this, this.tournament);
 
@@ -199,6 +199,7 @@ export class TournamentController {
     updateTournament(tournament : Tournament){
         this.tournament.update(tournament);
         this.clear_tournament();
+        this.site.hide_all();
         this.print_tournament();
     }
 
@@ -230,7 +231,7 @@ export class TournamentController {
         console.log("Printing tournament");
         console.log(this.tournament);
         if (this.tournament === null){
-            alert("Not implemented yet (print tournament)");
+            alert("Not implemented yet (print tournament but tournament is null)");
             return ;
         }
         this.tournament_div.classList.replace("hidden", "block");
