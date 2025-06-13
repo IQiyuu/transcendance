@@ -2,10 +2,11 @@ import { TournamentClientSocket } from "./TournamentClientSocket.js";
 import { SiteController } from "./SiteController.js";
 
 export class Tournament {
-    private id;
-    private name;
-    private owner;
+    private id : number = -1;
+    private name : string = "placeholder";
+    private owner : string = "unowned";
     private players; // image, win rate{}
+    private is_started : boolean = false;
 
 
     constructor(tournament) {
@@ -31,10 +32,13 @@ export class Tournament {
         return (this.players);
     }
 
+    isStarted(){
+        return (this.is_started);
+    }
+
     update(tournament){
         this.players = tournament.players;
     }
-
 }
 
 export class TournamentController {
@@ -49,14 +53,22 @@ export class TournamentController {
     private tournament_page = document.getElementById("tournament_page");
     private tournaments_page = document.getElementById("tournaments_join");
     private tournament_div = document.getElementById("tournament");
+    private tournament_state = document.getElementById("tournament_state");
     private tournaments_list = document.getElementById("tournaments_list");
     private tournament_form = document.getElementById("tournament_form");
     private tournament_create_btn = document.getElementById("tournament_create_button");
     private tournament_join_btn = document.getElementById("tournament_join_button");
     private tournament_rejoin_btn = document.getElementById("tournament_rejoin_button");
 
+// need to tell the client if a tournament created by him already exists
+// maybe the client send a fetch to check before creating the socket ?
+// Need to check (on page load) if the client has a tournament already present (maybe with the connection socket, UserSocket (profileSocket))
+
+// Need to handle if the tournament is disbanded
     constructor(site) {
         this.site = site;
+        // fetch to check if a tournament already exists
+        // this.checkTournament();
     }
 
     setUsername(username) {
@@ -102,7 +114,7 @@ export class TournamentController {
                     body: JSON.stringify(body)
                 });
                 const data = await resp.json();
-                if (data.success) {
+                if (data.success) { 
                     this.tournament = new Tournament(data.tournament);
                     this.cws = new TournamentClientSocket(this.username, this, this.tournament);
                     // console.log(this.tournament);
@@ -201,6 +213,7 @@ export class TournamentController {
         this.clear_tournament();
         this.site.hide_all();
         this.print_tournament();
+        this.print_tournament_page();
     }
 
     /**
@@ -227,11 +240,22 @@ export class TournamentController {
         this.tournaments_page.classList.replace("flex", "hidden");
     }
 
+    print_on_going_tournament(){
+        this.tournament_state.classList.replace("hidden", "flex");
+    }
+
+    hide_on_going_tournament(){
+        this.tournament_state.classList.replace("flex", "hidden");
+    }
+
     print_tournament() {
         console.log("Printing tournament");
         console.log(this.tournament);
         if (this.tournament === null){
             alert("Not implemented yet (print tournament but tournament is null)");
+            return ;
+        } else if (this.tournament.isStarted()){
+            this.print_on_going_tournament();
             return ;
         }
         this.tournament_div.classList.replace("hidden", "block");
@@ -288,38 +312,6 @@ export class TournamentController {
         leave_button.append(document.createTextNode("Leave"));
 
         leave_button.onclick = (event) => this.leaveTournamentHandler(event);
-
-        // leave_button.addEventListener("click", async(event) => {
-        //     event.preventDefault();
-        //     console.log("Trying to leave so soon ?");
-
-        //     try{
-        //         // fetch HERE TODO
-        //         let query = new URLSearchParams();
-        //         query.append("username", this.username);
-        //         console.log("Trying to leave ");
-        //         console.log(this.tournament);
-        //         let url = '/tournament/leave/' + this.tournament.getId() + `?${query}`;
-
-        //         const resp = await fetch(url, {
-        //             method: 'GET'
-        //         });
-
-        //         const data = await resp.json();
-        //         if (data.success){
-        //             this.tournament = null;
-        //             this.hide_all();
-        //             this.cws.close();
-        //             this.cws = null;
-        //             this.print_tournament_page();
-        //         }else{
-        //             console.log("Didnt leave");
-        //             throw (Error(data.error));
-        //         }
-        //     } catch (error){
-        //         console.log(error);
-        //     }
-        // });
         this.tournament_div.append(leave_button);
     }
 
@@ -356,9 +348,7 @@ export class TournamentController {
     }
 
     async startTournamentHandler(event) {
-        if (this.cws.isReady()){
-            this.cws.startTournament();
-        }
+        this.cws.startTournament();
     }
 
     hide_tournament() {
@@ -397,5 +387,6 @@ export class TournamentController {
         this.hide_tournament_form();
         this.hide_tournament_rejoin_btn();
         this.hide_tournament();
+        this.hide_on_going_tournament();
     }
 };

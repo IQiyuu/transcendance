@@ -1,7 +1,26 @@
 import Fastify from 'fastify';
-// import {} from './webSocketRoute.js';
 
 const TOURNAMENT_SIZE = 8;
+
+//To put in utils.js
+function randomIntFromInterval(min, max) {
+    return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
+// Return a random partition of position for a tournament bracket
+function    initBracket(){
+    let nbs = [];
+    let x;
+    while (i < TOURNAMENT_SIZE){
+        console.log("random number generated : " + x.toString());
+        x = randomIntFromInterval(0, TOURNAMENT_SIZE);
+        if (!nbs.contains(x)){
+            nbs.push(x);
+            i++;
+        }
+    }
+    return (nbs);
+}
 
 class Tournament{
 
@@ -112,6 +131,20 @@ class Tournament{
             i++;
         }
         return (false);
+    }
+
+    //Each player has a place randomly attributed at the start, that's used to know their position in the bracket
+    startTournament(){
+        console.log("Starting tournament");
+        // Initialzing the first round
+        let bracket_pile = initBracket();
+        this.players.forEach(tuple => {
+            tuple.bracket_pos = bracket_pile.pop();
+        });
+
+        console.log("Random pos are :");
+        console.log(this.players);
+        // the tournament is handled by the interval 
     }
 };
 
@@ -253,6 +286,16 @@ function tournamentRoute (fastify, options) {
 
         socket.on('message', (message) => {
             console.log(message);
+            if (message.type === "start"){
+                console.log("Starting tournament ??");
+                if (!t.isReadyToStart()){
+                    socket.send(JSON.stringify({
+                        type: "error",
+                        message: "Tournament can't be started now"
+                    }));
+                }
+                t.startTournament();
+            }
         });
 
         socket.on("close", (event) => {
@@ -314,7 +357,7 @@ function tournamentRoute (fastify, options) {
         return {success: true, tournament: tournament};
     });
     
-    // Declaring a match is over url to check
+    // Declaring a match is over url to check. Not used for now, it is websocket that handles it
     fastify.get('/tournament/:id/match_over', async (request, reply) => {
         return {success: true};
     });
@@ -381,7 +424,7 @@ function tournamentRoute (fastify, options) {
         return {success: true};
     })
 
-    //Starting the tournament
+    //Starting the tournament. Not used for now, it is websocket that handles it
     fastify.get('/tournament/start/:id', async(request, reply) => {
         let t_id = request.params.id;
         let player = request.query.username;
@@ -400,21 +443,20 @@ function tournamentRoute (fastify, options) {
         return ({success: true});
     })
 
-
+    // For optimizition, the interval can be set only when at least a tournament exists
     setInterval(() => {
         tournaments.forEach(tournament => {
             // console.log(tournament);
             if (tournament === null){
                 return ;
-            } if (tournament.getSize() === 0){
+            }
+            // Tournament garbage collector x)
+            if (tournament.getSize() === 0){
                 tournaments.splice(tournaments.indexOf(tournament));
-            } else if (tournament.isReadyToStart()){
-                tournament.start();
             }
             // if (tournament.hasNextRound() && tournament.currentRoundIsFinished())
             //     tournament.startNextRound();
-            // if (tournament.isFinished())
-            //     tournament.end();
+
         });
     }, 30);
 }

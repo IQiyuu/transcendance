@@ -1,5 +1,6 @@
 import fs from 'fs';
 
+//To put in utils.js
 function randomIntFromInterval(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
