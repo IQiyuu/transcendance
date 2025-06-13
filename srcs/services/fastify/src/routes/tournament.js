@@ -188,7 +188,7 @@ function    existsTournament(tournaments, id){
     return (false);
 }
 
-async function tournamentRoute (fastify, options) {
+function tournamentRoute (fastify, options) {
     let tournaments = [];
     let max_t_id = tournaments.length; // maybe get the max value of existing value ? 
 
@@ -211,6 +211,59 @@ async function tournamentRoute (fastify, options) {
             payload.tournament = getMasked(payload.tournament);
         }
     });
+
+
+    /**
+     * Websocket routes need to be registered before any other to handle events on socket
+     * Connecting a client to the tournament
+     */
+    fastify.get('/tournament/:id/ws', { websocket: true }, (socket, req) => {
+        let username = req.query.username;
+        let t_id = req.params.id;
+
+        const   CONNECTING_STATE = 0;
+        const   OPEN_STATE = 1;
+        
+        //Checking if user 
+        if (username === null || username === undefined || t_id === null || t_id === undefined)
+            return {success: false, error: "Need username and id"};
+        
+        if (!existsTournament(tournaments, t_id))
+            return {success: false, error: "Tournament doesnt exists"};
+        let t = getTournament(tournaments, t_id);
+        if (t === undefined)
+            return {success: false, error: "Unexpected error occured while fetching the tournament"};
+        
+        if (!t.contains(username))
+            return {success: false, error: "Player not in this tournament"};
+        
+        console.log("Trying new socket connection !");
+        // Could be improved ...
+        if (socket.readyState === OPEN_STATE){
+            console.log("Player connected " + username.toString());
+            t.connectPlayer(username, socket);
+            updateTournament(t);
+        }
+        // socket.on("open", event => {
+        //     console.log("Opening socket");
+        //     console.log("Player connected " + username.toString());
+        //     t.connectPlayer(username, socket);
+        //     updateTournament(t);
+        // });
+
+        socket.on('message', (message) => {
+            console.log(message);
+        });
+
+        socket.on("close", (event) => {
+            console.log("Player disconnected " + username.toString());
+            t.disconnectPlayer(username, socket);
+            updateTournament(t);
+        });
+
+        // t.connectPlayer(username, socket);
+    });
+
 
     //Return all tournaments that username can join. Also mask every private info
     function    getAvailableTournaments(tournaments, username){
@@ -344,45 +397,6 @@ async function tournamentRoute (fastify, options) {
         return ({success: true});
     })
 
-    //Connecting a client to the tournament
-    fastify.get('/tournament/:id/ws', { websocket: true }, (socket, req) => {
-        let username = req.query.username;
-        let t_id = req.params.id;
-
-        console.log("Trying new socket connection !");
-
-        //CHecking if user 
-        if (username === null || username === undefined || t_id === null || t_id === undefined)
-            return {success: false, error: "Need username and id"};
-
-        if (!existsTournament(tournaments, t_id))
-            return {success: false, error: "Tournament doesnt exists"};
-        let t = getTournament(tournaments, t_id);
-        if (t === undefined)
-            return {success: false, error: "Unexpected error occured while fetching the tournament"};
-
-        if (!t.contains(username))
-            return {success: false, error: "Player not in this tournament"};
-
-        socket.on("open", event => {
-            // console.log("Opening socket");
-            console.log("Player connected " + username.toString());
-            t.connectPlayer(username, socket);
-            updateTournament(t);
-        });
-
-        socket.on('message', message => {
-            console.log(message);
-        });
-
-        socket.on("close", () => {
-            console.log("Player disconnected " + username.toString());
-            t.disconnectPlayer(username, socket);
-            updateTournament(t);
-        });
-
-        // t.connectPlayer(username, socket);
-    });
 
     setInterval(() => {
         tournaments.forEach(tournament => {

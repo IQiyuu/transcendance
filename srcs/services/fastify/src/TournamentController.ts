@@ -31,6 +31,10 @@ export class Tournament {
         return (this.players);
     }
 
+    update(tournament){
+        this.players = tournament.players;
+    }
+
 }
 
 export class TournamentController {
@@ -193,7 +197,7 @@ export class TournamentController {
     }
 
     updateTournament(tournament : Tournament){
-        this.tournament = tournament;
+        this.tournament.update(tournament);
         this.clear_tournament();
         this.print_tournament();
     }
