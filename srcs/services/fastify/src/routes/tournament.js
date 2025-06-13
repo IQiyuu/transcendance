@@ -11,10 +11,11 @@ function randomIntFromInterval(min, max) {
 function    initBracket(){
     let nbs = [];
     let x;
-    while (i < TOURNAMENT_SIZE){
-        console.log("random number generated : " + x.toString());
+    let i = 0;
+    while (i < TOURNAMENT_SIZE){ // Soit on genre de 1 a T_SIZE, puis on gere avec le getNextROubd(nombre croissants), soit on gere avec des nombre de 1 a nb_joueurs
         x = randomIntFromInterval(0, TOURNAMENT_SIZE);
-        if (!nbs.contains(x)){
+        // console.log("random number generated : " + x.toString());
+        if (!nbs.includes(x)){
             nbs.push(x);
             i++;
         }
@@ -284,8 +285,16 @@ function tournamentRoute (fastify, options) {
         //     updateTournament(t);
         // });
 
-        socket.on('message', (message) => {
-            console.log(message);
+        socket.on('message', (data) => {
+            let message;
+            try {
+                message = JSON.parse(data.toString());
+            } catch (err) {
+                console.error('Invalid JSON:', data.toString());
+                return; // maybe send a mesg to client instead
+            }
+            console.log("Recv message :");
+            console.log(message.type);
             if (message.type === "start"){
                 console.log("Starting tournament ??");
                 if (!t.isReadyToStart()){

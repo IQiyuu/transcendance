@@ -66,6 +66,7 @@ export class TournamentClientSocket{
     }
     
     startTournament(){
+        console.log("Starting tournament ?");
         this.ws.send(JSON.stringify({
             type: "start"
         }));
