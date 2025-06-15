@@ -8,6 +8,7 @@ import jwt from '@fastify/jwt';
 import ejs from 'ejs'
 import fs from 'fs';
 
+import faRoute from './routes/faRoute.js';
 import LogginRoute from './routes/loggingRoute.js'
 import GameRoute from './routes/gameRoute.js'
 import tournamentRoute from './routes/tournament.js'
@@ -53,6 +54,7 @@ db.exec(`
     user_id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL,
     password TEXT NOT NULL,
+    twofa TEXT DEFAULT NULL,
     picture_path TEXT DEFAULT "../assets/imgs/standart.jpg",
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   );
@@ -66,6 +68,7 @@ db.exec(`
     FOREIGN KEY(user_id) REFERENCES users(user_id),
     FOREIGN KEY(friend_id) REFERENCES users(user_id)
   );
+  
 `)
 
 const schema = db.prepare("PRAGMA table_info(friends);").all();
@@ -89,6 +92,11 @@ fastify.register(fastifyBcrypt, {
 })
 
 fastify.register(LogginRoute, {
+  db: db,
+  secretKey: secretKey
+});
+
+fastify.register(faRoute, {
   db: db,
   secretKey: secretKey
 });

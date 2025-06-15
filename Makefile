@@ -6,7 +6,7 @@
 #    By: ggiboury <ggiboury@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/22 15:00:40 by ggiboury          #+#    #+#              #
-#    Updated: 2025/05/30 15:14:22 by ggiboury         ###   ########.fr        #
+#    Updated: 2025/06/13 16:55:01 by ggiboury         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -111,7 +111,9 @@ $(VOLUME_DATABASE): | $(VOLUME)
 	mkdir -p $(VOLUME_DATABASE)
 	
 $(VOLUME_DATABASE_FILES): | $(VOLUME_DATABASE)
-	@cp $(SRCS_DB) $(VOLUME_DATABASE_FILES)
+	if [ -e $(SRCS_DB) ] ; then \
+		@cp $(SRCS_DB) $(VOLUME_DATABASE_FILES); \
+	fi
 
 re : fclean $(NAME)
 

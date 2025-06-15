@@ -268,6 +268,7 @@ export async function gameRoute (fastify, options) {
         fastify.get('/game/ws', { websocket: true }, (socket, req) => {
             let username = req.query.username;
             socket.on('open', (event) => {
+                // PROBLEM ; I dont know when this is executed
                 console.log("socket game created for");
                 console.log(username);
                 waiting_clients.set(username, socket);

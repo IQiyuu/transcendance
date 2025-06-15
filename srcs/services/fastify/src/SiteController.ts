@@ -93,6 +93,11 @@ export class   ProfileController{
             if (this.profile_username == this.username)
                 this.camera_icon.classList.replace("opacity-60", "opacity-0");
         });
+        // Activate 2fa
+        this.fa_btn.addEventListener('click', async (event) => {
+            event.preventDefault();
+            window.open('/2fa', '42 AUTH');
+        });
 
     }
 
@@ -408,6 +413,8 @@ export class SiteController{
     print_menu(){
         this.print_main_page();
         this.menu.classList.replace("hidden", "block");
+        if (this.tournament !== null && this.tournament.hasTournament())
+            this.tournament.print_tournament_rejoin_btn();
     }
 
     hide_menu(){
