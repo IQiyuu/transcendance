@@ -8,12 +8,12 @@ function randomIntFromInterval(min, max) {
 }
 
 // Return a random partition of position for a tournament bracket
-function    initBracket(){
+function    initBracket(size){
     let nbs = [];
     let x;
     let i = 0;
-    while (i < TOURNAMENT_SIZE){ // Soit on genre de 1 a T_SIZE, puis on gere avec le getNextROubd(nombre croissants), soit on gere avec des nombre de 1 a nb_joueurs
-        x = randomIntFromInterval(0, TOURNAMENT_SIZE);
+    while (i < size){ // Soit on genre de 1 a T_SIZE, puis on gere avec le getNextROubd(nombre croissants), soit on gere avec des nombre de 1 a nb_joueurs
+        x = randomIntFromInterval(1, size);
         // console.log("random number generated : " + x.toString());
         if (!nbs.includes(x)){
             nbs.push(x);
@@ -23,13 +23,25 @@ function    initBracket(){
     return (nbs);
 }
 
+function    calculateNbBrackets(nb_p){
+    let x = Math.round(Math.log2(nb_p));
+    return (2 ** x < nb_p ? x + 1 : x);
+}
+
+// States used for the tournament itself and it's games
+const T_STARTING = 0;
+const T_ON_GOING = 1;
+const T_ENDED = 2;
+
 class Tournament{
 
     constructor(owner, id, name){
         this.id = id;
         this.name = name;
         this.owner = owner;
-        this.players = []; // {username, socket}
+        this.players = []; // Objects : {username, socket, bracket_starting_pos}
+        this.brackets = []; // Unordered lists of Objects : {round, game_id, players(p1, p2), state(STARTING || ON GOING || ENDED)}
+        this.state = T_STARTING;
     }
 
     getId(){
@@ -46,6 +58,10 @@ class Tournament{
 
     getSize(){
         return (this.players.length);
+    }
+
+    getState(){
+        return (this.state);
     }
 
     isFull(){
@@ -65,7 +81,7 @@ class Tournament{
         return (true);
     }
 
-    hasNextRound(){
+    hasNextRound(){ // not usefull ?
         return (false);
     }
 
@@ -138,14 +154,38 @@ class Tournament{
     startTournament(){
         console.log("Starting tournament");
         // Initialzing the first round
-        let bracket_pile = initBracket();
-        this.players.forEach(tuple => {
-            tuple.bracket_pos = bracket_pile.pop();
+        this.state = T_ON_GOING;
+        let bracket_pile = initBracket(this.players.length);
+        this.players.forEach(player => {
+            player.bracket_starting_pos = bracket_pile.pop();
         });
-
-        console.log("Random pos are :");
+        console.log("Tournament will start\nRandom pos are :");
         console.log(this.players);
-        // the tournament is handled by the interval 
+
+        this.brackets.length = calculateNbBrackets(this.players.length);
+        console.log("Len of brakcets : ");
+        console.log(this.brackets.length);
+        // BRacket 0, 1, 2
+        // b[0] = [m1, m2, mx];
+        // b[1] = [m1, m2, mx];
+        // b[2] = [m1, m2, mx];
+        // mx = {game_id, players (username1, username2), state}; 
+        // On ajoute directement au rang suivant on win ? 
+        // this.players.forEach(player => {
+        //     // console.log(typeof Math.floor(player.bracket_pos / 2));
+        //     let el = this.brackets.at(Math.floor(player.bracket_pos / 2));
+        //     if (el === undefined)
+        //         this.brackets.at(Math.floor(player.bracket_pos / 2)) = {round : 0, game_id : -1, players : [player.username, -1], state : T_STARTING};
+        //     else 
+        //         el.players[1] = player.username;
+        // });
+        console.log("List of matchs :");
+        console.log(this.brackets);
+        // the tournament is handled by the interval
+    }
+
+    startNextRound(){
+
     }
 };
 
@@ -304,6 +344,14 @@ function tournamentRoute (fastify, options) {
                     }));
                 }
                 t.startTournament();
+            } else if (message.type === "match_started"){
+                t.
+                updateTournament(t);
+            } else if (message.type === "match_finished"){
+                //Clients telling match is finished, we need both approval
+                // Registering the game in db, we just save the game_id (primary key) and the tournament id;
+            } else if (message.type === "match"){
+                
             }
         });
 
@@ -321,7 +369,7 @@ function tournamentRoute (fastify, options) {
     function    getAvailableTournaments(tournaments, username){
         let res = [];
         tournaments.forEach(t => {
-            if (t.getOwner() !== username && !t.contains(username) && !t.isFull()){
+            if (t.getOwner() !== username && !t.contains(username) && !t.isFull() && t.getState() === T_STARTING){
                 res.push(getMasked(t));
             }
         });
@@ -463,9 +511,10 @@ function tournamentRoute (fastify, options) {
             if (tournament.getSize() === 0){
                 tournaments.splice(tournaments.indexOf(tournament));
             }
-            // if (tournament.hasNextRound() && tournament.currentRoundIsFinished())
-            //     tournament.startNextRound();
-
+            if (tournament.hasNextRound() && tournament.currentRoundIsFinished())
+                tournament.startNextRound();
+            if (tournament.isFinished())
+                tournament.endTournament();
         });
     }, 30);
 }
