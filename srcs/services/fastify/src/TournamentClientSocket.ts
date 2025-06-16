@@ -11,7 +11,7 @@ export class TournamentClientSocket{
     private view : TournamentController = null;
     protected tournament : Tournament = null;
 
-    // no tournament historic, maybe a button to filter histo matches ?
+    // tournament historic on the same page, maybe a button to filter histo matches ?
     constructor(username : string, view : TournamentController, tournament : Tournament){
         this.username = username;
         this.tournament = tournament;
@@ -70,6 +70,10 @@ export class TournamentClientSocket{
         this.ws.send(JSON.stringify({
             type: "start"
         }));
+    }
+
+    finishGame(){
+
     }
 
     close(){

@@ -216,6 +216,9 @@ export class TournamentController {
         this.print_tournament_page();
     }
 
+    finishGame(){
+        
+    }
     /**
      * VIEW METHODS
      * 

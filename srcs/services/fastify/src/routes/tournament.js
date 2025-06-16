@@ -1,4 +1,6 @@
 import Fastify from 'fastify';
+import * as gameRoute from "./gameRoute.js";
+
 
 const TOURNAMENT_SIZE = 8;
 
@@ -30,8 +32,9 @@ function    calculateNbBrackets(nb_p){
 
 // States used for the tournament itself and it's games
 const T_STARTING = 0;
-const T_ON_GOING = 1;
-const T_FINISHED = 2;
+const T_READY = 1;
+const T_ON_GOING = 2;
+const T_FINISHED = 3;
 
 class Tournament{
     current_round = 0;
@@ -41,6 +44,7 @@ class Tournament{
         this.name = name;
         this.owner = owner;
         this.players = []; // Objects : {username, socket, bracket_starting_pos}
+        // Is a map for players better ?
         this.brackets = []; // Array of unordered lists of Objects : {game_id, players(p1, p2), state(STARTING || ON GOING || FINISHED)}
         this.state = T_STARTING;
     }
@@ -82,16 +86,25 @@ class Tournament{
         return (true);
     }
 
-    hasNextRound(){ // not useful ?
-        return (false);
-    }
-
     currentRoundIsFinished(){
         if (this.state === T_STARTING)
             return (false);
         for (let i = 0 ; i < this.brackets[this.current_round].length ; i++){
             if (this.brackets[this.current_round][i].state !== T_FINISHED)
                 return (false);
+        }
+        return (true);
+    }
+    
+    // Tell whether the current round can be started
+    isRoundReadyToStart(){
+        let round = this.brackets[this.current_round];
+        if (round === null || round === undefined)
+            return (false);
+        for (let i = 0 ; i < round.length ; i++){
+            if (round[i].state !== T_READY){
+                return (false);
+            }
         }
         return (true);
     }
@@ -157,27 +170,25 @@ class Tournament{
         return (false);
     }
 
-    //Each player has a place randomly attributed at the start, that's used to know their position in the bracket
+    /**
+     * Initialize the first round
+     * Each player has a random position given
+     */
     startTournament(){
         console.log("Starting tournament");
-        // Initialzing the first round
         this.state = T_ON_GOING;
-        let bracket_pile = initBracket(this.players.length);
-        // this.players.forEach(player => {
-        //     player.bracket_starting_pos = bracket_pile.pop();
-        // });
-        console.log("Tournament will start\nRandom pos are :");
-        // console.log(this.players);
 
+        console.log("Tournament will start\nRandom pos are :");
         this.brackets.length = calculateNbBrackets(this.players.length);
+
         console.log("Len of brakcets : ");
         console.log(this.brackets.length);
-        let next;
+        
         this.brackets[0] = [];
+        let bracket_pile = initBracket(this.players.length);
+        let next;
         while (bracket_pile.length > 0){
             next = bracket_pile.pop();
-            // console.log("next");
-            // console.log(next);
             let p1 = this.players[next - 1];
             if (bracket_pile.length === 0){
                 this.brackets[0].push({game_id : -1, players : [p1.username, null], state : T_FINISHED});
@@ -190,10 +201,6 @@ class Tournament{
             // console.log("players : " + p1.username + " | " + p2["username"]);
             this.brackets[0].push({game_id : -1, players : [p1.username, p2.username], state : T_STARTING});
         }
-        // Bracket 0, 1, 2
-        // b[0] = [m1, m2, mx];
-        // b[1] = [m1, m2, mx];
-        // b[2] = [m1, m2, mx];
         // mx = {game_id, players (username1, username2), state}; 
         // On ajoute directement au rang suivant on win ? 
 
@@ -202,8 +209,26 @@ class Tournament{
         // the tournament is handled by the interval
     }
 
-    startNextRound(){
+    startRound(){
+        // Create games for each user in a match
+        console.log("Starting a round");
+        if (this.brackets === undefined || this.brackets[this.current_round] === undefined)
+            console.log("error : the round we want to start is null or undefined");
+        this.brackets[this.current_round].forEach(match => {
+            console.log("Starting a tournament match !");
+            console.log(match);
+            if (match.players[1] === null){
+                console.log("No opponent");
+            } else {
+                console.log("starting :");
+                // gameRoute.createGame(match.players[0], match.players[1]);
+            }
+            match.state = T_ON_GOING;
+        });
+    }
 
+    initNextRound(){
+        
     }
 };
 
@@ -351,10 +376,10 @@ function tournamentRoute (fastify, options) {
                 console.error('Invalid JSON:', data.toString());
                 return; // maybe send a mesg to client instead
             }
-            console.log("Recv message :");
+            console.log("Recv message type :");
             console.log(message.type);
             if (message.type === "start"){
-                console.log("Starting tournament ??");
+                // console.log("Starting tournament");
                 if (!t.isReadyToStart()){
                     socket.send(JSON.stringify({
                         type: "error",
@@ -363,7 +388,6 @@ function tournamentRoute (fastify, options) {
                 }
                 t.startTournament();
             } else if (message.type === "match_started"){
-                t.
                 updateTournament(t);
             } else if (message.type === "match_finished"){
                 //Clients telling match is finished, we need both approval
@@ -531,8 +555,10 @@ function tournamentRoute (fastify, options) {
             }
             if (tournament.isFinished())
                 tournament.endTournament();
-            if (tournament.currentRoundIsFinished())
-                tournament.startNextRound();
+            else if (tournament.isRoundReadyToStart()){
+                tournament.startRound();
+            } else if (tournament.currentRoundIsFinished())
+                tournament.initNextRound();
         });
     }, 30);
 }
