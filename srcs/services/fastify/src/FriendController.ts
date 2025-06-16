@@ -18,7 +18,10 @@ export class FriendController {
         this.ws = ws;
 
         this.initFriendlist();
+        this.addEvents();
     }
+
+    setUsername(username: string) { this.username = username; }
 
     async initFriendlist() {
         try {
@@ -27,12 +30,13 @@ export class FriendController {
             });
 
             const data = await response.json();
-
+            console.log(data);
             if (!data.success) {
                 throw(Error(data.error));
             } else {
-                for (let user of data.friends)
+                for (let user of data.friends) {
                     this.addFriend(user.username, user.pp);
+                }
             }
         } catch (error) {
             alert(error);
@@ -63,7 +67,7 @@ export class FriendController {
         img.className = "rounded-full";
         img.style.width = "7%";
 
-        span.className = "flex w-3 h-3 me-3 bg-red-500 rounded-full";
+        span.className = "flex w-3 h-3 me-3 bg-green-500 rounded-full";
 
         p.className = 'text-lg';
         p.textContent = username.length > 10 ? username.substring(0,8)+"..":username;

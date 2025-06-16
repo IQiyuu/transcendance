@@ -1,5 +1,7 @@
 // import {Game} from "./pong.js";
 
+import { FriendController } from "./FriendController.js";
+
 /**
  * Class used for connected client
  */
@@ -9,6 +11,8 @@ export class ClientSocket{
     private user_id : number = -1;
     private view_site;
     private view_profile;
+
+    private friends: FriendController = null;
 
     // protected game : Game = null;
 
@@ -23,6 +27,10 @@ export class ClientSocket{
 
     get_username(){
         return (this.username);
+    }
+
+    setFriend(friend: FriendController) {
+        this.friends = friend;
     }
 
     // async isLoggedIn() { // maybe useless, as I copied it to controller
@@ -75,9 +83,9 @@ export class ClientSocket{
                 const dot = div.getElementsByTagName("span")[0];
                 dot.classList.replace("bg-green-500", "bg-red-500");
             } else if (data.type == "addFriend") {
-                // addFriend(data.user, data.pp);
+                this.friends.addFriend(data.user, data.pp);
             } else if (data.type == "removeFriend") {
-                // removeFriend(data.user);
+                this.friends.removeFriend(data.user);
             }
         };
 
