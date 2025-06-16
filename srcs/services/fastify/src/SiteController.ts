@@ -1,8 +1,10 @@
 import {ClientSocket} from "./ClientSocket.js";
+import { LangController } from "./LangContoller.js";
 import {GameClientSocket} from "./GameClientSocket.js";
 // import {Game} from "./pong.js";
 import {GameController} from "./pong.js";
 import {TournamentController} from "./TournamentController.js";
+import { FriendController } from "./FriendController.js";
 
 export class   ProfileController{
 
@@ -185,7 +187,6 @@ export class   ProfileController{
 export class SiteController{
 
     //Controller attributes
-    private lang_file = null;
     private isRegisterMode = false;
     private ws : ClientSocket = null;
     private username : string;
@@ -193,6 +194,8 @@ export class SiteController{
     private game : GameController = null;
     private tournament : TournamentController = null;
     private profile: ProfileController = null;
+    private lang: LangController = null;
+    private friends: FriendController = null;
 
     //  View attributes
     private title_link = document.getElementById("game_title");
@@ -210,52 +213,37 @@ export class SiteController{
     private tournament_create_btn = document.getElementById("tournament_create_button");
     private tournament_join_btn = document.getElementById("tournament_join_button");
     private about_btn = document.getElementById("about_button");
+    private logout_btn = document.getElementById("logout_btn");
 
-    constructor(lang){
-        this.lang_file = lang;
-        this._load_lang(lang);
+    private tmp_btn = document.getElementById("tmp_create");
 
+    constructor(){
         this.profile = new ProfileController(this);
         this.game = new GameController(this);
         this.tournament = new TournamentController(this);
     }
 
-    getLang(){
-        return this.lang_file;
+    async initLang() {
+        if (await this.is_logged())
+            this.connect();
+
+        this.lang = new LangController(this.username);
+        
+        this.print_current_page();
     }
 
     getText(key: string){
-        return this.lang_file[key];
+        return this.lang.getFile()[key];
     }
 
     /**
      * CONTROLLER
      */
-
-    //Menu
-    _load_lang(lang){
-        document.getElementById('form-title').textContent = lang['connexion_title'];
-        document.querySelector("label[for='username']").textContent = lang['username'];
-        document.querySelector("label[for='password']").textContent = lang['password'];
-        document.getElementById('register-view').textContent = lang['register_text'];
-        document.getElementById('game_title').textContent = lang['title'];
-        document.getElementById('div_title').textContent = lang['change_pp'];
-        document.getElementById('login_btn').textContent = lang['connexion_title'];
-        document.getElementById('offline').textContent = lang['play_local'];
-        document.getElementById('matchmaking').textContent = lang['play_online'];
-        document.getElementById('tournament_button').textContent = lang['tournament'];
-        document.getElementById('profile_button').textContent = lang['profile'];
-        document.getElementById('upload_btn').textContent = lang['upload_txt'];
-        document.getElementById('about_button').textContent = lang['about'];
-        document.getElementById('friend_text').textContent = lang['friends'];
-        document.getElementById('histo_text').textContent = lang['historique'];
-        (document.getElementById('search_player_in') as HTMLInputElement).placeholder = lang['search'];
-    }
-
     add_events(){
         // Register/login page
         this.register_link.addEventListener("click", (event) => {
             event.preventDefault();
+            const lang = this.lang.getFile();
 
             const formTitle = document.getElementById("form-title");
             const registerLink = document.getElementById("register-view"); //link for swapping register/login
@@ -263,21 +251,44 @@ export class SiteController{
 
             this.isRegisterMode = !this.isRegisterMode;
             if (this.isRegisterMode) {
-                formTitle.textContent = this.lang_file["register_title"];
-                registerLink.textContent = this.lang_file["connexion_text"];
-                logginBtn.textContent = this.lang_file["register_title"];
+                formTitle.textContent = lang["register_title"];
+                registerLink.textContent = lang["connexion_text"];
+                logginBtn.textContent = lang["register_title"];
     
             } else {
-                formTitle.textContent = this.lang_file["connexion_title"];
-                registerLink.textContent = this.lang_file["register_text"];
-                logginBtn.textContent = this.lang_file["connexion_title"];
+                formTitle.textContent = lang["connexion_title"];
+                registerLink.textContent = lang["register_text"];
+                logginBtn.textContent = lang["connexion_title"];
+            }
+        });
+
+        this.tmp_btn.addEventListener("click", async (event) => {
+            event.preventDefault();
+
+            const body = { 
+                username: "test",
+                password: "test",
+            };
+            try {
+                const response = await fetch("register", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(body),
+                });
+                
+                const data = await response.json();
+                
+
+                if (!data.success)
+                    throw(Error("Cannot create the user test"));
+            } catch (error) {
+                alert(error);
             }
         });
 
         // Register/login form validation
         this.login_form.addEventListener("submit", async (event) => {
             event.preventDefault();
-            
             const username = document.getElementById("username") as HTMLInputElement;
             const password = document.getElementById("password") as HTMLInputElement;
             
@@ -300,18 +311,18 @@ export class SiteController{
                 // console.log("Réponse du serveur :", data);
                 
                 if (data.success) {
-                    this.connect(data.username);
+                    this.username = data.username;
+                    this.connect();
                     // this.ws.print_info();
 
                 } else {
                     const error = document.getElementById("errorAuth") as HTMLParagraphElement;
-                    error.textContent = this.lang_file[data.message];
+                    error.textContent = this.lang.getFile()[data.message];
                     error.classList.replace("hidden", "block");
-                    console.log("Auth error");
+                    throw(Error(data.error));
                 }
             } catch (error) {
-                console.error("error ", error);
-                alert("Une erreur est survenue.");
+                alert(error);
             }
         });
 
@@ -345,23 +356,35 @@ export class SiteController{
             this.print_tournament_btns();
         });
 
+
+        this.logout_btn.addEventListener("click", async (event) => {
+            event.preventDefault();
+
+            const response = await fetch("/logout", {
+                method: "POST",
+            });
+            sessionStorage.clear();
+            
+            document.getElementById("site").classList.replace("block", "hidden");
+            document.getElementById("login-form").classList.replace("hidden", "flex");
+            document.body.classList.add("justify-center", "align-center", "flex");
+        });
+
 		//Registering children events
         this.game.addEvents();
         this.profile.addEvents();
         this.tournament.addEvents();
+        this.lang.addEvents();
     }
 
     async is_logged(){
-        if (sessionStorage != null && sessionStorage.getItem("username") === null)
-            return (false);
         try {
             const response = await fetch('/protected', {
                 method: 'GET',
                 credentials: 'include'
             });
-    
             const data = await response.json();
-
+            this.username = data.username
             return (response.ok === true && data.success === true);
         } catch (error) {
             return (false);
@@ -372,13 +395,15 @@ export class SiteController{
         sessionStorage.setItem('username', username);
     }
 
-    connect(username){
-        this.username = username;
-        this.ws = new ClientSocket(username, this, this.profile);
-        this.game.setUsername(username);
-        this.profile.setUsername(username);
-        this.tournament.setUsername(username);
-        this.store_session(username);
+    connect(){
+        this.ws = new ClientSocket(this.username, this, this.profile);
+        this.friends = new FriendController(this.username, this.lang, this.ws);
+        this.ws.setFriend(this.friends);
+        this.game.setUsername(this.username);
+        this.profile.setUsername(this.username);
+        this.tournament.setUsername(this.username);
+        this.friends.setUsername(this.username);
+        this.store_session(this.username);
 
         console.log("Connected, client socket :");
         console.log(this.ws);

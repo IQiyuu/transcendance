@@ -2,38 +2,10 @@ import {SiteController} from "./SiteController.js";
 
 // import * as utils from "./utils.js";
 
-async function load_lang_file(lang="fr") {
-    let lang_file;
-    try {
-        const file = await fetch(`/assets/locales/${lang}/translation.json`);
-        if (file == null)
-            throw (Error("Lang file wasnt fetched"));
-        lang_file = await file.json();
-        if (lang_file == null)
-            throw (Error("Not parsed"));
-    } catch (error) {     
-        console.error("ERROR : Lang files could not be parsed, en will be set by default");
-        console.log("LOG : Lang files could not be parsed, en will be set by default");
-        lang_file = {
-            "title" : "Trong the game",
-            "username": "Username",
-            "password": "Password",
-            "register_text": "Register"
-        }
-    }
-    return lang_file;
-}
-
 async function main(){
-    let lang_file = await load_lang_file("en");
-    let view = new SiteController(lang_file);
-    
+    let view = new SiteController();
+    await view.initLang();
     view.add_events();
-
-    if (await view.is_logged())
-        view.connect(sessionStorage.username);
-
-    view.print_current_page();
 }
 
 await main();

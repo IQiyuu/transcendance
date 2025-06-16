@@ -99,6 +99,14 @@ async function logginRoute (fastify, options) {
     }
   };
 
+  // logout route
+  fastify.post('/logout', {
+    preHandler: isAuthenticated,
+  }, async (req, rep) => {
+    rep.clearCookie('auth_token');
+    rep.send({success: true});
+  });
+
   // Check whether the user is connected
   fastify.get('/protected', {
     preHandler: isAuthenticated,
