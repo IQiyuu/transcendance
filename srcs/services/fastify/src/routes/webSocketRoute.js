@@ -17,11 +17,11 @@ async function websocketRoute(fastify, options) {
 
     function getFriendList(user) {
         return db.prepare(`
-            SELECT users.username
+            SELECT users.username as username
             FROM users
             JOIN friends 
               ON users.user_id = friends.user_id OR users.user_id = friends.friend_id
-            WHERE users.user_id != ?
+            WHERE users.username != ?
               AND friends.status = 'accepted'
         `).all(user);
     }
@@ -43,7 +43,6 @@ async function websocketRoute(fastify, options) {
             
             function sendInfosFriends(socket, username, type) {
                 const friendlist = getFriendList(username);
-            
                 for (let friend of friendlist) {
                     const friendSocket = connectedClients.get(friend.username);
             

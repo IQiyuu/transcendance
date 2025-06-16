@@ -17,20 +17,21 @@ export class ClientSocket{
     // protected game : Game = null;
 
     // constructor(username, view_site, view_profile, view_friends){
-    constructor(username, view_site, view_profile){
+    constructor(username){
         this.username = username;
         this.ws = new WebSocket(`wss://${window.location.host}/ws?username=${this.username}`);
-        this.set_socket();
-        this.view_site = view_site;
-        this.view_profile = view_profile;
     }
 
     get_username(){
         return (this.username);
     }
 
-    setFriend(friend: FriendController) {
+    async setFriend(friend: FriendController, view_site, view_profile) {
+        await this.set_socket();
+        this.view_site = view_site;
+        this.view_profile = view_profile;
         this.friends = friend;
+        this.friends.initFriendlist();
     }
 
     // async isLoggedIn() { // maybe useless, as I copied it to controller
@@ -57,14 +58,14 @@ export class ClientSocket{
     //     }
     // }
 
-    set_socket(){
+    async set_socket(){
         this.ws.onopen = (event) => {
             console.log("Auth connected");
             // this.view_profile.updateProfile();
         }
         
         this.ws.onmessage = (message) => {
-            console.log("msg recu");
+            console.log("msg recu: ", message);
             const data = JSON.parse(message.data);
             if (data === null)
                 return ; // ERROR
@@ -89,9 +90,8 @@ export class ClientSocket{
             }
         };
 
-        this.ws.onclose = (event) => {
-            // console.log("Closing client " + this.username);
-            // Maybe we neeed to say bye to the server ?
+        this.ws.onclose = () => {
+            //
         }
 
     }

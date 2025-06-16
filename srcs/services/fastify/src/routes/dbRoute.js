@@ -280,7 +280,6 @@ async function dbRoute (fastify, options) {
     fastify.get('/db/friends/friendlist/:username', async (request, reply) => {
         try {
             const userId = getIdFromUsername(request.params.username);
-
             const friendlist = getFriendList(userId);
             reply.send({ success: true, friends: friendlist });
         } catch (error) {
