@@ -7,12 +7,12 @@ function randomIntFromInterval(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
-// Return a random partition of position for a tournament bracket
+// Return a random partition of order for a tournament bracket
 function    initBracket(size){
     let nbs = [];
     let x;
     let i = 0;
-    while (i < size){ // Soit on genre de 1 a T_SIZE, puis on gere avec le getNextROubd(nombre croissants), soit on gere avec des nombre de 1 a nb_joueurs
+    while (i < size){
         x = randomIntFromInterval(1, size);
         // console.log("random number generated : " + x.toString());
         if (!nbs.includes(x)){
@@ -31,16 +31,17 @@ function    calculateNbBrackets(nb_p){
 // States used for the tournament itself and it's games
 const T_STARTING = 0;
 const T_ON_GOING = 1;
-const T_ENDED = 2;
+const T_FINISHED = 2;
 
 class Tournament{
+    current_round = 0;
 
     constructor(owner, id, name){
         this.id = id;
         this.name = name;
         this.owner = owner;
         this.players = []; // Objects : {username, socket, bracket_starting_pos}
-        this.brackets = []; // Unordered lists of Objects : {round, game_id, players(p1, p2), state(STARTING || ON GOING || ENDED)}
+        this.brackets = []; // Array of unordered lists of Objects : {game_id, players(p1, p2), state(STARTING || ON GOING || FINISHED)}
         this.state = T_STARTING;
     }
 
@@ -81,16 +82,22 @@ class Tournament{
         return (true);
     }
 
-    hasNextRound(){ // not usefull ?
+    hasNextRound(){ // not useful ?
         return (false);
     }
 
     currentRoundIsFinished(){
-        return (false);
+        if (this.state === T_STARTING)
+            return (false);
+        for (let i = 0 ; i < this.brackets[this.current_round].length ; i++){
+            if (this.brackets[this.current_round][i].state !== T_FINISHED)
+                return (false);
+        }
+        return (true);
     }
 
     isFinished(){
-        return (false);
+        return (this.state === T_FINISHED);
     }
 
     addPlayer(player) {
@@ -156,30 +163,41 @@ class Tournament{
         // Initialzing the first round
         this.state = T_ON_GOING;
         let bracket_pile = initBracket(this.players.length);
-        this.players.forEach(player => {
-            player.bracket_starting_pos = bracket_pile.pop();
-        });
+        // this.players.forEach(player => {
+        //     player.bracket_starting_pos = bracket_pile.pop();
+        // });
         console.log("Tournament will start\nRandom pos are :");
-        console.log(this.players);
+        // console.log(this.players);
 
         this.brackets.length = calculateNbBrackets(this.players.length);
         console.log("Len of brakcets : ");
         console.log(this.brackets.length);
-        // BRacket 0, 1, 2
+        let next;
+        this.brackets[0] = [];
+        while (bracket_pile.length > 0){
+            next = bracket_pile.pop();
+            // console.log("next");
+            // console.log(next);
+            let p1 = this.players[next - 1];
+            if (bracket_pile.length === 0){
+                this.brackets[0].push({game_id : -1, players : [p1.username, null], state : T_FINISHED});
+                break ;
+            }
+            console.log(next);
+            next = bracket_pile.pop();
+            let p2 = this.players[next - 1];
+            // console.log("players : " + p1.toString() + " | " + p2.toString());
+            // console.log("players : " + p1.username + " | " + p2["username"]);
+            this.brackets[0].push({game_id : -1, players : [p1.username, p2.username], state : T_STARTING});
+        }
+        // Bracket 0, 1, 2
         // b[0] = [m1, m2, mx];
         // b[1] = [m1, m2, mx];
         // b[2] = [m1, m2, mx];
         // mx = {game_id, players (username1, username2), state}; 
         // On ajoute directement au rang suivant on win ? 
-        // this.players.forEach(player => {
-        //     // console.log(typeof Math.floor(player.bracket_pos / 2));
-        //     let el = this.brackets.at(Math.floor(player.bracket_pos / 2));
-        //     if (el === undefined)
-        //         this.brackets.at(Math.floor(player.bracket_pos / 2)) = {round : 0, game_id : -1, players : [player.username, -1], state : T_STARTING};
-        //     else 
-        //         el.players[1] = player.username;
-        // });
-        console.log("List of matchs :");
+
+        console.log("List of matchs (to recheck with more players) :");
         console.log(this.brackets);
         // the tournament is handled by the interval
     }
@@ -511,10 +529,10 @@ function tournamentRoute (fastify, options) {
             if (tournament.getSize() === 0){
                 tournaments.splice(tournaments.indexOf(tournament));
             }
-            if (tournament.hasNextRound() && tournament.currentRoundIsFinished())
-                tournament.startNextRound();
             if (tournament.isFinished())
                 tournament.endTournament();
+            if (tournament.currentRoundIsFinished())
+                tournament.startNextRound();
         });
     }, 30);
 }
