@@ -48,6 +48,9 @@ export class TournamentClientSocket{
                 console.log("Tournament will start in a few moments");
                 this.view.updateTournament(data.tournament);
                 this.view.print_tournament();
+            } else if (data.type === "new_match"){
+                console.log("Creating a new tournament match");
+                this.view;
             } else if (data.type === "finished"){
                 console.log("Tournament is finished !");
             } else if (data.type === "error"){

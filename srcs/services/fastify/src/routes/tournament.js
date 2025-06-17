@@ -180,9 +180,6 @@ class Tournament{
 
         console.log("Tournament will start\nRandom pos are :");
         this.brackets.length = calculateNbBrackets(this.players.length);
-
-        console.log("Len of brakcets : ");
-        console.log(this.brackets.length);
         
         this.brackets[0] = [];
         let bracket_pile = initBracket(this.players.length);
@@ -191,7 +188,7 @@ class Tournament{
             next = bracket_pile.pop();
             let p1 = this.players[next - 1];
             if (bracket_pile.length === 0){
-                this.brackets[0].push({game_id : -1, players : [p1.username, null], state : T_FINISHED});
+                this.brackets[0].push({game_id : -1, players : [p1.username, null], state : T_READY});
                 break ;
             }
             console.log(next);
@@ -199,7 +196,7 @@ class Tournament{
             let p2 = this.players[next - 1];
             // console.log("players : " + p1.toString() + " | " + p2.toString());
             // console.log("players : " + p1.username + " | " + p2["username"]);
-            this.brackets[0].push({game_id : -1, players : [p1.username, p2.username], state : T_STARTING});
+            this.brackets[0].push({game_id : -1, players : [p1.username, p2.username], state : T_READY});
         }
         // mx = {game_id, players (username1, username2), state}; 
         // On ajoute directement au rang suivant on win ? 
@@ -218,12 +215,13 @@ class Tournament{
             console.log("Starting a tournament match !");
             console.log(match);
             if (match.players[1] === null){
-                console.log("No opponent");
+                console.log("No opponent, to impl");
+                match.state = T_FINISHED;
             } else {
                 console.log("starting :");
-                // gameRoute.createGame(match.players[0], match.players[1]);
+                gameRoute.createGame(match.players[0], match.players[1]);
+                match.state = T_ON_GOING;
             }
-            match.state = T_ON_GOING;
         });
     }
 

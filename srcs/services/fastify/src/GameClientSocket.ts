@@ -12,9 +12,13 @@ export class GameClientSocket{
     private should_search : boolean = false;
     private should_start_solo : boolean = false;
 
-    constructor(username, game){
+    constructor(username : string, game : any);
+    constructor(username : string, game : any, tournament ?: any){
         this.username = username;
+        // if (!tournament)
         this.ws = new WebSocket(`wss://${window.location.host}/game/ws?username=${this.username}`);
+        // else
+        //     this.ws = new WebSocket();
         if (this.ws.readyState === this.ws.CLOSED || this.ws.readyState === this.ws.CLOSING){
             //error handling to do !
             alert("ERROR WHILE CREAtING GAMESOCKET");
@@ -23,6 +27,7 @@ export class GameClientSocket{
         this.game = game;
         this.setSocket();
     }
+
 
     get_username(){
         return (this.username);

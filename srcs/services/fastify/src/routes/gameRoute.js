@@ -324,7 +324,7 @@ export async function gameRoute (fastify, options) {
 
                             playing_clients.set(socket, new_game_id);
                             playing_clients.set(second_player_socket, new_game_id);
-                            waiting_clients.delete(second_player_name);
+                            waiting_clients.delete(second_player_name); // poping user before creating the game is better in an async env
                         }
                         else{
                             waiting_clients.set(message.username, socket);
@@ -337,6 +337,8 @@ export async function gameRoute (fastify, options) {
                         });
                         socket.close();
                     }
+                } else if (message.type === "tournament"){
+                    console.log("tournament msg");
                 }
             })
 
