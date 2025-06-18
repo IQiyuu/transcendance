@@ -225,6 +225,9 @@ export class   GameController{
         document.removeEventListener("keydown", this.key_handler)
         clearInterval(this.interval_id);
         this.hide_game();
+        // if (false){ // game is from a tournament
+        //     this.tournament.finishGame();
+        // }
         this.print_end_game();
     }
 

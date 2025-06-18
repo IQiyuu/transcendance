@@ -6,7 +6,7 @@
 #    By: ggiboury <ggiboury@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/22 15:00:40 by ggiboury          #+#    #+#              #
-#    Updated: 2025/06/13 16:55:01 by ggiboury         ###   ########.fr        #
+#    Updated: 2025/06/16 15:05:45 by ggiboury         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -111,7 +111,7 @@ $(VOLUME_DATABASE): | $(VOLUME)
 	mkdir -p $(VOLUME_DATABASE)
 	
 $(VOLUME_DATABASE_FILES): | $(VOLUME_DATABASE)
-	if [ -e $(SRCS_DB) ] ; then \
+	@if [ -e $(SRCS_DB) ] ; then \
 		@cp $(SRCS_DB) $(VOLUME_DATABASE_FILES); \
 	fi
 

@@ -1,5 +1,6 @@
 import fs from 'fs';
 
+//To put in utils.js
 function randomIntFromInterval(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
@@ -297,9 +298,6 @@ export async function gameRoute (fastify, options) {
                 } else if (message.type === "game_update"){
                     let game = games[message.game_id];
                     movePaddle(game, message.side, message.move_up);
-
-                    // if (newY > 15 && newY < BOARD_H - 15)
-                    //     game.paddles[message.side].y = newY;
                 } else if (message.type === "matchmaking"){
                     if (message.state === "join"){
                         console.log("A player is joining matchmaking");
@@ -326,26 +324,31 @@ export async function gameRoute (fastify, options) {
 
                             playing_clients.set(socket, new_game_id);
                             playing_clients.set(second_player_socket, new_game_id);
-                            waiting_clients.delete(second_player_name);
+                            waiting_clients.delete(second_player_name); // poping user before creating the game is better in an async env
                         }
                         else{
                             waiting_clients.set(message.username, socket);
                         }
                     } else if (message.state === "leave"){
                         console.log("A player is leaving matchmaking");
-                        // if (isValid)
                         waiting_clients.forEach((sck, username) => {
                             if (sck === socket)
                                 waiting_clients.delete(username);
                         });
                         socket.close();
                     }
+                } else if (message.type === "tournament"){
+                    console.log("tournament msg");
                 }
             })
 
             socket.on('close', (event) => {
                 //If game is active, tell users the game is over
-
+                // if (isPlaying){
+                //     endGame
+                //     tellOpponent
+                //     saveGame
+                // }
                 //At least, closing properly and removing from maps
                 console.log("Closing  socket");
                 // console.log(socket);
@@ -359,9 +362,6 @@ export async function gameRoute (fastify, options) {
     });
 
 
-    // fastify.register(async function (fastify) {
-    //     // Gere le matchmaking et la deconnexion en pleine partie (Le deconnecte perd automatiquement)
-    //     // marche en socket
     //     fastify.get('/matchmaking', { websocket: true }, (socket, req) => {
 
     //         if (waiting_list && w_uname != req.query.username) {
