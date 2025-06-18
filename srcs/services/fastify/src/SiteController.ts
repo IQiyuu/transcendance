@@ -282,6 +282,7 @@ export class SiteController{
                 if (!data.success)
                     throw(Error("Cannot create the user test"));
             } catch (error) {
+                console.log("tmp btn");
                 alert(error);
             }
         });
@@ -322,6 +323,7 @@ export class SiteController{
                     throw(Error(data.error));
                 }
             } catch (error) {
+                console.log("initFriendList");
                 alert(error);
             }
         });
@@ -396,13 +398,13 @@ export class SiteController{
     }
 
     connect(){
-        this.ws = new ClientSocket(this.username, this, this.profile);
-        this.friends = new FriendController(this.username, this.lang, this.ws);
-        this.ws.setFriend(this.friends);
+        console.log("ICI+"+this.username);
+        this.ws = new ClientSocket(this.username);
+        
         this.game.setUsername(this.username);
         this.profile.setUsername(this.username);
         this.tournament.setUsername(this.username);
-        this.friends.setUsername(this.username);
+
         this.store_session(this.username);
 
         console.log("Connected, client socket :");
@@ -411,6 +413,9 @@ export class SiteController{
         this.hide_register_page();
         document.body.classList.remove("justify-center", "align-center", "flex");
         this.print_main_page();
+        this.friends = new FriendController(this.username, this.lang, this.ws);
+        this.ws.setFriend(this.friends, this, this.profile);
+        this.friends.setUsername(this.username);
     }
 
     /**

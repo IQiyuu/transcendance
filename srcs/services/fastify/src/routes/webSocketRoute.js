@@ -17,11 +17,11 @@ async function websocketRoute(fastify, options) {
 
     function getFriendList(user) {
         return db.prepare(`
-            SELECT users.username
+            SELECT users.username as username
             FROM users
             JOIN friends 
-              ON users.user_id = friends.user_id OR users.user_id = friends.friend_id
-            WHERE users.user_id != ?
+              ON users.user_id = friends.user_id
+            WHERE users.username != ?
               AND friends.status = 'accepted'
         `).all(user);
     }
@@ -43,7 +43,6 @@ async function websocketRoute(fastify, options) {
             
             function sendInfosFriends(socket, username, type) {
                 const friendlist = getFriendList(username);
-            
                 for (let friend of friendlist) {
                     const friendSocket = connectedClients.get(friend.username);
             
@@ -89,13 +88,7 @@ async function websocketRoute(fastify, options) {
                     console.error('Invalid JSON:', rawMessage.toString());
                     return;
                 }
-                if (data.type === 'chat') {
-                    broadcast({
-                        type: 'chat',
-                        sender: username,
-                        message: data.message
-                    });
-                } if (data.type === 'addFriend' || data.type === 'removeFriend') {
+                if (data.type === 'addFriend' || data.type === 'removeFriend') {
                     const targetSocket = connectedClients.get(data.target);
                     if (targetSocket) {
                         targetSocket.send(JSON.stringify(data));
@@ -141,10 +134,11 @@ async function websocketRoute(fastify, options) {
                         // console.log(games[gameId]);
                         delete gameRoute.games[gameId];
                     }
+                } else if (data.type == "initialized") {
+                    sendInfosFriends(socket, username, "connection");
                 }
             });
 
-            sendInfosFriends(socket, username, "connection");
             connectedClients.set(username, socket);
         });
     });

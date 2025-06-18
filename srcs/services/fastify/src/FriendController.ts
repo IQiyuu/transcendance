@@ -17,7 +17,6 @@ export class FriendController {
         this.lang = lang;
         this.ws = ws;
 
-        this.initFriendlist();
         this.addEvents();
     }
 
@@ -31,14 +30,26 @@ export class FriendController {
 
             const data = await response.json();
             console.log(data);
+            console.log(response);
             if (!data.success) {
                 throw(Error(data.error));
             } else {
                 for (let user of data.friends) {
+                    console.log(user);
                     this.addFriend(user.username, user.pp);
+                    this.ws.send(JSON.stringify({
+                        type: "connection",
+                        user: this.username,
+                        target: user,
+                    }));
                 }
             }
+            this.ws.send(JSON.stringify({
+                type: "initialized",
+                user: this.username
+            }));
         } catch (error) {
+            console.log("initFriendList");
             alert(error);
         }
     }

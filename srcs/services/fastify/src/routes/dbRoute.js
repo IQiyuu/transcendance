@@ -136,19 +136,25 @@ async function dbRoute (fastify, options) {
     }
 
     function getIdFromUsername(username) {
-        return db.prepare('SELECT user_id FROM users WHERE username = ?').get(username).user_id;
+        const data = db.prepare('SELECT user_id FROM users WHERE username = ?').get(username);
+        console.log(data, " ", username);
+        return data.user_id;
     }
 
     function getFriendList(user) {
         return db.prepare(`
             SELECT users.username as username, users.picture_path as pp
             FROM users
-            JOIN friends 
-              ON users.user_id = friends.user_id OR users.user_id = friends.friend_id
-            WHERE users.user_id != ?
-              AND friends.status = 'accepted'
-        `).all(user);
+            JOIN friends ON (
+                (friends.user_id = ? AND friends.friend_id = users.user_id)
+                OR
+                (friends.friend_id = ? AND friends.user_id = users.user_id)
+            )
+            WHERE friends.status = 'accepted'
+        `).all(user, user);
     }
+
+    // SELETCIONNER LE USERNAME ET LA PP DE USERS AVEC FRIENDS QUI A LE MEME ID (friend user ou friend friend) QUAND le user id c'est pas celui de l'utilisateur qui a fait la requete
 
     function getFriendRelation(user1, user2) {
         return db.prepare(`
@@ -280,7 +286,6 @@ async function dbRoute (fastify, options) {
     fastify.get('/db/friends/friendlist/:username', async (request, reply) => {
         try {
             const userId = getIdFromUsername(request.params.username);
-
             const friendlist = getFriendList(userId);
             reply.send({ success: true, friends: friendlist });
         } catch (error) {
