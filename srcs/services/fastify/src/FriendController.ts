@@ -44,6 +44,10 @@ export class FriendController {
                     }));
                 }
             }
+            this.ws.send(JSON.stringify({
+                type: "initialized",
+                user: this.username
+            }));
         } catch (error) {
             console.log("initFriendList");
             alert(error);

@@ -31,7 +31,6 @@ export class ClientSocket{
         this.view_site = view_site;
         this.view_profile = view_profile;
         this.friends = friend;
-        this.friends.initFriendlist();
     }
 
     // async isLoggedIn() { // maybe useless, as I copied it to controller
@@ -61,6 +60,7 @@ export class ClientSocket{
     async set_socket(){
         this.ws.onopen = (event) => {
             console.log("Auth connected");
+            this.friends.initFriendlist();
             // this.view_profile.updateProfile();
         }
         
