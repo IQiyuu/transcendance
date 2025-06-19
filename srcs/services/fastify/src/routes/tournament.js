@@ -225,6 +225,11 @@ class Tournament{
                 //Create the match
                 let g_id = gameRoute.createGame(match.players[0], match.players[1]);
                 console.log(match.players[0]);
+                let test = JSON.stringify({
+                    g_id: g_id,
+                    game: gameRoute.games[g_id]
+                });
+                console.log("Not the content");
                 match.players[0].socket.send(JSON.stringify({
                     g_id: g_id,
                     game: gameRoute.games[g_id]
@@ -312,9 +317,10 @@ function    existsTournament(tournaments, id){
     return (false);
 }
 
+let tournaments = [];
+let max_t_id = tournaments.length;
+
 function tournamentRoute (fastify, options) {
-    let tournaments = [];
-    let max_t_id = tournaments.length; // maybe get the max value of existing value ? 
 
     //Securising all private tournaments routes :
     fastify.addHook('preValidation', async (request, reply) => {

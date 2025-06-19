@@ -11,20 +11,21 @@ export class GameClientSocket{
     
     private should_search : boolean = false;
     private should_start_solo : boolean = false;
+    private match_id : number = undefined; // if this number is set, then its the game id we have to connect (context : tournament)
 
-    constructor(username : string, ctl : any);
-    constructor(username : string, ctl : any, tournament ?: any){
+    constructor(username : string, ctl : any, match_id ?: number){
         this.username = username;
-        if (!tournament)
-            this.ws = new WebSocket(`wss://${window.location.host}/game/ws?username=${this.username}`);
-        else
-            this.ws = new WebSocket(`wss://${window.location.host}/game/ws?username=${this.username}`); // HERE
+        this.ws = new WebSocket(`wss://${window.location.host}/game/ws?username=${this.username}`);
         if (this.ws.readyState === this.ws.CLOSED || this.ws.readyState === this.ws.CLOSING){
             //error handling to do !
             alert("ERROR WHILE CREATING GAMESOCKET");
             return ;
         }
         this.ctl = ctl;
+        if (match_id){
+            console.log("game creation socket tournament");
+            this.match_id = match_id;
+        }
         this.setSocket();
     }
 
@@ -47,6 +48,13 @@ export class GameClientSocket{
                     type: "create_game_offline",
                     username: this.username
                 }));
+            } else if (this.match_id){
+                this.ws.send(JSON.stringify({
+                    type : "tournament",
+                    state : "get_match",
+                    username : this.username,
+                    game_id : this.match_id
+                }))
             }
         }
         
