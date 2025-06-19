@@ -25,6 +25,7 @@ export class   ProfileController{
     private	search_inp = document.getElementById("search_player_in") as HTMLInputElement;
     private	friend_div = document.getElementById("friend_div");
     private	fa_btn = document.getElementById("fa_btn");
+    private	check_btn = document.getElementById("check_btn");
 	
     private	histo_list = document.getElementById("histo_list");
 
@@ -93,10 +94,16 @@ export class   ProfileController{
             if (this.profile_username == this.username)
                 this.camera_icon.classList.replace("opacity-60", "opacity-0");
         });
-        // Activate 2fa
+        // Activate Google authentificator
         this.fa_btn.addEventListener('click', async (event) => {
             event.preventDefault();
             window.open('/2fa', '42 AUTH');
+        });
+        
+        this.check_btn.addEventListener('click', async (event) => {
+            event.preventDefault();
+            window.open('/check', '42 AUTH');
+            
         });
 
     }
