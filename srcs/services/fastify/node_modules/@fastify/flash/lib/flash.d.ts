@@ -1,0 +1,8 @@
+type ReplyReturn = {
+    [k: string]: string[] | undefined;
+} | string[];
+export declare function flashFactory(): {
+    request(type: string, ...message: string[] | [string[]]): number;
+    reply(type?: string): ReplyReturn;
+};
+export {};
