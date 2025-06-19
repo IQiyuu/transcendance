@@ -179,6 +179,10 @@ export class   GameController{
         }
     }
 
+    startTournamentGame(game_id){
+        this.ws = new GameClientSocket(this.username, this, game_id);
+    }
+
     close(){
         this.stop_matchmaking_animation();
         if (this.ws !== null){

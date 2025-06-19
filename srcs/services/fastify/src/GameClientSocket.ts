@@ -7,24 +7,24 @@ export class GameClientSocket{
     private ws : WebSocket = null;
     private username : string;
 
-    protected game : GameController = null;
+    protected ctl : GameController = null;
     
     private should_search : boolean = false;
     private should_start_solo : boolean = false;
 
-    constructor(username : string, game : any);
-    constructor(username : string, game : any, tournament ?: any){
+    constructor(username : string, ctl : any);
+    constructor(username : string, ctl : any, tournament ?: any){
         this.username = username;
-        // if (!tournament)
-        this.ws = new WebSocket(`wss://${window.location.host}/game/ws?username=${this.username}`);
-        // else
-        //     this.ws = new WebSocket();
+        if (!tournament)
+            this.ws = new WebSocket(`wss://${window.location.host}/game/ws?username=${this.username}`);
+        else
+            this.ws = new WebSocket(`wss://${window.location.host}/game/ws?username=${this.username}`); // HERE
         if (this.ws.readyState === this.ws.CLOSED || this.ws.readyState === this.ws.CLOSING){
             //error handling to do !
             alert("ERROR WHILE CREATING GAMESOCKET");
             return ;
         }
-        this.game = game;
+        this.ctl = ctl;
         this.setSocket();
     }
 
@@ -56,30 +56,30 @@ export class GameClientSocket{
             if (message === null)
                 return ;            
             if (message.type === "game_info"){
-                this.game.updateState(message.game);
+                this.ctl.updateState(message.game);
             } else if (message.type === "matchmaking") {
                 console.log("Match found");
                 // console.log(message);
                 if (message.state === "found") {
-                    this.game.updateState(message.game);
+                    this.ctl.updateState(message.game);
                     let side = (message.game.players.left === this.username ? "left" : "right")
-                    this.game.setSide(side);
-                    console.log("side = " + this.game.getSide());
-                    this.game.stop_matchmaking_animation();
-                    this.game.gameInit();
-                    this.game.hide_all();
-                    this.game.hide_menu();
-                    this.game.print_play_page();
+                    this.ctl.setSide(side);
+                    console.log("side = " + this.ctl.getSide());
+                    this.ctl.stop_matchmaking_animation();
+                    this.ctl.gameInit();
+                    this.ctl.hide_all();
+                    this.ctl.hide_menu();
+                    this.ctl.print_play_page();
                 }
             } else if (message.type === "offline_game_created"){
-                this.game.updateState(message.game);
-                this.game.gameInit();
-                this.game.hide_all();
-                this.game.hide_menu();
-                this.game.print_play_page();
+                this.ctl.updateState(message.game);
+                this.ctl.gameInit();
+                this.ctl.hide_all();
+                this.ctl.hide_menu();
+                this.ctl.print_play_page();
             } else if (message.type === "game_finished"){
                 console.log("Game is finished");
-                this.game.finishGame();
+                this.ctl.finishGame();
                 this.ws.close();
             }
         };
@@ -87,7 +87,7 @@ export class GameClientSocket{
         this.ws.onclose = (event) => {
             console.log("closing socket");
             console.log(event);
-            this.game.close();
+            this.ctl.close();
         }
 
         this.ws.onerror = (event) => {

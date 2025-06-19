@@ -1,5 +1,6 @@
-import { TournamentClientSocket } from "./TournamentClientSocket.js";
 import { SiteController } from "./SiteController.js";
+import {GameController} from "./pong.js";
+import { TournamentClientSocket } from "./TournamentClientSocket.js";
 
 export class Tournament {
     private id : number = -1;
@@ -48,6 +49,7 @@ export class TournamentController {
     private site: SiteController = null;
     private username: string = null;
     private tournament: Tournament = null;
+    private game: GameController;
 
     /**VIEW */
     private tournament_page = document.getElementById("tournament_page");
@@ -60,14 +62,12 @@ export class TournamentController {
     private tournament_join_btn = document.getElementById("tournament_join_button");
     private tournament_rejoin_btn = document.getElementById("tournament_rejoin_button");
 
-// need to tell the client if a tournament created by him already exists
-// maybe the client send a fetch to check before creating the socket ?
 // Need to check (on page load) if the client has a tournament already present (maybe with the connection socket, UserSocket (profileSocket))
 
 // Need to handle if the tournament is disbanded
-    constructor(site) {
+    constructor(site : SiteController, game : GameController) {
         this.site = site;
-        // fetch to check if a tournament already exists
+        this.game = game;
         // this.checkTournament();
     }
 
@@ -181,8 +181,13 @@ export class TournamentController {
                                             this.clear_tournament();
                                             this.print_tournament_page();
                                             this.print_tournament();
-                                        } else
+                                        } else{
+                                            const T_DSNT_EXISTS = 999;
+                                            if (data.code === T_DSNT_EXISTS){
+                                                alert("This tournament doesnt exists");
+                                            }
                                             throw Error(data.error);
+                                        }
                                     } catch (error) {
                                         console.log(error);
                                     }
@@ -214,6 +219,10 @@ export class TournamentController {
         this.site.hide_all();
         this.print_tournament();
         this.print_tournament_page();
+    }
+
+    createMatch(game_id){
+
     }
 
     finishGame(){
@@ -340,7 +349,7 @@ export class TournamentController {
                 this.hide_all();
                 this.cws.close();
                 this.cws = null;
-                this.print_tournaments_page();
+                this.tournament_join_btn.dispatchEvent(new MouseEvent("click"));
             } else {
                 console.log("Didnt leave");
                 throw (Error(data.error));

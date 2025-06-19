@@ -35,6 +35,11 @@ const T_READY = 1;
 const T_ON_GOING = 2;
 const T_FINISHED = 3;
 
+function Player(username, socket){
+    this.username = username;
+    this.socket = socket;
+}
+
 class Tournament{
     current_round = 0;
 
@@ -42,7 +47,7 @@ class Tournament{
         this.id = id;
         this.name = name;
         this.owner = owner;
-        this.players = []; // Objects : {username, socket, bracket_starting_pos}
+        this.players = []; // Objects : {username, socket}
         // Is a map for players better ?
         this.brackets = []; // Array of unordered lists of Objects : {game_id, players(p1, p2), state(STARTING || ON GOING || FINISHED)}
         this.state = T_STARTING;
@@ -112,21 +117,20 @@ class Tournament{
         return (this.state === T_FINISHED);
     }
 
-    addPlayer(player) {
-        if (!this.isFull() && !this.contains(player))
-            this.players.push({username: player, socket: null});
-        // if (this.players.length >= 3)
-        //     this.isReadyToStart = true;
+    addPlayer(username) {
+        if (!this.isFull() && !this.contains(username))
+            this.players.push(new Player(username, null));
     }
 
     // Remove a player from the tournament. Also close the socket if it exists
-    removePlayer(player){
+    removePlayer(username){
         console.log("Trying to remove ");
-        console.log(player);
+        console.log(username);
+        console.log(this.players);
         let pos = -1;
-        this.players.forEach(tuple => {
-            if (tuple.username === player){
-                pos = this.players.indexOf(tuple);
+        this.players.forEach(player => {
+            if (player.username == username){
+                pos = this.players.indexOf(player);
             }
         });
         if (pos === -1){
@@ -140,29 +144,29 @@ class Tournament{
     }
 
     //Set the socket for a player
-    connectPlayer(player, socket){
-        this.players.forEach(tuple => {
-            if (tuple.username === player){
-                tuple.socket = socket;
+    connectPlayer(username, socket){
+        this.players.forEach(player => {
+            if (player.username === username){
+                player.socket = socket;
             }
         });
     }
 
     //Close the socket for a player
-    disconnectPlayer(player){
-        this.players.forEach(tuple => {
-            if (tuple.username === player){
-                if (tuple.socket !== null)
-                    tuple.socket.close();
-                tuple.socket = null;
+    disconnectPlayer(username){
+        this.players.forEach(player => {
+            if (player.username === username){
+                if (player.socket !== null)
+                    player.socket.close();
+                player.socket = null;
             }
         });
     }
 
-    contains(player){
+    contains(username){
         let i = 0, len = this.players.length;
         while (i < len){
-            if (this.players[i].username === player)
+            if (this.players[i].username === username)
                 return (true);
             i++;
         }
@@ -187,7 +191,7 @@ class Tournament{
             next = bracket_pile.pop();
             let p1 = this.players[next - 1];
             if (bracket_pile.length === 0){
-                this.brackets[0].push({game_id : -1, players : [p1.username, null], state : T_READY});
+                this.brackets[0].push({game_id : -1, players : [p1, null], state : T_READY});
                 break ;
             }
             console.log(next);
@@ -195,7 +199,7 @@ class Tournament{
             let p2 = this.players[next - 1];
             // console.log("players : " + p1.toString() + " | " + p2.toString());
             // console.log("players : " + p1.username + " | " + p2["username"]);
-            this.brackets[0].push({game_id : -1, players : [p1.username, p2.username], state : T_READY});
+            this.brackets[0].push({game_id : -1, players : [p1, p2], state : T_READY});
         }
         // mx = {game_id, players (username1, username2), state}; 
         // On ajoute directement au rang suivant on win ? 
@@ -205,7 +209,7 @@ class Tournament{
         // the tournament is handled by the interval
     }
 
-    startRound(){
+    async startRound(){
         // Create games for each user in a match
         console.log("Starting a round");
         if (this.brackets === undefined || this.brackets[this.current_round] === undefined)
@@ -218,7 +222,13 @@ class Tournament{
                 match.state = T_FINISHED;
             } else {
                 console.log("starting :");
-                gameRoute.createGame(match.players[0], match.players[1]);
+                //Create the match
+                let g_id = gameRoute.createGame(match.players[0], match.players[1]);
+                console.log(match.players[0]);
+                match.players[0].socket.send(JSON.stringify({
+                    g_id: g_id,
+                    game: gameRoute.games[g_id]
+                }));
                 match.state = T_ON_GOING;
             }
         });
@@ -230,13 +240,13 @@ class Tournament{
 };
 
 // Check whether the player is already enrolled in a tournament
-function    inTournament(tournaments, player){
+function    inTournament(tournaments, username){
     if (tournaments === null || tournaments === undefined)
         return (false);
-    tournaments.forEach((t) => {
-        if (t.contains(player))
+    for (let i = 0; i < tournaments.length ; i++){
+        if (tournaments[i].contains(username))
             return (true);
-    });
+    }
     return (false);
 }
 
@@ -264,10 +274,10 @@ function    getMasked(t){
 function    updateTournament(tournament){
     let res = getMasked(tournament);
     console.log("Trying to update clients");
-    tournament.getPlayers().forEach(tuple => {
-        if (tuple.socket !== null){
+    tournament.getPlayers().forEach(player => {
+        if (player.socket !== null){
             console.log("   Socket found");
-            tuple.socket.send(JSON.stringify({
+            player.socket.send(JSON.stringify({
                 type: "update",
                 tournament: res
             }));
@@ -458,26 +468,26 @@ function tournamentRoute (fastify, options) {
     fastify.get('/tournament/:id/match_over', async (request, reply) => {
         return {success: true};
     });
-
+    const T_DSNT_EXISTS = 999;
     //Join a tournament
     fastify.get('/tournament/join/:id', async (request, reply) => {
         let t_id = request.params.id;
-        let player = request.query.username;
+        let player_username = request.query.username;
 
         if (!existsTournament(tournaments, t_id))
-            return {success: false, error: "Tournament doesnt exists"};
+            return {success: false, code: T_DSNT_EXISTS,  error: "Tournament doesnt exists"};
 
-        if (inTournament(tournaments, player))
+        if (inTournament(tournaments, player_username))
             return {success: false, message: "Player can't join a tournament as he's already in one"};
 
         let t = getTournament(tournaments, t_id);
-        if (t.contains(player))
+        if (t.contains(player_username))
             return {success: false, error: "Player in the tournament"};
 
         if (t.isFull())
             return {success: false, error: "Tournament full"};
 
-        t.addPlayer(player);
+        t.addPlayer(player_username);
         //ServerSocket.sendMsg(); // HERE to update connected clients
         return {success: true, tournament : t};
     });
@@ -495,7 +505,6 @@ function tournamentRoute (fastify, options) {
             return {success: false, error: "Owner can't leave the room while other players are present"};
 
         t.disconnectPlayer(user);
-        t.removePlayer(user);
 
         return {success: true};
     });
@@ -542,7 +551,6 @@ function tournamentRoute (fastify, options) {
 
     // For optimizition, the interval can be set only when at least a tournament exists
     setInterval(() => {
-        console.log(tournaments);
         tournaments.forEach(tournament => {
             // console.log(tournament);
             if (tournament === null){
@@ -559,7 +567,7 @@ function tournamentRoute (fastify, options) {
             } else if (tournament.currentRoundIsFinished())
                 tournament.initNextRound();
         });
-    }, 3000);
+    }, 30);
 }
 
 export default tournamentRoute;
