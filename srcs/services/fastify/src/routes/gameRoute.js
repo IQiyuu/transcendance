@@ -12,9 +12,9 @@ function degToRad(degree){
 // Each position is the center of the object
 
 const	SCORE_GOAL = 11;
-const	STARTING_SPEED = 10;
+const	STARTING_SPEED = 7;
 const	ACCELERATION = 1;
-const	LIMIT_SPEED = 20;
+const	LIMIT_SPEED = 15;
 const	BOARD_W = 700;
 const	BOARD_H = 480;
 
@@ -84,9 +84,8 @@ export function createGame(user, user2) {
 export function movePaddle(game, side, moveUp){
     if (side !== "left" && side !== "right")
         return ;
-    // the len is added or subtracted depending on paddle's direction
-    let new_y = (game.paddles[side].y) + (moveUp ? -4 - (PADDLE_H / 2) : 4 + (PADDLE_H / 2));
-    if (new_y > 20 && new_y < BOARD_H - 20)
+    let new_y = (game.paddles[side].y) + (moveUp ? -4 : 4);
+    if (new_y - (PADDLE_H / 2) > 20 && new_y + (PADDLE_H / 2) < BOARD_H - 20)
         game.paddles[side].y = new_y;
 }
 
@@ -468,7 +467,7 @@ export async function gameRoute (fastify, options) {
                 }
             // checking with centers of objects
             if (game.ball.x <= game.paddles.left.x || game.ball.x >= game.paddles.right.x) {
-                game.scores[game.ball.x <= game.paddles.left.x - PADDLE_W ? "right" : "left"]++;
+                game.scores[game.ball.x <= game.paddles.left.x ? "right" : "left"]++;
                 game.ball.v = STARTING_SPEED;
                 game.ball.x = STARTING_X;
                 game.ball.y = STARTING_Y;
