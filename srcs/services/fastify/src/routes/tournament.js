@@ -1,7 +1,6 @@
 import Fastify from 'fastify';
 import * as gameRoute from "./gameRoute.js";
 
-
 const TOURNAMENT_SIZE = 8;
 
 //To put in utils.js
@@ -247,7 +246,7 @@ function    needAuthRoute(route){ // to recheck
     );
 }
 
-function getMasked(t){
+function    getMasked(t){
     let players = [];
     t.players.forEach(p =>{
         players.push(p.username);
@@ -398,6 +397,7 @@ function tournamentRoute (fastify, options) {
         socket.on("close", (event) => {
             console.log("Player disconnected " + username.toString());
             t.disconnectPlayer(username, socket);
+            t.removePlayer(username);
             updateTournament(t);
         });
 
@@ -542,6 +542,7 @@ function tournamentRoute (fastify, options) {
 
     // For optimizition, the interval can be set only when at least a tournament exists
     setInterval(() => {
+        console.log(tournaments);
         tournaments.forEach(tournament => {
             // console.log(tournament);
             if (tournament === null){
@@ -558,7 +559,7 @@ function tournamentRoute (fastify, options) {
             } else if (tournament.currentRoundIsFinished())
                 tournament.initNextRound();
         });
-    }, 30);
+    }, 3000);
 }
 
 export default tournamentRoute;

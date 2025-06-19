@@ -340,7 +340,7 @@ export class TournamentController {
                 this.hide_all();
                 this.cws.close();
                 this.cws = null;
-                this.print_tournament_page();
+                this.print_tournaments_page();
             } else {
                 console.log("Didnt leave");
                 throw (Error(data.error));

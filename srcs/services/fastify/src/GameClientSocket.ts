@@ -21,7 +21,7 @@ export class GameClientSocket{
         //     this.ws = new WebSocket();
         if (this.ws.readyState === this.ws.CLOSED || this.ws.readyState === this.ws.CLOSING){
             //error handling to do !
-            alert("ERROR WHILE CREAtING GAMESOCKET");
+            alert("ERROR WHILE CREATING GAMESOCKET");
             return ;
         }
         this.game = game;
