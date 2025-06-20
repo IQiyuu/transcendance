@@ -36,7 +36,7 @@ export class TournamentClientSocket{
         }
         
         this.ws.onmessage = (message) => {
-            console.log("msg recu");
+            // console.log("msg recu");
             const data = JSON.parse(message.data);
             if (data === null)
                 return ; // ERROR

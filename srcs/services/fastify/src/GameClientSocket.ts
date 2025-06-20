@@ -39,20 +39,19 @@ export class GameClientSocket{
             if (this.should_search){
                 this.ws.send(JSON.stringify({
                     type: "matchmaking",
-                    username: this.username,
+                    username: this.username, // useless ?
                     state: "join"
                 }));
                 this.should_search = false;
             } else if (this.should_start_solo){
                 this.ws.send(JSON.stringify({
                     type: "create_game_offline",
-                    username: this.username
+                    username: this.username //useless ?
                 }));
             } else if (this.match_id){
                 this.ws.send(JSON.stringify({
                     type : "tournament",
-                    state : "get_match",
-                    username : this.username,
+                    state : "connecting_match",
                     game_id : this.match_id
                 }))
             }
@@ -60,14 +59,13 @@ export class GameClientSocket{
         
         this.ws.onmessage = (data) => {
             const message = JSON.parse(data.data);
-            // console.log(message);
+            console.log(message);
             if (message === null)
                 return ;            
             if (message.type === "game_info"){
                 this.ctl.updateState(message.game);
             } else if (message.type === "matchmaking") {
                 console.log("Match found");
-                // console.log(message);
                 if (message.state === "found") {
                     this.ctl.updateState(message.game);
                     let side = (message.game.players.left === this.username ? "left" : "right")
@@ -89,6 +87,18 @@ export class GameClientSocket{
                 console.log("Game is finished");
                 this.ctl.finishGame();
                 this.ws.close();
+            } else if (message.type === "tournament"){
+                if (!message.success){
+                    alert("erroererer");
+                } else{
+                    if (message === "match_connected"){
+                        this.ctl.hide_all();
+                        this.ctl.print_game();
+                        this.ctl.print_play_page();
+                        this.ctl.updateState(message.game);
+                        this.ctl.gameInit();
+                    }
+                }
             }
         };
 

@@ -62,9 +62,8 @@ export class TournamentController {
     private tournament_join_btn = document.getElementById("tournament_join_button");
     private tournament_rejoin_btn = document.getElementById("tournament_rejoin_button");
 
-// Need to check (on page load) if the client has a tournament already present (maybe with the connection socket, UserSocket (profileSocket))
 
-// Need to handle if the tournament is disbanded
+    // Need to handle if the tournament is disbanded
     constructor(site : SiteController, game : GameController) {
         this.site = site;
         this.game = game;
@@ -224,7 +223,7 @@ export class TournamentController {
     createMatch(game_id, game){
         console.log("Creating the match :");
         console.log(game);
-        this.game.startTournamentGame(game_id);
+        this.game.startTournamentGame(game_id, game);
     }
 
     finishGame(){

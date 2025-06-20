@@ -29,6 +29,12 @@ const	STARTING_Y = BOARD_H / 2;
 export let games = {};
 const finished_games = [];
 
+/**
+ * Clients are put in the waiting map on connection, then are moved to the playing when the game start
+ */
+let waiting_clients = new Map(); // username, socket
+let playing_clients = new Map(); // socket, game_id as we may have 2 socket for the same game_id
+
 // Creer un objet game cote server
 export function createGame(user, user2) {
     const gameId = Object.keys(games).length;
@@ -94,16 +100,28 @@ export function userExistsInDb(username, db){
     return (req !== null && req !== undefined);
 }
 
+export function addPlayingClients(p1, p2, id){
+    // console.log(p1);
+    // console.log(p2);
+    playing_clients.set(p1.socket, id);
+    playing_clients.set(p2.socket, id);
+}
+
+
+function    getGame(games, username){
+    for (let i = 0; i < games.length; i++){
+        if (games[i].players.left === username || games[i].players.right === username)
+            return (games[i].id);
+    }
+    return (-1)
+}
+
 export async function gameRoute (fastify, options) {
     // let waiting_list = null;
     // let w_uname = null;
     let img_path = "dist/assets/imgs/"; //to update 
 
 
-    // function addGame(game){
-    //     games[Object.keys(games).length] = game;
-    // }
-    
     // Stocke la game dans la db
     fastify.post('/game/storeGame', async (request, reply) => {
         const { winner_username, loser_username, loser_score } = request.body;
@@ -258,12 +276,6 @@ export async function gameRoute (fastify, options) {
                 game.paddles["left"].y = newY2;
     })
 
-    /**
-     * Clients are put in the waiting map on connection, then are moved to the playing when the game start
-     */
-    let waiting_clients = new Map(); // username, socket
-    let playing_clients = new Map(); // socket, game_id as we may have 2 socket for the same game_id
-
     // Sub plugin for ws games;
     fastify.register(async function (fastify) {
         fastify.addHook("preValidation", async (request, reply) => {
@@ -276,7 +288,7 @@ export async function gameRoute (fastify, options) {
                 // PROBLEM ; I dont know when this is executed
                 console.log("socket game created for");
                 console.log(username);
-                waiting_clients.set(username, socket);
+                // waiting_clients.set(username, socket);
             });
             
             socket.on('message', (data) => {
@@ -287,8 +299,8 @@ export async function gameRoute (fastify, options) {
                     console.error('Invalid JSON:', data.toString());
                     return;
                 }
-                // console.log("Receiving :");
-                // console.log(message);
+                console.log("Receiving :");
+                console.log(message);
                 if (message.type === "create_game_offline"){
                     let new_game_id = createGame(message.username, message.username + "-2");
                     // NE PAS OUBLIER DE MASKER AVEC UN HOOK
@@ -301,6 +313,7 @@ export async function gameRoute (fastify, options) {
                     waiting_clients.delete(username);
                 } else if (message.type === "game_update"){
                     let game = games[message.game_id];
+                    //to test
                     movePaddle(game, message.side, message.move_up);
                 } else if (message.type === "matchmaking"){
                     if (message.state === "join"){
@@ -343,16 +356,26 @@ export async function gameRoute (fastify, options) {
                     }
                 } else if (message.type === "tournament"){
                     console.log("tournament msg");
-                    if (message.state === "get_match"){
-                        console.log("client is trying to get the game ");
-                        console.log(message);
-                        let game = games[message.game_id];
-                        if (game === undefined)
-                            console.log("ERROR\n" + game);
-                        socket.send({
-                            type : "match_info",
-                            game: game
-                        });
+                    if (message.state === "connecting_match"){
+                        console.log("Client is connecting");
+                        let game_id = getGame(games, username);
+                        if (game_id === -1){
+                            console.log("Error");
+                            socket.send(JSON.stringify({
+                                type: 'tournament',
+                                success: false,
+                                message: "User isnt in a match"
+                            }));
+                        }else {
+                            socket.send(JSON.stringify({
+                                type: 'tournament',
+                                success: true,
+                                state: 'match_connected',
+                                game: games[game_id],
+                                game_id: game_id
+                            }));
+                            playing_clients.set(socket, game_id);
+                        }
                     }
                 }
             })
@@ -375,39 +398,6 @@ export async function gameRoute (fastify, options) {
             });
         });
     });
-
-
-    //     fastify.get('/matchmaking', { websocket: true }, (socket, req) => {
-
-    //         if (waiting_list && w_uname != req.query.username) {
-    //             const gameId = createGame(w_uname, req.query.username);
-    //             // console.log("game created: ", gameId);
-    //             waiting_list.send(JSON.stringify({ state: "found", gameId: gameId, role: "left", opponent: w_uname }));
-    //             socket.send(JSON.stringify({ state: "found", gameId: gameId, role: "right", opponent: req.query.username }));
-    
-    //             socket.on('close', () => {
-    //                 games[gameId].scores["left"] = 11;
-    //             });
-    //             waiting_list.on('close', () => {
-    //                 games[gameId].scores["right"] = 11;
-    //             });
-    //             waiting_list = null;
-    //             w_uname = null;
-    //         } else if (w_uname == req.query.username) {
-    //             waiting_list = null;
-    //             w_uname = null;
-    //             // console.log("someone left.");
-    //         } else {
-    //             waiting_list = socket;
-    //             w_uname = req.query.username;
-    //             socket.on('close', () => {
-    //                 // console.log("someone left.");
-    //                 waiting_list = null;
-    //                 w_uname = null;
-    //             });
-    //         }
-    //     });
-    // });
 
     /**
      * For paddles collisions, we check that the ball center for y touch the paddle
@@ -481,6 +471,8 @@ export async function gameRoute (fastify, options) {
         playing_clients.forEach((game_id, socket) => {
             let game = games[game_id];// Tester que la game existe tjrs sinon crash possble
             
+            // console.log("for :" + game_id + " sock : " + socket);
+            // console.log(game);
             if (finished_games.includes(game_id)){
                 // end_game(game); // save into db
                 socket.send(JSON.stringify({

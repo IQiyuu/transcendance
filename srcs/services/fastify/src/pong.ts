@@ -65,20 +65,6 @@ export class   GameController{
         this.site = site;
     }
 
-    // constructor(socket, id, side, opponent, is_local){
-    //     console.log("Client game created !");
-    //     this.ws = socket;
-    //     this.side = side;
-    //     this.opponent = opponent;
-    //     this.game_id = id;
-    //     this.is_local = is_local;
-
-    //     this.init();
-
-    //     //Launch the animation
-    //     requestAnimationFrame(() => this.draw());
-    // }
-
     setUsername(username){
         this.username = username;
     }
@@ -147,13 +133,13 @@ export class   GameController{
      *  */
     moves(obj, ws){
         // console.log("Moves");
+        obj.draw();
         if (obj.key_state["ArrowUp"] || obj.key_state["ArrowDown"]) {
             ws.updatePos(obj.getGameId(), obj.key_state["ArrowUp"], obj.isLocal() ? "right" : obj.getSide());
         }
         if (obj.isLocal() && (obj.key_state["KeyW"] || obj.key_state["KeyS"])){
             ws.updatePos(obj.getGameId(), obj.key_state["KeyW"], "left");
         }
-        obj.draw(); // here for now, but maybe socket call it instead (after a move);
     }
 
 
@@ -179,9 +165,13 @@ export class   GameController{
         }
     }
 
-    startTournamentGame(game_id){
+    startTournamentGame(game_id, game){
         this.ws = new GameClientSocket(this.username, this, game_id);
-        // this.ws.
+        // this.site.hide_all();
+        // this.print_game();
+        // this.print_play_page();
+        // this.updateState(game);
+        // this.gameInit();
     }
 
     close(){
