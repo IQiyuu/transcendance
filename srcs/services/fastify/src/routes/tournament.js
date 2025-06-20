@@ -181,7 +181,7 @@ class Tournament{
         console.log("Starting tournament");
         this.state = T_ON_GOING;
 
-        console.log("Tournament will start\nRandom pos are :");
+        // console.log("Tournament will start\nRandom pos are :");
         this.brackets.length = calculateNbBrackets(this.players.length);
         
         this.brackets[0] = [];
@@ -194,7 +194,7 @@ class Tournament{
                 this.brackets[0].push({game_id : -1, players : [p1, null], state : T_READY});
                 break ;
             }
-            console.log(next);
+            // console.log(next);
             next = bracket_pile.pop();
             let p2 = this.players[next - 1];
             // console.log("players : " + p1.toString() + " | " + p2.toString());
@@ -204,8 +204,8 @@ class Tournament{
         // mx = {game_id, players (username1, username2), state}; 
         // On ajoute directement au rang suivant on win ? 
 
-        console.log("List of matchs (to recheck with more players) :");
-        console.log(this.brackets);
+        // console.log("List of matchs (to recheck with more players) :");
+        // console.log(this.brackets);
         // the tournament is handled by the interval
     }
 
@@ -223,16 +223,16 @@ class Tournament{
             } else {
                 console.log("starting :");
                 //Create the match
-                let g_id = gameRoute.createGame(match.players[0], match.players[1]);
-                console.log(match.players[0]);
-                let test = JSON.stringify({
-                    g_id: g_id,
-                    game: gameRoute.games[g_id]
-                });
-                console.log("Not the content");
+                let g_id = gameRoute.createGame(match.players[0].username, match.players[1].username);
+                let game = gameRoute.games[g_id];
                 match.players[0].socket.send(JSON.stringify({
                     g_id: g_id,
-                    game: gameRoute.games[g_id]
+                    game: game
+                }));
+
+                match.players[1].socket.send(JSON.stringify({
+                    g_id: g_id,
+                    game: game
                 }));
                 match.state = T_ON_GOING;
             }
@@ -398,8 +398,9 @@ function tournamentRoute (fastify, options) {
                         type: "error",
                         message: "Tournament can't be started now"
                     }));
+                }else {
+                    t.startTournament();
                 }
-                t.startTournament();
             } else if (message.type === "match_started"){
                 updateTournament(t);
             } else if (message.type === "match_finished"){
