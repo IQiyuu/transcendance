@@ -22,7 +22,7 @@ export class GameClientSocket{
             return ;
         }
         this.ctl = ctl;
-        if (match_id){
+        if (match_id !== undefined){
             console.log("game creation socket tournament");
             this.match_id = match_id;
         }
@@ -48,7 +48,7 @@ export class GameClientSocket{
                     type: "create_game_offline",
                     username: this.username //useless ?
                 }));
-            } else if (this.match_id){
+            } else if (this.match_id !== undefined){
                 this.ws.send(JSON.stringify({
                     type : "tournament",
                     state : "connecting_match",
@@ -59,7 +59,7 @@ export class GameClientSocket{
         
         this.ws.onmessage = (data) => {
             const message = JSON.parse(data.data);
-            console.log(message);
+            // console.log(message);
             if (message === null)
                 return ;            
             if (message.type === "game_info"){
@@ -92,7 +92,7 @@ export class GameClientSocket{
                     alert("erroererer");
                 } else{
                     if (message === "match_connected"){
-                        this.ctl.hide_all();
+                        this.ctl.hide_aal();
                         this.ctl.print_game();
                         this.ctl.print_play_page();
                         this.ctl.updateState(message.game);

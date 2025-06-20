@@ -363,6 +363,11 @@ export class   GameController{
         this.hide_game();
         this.hide_scoreboard();
     }
+
+    //bad design, because we should separate view from ctl
+    hide_aal(){
+        this.site.hide_all();
+    }
 };
 
 // /*----------------------------------------------------------------------------------------*/

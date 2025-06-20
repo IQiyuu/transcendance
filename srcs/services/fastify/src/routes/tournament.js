@@ -221,7 +221,7 @@ class Tournament{
                 console.log("No opponent, to impl");
                 match.state = T_FINISHED;
             } else {
-                // console.log("starting :");
+                console.log("starting a round");
                 //Create the match
                 let g_id = gameRoute.createGame(match.players[0].username, match.players[1].username);
                 let game = gameRoute.games[g_id];

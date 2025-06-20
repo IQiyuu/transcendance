@@ -26,7 +26,7 @@ const   BALL_W = 10;
 const	STARTING_X = BOARD_W / 2;
 const	STARTING_Y = BOARD_H / 2;
 
-export let games = {};
+export let games = [];
 const finished_games = [];
 
 /**
@@ -37,7 +37,7 @@ let playing_clients = new Map(); // socket, game_id as we may have 2 socket for 
 
 // Creer un objet game cote server
 export function createGame(user, user2) {
-    const gameId = Object.keys(games).length;
+    const gameId = games.length;
     const angle = degToRad(randomIntFromInterval(0, 45));
     if (randomIntFromInterval(0,1) === 0){
         let tmp = user;
@@ -45,7 +45,7 @@ export function createGame(user, user2) {
         user2 = tmp;
     }
     const neg_x = randomIntFromInterval(0,1), neg_y = randomIntFromInterval(0,1);
-    games[gameId] = {
+    games.push({
         id: gameId,
         players: {  
             left: user,
@@ -83,7 +83,7 @@ export function createGame(user, user2) {
                 y: STARTING_Y
             }
         }
-    }
+    });
     return gameId;
 };
 
@@ -108,10 +108,10 @@ export function addPlayingClients(p1, p2, id){
 }
 
 
-function    getGame(games, username){
-    for (let i = 0; i < games.length; i++){
-        if (games[i].players.left === username || games[i].players.right === username)
-            return (games[i].id);
+function    getGame(gs, username){
+    for (let i = 0; i < gs.length; i++){
+        if (gs[i].players.left === username || gs[i].players.right === username)
+            return (gs[i].id);
     }
     return (-1)
 }
@@ -137,7 +137,7 @@ export async function gameRoute (fastify, options) {
     });
 
     fastify.post('/game/stopGame', async (req, reply) => {
-        delete games[req.body.gameId];
+        delete games[req.body.gameId]; // to update
     });
 
     // Route qui recupere les infos du user :username dans la db et les renvoie
@@ -299,8 +299,8 @@ export async function gameRoute (fastify, options) {
                     console.error('Invalid JSON:', data.toString());
                     return;
                 }
-                console.log("Receiving :");
-                console.log(message);
+                // console.log("Receiving :");
+                // console.log(message);
                 if (message.type === "create_game_offline"){
                     let new_game_id = createGame(message.username, message.username + "-2");
                     // NE PAS OUBLIER DE MASKER AVEC UN HOOK
@@ -313,7 +313,7 @@ export async function gameRoute (fastify, options) {
                     waiting_clients.delete(username);
                 } else if (message.type === "game_update"){
                     let game = games[message.game_id];
-                    //to test
+                    //to check ?
                     movePaddle(game, message.side, message.move_up);
                 } else if (message.type === "matchmaking"){
                     if (message.state === "join"){

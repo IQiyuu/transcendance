@@ -35,26 +35,26 @@ export class TournamentClientSocket{
             this.ctler.print_tournament_rejoin_btn();
         }
         
-        this.ws.onmessage = (message) => {
+        this.ws.onmessage = (data) => {
             // console.log("msg recu");
-            const data = JSON.parse(message.data);
-            if (data === null)
+            const message = JSON.parse(data.data);
+            if (message === null)
                 return ; // ERROR
-            if (data.type === "update") {
+            if (message.type === "update") {
                 console.log("   tournament has been updated,");
-                console.log(data.tournament);
-                this.ctler.updateTournament(data.tournament);
-            } else if (data.type === "started") {
+                console.log(message.tournament);
+                this.ctler.updateTournament(message.tournament);
+            } else if (message.type === "started") {
                 console.log("Tournament will start in a few moments");
-                this.ctler.updateTournament(data.tournament);
+                this.ctler.updateTournament(message.tournament);
                 this.ctler.print_tournament();
-            } else if (data.type === "new_match"){
+            } else if (message.type === "new_match"){
                 console.log("Creating a new tournament match");
-                this.ctler.createMatch(data.game_id, data.game);
-            } else if (data.type === "finished"){
+                this.ctler.createMatch(message.game_id, message.game);
+            } else if (message.type === "finished"){
                 console.log("Tournament is finished !");
-            } else if (data.type === "error"){
-                console.log(data.message);
+            } else if (message.type === "error"){
+                console.log(message.message);
             }
         };
 
