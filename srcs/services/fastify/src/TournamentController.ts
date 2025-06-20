@@ -221,8 +221,10 @@ export class TournamentController {
         this.print_tournament_page();
     }
 
-    createMatch(game_id){
-
+    createMatch(game_id, game){
+        console.log("Creating the match :");
+        console.log(game);
+        this.game.startTournamentGame(game_id);
     }
 
     finishGame(){

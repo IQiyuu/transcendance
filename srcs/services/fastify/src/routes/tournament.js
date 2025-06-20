@@ -124,9 +124,9 @@ class Tournament{
 
     // Remove a player from the tournament. Also close the socket if it exists
     removePlayer(username){
-        console.log("Trying to remove ");
-        console.log(username);
-        console.log(this.players);
+        // console.log("Trying to remove ");
+        // console.log(username);
+        // console.log(this.players);
         let pos = -1;
         this.players.forEach(player => {
             if (player.username == username){
@@ -178,7 +178,7 @@ class Tournament{
      * Each player has a random position given
      */
     startTournament(){
-        console.log("Starting tournament");
+        // console.log("Starting tournament");
         this.state = T_ON_GOING;
 
         // console.log("Tournament will start\nRandom pos are :");
@@ -215,24 +215,26 @@ class Tournament{
         if (this.brackets === undefined || this.brackets[this.current_round] === undefined)
             console.log("error : the round we want to start is null or undefined");
         this.brackets[this.current_round].forEach(match => {
-            console.log("Starting a tournament match !");
-            console.log(match);
+            // console.log("Starting a tournament match !");
+            // console.log(match);
             if (match.players[1] === null){
                 console.log("No opponent, to impl");
                 match.state = T_FINISHED;
             } else {
-                console.log("starting :");
+                // console.log("starting :");
                 //Create the match
                 let g_id = gameRoute.createGame(match.players[0].username, match.players[1].username);
                 let game = gameRoute.games[g_id];
                 match.players[0].socket.send(JSON.stringify({
-                    g_id: g_id,
-                    game: game
+                    type: "new_match",
+                    game_id: g_id,
+                    game: game // not used 
                 }));
 
                 match.players[1].socket.send(JSON.stringify({
-                    g_id: g_id,
-                    game: game
+                    type: "new_match",
+                    game_id: g_id,
+                    game: game // not used, only there for debugging
                 }));
                 match.state = T_ON_GOING;
             }
@@ -367,7 +369,7 @@ function tournamentRoute (fastify, options) {
         if (!t.contains(username))
             return {success: false, error: "Player not in this tournament"};
         
-        console.log("Trying new socket connection !");
+        // console.log("Trying new socket connection !");
         // Could be improved ...
         if (socket.readyState === OPEN_STATE){
             console.log("Player connected " + username.toString());
@@ -401,13 +403,16 @@ function tournamentRoute (fastify, options) {
                 }else {
                     t.startTournament();
                 }
-            } else if (message.type === "match_started"){
+            } else if (message.type === "match"){
+                if (message.state === "started"){
+
+                }else if (message.state === "ended"){
+
+                }
                 updateTournament(t);
             } else if (message.type === "match_finished"){
                 //Clients telling match is finished, we need both approval
                 // Registering the game in db, we just save the game_id (primary key) and the tournament id;
-            } else if (message.type === "match"){
-                
             }
         });
 

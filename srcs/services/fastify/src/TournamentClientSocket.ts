@@ -50,7 +50,7 @@ export class TournamentClientSocket{
                 this.ctler.print_tournament();
             } else if (data.type === "new_match"){
                 console.log("Creating a new tournament match");
-                this.ctler.createMatch(data.game_id);
+                this.ctler.createMatch(data.game_id, data.game);
             } else if (data.type === "finished"){
                 console.log("Tournament is finished !");
             } else if (data.type === "error"){

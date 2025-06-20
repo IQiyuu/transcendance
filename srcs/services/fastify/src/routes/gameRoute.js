@@ -262,7 +262,7 @@ export async function gameRoute (fastify, options) {
      * Clients are put in the waiting map on connection, then are moved to the playing when the game start
      */
     let waiting_clients = new Map(); // username, socket
-    let playing_clients = new Map(); // socket, game_id as we have 2 socket sometimes for the same game_id
+    let playing_clients = new Map(); // socket, game_id as we may have 2 socket for the same game_id
 
     // Sub plugin for ws games;
     fastify.register(async function (fastify) {
@@ -347,6 +347,8 @@ export async function gameRoute (fastify, options) {
                         console.log("client is trying to get the game ");
                         console.log(message);
                         let game = games[message.game_id];
+                        if (game === undefined)
+                            console.log("ERROR\n" + game);
                         socket.send({
                             type : "match_info",
                             game: game
