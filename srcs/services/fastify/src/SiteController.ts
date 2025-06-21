@@ -24,7 +24,7 @@ export class   ProfileController{
     private	search_btn = document.getElementById("search_player_btn");
     private	search_inp = document.getElementById("search_player_in") as HTMLInputElement;
     private	friend_div = document.getElementById("friend_div");
-    private	fa_btn = document.getElementById("fa_btn");
+    private	fa_btn = document.getElementById("auth_btn");
     private	check_btn = document.getElementById("check_btn");
     private google_auth = document.getElementById("google_auth");
 
@@ -101,14 +101,14 @@ export class   ProfileController{
             event.preventDefault();
             if(this.google_auth.textContent === "Activer Google authentificator")
             {
-                window.open('/2fa', '42 AUTH');
-                this.google_auth.id = "desable_fa_btn";
+                window.open('/google-auth', '42 AUTH');
+                this.google_auth.id = "desable_auth_btn";
                 this.google_auth.textContent = "Desactiver Google authentificator";
             }
             else 
             {
-                await fetch('/desable_fa');
-                this.google_auth.id = "fa_btn";
+                await fetch('/desable_auth');
+                this.google_auth.id = "auth_btn";
                 this.google_auth.textContent = "Activer Google authentificator";
             }
         });
