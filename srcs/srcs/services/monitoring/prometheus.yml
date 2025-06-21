@@ -1,0 +1,15 @@
+# Can be overridden by individual targets
+global:
+  scrape_interval:     15s
+  evaluation_interval: 15s
+
+#Location of rules
+rule_files:
+  # - "first.rules"
+  # - "second.rules"
+
+# App to monitore
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ['localhost:9090']

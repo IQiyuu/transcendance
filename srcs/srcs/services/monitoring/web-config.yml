@@ -1,0 +1,7 @@
+tls_server_config:
+  cert_file: SSL.crt
+  key_file: SSL.key
+
+basic_auth_users:
+  ggiboury : $2a$12$4NJ.uuq2WFjlC0QgGEIr7ejIyrUp4EdVXV/IwAKa6O5.Hc5rUjCBa
+  grafana : $2a$12$nNwKfkNYWHWV3sBJCciRWOGqhdd0ykHW.ey7G0I7FYy/ldVh90tou #jB70*8Fhoq~#<nEbe`2,
