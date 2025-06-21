@@ -26,6 +26,8 @@ export class   ProfileController{
     private	friend_div = document.getElementById("friend_div");
     private	fa_btn = document.getElementById("fa_btn");
     private	check_btn = document.getElementById("check_btn");
+    private google_auth = document.getElementById("google_auth");
+
 	
     private	histo_list = document.getElementById("histo_list");
 
@@ -94,10 +96,21 @@ export class   ProfileController{
             if (this.profile_username == this.username)
                 this.camera_icon.classList.replace("opacity-60", "opacity-0");
         });
-        // Activate Google authentificator
+        // Activate / Desactivate Google authentificator
         this.fa_btn.addEventListener('click', async (event) => {
             event.preventDefault();
-            window.open('/2fa', '42 AUTH');
+            if(this.google_auth.textContent === "Activer Google authentificator")
+            {
+                window.open('/2fa', '42 AUTH');
+                this.google_auth.id = "desable_fa_btn";
+                this.google_auth.textContent = "Desactiver Google authentificator";
+            }
+            else 
+            {
+                await fetch('/desable_fa');
+                this.google_auth.id = "fa_btn";
+                this.google_auth.textContent = "Activer Google authentificator";
+            }
         });
         
         this.check_btn.addEventListener('click', async (event) => {
@@ -184,6 +197,7 @@ export class   ProfileController{
 
     hide_page(){
         this.profile_page.classList.replace("flex", "hidden");
+
     }
 
     hide_all(){
