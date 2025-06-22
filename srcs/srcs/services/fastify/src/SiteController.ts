@@ -359,15 +359,15 @@ export class SiteController{
                 // console.log("Réponse du serveur :", data);
                 
                 if (data.success) {
+                    this.isRegisterMode = false;
                     this.username = data.username;
                     this.connect();
                     // this.ws.print_info();
-
+                    document.getElementById("errorAuth").classList.replace("block", "hidden");
                 } else {
                     const error = document.getElementById("errorAuth") as HTMLParagraphElement;
                     error.textContent = this.lang.getFile()[data.message];
                     error.classList.replace("hidden", "block");
-                    throw(Error(data.error));
                 }
             } catch (error) {
                 console.log("initFriendList");
@@ -417,6 +417,16 @@ export class SiteController{
             document.getElementById("site").classList.replace("block", "hidden");
             document.getElementById("login-form").classList.replace("hidden", "flex");
             document.body.classList.add("justify-center", "align-center", "flex");
+            this.username = null;
+            this.friends.removeEvents();
+            this.game.setUsername(null);
+            this.tournament.setUsername(null);
+            this.profile.setUsername(null);
+            this.profile.setProfileUsername(null);
+            this.lang.setUsername(null);
+            this.ws.close();
+            this.ws = null;
+            console.log(this.ws);
         });
 
 		//Registering children events
@@ -448,6 +458,8 @@ export class SiteController{
         console.log("ICI+"+this.username);
         this.ws = new ClientSocket(this.username);
         
+        if (this.lang)
+            this.lang.initLang(this.username);
         this.game.setUsername(this.username);
         this.profile.setUsername(this.username);
         this.tournament.setUsername(this.username);
@@ -457,12 +469,13 @@ export class SiteController{
         console.log("Connected, client socket :");
         console.log(this.ws);
 
-        this.hide_register_page();
+        this.hide_all();
         document.body.classList.remove("justify-center", "align-center", "flex");
-        this.print_main_page();
+        this.print_menu();
         this.friends = new FriendController(this.username, this.lang, this.ws);
+        console.log(this.username);
         this.ws.setFriend(this.friends, this, this.profile);
-        this.friends.setUsername(this.username);
+        console.log(this.friends);
     }
 
     /**
