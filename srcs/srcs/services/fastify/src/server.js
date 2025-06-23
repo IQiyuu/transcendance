@@ -56,7 +56,7 @@ db.exec(`
     password TEXT NOT NULL,
     twofa TEXT DEFAULT NULL,
     lang TEXT NOT NULL DEFAULT 'en',
-    picture_path TEXT DEFAULT "../assets/imgs/standart.jpg",
+    picture_path TEXT DEFAULT "standart.jpg",
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   );
 

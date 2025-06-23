@@ -25,9 +25,13 @@ export class   ProfileController{
     private	search_inp = document.getElementById("search_player_in") as HTMLInputElement;
     private	friend_div = document.getElementById("friend_div");
     private	fa_btn = document.getElementById("fa_btn");
+    private upload_btn = document.getElementById("upload_btn");
+    private profile_cross = document.getElementById("profile_cross");
+
+    private profile_card = document.getElementById("profile_card");
+    private file_input = document.getElementById("file_input")
 	
     private searchError = document.getElementById("searchError");
-
 
     private	histo_list = document.getElementById("histo_list");
 
@@ -51,6 +55,20 @@ export class   ProfileController{
     }
 
     addEvents(){
+
+        this.profile_username_tag.addEventListener("mouseover", async (event) => {
+            event.preventDefault();
+
+            if (this.profile_username == this.username)
+                this.profile_username_tag.textContent = "EMOJI " + this.profile_username_tag.textContent;
+        });
+
+        this.profile_username_tag.addEventListener("mouseout", async (event) => {
+            event.preventDefault();
+            
+            if (this.profile_username == this.username)
+                this.profile_username_tag.textContent = this.profile_username;
+        });
 
         // Player's search
         this.search_inp.addEventListener("keydown", async (event) => {
@@ -103,6 +121,78 @@ export class   ProfileController{
         this.fa_btn.addEventListener('click', async (event) => {
             event.preventDefault();
             window.open('/2fa', '42 AUTH');
+        });
+
+        this.upload_btn.addEventListener('click', async (event) => {
+            event.preventDefault();
+
+            console.log("UGGHVDGHASVFJASVUTASJG");
+        });
+
+        // croix du changement de photo de profile
+        this.profile_cross.addEventListener("click", async (event) => {
+            event.preventDefault();
+            document.getElementById("profile_picture_overlay").classList.replace("flex", "hidden");
+            (document.getElementById("previsu_picture") as HTMLImageElement).src = "";
+            (document.getElementById("file_input") as HTMLInputElement).value = "";
+        });
+
+        // echape du changement de photo de profile
+        this.profile_card.addEventListener("keydown", async (event) => {
+            if (!document.getElementById("profile_picture_overlay").classList.contains("hidden")) {
+                event.preventDefault();
+                if (event.key === "Escape") {
+                    document.getElementById("profile_picture_overlay").classList.replace("flex", "hidden");
+                    (document.getElementById("previsu_picture") as HTMLImageElement).src = "";
+                    (document.getElementById("file_input") as HTMLInputElement).value = "";
+                }
+            }
+        });
+
+        // previsualiser la photo de profile selectionnee
+        this.file_input.addEventListener("change", async (event) => {
+            const file = (event.target as HTMLInputElement).files[0];
+            const previsuImage = document.getElementById("previsu_picture") as HTMLImageElement;
+            if (file) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    previsuImage.src = e.target.result as string;
+                };
+                
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // upload une photo de profile avec le boutton
+        this.upload_btn.addEventListener("click", async (event) => {
+            event.preventDefault();
+
+            const formData = new FormData();
+            const fileInput = document.getElementById('file_input') as HTMLInputElement;
+            if (fileInput.files[0]) {
+                formData.append('file', fileInput.files[0]);
+                try {
+                    const response = await fetch(`/upload/picture/${this.username}`, {
+                        method: 'POST',
+                        body: formData,
+                    });
+                    if (!response.ok)
+                        console.log("error in file upload.");
+                    else {
+                        console.log("file uploaded.");
+                        document.getElementById("profile_picture_overlay").classList.replace("flex", "hidden");
+                        (document.getElementById("previsu_picture") as HTMLImageElement).src = "";
+                        (document.getElementById("file_input") as HTMLInputElement).value = "";
+                        this.picture_path = "../assets/imgs/" + this.username + ".jpg";
+                        (this.profile_picture as HTMLImageElement).src = this.picture_path + "?" + new Date().getTime();
+                    }
+                } catch (error) {
+                console.error("error: ", error);
+                }
+            } else {
+                console.log("No file selected.");
+            }
         });
 
     }
@@ -199,7 +289,7 @@ export class   ProfileController{
         //profile
         this.profile_page.classList.replace("hidden", "flex");
         this.profile_username_tag.innerText = this.profile_username;
-        (this.profile_picture as HTMLImageElement).src = this.picture_path + "?" + new Date().getTime(); // jsp ??
+        (this.profile_picture as HTMLImageElement).src = "../assets/imgs/" + this.picture_path + "?" + new Date().getTime(); // jsp ??
         this.register_date_tag.innerText = `${this.site.getText("member_since")}: ${this.register_date}`;
 
 		if (this.profile_username != this.username){
@@ -379,6 +469,7 @@ export class SiteController{
         this.title_link.addEventListener("click", async (event) => {
             event.preventDefault();
 
+            this.profile.setProfileUsername(null);
             this.hide_all();
             this.print_menu();
             this.print_btn_menu();
