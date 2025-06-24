@@ -27,5 +27,18 @@
   "send_yblock": "このユーザーをブロックしました",
   "errAuth": "ユーザー名またはパスワードが正しくありません",
   "errReg": "このユーザー名はすでに使われています",
-  "about": "このゲームについて"
+  "about": "このゲームについて",
+
+  "pass_change": "パスワードを変更する",
+  "pass_current": "現在のパスワード",
+  "pass_new": "新しいパスワード",
+  "pass_confirm": "新しいパスワードを確認します",
+  "modal-confirm-yes": "はい",
+  "modal-confirm-no": "いいえ",
+  "cancel": "キャンセル",
+  "confirm": "確認する",
+  "game_start": "ゲームが始まります。準備はいいですか？",
+  "logout_btn": "ログアウト",
+  "waiting_online": "待っている",
+  "cancel_mm": "キャンセルするにはクリックしてください❌"
 }

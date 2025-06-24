@@ -69,7 +69,7 @@ export function createGame(user, user2) {
                 y: STARTING_Y
             },
             right: {
-                x: BOARD_W - 20,
+                x: BOARD_W - 10,
                 y: STARTING_Y
             }
         }
@@ -408,11 +408,11 @@ export async function gameRoute (fastify, options) {
             if (game.ball.y <= 0 || game.ball.y >= BOARD_H)
                 game.ball.dy *= -1;
 
-            if (game.ball.x <= game.paddles.left.x + PADDLE_W
-                && game.ball.y >= game.paddles.left.y // on passe de -50 a 0
-                && game.ball.y <= game.paddles.left.y + PADDLE_H) {
+            if (game.ball.x <= game.paddles.left.x + PADDLE_W / 2
+                && game.ball.y >= game.paddles.left.y - PADDLE_H / 2
+                && game.ball.y <= game.paddles.left.y + PADDLE_H / 2) {
                     // There are 8 zone considered for the bouncing, so we round to the closest quarter
-                    let dist = Math.abs(game.ball.y - (game.paddles.left.y + (PADDLE_H / 2)));
+                    let dist = Math.abs(game.ball.y - game.paddles.left.y);
                     let sign = game.ball.dy < 0 ? -1 : 1;
                     let angle = 90;
                     if (dist > (3 * 50) / 4)
@@ -427,13 +427,12 @@ export async function gameRoute (fastify, options) {
                     game.ball.dy = Math.sin(degToRad(angle)) * sign;
                     game.ball.accelerate();
                 }
-                else if (game.ball.x > game.paddles.right.x
-                    && game.ball.y > game.paddles.right.y // same here
-                    && game.ball.y < game.paddles.right.y + 100) {
+                else if (game.ball.x >= game.paddles.right.x - PADDLE_W / 2
+                    && game.ball.y >= game.paddles.right.y - PADDLE_H / 2
+                    && game.ball.y <= game.paddles.right.y + PADDLE_H / 2) {
                     // There are 8 zone considered for the bouncing, so we round to the closest quarter
-                    let dist = Math.abs(game.ball.y - (game.paddles.right.y + (PADDLE_H / 2)));
+                    let dist = Math.abs(game.ball.y - game.paddles.right.y);
                     let sign = game.ball.dy < 0 ? -1 : 1;
-
                     let angle = 90;
                     if (dist > (3 * 50) / 4)
                         angle += 45;

@@ -27,5 +27,19 @@
   "send_yblock": "You have blocked this user",
   "errAuth": "Incorrect username or password",
   "errReg": "Username already taken",
-  "about": "About"
+  "about": "About",
+
+  "pass_change": "Change password",
+  "pass_current": "Current password",
+  "pass_new": "New password",
+  "pass_confirm": "Confirm new password",
+  "modal-confirm-yes": "Yes",
+  "modal-confirm-no": "No",
+  "cancel": "Cancel",
+  "confirm": "Confirm",
+  "game_start": "The game is about to begin. Ready?",
+  "logout_btn": "Logout",
+  "waiting_online": "waiting",
+  "cancel_mm": "click to cancel ❌"
+
 }
