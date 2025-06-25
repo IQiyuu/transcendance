@@ -14,9 +14,7 @@ DOING :
 
 TODO :
 
-- Password and username politic to add
-- Configure grafana
-- Configure Prometheus
-- Historic to add
+# - Configure grafana
+# - Configure Prometheus
 - Script for database queries (from server.js)
 - Protection des routes

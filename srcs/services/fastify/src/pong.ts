@@ -12,6 +12,7 @@ export class   GameController{
     private site : SiteController = null;
 
     private is_searching : boolean = false;
+	private	is_tournament : boolean = false;
 
     private username : string = "undefined";
 
@@ -167,6 +168,7 @@ export class   GameController{
 
     startTournamentGame(game_id, game){
         this.ws = new GameClientSocket(this.username, this, game_id);
+		this.is_tournament = true;
         // this.site.hide_all();
         // this.print_game();
         // this.print_play_page();
@@ -180,6 +182,7 @@ export class   GameController{
             this.ws.close();
             this.ws = null;
         }
+		// is_tournament ?
     }
 
     gameInit(){
@@ -192,19 +195,6 @@ export class   GameController{
         document.addEventListener("keyup", this.key_handler);
         document.addEventListener("keydown", this.key_handler);
 
-        // this.game.addEventListener("keydown", this.key_handler);
-        // if (this.is_local){
-        //     this.game.addEventListener("W",  this.key_handler);
-        //     this.game.addEventListener("S",  this.key_handler);
-        // }
-
-
-        //Ball view
-        // this.ball.width();(x + game.ball.x, y + game.ball.y, ballRadius, 0, Math.PI * 2);
-        
-        // this.l_paddle_y = this.game.height / 2 - paddleHeight / 2;
-        // this.r_paddle_y = this.game.height / 2 - paddleHeight / 2;
-        
         this.print_player_names();
 
         this.ball.style.position="relative";
@@ -220,6 +210,7 @@ export class   GameController{
         document.removeEventListener("keydown", this.key_handler)
         clearInterval(this.interval_id);
         this.hide_game();
+		// if (this.is_tournament){
         this.print_end_game();
     }
 
@@ -369,27 +360,3 @@ export class   GameController{
         this.site.hide_all();
     }
 };
-
-// /*----------------------------------------------------------------------------------------*/
-
-// // Rentre la game dans la db
-// async function saveGame(game) {
-//     console.log("game saved");
-//     try {
-//         const winner = game.scores.left == 11 ? "left" : "right";
-//         const body = { 
-//             winner_username: game.players[winner], 
-//             loser_username: game.players[(winner == "right" ? "left": "right")],
-//             loser_score: game.scores.left == 11 ? game.scores.right : game.scores.left
-//         };
-//         const response = await fetch("game/storeGame", {
-//             method: "POST",
-//             headers: { "Content-Type": "application/json" },
-//             body: JSON.stringify(body),
-//         });
-//         const data = await response.json();
-//         console.log("Réponse du serveur :", data);
-//     } catch (error) {
-//         console.log("error: ", error);
-//     }
-// }
