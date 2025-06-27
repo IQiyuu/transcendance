@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "outDir": "dist",
+    "module": "nodenext"
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules"]
+}

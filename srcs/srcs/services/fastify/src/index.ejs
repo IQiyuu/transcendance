@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="style.css" rel="stylesheet">
+    <title>Trong</title>
+</head>
+<!-- <div class="fixed top-4 left-4 z-50"></div> -->
+<body class="h-screen flex items-center justify-center bg-gradient-to-br from-purple-600 to-blue-500">
+    <select id="lang_select" class="fixed top-4 left-4 z-50">
+        <option value="jp">🇯🇵 日本語</option>
+        <option value="fr">🇫🇷 Français</option>
+        <option value="en">🇺🇸 English</option>
+    </select>
+</div>
+
+<!-- Popup pour le changement de mot de passe -->
+<div id="passwordPopup" class="fixed inset-0 flex items-center justify-center hidden z-50">
+    <div class="bg-gray-800 p-6 rounded-lg w-96 shadow-lg">
+        <h3 id="pass_change" class="text-xl font-semibold mb-4 text-teal-400 text-center">Changer le mot de passe</h3>
+        
+        <!-- Formulaire pour changer le mot de passe -->
+        <form id="passwordForm">
+            <div class="mb-4">
+                <label id="pass_current" for="currentPassword" class="block text-sm font-medium text-white">Mot de passe actuel</label>
+                <input type="password" id="currentPassword" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+            </div>
+
+            <div class="mb-4">
+                <label id="pass_new" for="newPassword" class="block text-sm font-medium text-white">Nouveau mot de passe</label>
+                <input type="password" id="newPassword" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+            </div>
+
+            <div class="mb-4">
+                <label id="pass_confirm" for="confirmPassword" class="block text-sm font-medium text-white">Confirmer le nouveau mot de passe</label>
+                <input type="password" id="confirmPassword" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+            </div>
+
+            <!-- Messages d'erreur -->
+            <div id="errorMessages" class="text-red-500 mb-4 hidden">
+                <p id="errorMessageText"></p>
+            </div>
+
+            <div class="flex justify-between items-center">
+                <button id="cancel" type="button" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400" onclick="closePasswordPopup()">Annuler</button>
+                <button id="confirm" type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-700">Valider</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+
+    <div class="fixed top-4 right-4 z-50">
+  <button id="logout_btn" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded shadow-md transition duration-300 ease-in-out cursor-pointer">
+    Logout
+  </button>
+</div>
+    <!-- LOGIN FORM -->
+    <div id="login-form" class="hidden flex-col p-6 items-center justify-center bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 max-w-sm w-full">
+        <h1 class="underline text-white text-4xl text-center mb-4" id="form-title">Connexion</h1>
+
+        <form class="w-full" id="form">
+            <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="username">Username</label>
+            <input class="mb-4 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" id="username" name="username" required />
+
+            <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="password">Password</label>
+            <input class="mb-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" id="password" name="password" type="password" required />
+
+            <p class="hidden text-red-600 mb-2" id="errorAuth"></p>
+
+            <a class="font-medium text-blue-600 hover:underline dark:text-blue-500 block mb-2 text-right" id="register-view" href="#">S'inscrire</a>
+
+            <button id="login_btn" class="w-full text-white bg-gradient-to-br from-green-400 to-blue-600 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-green-200 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center" type="submit">Se connecter</button>
+        </form>
+    </div>
+
+    <div id="site" class="hidden">
+        <div id="pong-game">
+            <div id="gameContainer">
+                <h1 class="mb-50 underline text-white text-7xl font-serif text-center cursor-pointer" id="game_title">Trong the Game</h1>
+                <!-- MENU -->
+                <div id="pageContent" class="flex w-full justify-between">
+                    <!-- Premier UL : 70% -->
+                    <ul id="menu" class="block w-[70%] space-y-6 text-gray-500 list-none dark:text-gray-400">
+                        <li id="offline" class="flex hover:animate-pulse relative w-[90%] hover:w-full transition-all duration-500 ease-in-out cursor-pointer p-12 text-5xl italic font-medium dark:text-black text-white bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg border-4 border-purple-600 flex items-center justify-center text-center
+                            hover:scale-105 hover:shadow-[0_0_40px_rgba(236,72,153,0.9)] hover:bg-gradient-to-r hover:from-pink-400 hover:via-purple-400 hover:to-red-400">
+                            <button>
+                                Play local
+                                <span class="absolute inset-0 rounded-lg bg-white opacity-0 hover:opacity-10 blur-md transition-opacity duration-500"></span>
+                            </button>
+                        </li>
+                        <li id="matchmaking" class="flex relative w-[90%] hover:w-full transition-all duration-500 ease-in-out cursor-pointer p-12 text-5xl italic font-medium dark:text-black text-white bg-gradient-to-r from-teal-200 to-lime-200 rounded-lg border-4 border-green-800 flex items-center justify-center text-center
+                            hover:scale-105 hover:shadow-[0_0_40px_rgba(132,204,22,0.9)] hover:bg-gradient-to-r hover:from-lime-300 hover:via-teal-300 hover:to-green-400">
+                            <button>
+                                Play online
+                                <span class="absolute inset-0 rounded-lg bg-white opacity-0 hover:opacity-10 blur-md transition-opacity duration-500"></span>
+                            </button>
+                        </li>
+
+                        <li id="tournament_button" class="flex relative w-[90%] hover:w-full transition-all duration-500 ease-in-out cursor-pointer p-12 text-5xl italic font-medium dark:text-black text-white bg-gradient-to-br from-green-400 to-blue-600 rounded-lg border-4 border-green-800 flex items-center justify-center text-center
+                            hover:scale-105 hover:shadow-[0_0_40px_rgba(59,130,246,0.9)] hover:bg-gradient-to-tr hover:from-blue-400 hover:via-green-400 hover:to-teal-400">
+                            <button >
+                            Tournament
+                            <span class="absolute inset-0 rounded-lg bg-white opacity-0 hover:opacity-10 blur-md transition-opacity duration-500"></span>
+                            </button>
+                        </li>
+                        <li id="tournament_create_button" class="hidden relative w-[90%] hover:w-full transition-all duration-500 ease-in-out cursor-pointer p-12 text-5xl italic font-medium dark:text-black text-white bg-gradient-to-br from-green-400 to-blue-600 rounded-lg border-4 border-green-800 flex items-center justify-center text-center
+                            hover:scale-105 hover:shadow-[0_0_40px_rgba(59,130,246,0.9)] hover:bg-gradient-to-tr hover:from-blue-400 hover:via-green-400 hover:to-teal-400">
+                            <button >
+                            Create
+                            <span class="absolute inset-0 rounded-lg bg-white opacity-0 hover:opacity-10 blur-md transition-opacity duration-500"></span>
+                            </button>
+                        </li>
+                        <li id="tournament_join_button" class="hidden hover:animate-ping relative w-[90%] hover:w-full transition-all duration-500 ease-in-out cursor-pointer p-12 text-5xl italic font-medium dark:text-black text-white bg-gradient-to-br from-green-400 to-blue-600 rounded-lg border-4 border-green-800 flex items-center justify-center text-center
+                            hover:scale-105 hover:shadow-[0_0_40px_rgba(59,130,246,0.9)] hover:bg-gradient-to-tr hover:from-blue-400 hover:via-green-400 hover:to-teal-400">
+                            <button>
+                            Join
+                            <span class="absolute inset-0 rounded-lg bg-white opacity-0 hover:opacity-10 blur-md transition-opacity duration-500"></span>
+                            </button>
+                        </li>
+                        <li id="tournament_rejoin_button" class="hidden hover:animate-ping relative w-[90%] hover:w-full transition-all duration-500 ease-in-out cursor-pointer p-12 text-5xl italic font-medium dark:text-black text-white bg-gradient-to-br from-green-400 to-blue-600 rounded-lg border-4 border-green-800 flex items-center justify-center text-center
+                            hover:scale-105 hover:shadow-[0_0_40px_rgba(59,130,246,0.9)] hover:bg-gradient-to-tr hover:from-blue-400 hover:via-green-400 hover:to-teal-400">
+                            <button>
+                            Current tournament
+                            <span class="absolute inset-0 rounded-lg bg-white opacity-0 hover:opacity-10 blur-md transition-opacity duration-500"></span>
+                            </button>
+                        </li>
+
+                        <li id="profile_button" class="relative w-[90%] hover:w-full transition-all duration-500 ease-in-out cursor-pointer p-12 text-5xl italic font-medium dark:text-black text-white bg-gradient-to-r from-red-200 via-red-300 to-yellow-200 rounded-lg border-4 border-red-600 flex items-center justify-center text-center
+                            hover:scale-105 hover:shadow-[0_0_40px_rgba(251,191,36,0.9)] hover:bg-gradient-to-r hover:from-yellow-400 hover:via-red-400 hover:to-orange-400">
+                            <button>
+                            Profile
+                            <span class="absolute inset-0 rounded-lg bg-white opacity-0 hover:opacity-10 blur-md transition-opacity duration-500"></span>
+                            </button>
+                        </li>
+
+                        <li id="about_button" class="hover:animate-none relative w-[90%] hover:w-full transition-all duration-500 ease-in-out cursor-pointer p-12 text-5xl italic font-medium dark:text-black text-white bg-gradient-to-r from-cyan-500 to-blue-500 rounded-lg border-4 border-blue-700 flex items-center justify-center text-center
+                            hover:scale-105 hover:shadow-[0_0_40px_rgba(34,211,238,0.9)] hover:bg-gradient-to-r hover:from-blue-400 hover:via-cyan-300 hover:to-purple-400">
+                            <button>
+                            About
+                            <span class="absolute inset-0 rounded-lg bg-white opacity-0 hover:opacity-10 blur-md transition-opacity duration-500"></span>
+                            </button>
+                        </li>
+                    </ul>
+
+                </div >
+
+                <!-- PROFILE -->
+                <div id="player_profile" class="relative hidden w-full justify-center flex-col items-center py-8 bg-gradient-to-r from-purple-700 via-indigo-600 to-blue-500 text-white">
+
+                    <!-- Carte de Profil -->
+                    <div id="profile_card" class="relative flex flex-col items-center justify-center w-full max-w-sm mx-auto bg-gradient-to-br from-pink-400 via-red-500 to-yellow-500 p-6 rounded-xl shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                        
+                        <!-- Image de profil avec icône et ID conservés -->
+                        <div class="relative w-32 h-32 mb-4">
+                            <img id="profile_picture" class="w-full h-full rounded-full shadow-lg object-cover" src="assets/imgs/standart.jpg"/>
+                            <img src="assets/imgs/hoverPicture.png" id="camera_icon" class="absolute inset-0 top-1/4 mx-auto w-1/2 h-1/2 opacity-0 cursor-pointer transition-all duration-200 hover:opacity-80" />
+                        </div>
+
+                        <div id="profile_picture_overlay" class="absolute hidden z-50 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                        <form id="profil_picture_square" class="flex flex-col items-center bg-gray-800 p-6 rounded-lg shadow-lg relative">
+                            <p id="div_title" class="text-lg text-white mb-4">Upload your profile picture</p>
+                            <button id="profile_cross" type="button" class="absolute top-2 right-2 text-white text-lg">✖</button>
+                            <input type="file" id="file_input" class="mb-4 p-2 rounded-md bg-gray-700 text-white" />
+                            <button id="upload_btn" class="w-1/2 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700">Upload</button>
+                            <img id="previsu_picture" src="" width="50" height="50" class="mt-4"/>
+                        </form>
+                        </div>
+
+
+                        <!-- Overlay pour changement de photo
+                        <div id="profile_picture_overlay" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 hidden z-50">
+
+                            <form id="profil_picture_square" class="flex flex-col items-center bg-gray-800 p-6 rounded-lg shadow-lg relative">
+                                <p id="div_title" class="text-lg text-white mb-4">Upload your profile picture</p>
+                                <button id="profile_cross" type="button" class="absolute top-2 right-2 text-white text-lg">✖</button>
+                                <input type="file" id="file_input" class="mb-4 p-2 rounded-md bg-gray-700 text-white" />
+                                <button id="upload_btn" class="w-1/2 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700">Upload</button>
+                                <img id="previsu_picture" src="" width="50" height="50" class="mt-4"/>
+                            </form>
+                        </div> -->
+
+                        <!-- Infos utilisateur -->
+                        <h5 class="mb-1 text-2xl font-semibold text-center cursor-pointer" id="profile_username" onclick="editUsername()">Username</h5>
+                        <span id="wr_card" class="text-sm font-medium">Winrate N/A</span>
+
+
+                        <!-- Boutons -->
+                        <div id="friend_div" class="hidden mt-6 space-x-4">
+                            <button id="friend_btn" class="px-6 py-2 bg-gradient-to-r from-green-400 to-blue-600 text-white rounded-lg hover:bg-gradient-to-bl transition-all duration-300">Add Friend</button>
+                            <button id="block_btn" class="px-6 py-2 bg-gradient-to-r from-red-400 to-yellow-600 text-white rounded-lg hover:bg-gradient-to-bl transition-all duration-300">Block</button>
+                        </div>
+                        <div class="flex">
+                            <!-- Premier bouton -->
+                            <button id="fa_btn" class="flex relative px-6 py-3 text-white font-bold text-lg rounded-lg bg-gradient-to-r from-pink-500 via-yellow-400 to-green-500 animate-pulse shadow-lg hover:shadow-xl transition duration-300 mr-5">
+                              <span class="relative z-10">2FA</span>
+                              <span class="absolute inset-0 bg-white opacity-10 rounded-lg blur-sm"></span>
+                            </button>
+                          
+                            <!-- Deuxième bouton (popup) -->
+                            <button class="flex relative px-6 py-3 bg-pink-700 text-white rounded-full hover:bg-blue-700" onclick="openPasswordPopup()">
+                              <i class="fas fa-key mr-2"></i> 🔑
+                            </button>
+                        </div>
+
+                        <!-- Date de création -->
+                        <p id="profile_creation" class="mt-4 text-sm text-gray-300"></p>
+                    </div>
+
+                    <!-- Search barre -->
+                    <div id="search_container" class="flex items-center mt-10 space-x-4">
+                        <input id="search_player_in" type="text" placeholder="" class="p-3 rounded-lg w-64 bg-gray-800 text-white placeholder-gray-400 outline-none focus:ring-2 focus:ring-purple-400" />
+                        <button id="search_player_btn" class="py-3 px-4 bg-gradient-to-r from-teal-500 to-lime-500 text-white rounded-lg hover:scale-105 transition-all duration-300">🔎</button>
+                    </div>
+
+                    <!-- Historique -->
+                    <div id="histo" class="hidden w-full max-w-md bg-gray-700 p-6 rounded-lg mt-10 shadow-lg text-white">
+                        <p id="histo_text" class="text-lg font-semibold mb-4">Historique</p>
+                        <svg id="wr_graph" viewBox="0 0 36 36" class="mx-auto mb-4" style="max-height: 120px;">
+                            <path class="around" style="stroke: #960e0e; fill: none; stroke-width: 2.8;" stroke-dasharray="100, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+                            <path id="percent" class="percent" style="stroke: #6f6fff; fill: none; stroke-width: 2.8; stroke-linecap: round;" stroke-dasharray="30, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+                            <text id="wr" x="18" y="14" text-anchor="middle" dy="7" font-size="10">3/10</text>
+                        </svg>
+                        <ul id="histo_list" class="space-y-2 text-sm text-gray-300">
+                        </ul>
+                    </div>
+                </div>
+
+                <!--TOURNAMENT-->
+                <div id="tournament_page" class="hidden">
+                    <!--CREATION OF A TOURNAMENT-->
+                    <div id="tournament_form" class="hidden">
+                        <h3>Creating a tournament</h3>
+                        <form novalidate="true">
+                            <label>Tournament's name</label>
+                            <input type="text" name="tname" id="tournament_name"/>
+                            <input type="submit" value="Submit" id="tournament_creation"/>
+                        </form>
+                    </div>
+                    <!--LIST OF TOURNAMENTS-->
+                    <div id="tournaments_join" class="hidden">
+                        <h3>Tournaments</h3>
+                        <search id="tournaments_list">
+                        </search>
+                    </div>
+                    <!-- Tournament home's page -->
+                    <div id="tournament" class="hidden">
+                        <div id="tournament_state" class="hidden"></div>
+                    </div>
+                </div>
+                
+                <!-- Friendlist box -->
+                <div class="w-[20%] absolute bottom-4 right-4 overflow-y-auto bg-gray-100 dark:bg-gray-800 rounded-lg p-4 border border-gray-300 dark:border-gray-700 shadow-inner">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 id="friend_text" class="text-xl font-bold text-gray-800 dark:text-gray-100">Amis connectés</h2>
+                    </div>
+                        
+                    <div id="friendlist">
+                        <div id="friendsContainer" class="space-y-3">
+
+                        </div>
+                    </div>
+                </div>
+            </div> 
+<!-- JEU -->
+<div id="game_page" class="hidden inset-0 flex-col items-center justify-center space-y-6">
+    <!-- SCOREBOARD au-dessus -->
+    <div id="scoreboard" class="block text-3xl font-stretch-ultra-condensed font-roboto text-center" >
+        <span id="player-left" class="w-[85%] transition-all duration-500 ease-in-out cursor-pointer p-10 text-5xl font-extrabold text-white bg-gradient-to-r from-fuchsia-500 via-red-500 to-orange-400  rounded-xl border-4 border-white shadow-lg text-center tracking-wide select-none">Player 1</span> 
+        <span id="score-left" class="w-[85%] transition-all duration-500 ease-in-out cursor-pointer p-10 text-5xl font-extrabold text-white bg-gradient-to-r from-fuchsia-500 via-red-500 to-orange-400  rounded-xl border-4 border-white shadow-lg text-center tracking-wide select-none">0</span>
+        <span id="score-right" class="w-[85%] transition-all duration-500 ease-in-out cursor-pointer p-10 text-5xl font-extrabold text-white bg-gradient-to-r from-emerald-400 via-teal-400 to-lime-400 rounded-xl border-4 border-white shadow-lg text-center tracking-wide select-none">0</span>
+        <span id="player-right" class="w-[85%] transition-all duration-500 ease-in-out cursor-pointer p-10 text-5xl font-extrabold text-white bg-gradient-to-r from-emerald-400 via-teal-400 to-lime-400 rounded-xl border-4 border-white shadow-lg text-center tracking-wide select-none">Player 2</span>
+    </div>
+    <!-- Game -->
+    <div id="game" class="relative w-[700px] h-[480px] bg-red-500 mx-auto my-10">
+        <div id="l_paddle" class="absolute left-0 top-1/2 transform -translate-y-1/2 bg-black w-[10px] h-[80px]"></div>
+        <div id="ball" class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black w-[10px] h-[10px]"></div>
+        <div id="r_paddle" class="absolute right-0 top-1/2 transform -translate-y-1/2 bg-black w-[10px] h-[80px]"></div>
+    </div>
+
+</div>
+    
+<div id="about" class="hidden overflow-y-auto h-[500px] whitespace-pre-line text-white font-bold flex-col items-center justify-start px-4 w-3/4 mx-auto bg-gradient-to-br from-green-400 via-cyan-500 to-blue-500 p-6 rounded-xl shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
+
+🎮 Transcendence - Pong Multijoueur en ligne
+🧠 À propos du projet
+
+Transcendence est un projet de l'école 42 qui consiste à développer un jeu Pong moderne et complet en fullstack, avec une interface utilisateur interactive et des fonctionnalités de réseau.
+Ce projet a pour but de consolider les compétences en développement web en utilisant des technologies modernes côté frontend et backend, tout en intégrant des fonctionnalités temps réel comme des parties en ligne, un chat, et un système d'amis.
+
+⚙️ Technologies utilisées :
+
+    Frontend : React, TypeScript, WebSocket, Tailwindcss
+    Backend : TypeScript, Fastify
+    Authentification : 2FA (Two-Factor Authentication)
+    WebSocket : pour le jeu en temps réel et le chat
+    Docker : pour le déploiement
+
+🏓 Description du jeu
+
+Le jeu est une version améliorée du classique Pong, avec des parties 1v1 jouables en ligne, des tournois et un classement. Les joueurs peuvent s'inscrire, personnaliser leur profil, discuter entre eux et défier leurs amis.
+
+🕹️ Commandes pour jouer
+
+Commandes clavier disponibles :
+Action                 Touche(s)
+Monter la raquette     ↑ (Flèche Haut) ou W
+Descendre la raquette  ↓ (Flèche Bas) ou S
+
+💡 Fonctionnalités du site
+
+- 🎮 Jeu multijoueur en temps réel
+- 💬 Chat en direct avec les autres joueurs
+- 🧑‍🤝‍🧑 Système d’amis et invitations aux matchs
+- 🏆 Tournois et classement global
+- 🔒 Authentification sécurisée avec 2FA
+- 🌐 Interface multilingue (FR/EN)
+- 👤 Profils utilisateurs personnalisables
+- 📱 Interface responsive adaptée à toutes les tailles d’écran
+
+🔐 Bouton "Logout" (Déconnexion)
+
+En haut à droite de l’interface, le bouton "Logout" permet à l’utilisateur de se déconnecter en toute sécurité de son compte. Cette action met fin à la session active et redirige vers la page d'accueil ou de connexion.
+
+🌍 Changement de langue
+
+En haut à gauche du site, une option permet de changer la langue de l’interface. Cela permet à l'utilisateur de naviguer en français ou en anglais, selon sa préférence. Les textes de l'interface, les boutons et les messages s’adaptent dynamiquement à la langue sélectionnée.
+</div>
+      
+    </div>
+
+<div id="offline-confirm-modal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
+  <div class="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg p-6 w-80 text-center">
+    <p id="game_start" class="text-base font-medium text-gray-800 dark:text-gray-100 mb-4">La partie va commencer. Prêt ?</p>
+    <div class="flex justify-center space-x-4">
+      <button id="modal-confirm-yes" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">Oui</button>
+      <button id="modal-confirm-no" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const cameraIcon = document.getElementById("camera_icon");
+  const profileOverlay = document.getElementById("profile_picture_overlay");
+  const closeBtn = document.getElementById("profile_cross");
+
+  // Clique sur l'icône → montre la modale
+  cameraIcon.addEventListener("click", () => {
+    profileOverlay.classList.remove("hidden");
+  });
+
+  // Clique sur la croix ✖ → cache la modale
+  closeBtn.addEventListener("click", () => {
+    profileOverlay.classList.add("hidden");
+  });
+</script>
+
+<script>
+    function editUsername() {
+        var currentUsername = document.getElementById('profile_username').innerText;
+        var inputField = document.createElement('input');
+        inputField.type = 'text';
+        inputField.value = currentUsername;
+        inputField.id = 'profile_username_input';
+
+        inputField.classList.add(
+            'text-xl',
+            'font-semibold',
+            'text-center',
+            'border-b',
+            'border-gray-400',
+            'focus:outline-none',
+            'focus:border-blue-500',
+            'px-2',
+            'py-1'
+        );
+
+        var usernameElement = document.getElementById('profile_username');
+        usernameElement.innerHTML = '';
+        usernameElement.appendChild(inputField);
+
+        inputField.focus();
+
+        inputField.addEventListener('blur', function() {
+            saveUsername(inputField.value);
+        });
+
+        inputField.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                saveUsername(inputField.value);
+            }
+        });
+    }
+
+    async function saveUsername(newUsername) {
+        document.getElementById('profile_username').innerText = newUsername;
+        console.log("Nouvelle valeur du nom d'utilisateur : " + newUsername);
+
+        const body = {
+            username: "IQiyu", // changer par this.username dans la classe
+            newUsername: newUsername
+        };
+        try {
+            const req = await fetch('/db/update/username', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { "Content-Type": "application/json" },
+                    boy: JSON.stringify(body)
+                });
+
+            const data = await req.json();
+
+            if (!data.success)
+                throw(Error(data.error));
+
+            console.log("username updated.");
+        } catch (error) {
+            alert(error);
+        }
+    }
+</script>
+
+<script>
+    // Ouvrir la popup
+    function openPasswordPopup() {
+        document.getElementById('passwordPopup').classList.remove('hidden');
+    }
+
+    // Fermer la popup
+    function closePasswordPopup() {
+        document.getElementById('passwordPopup').classList.add('hidden');
+    }
+
+    // Validation du formulaire de changement de mot de passe
+    document.getElementById('passwordForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
+
+        // Récupération des valeurs des champs
+        const currentPassword = document.getElementById('currentPassword').value;
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+
+        // Vérification que les mots de passe correspondent
+        if (newPassword !== confirmPassword) {
+            showError("Les nouveaux mots de passe ne correspondent pas.");
+            return;
+        }
+
+        const body = {
+            username: "IQiyu", // changer par this.username dans la classe
+            password: currentPassword,
+            newPassword: newPassword
+        };
+        try {
+            const req = await fetch('/db/update/password', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { "Content-Type": "application/json" },
+                    boy: JSON.stringify(body)
+                });
+
+            const data = await req.json();
+
+            if (!data.success)
+                throw(Error(data.error));
+
+            console.log("password updated.");
+        } catch (error) {
+            alert(error);
+        }
+
+        // Si tout est correct, effectuer le changement (par exemple, envoyer les données au serveur)
+        alert("Mot de passe changé avec succès !");
+        closePasswordPopup();
+        document.getElementById('passwordForm').reset();
+    });
+
+    // Afficher les messages d'erreur
+    function showError(message) {
+        const errorMessagesDiv = document.getElementById('errorMessages');
+        const errorMessageText = document.getElementById('errorMessageText');
+        errorMessageText.innerText = message;
+        errorMessagesDiv.classList.remove('hidden');
+    }
+</script>
+
+
+    <script type="module" src="app.js"></script>
+
+</body>
+</html>
