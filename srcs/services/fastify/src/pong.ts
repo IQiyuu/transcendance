@@ -45,7 +45,11 @@ export class   GameController{
     private online_play_btn = document.getElementById("matchmaking");
     private offline_play_btn = document.getElementById("offline");
 
+    private right_text = document.getElementById("right_text");
+    private left_text = document.getElementById("left_text");
+
     private game = document.getElementById("game");
+    private scoreboard = document.getElementById("scoreboard");
 
     private left_player_tag = document.getElementById("player-left");
     private right_player_tag = document.getElementById("player-right");
@@ -142,8 +146,8 @@ export class   GameController{
 
     const onYes = () => {
         closeModal();
+        this.print_all();
         this.stopMatchmaking();
-        this.print_play_page();
         this.is_local = true;
         this.ws = new GameClientSocket(this.username, this);
         this.ws.startOfflineGame();
@@ -245,7 +249,6 @@ export class   GameController{
         document.removeEventListener("keyup", this.key_handler)
         document.removeEventListener("keydown", this.key_handler)
         clearInterval(this.interval_id);
-        this.hide_game();
         // if (false){ // game is from a tournament
         //     this.tournament.finishGame();
         // }
@@ -284,7 +287,7 @@ export class   GameController{
     // Update every game values
     updateState(game){
         // console.log("Updating game");
-        // console.log(game);
+        console.log(game);
 
         this.game_id = game.id;
 
@@ -366,15 +369,16 @@ export class   GameController{
     }
 
     print_scoreboard(){
-        this.game.classList.replace("hidden", "flex");
+        this.scoreboard.classList.replace("hidden", "block");
     }
 
     hide_scoreboard(){
-        this.game.classList.replace("flex", "hidden");
+        this.scoreboard.classList.replace("block", "hidden");
     }
 
     print_game(){
         this.game.classList.replace("hidden", "flex");
+        console.log(this.game);
     }
 
     hide_game(){
@@ -382,11 +386,16 @@ export class   GameController{
     }
 
     print_end_game(){
-        alert("To do, but game finished");
+        this.right_text.textContent = this.score_right.textContent === '11' ? "WIN" : "LOSE";
+        this.right_text.classList.replace("hidden", "absolute");
+        this.left_text.textContent = this.score_left.textContent === '11' ? "WIN" : "LOSE";
+        this.left_text.classList.replace("hidden", "absolute");
+
     }
 
     hide_end_game(){
-        console.log("Maybe clearing the text ?");
+        this.right_text.classList.replace("absolute", "hidden");
+        this.left_text.classList.replace("absolute", "hidden");
     }
 
     // Not to be added to hide_all
@@ -398,6 +407,12 @@ export class   GameController{
         this.hide_play_page();
         this.hide_game();
         this.hide_scoreboard();
+    }
+
+    print_all(){
+        this.print_play_page();
+        this.print_game();
+        this.print_scoreboard();
     }
 };
 
