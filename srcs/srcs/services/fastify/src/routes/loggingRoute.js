@@ -28,8 +28,8 @@ async function isValidPassword(password) {
         throw Error("Password must contain maj, min, special char and digit");
       }
     } catch (error) {
-      console.error("Erreur : AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", error);
-      return { success: false, message: 'Error insert data in db.' };
+      console.error(error);
+      return { success: false, error: error };
     }
     
     try {
