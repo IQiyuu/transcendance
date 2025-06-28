@@ -351,7 +351,7 @@ export class SiteController{
     constructor(){
         this.profile = new ProfileController(this);
         this.game = new GameController(this);
-        this.tournament = new TournamentController(this);
+        this.tournament = new TournamentController(this, this.game);
     }
 
     async initLang() {
@@ -557,8 +557,8 @@ export class SiteController{
 
         this.store_session(this.username);
 
-        console.log("Connected, client socket :");
-        console.log(this.ws);
+        // console.log("Connected, client socket :");
+        // console.log(this.ws);
 
         this.hide_all();
         document.body.classList.remove("justify-center", "align-center", "flex");

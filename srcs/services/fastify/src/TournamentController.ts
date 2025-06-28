@@ -1,11 +1,18 @@
-import { TournamentClientSocket } from "./TournamentClientSocket.js";
 import { SiteController } from "./SiteController.js";
+import {GameController} from "./pong.js";
+import { TournamentClientSocket } from "./TournamentClientSocket.js";
+
+const T_STARTING = 0;
+const T_READY = 1;
+const T_ON_GOING = 2;
+const T_FINISHED = 3;
 
 export class Tournament {
     private id;
     private name;
     private owner;
     private players; // image, win rate{}
+    private brackets = undefined; // ordered array of ordered array of {username, username, state, winner}
 
 
     constructor(tournament) {
@@ -13,6 +20,7 @@ export class Tournament {
         this.name = tournament.name;
         this.owner = tournament.owner;
         this.players = tournament.players;
+        this.brackets = null;
     }
 
     getId() {
@@ -30,9 +38,18 @@ export class Tournament {
     getPlayers(){
         return (this.players);
     }
+    getBrackets(){
+        return (this.brackets);
+    }
+
+    isStarted(){
+        return (this.brackets !== undefined);
+    }
 
     update(tournament){
         this.players = tournament.players;
+        if (tournament.brackets !== undefined )
+            this.brackets = tournament.brackets;
     }
 
 }
@@ -44,19 +61,25 @@ export class TournamentController {
     private site: SiteController = null;
     private username: string = null;
     private tournament: Tournament = null;
+    private game: GameController;
 
     /**VIEW */
     private tournament_page = document.getElementById("tournament_page");
     private tournaments_page = document.getElementById("tournaments_join");
     private tournament_div = document.getElementById("tournament");
+    private tournament_lobby = document.getElementById("tournament_lobby");
+    private tournament_state = document.getElementById("tournament_state");
     private tournaments_list = document.getElementById("tournaments_list");
     private tournament_form = document.getElementById("tournament_form");
     private tournament_create_btn = document.getElementById("tournament_create_button");
     private tournament_join_btn = document.getElementById("tournament_join_button");
     private tournament_rejoin_btn = document.getElementById("tournament_rejoin_button");
 
-    constructor(site) {
+    // Need to handle if the tournament is disbanded
+    constructor(site : SiteController, game : GameController) {
         this.site = site;
+        this.game = game;
+        // this.checkTournament();
     }
 
     setUsername(username) {
@@ -107,8 +130,9 @@ export class TournamentController {
                     this.cws = new TournamentClientSocket(this.username, this, this.tournament);
                     // console.log(this.tournament);
                     this.hide_all();
+                    // this.print_tournament_lobby();
+                    // this.print_tournament_page();
                     this.print_tournament();
-                    this.print_tournament_page();
                     this.print_tournament_rejoin_btn();
                 }
                 else
@@ -167,10 +191,16 @@ export class TournamentController {
 
                                             this.site.hide_all();
                                             this.clear_tournament();
-                                            this.print_tournament_page();
+                                            // this.print_tournament_page();
+                                            // this.print_tournament_lobby();
                                             this.print_tournament();
-                                        } else
+                                        } else{
+                                            const T_DSNT_EXISTS = 999;
+                                            if (data.code === T_DSNT_EXISTS){
+                                                alert("This tournament doesnt exists");
+                                            }
                                             throw Error(data.error);
+                                        }
                                     } catch (error) {
                                         console.log(error);
                                     }
@@ -191,8 +221,9 @@ export class TournamentController {
         this.tournament_rejoin_btn.addEventListener("click", async (event) => {
             this.clear_tournament();
             this.site.hide_all();
-            this.print_tournament_page();
+            // this.print_tournament_page();
             this.print_tournament();
+            // state
         });
     }
 
@@ -201,6 +232,14 @@ export class TournamentController {
         this.clear_tournament();
         this.site.hide_all();
         this.print_tournament();
+        // this.print_tournament_lobby();
+        // this.print_tournament_page();
+    }
+
+    createMatch(game_id, game){
+        console.log("Creating the match :");
+        console.log(game);
+        this.game.startTournamentGame(game_id, game);
     }
 
     /**
@@ -227,20 +266,23 @@ export class TournamentController {
         this.tournaments_page.classList.replace("flex", "hidden");
     }
 
-    print_tournament() {
-        console.log("Printing tournament");
+    print_tournament_div(){
+        this.tournament_div.classList.replace("hidden", "block");
+    }
+
+    print_tournament_lobby(){
+        // To recheck 
+        console.log("Printing tournament lobby ( I have this :");
         console.log(this.tournament);
         if (this.tournament === null){
             alert("Not implemented yet (print tournament but tournament is null)");
             return ;
         }
-        this.tournament_div.classList.replace("hidden", "block");
 
         let title = document.createElement("h3");
         title.append(document.createTextNode(this.tournament.getName()));
 
         let table = document.createElement("table");
-        table.append();
 
         //First line
         let tr = document.createElement("tr");
@@ -255,7 +297,7 @@ export class TournamentController {
 
         table.append(tr);
 
-        //Next lines
+        //Each player info
         this.tournament.getPlayers().forEach(p => {
             tr = document.createElement("tr");
             th = document.createElement("th");
@@ -273,54 +315,88 @@ export class TournamentController {
             tr.append(th);
             table.append(tr);
         });
-
-        this.tournament_div.append(title);
-        this.tournament_div.append(table);
+        this.tournament_lobby.append(title);
+        this.tournament_lobby.append(table);
 
         if (this.username === this.tournament.getOwner()) {
             let start_button = document.createElement("button");
             start_button.append(document.createTextNode("Start"));
             start_button.onclick = (event) => this.startTournamentHandler(event);
-            this.tournament_div.append(start_button);
+            this.tournament_lobby.append(start_button);
         }
 
         let leave_button = document.createElement("button");
         leave_button.append(document.createTextNode("Leave"));
 
         leave_button.onclick = (event) => this.leaveTournamentHandler(event);
+        this.tournament_lobby.append(leave_button);
+        this.tournament_lobby.classList.replace("hidden", "block");
+    }
 
-        // leave_button.addEventListener("click", async(event) => {
-        //     event.preventDefault();
-        //     console.log("Trying to leave so soon ?");
+    hide_tournament_lobby(){
+        this.tournament_lobby.classList.replace("block", "hidden");
+    }
 
-        //     try{
-        //         // fetch HERE TODO
-        //         let query = new URLSearchParams();
-        //         query.append("username", this.username);
-        //         console.log("Trying to leave ");
-        //         console.log(this.tournament);
-        //         let url = '/tournament/leave/' + this.tournament.getId() + `?${query}`;
+    print_tournament_state(){
+        // this.tournament_state.style.height="80";
+        // this.tournament_state.style.width="60";
+        let brackets = this.tournament.getBrackets();
+        if (brackets === undefined || brackets === null){
+            // console.log("TOurnament not started")
+            return ;
+        }
 
-        //         const resp = await fetch(url, {
-        //             method: 'GET'
-        //         });
+        console.log("Printing state :");
+        let nb_round = brackets.length;
+        let table = document.createElement("table");
+        for (let i = 0; i < nb_round ; i++){
+            console.log(brackets[i]);
+            let nb_match = brackets[i].length;
+            let round = document.createElement("tr");
+            for (let j = 0 ; j < nb_match ; j++){
+                let match = document.createElement("td");
+                let winner = brackets[i][j].winner;
 
-        //         const data = await resp.json();
-        //         if (data.success){
-        //             this.tournament = null;
-        //             this.hide_all();
-        //             this.cws.close();
-        //             this.cws = null;
-        //             this.print_tournament_page();
-        //         }else{
-        //             console.log("Didnt leave");
-        //             throw (Error(data.error));
-        //         }
-        //     } catch (error){
-        //         console.log(error);
-        //     }
-        // });
-        this.tournament_div.append(leave_button);
+                console.log(brackets[i][j]);
+
+                let p1 = document.createElement("p");
+                p1.innerText = brackets[i][j].p1;
+                if (winner !== null)
+                    p1.style.backgroundColor = (winner === brackets[i][j].p1 ? "green" : "red");
+                match.appendChild(p1);
+
+                if (brackets[i][j].p2 !== null){
+                    let p2 = document.createElement("p");
+                    match.append(document.createTextNode(" VS "))
+                    p2.append(document.createTextNode(brackets[i][j].p2));
+                    if (winner !== null)
+                        p2.style.backgroundColor = (winner === brackets[i][j].p2 ? "green" : "red");
+                    match.appendChild(p2);
+                }
+                // match.innerText = "M";
+                round.append(match);
+            }
+            table.append(round);
+        }
+        this.tournament_state.append(table);
+
+        this.tournament_state.classList.replace("hidden", "block");
+    }
+
+    hide_tournament_state(){
+        this.tournament_state.classList.replace("block", "hidden");
+    }
+
+    print_tournament(){
+        this.print_tournament_lobby();
+        this.clear_tournament_state();
+        this.print_tournament_state();
+        this.print_tournament_div();
+        this.print_tournament_page();
+    }
+
+    hide_tournament(){
+        this.tournament_div.classList.replace("block", "hidden");
     }
 
     async leaveTournamentHandler(event) {
@@ -345,7 +421,7 @@ export class TournamentController {
                 this.hide_all();
                 this.cws.close();
                 this.cws = null;
-                this.print_tournament_page();
+                this.tournament_join_btn.dispatchEvent(new MouseEvent("click"));
             } else {
                 console.log("Didnt leave");
                 throw (Error(data.error));
@@ -356,13 +432,7 @@ export class TournamentController {
     }
 
     async startTournamentHandler(event) {
-        if (this.cws.isReady()){
-            this.cws.startTournament();
-        }
-    }
-
-    hide_tournament() {
-        this.tournament_div.classList.replace("block", "hidden");
+        this.cws.startTournament();
     }
 
     print_tournament_form() {
@@ -382,12 +452,15 @@ export class TournamentController {
     }
 
     clear_tournament() {
-        // console.log(this.tournament_div.textContent);/
-        this.tournament_div.textContent = '';
+        this.tournament_lobby.textContent = '';
     }
 
+    clear_tournament_state(){
+        this.tournament_state.textContent = '';
+    }
+
+
     clear_tournaments() {
-        // console.log(this.tournaments_list.textContent);
         this.tournaments_list.textContent = '';
     }
 
@@ -395,6 +468,8 @@ export class TournamentController {
         this.hide_tournament_page();
         this.hide_tournaments_page();
         this.hide_tournament_form();
+        this.hide_tournament_lobby();
+        this.hide_tournament_state();
         this.hide_tournament_rejoin_btn();
         this.hide_tournament();
     }

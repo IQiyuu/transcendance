@@ -8,25 +8,35 @@ function degToRad(degree){
     return ((degree * Math.PI) / 180)
 }
 
+// Each position is the center of the object
+
 const	SCORE_GOAL = 11;
-const	STARTING_SPEED = 10;
+const	STARTING_SPEED = 7;
 const	ACCELERATION = 1;
-const	LIMIT_SPEED = 20;
+const	LIMIT_SPEED = 15;
 const	BOARD_W = 700;
 const	BOARD_H = 480;
 
 const   PADDLE_W = 10;
 const   PADDLE_H = 80;
 
+const   BALL_W = 10;
+
 const	STARTING_X = BOARD_W / 2;
 const	STARTING_Y = BOARD_H / 2;
 
-export let games = {};
+export let games = [];
 const finished_games = [];
+
+/**
+ * Clients are put in the waiting map on connection, then are moved to the playing when the game start
+ */
+let waiting_clients = new Map(); // username, socket
+let playing_clients = new Map(); // socket, game_id as we may have 2 socket for the same game_id
 
 // Creer un objet game cote server
 export function createGame(user, user2) {
-    const gameId = Object.keys(games).length;
+    const gameId = games.length;
     const angle = degToRad(randomIntFromInterval(0, 45));
     if (randomIntFromInterval(0,1) === 0){
         let tmp = user;
@@ -34,7 +44,7 @@ export function createGame(user, user2) {
         user2 = tmp;
     }
     const neg_x = randomIntFromInterval(0,1), neg_y = randomIntFromInterval(0,1);
-    games[gameId] = {
+    games.push({
         id: gameId,
         players: {  
             left: user,
@@ -72,15 +82,15 @@ export function createGame(user, user2) {
                 y: STARTING_Y
             }
         }
-    }
+    });
     return gameId;
 };
 
 export function movePaddle(game, side, moveUp){
     if (side !== "left" && side !== "right")
         return ;
-    let new_y = game.paddles[side].y + (moveUp ? -4 : 4);
-    if (new_y > 15 && new_y < BOARD_H - 15)
+    let new_y = (game.paddles[side].y) + (moveUp ? -4 : 4);
+    if (new_y - (PADDLE_H / 2) > 20 && new_y + (PADDLE_H / 2) < BOARD_H - 20)
         game.paddles[side].y = new_y;
 }
 
@@ -89,16 +99,28 @@ export function userExistsInDb(username, db){
     return (req !== null && req !== undefined);
 }
 
+export function addPlayingClients(p1, p2, id){
+    // console.log(p1);
+    // console.log(p2);
+    playing_clients.set(p1.socket, id);
+    playing_clients.set(p2.socket, id);
+}
+
+
+function    getGame(gs, username){
+    for (let i = 0; i < gs.length; i++){
+        if (gs[i].players.left === username || gs[i].players.right === username)
+            return (gs[i].id);
+    }
+    return (-1)
+}
+
 export async function gameRoute (fastify, options) {
     // let waiting_list = null;
     // let w_uname = null;
     let img_path = "dist/assets/imgs/"; //to update 
 
 
-    // function addGame(game){
-    //     games[Object.keys(games).length] = game;
-    // }
-    
     // Stocke la game dans la db
     fastify.post('/game/storeGame', async (request, reply) => {
         const { winner_username, loser_username, loser_score } = request.body;
@@ -122,7 +144,7 @@ export async function gameRoute (fastify, options) {
     });
 
     fastify.post('/game/stopGame', async (req, reply) => {
-        delete games[req.body.gameId];
+        delete games[req.body.gameId]; // to update
     });
 
     // Route qui recupere les infos du user :username dans la db et les renvoie
@@ -261,12 +283,6 @@ export async function gameRoute (fastify, options) {
                 game.paddles["left"].y = newY2;
     })
 
-    /**
-     * Clients are put in the waiting map on connection, then are moved to the playing when the game start
-     */
-    let waiting_clients = new Map(); // username, socket
-    let playing_clients = new Map(); // socket, game_id as we have 2 socket sometimes for the same game_id
-
     // Sub plugin for ws games;
     fastify.register(async function (fastify) {
         fastify.addHook("preValidation", async (request, reply) => {
@@ -279,7 +295,7 @@ export async function gameRoute (fastify, options) {
                 // PROBLEM ; I dont know when this is executed
                 console.log("socket game created for");
                 console.log(username);
-                waiting_clients.set(username, socket);
+                // waiting_clients.set(username, socket);
             });
             
             socket.on('message', (data) => {
@@ -304,6 +320,7 @@ export async function gameRoute (fastify, options) {
                     waiting_clients.delete(username);
                 } else if (message.type === "game_update"){
                     let game = games[message.game_id];
+                    //to check ?
                     movePaddle(game, message.side, message.move_up);
 
                     // if (newY > 15 && newY < BOARD_H - 15)
@@ -348,6 +365,29 @@ export async function gameRoute (fastify, options) {
                         });
                         socket.close();
                     }
+                } else if (message.type === "tournament"){
+                    console.log("tournament msg");
+                    if (message.state === "connecting_match"){
+                        console.log("Client is connecting");
+                        let game_id = getGame(games, username);
+                        if (game_id === -1){
+                            console.log("Error");
+                            socket.send(JSON.stringify({
+                                type: 'tournament',
+                                success: false,
+                                message: "User isnt in a match"
+                            }));
+                        }else {
+                            socket.send(JSON.stringify({
+                                type: 'tournament',
+                                success: true,
+                                state: 'match_connected',
+                                game: games[game_id],
+                                game_id: game_id
+                            }));
+                            playing_clients.set(socket, game_id);
+                        }
+                    }
                 }
             })
 
@@ -367,41 +407,10 @@ export async function gameRoute (fastify, options) {
     });
 
 
-    // fastify.register(async function (fastify) {
-    //     // Gere le matchmaking et la deconnexion en pleine partie (Le deconnecte perd automatiquement)
-    //     // marche en socket
-    //     fastify.get('/matchmaking', { websocket: true }, (socket, req) => {
-
-    //         if (waiting_list && w_uname != req.query.username) {
-    //             const gameId = createGame(w_uname, req.query.username);
-    //             // console.log("game created: ", gameId);
-    //             waiting_list.send(JSON.stringify({ state: "found", gameId: gameId, role: "left", opponent: w_uname }));
-    //             socket.send(JSON.stringify({ state: "found", gameId: gameId, role: "right", opponent: req.query.username }));
-    
-    //             socket.on('close', () => {
-    //                 games[gameId].scores["left"] = 11;
-    //             });
-    //             waiting_list.on('close', () => {
-    //                 games[gameId].scores["right"] = 11;
-    //             });
-    //             waiting_list = null;
-    //             w_uname = null;
-    //         } else if (w_uname == req.query.username) {
-    //             waiting_list = null;
-    //             w_uname = null;
-    //             // console.log("someone left.");
-    //         } else {
-    //             waiting_list = socket;
-    //             w_uname = req.query.username;
-    //             socket.on('close', () => {
-    //                 // console.log("someone left.");
-    //                 waiting_list = null;
-    //                 w_uname = null;
-    //             });
-    //         }
-    //     });
-    // });
-
+    /**
+     * For paddles collisions, we check that the ball center for y touch the paddle
+     *  For x, we check that there is a contact
+     */
     setInterval(() => {
         finished_games.length = 0; // clearing array
     
@@ -413,15 +422,15 @@ export async function gameRoute (fastify, options) {
             }
             game.ball.x += game.ball.dx * game.ball.v;
             game.ball.y += game.ball.dy * game.ball.v;
-            if (game.ball.y <= 0 || game.ball.y >= BOARD_H)
+            if (game.ball.y - (BALL_W / 2) <= 0 || game.ball.y + (BALL_W / 2) >= BOARD_H)
                 game.ball.dy *= -1;
 
-            if (game.ball.x <= game.paddles.left.x + PADDLE_W
-                && game.ball.y >= game.paddles.left.y // on passe de -50 a 0
-                && game.ball.y <= game.paddles.left.y + PADDLE_H) {
+            if (game.ball.x - (BALL_W / 2) <= game.paddles.left.x + (PADDLE_W / 2)
+                && game.ball.y >= game.paddles.left.y - (PADDLE_H / 2)
+                && game.ball.y <= game.paddles.left.y + (PADDLE_H / 2)) {
                     // There are 8 zone considered for the bouncing, so we round to the closest quarter
-                    let dist = Math.abs(game.ball.y - (game.paddles.left.y + (PADDLE_H / 2)));
-                    let sign = game.ball.dy < 0 ? -1 : 1;
+                    let dist = Math.abs(game.ball.y - game.paddles.left.y);
+                    let sign = game.ball.dy < 0 ? -1 : 1; // test if vector is neg
                     let angle = 90;
                     if (dist > (3 * 50) / 4)
                         angle += 45;
@@ -431,17 +440,17 @@ export async function gameRoute (fastify, options) {
                         angle += 80;
                     else
                         angle += 90;
+
                     game.ball.dx = Math.cos(degToRad(angle)) * -1;
                     game.ball.dy = Math.sin(degToRad(angle)) * sign;
                     game.ball.accelerate();
                 }
-                else if (game.ball.x > game.paddles.right.x
-                    && game.ball.y > game.paddles.right.y // same here
-                    && game.ball.y < game.paddles.right.y + 100) {
+                else if (game.ball.x + (BALL_W / 2) >= game.paddles.right.x - (PADDLE_W / 2)
+                    && game.ball.y >= game.paddles.right.y - (PADDLE_H / 2)
+                    && game.ball.y <= game.paddles.right.y + (PADDLE_H / 2)) {
                     // There are 8 zone considered for the bouncing, so we round to the closest quarter
-                    let dist = Math.abs(game.ball.y - (game.paddles.right.y + (PADDLE_H / 2)));
+                    let dist = Math.abs(game.ball.y - game.paddles.right.y);
                     let sign = game.ball.dy < 0 ? -1 : 1;
-
                     let angle = 90;
                     if (dist > (3 * 50) / 4)
                         angle += 45;
@@ -456,9 +465,9 @@ export async function gameRoute (fastify, options) {
                     game.ball.dy = Math.sin(degToRad(angle)) * sign;
                     game.ball.accelerate();
                 }
-
-            if (game.ball.x <= game.paddles.left.x - PADDLE_W || game.ball.x >= game.paddles.right.x + PADDLE_W + 10) {
-                game.scores[game.ball.x <= game.paddles.left.x - PADDLE_W ? "right" : "left"]++;
+            // checking with centers of objects
+            if (game.ball.x <= game.paddles.left.x || game.ball.x >= game.paddles.right.x) {
+                game.scores[game.ball.x <= game.paddles.left.x ? "right" : "left"]++;
                 game.ball.v = STARTING_SPEED;
                 game.ball.x = STARTING_X;
                 game.ball.y = STARTING_Y;
@@ -470,6 +479,8 @@ export async function gameRoute (fastify, options) {
         playing_clients.forEach((game_id, socket) => {
             let game = games[game_id];// Tester que la game existe tjrs sinon crash possble
             
+            // console.log("for :" + game_id + " sock : " + socket);
+            // console.log(game);
             if (finished_games.includes(game_id)){
                 // end_game(game); // save into db
                 socket.send(JSON.stringify({
