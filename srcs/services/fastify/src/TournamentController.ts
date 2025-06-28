@@ -8,9 +8,9 @@ const T_ON_GOING = 2;
 const T_FINISHED = 3;
 
 export class Tournament {
-    private id : number = -1;
-    private name : string = "placeholder";
-    private owner : string = "unowned";
+    private id;
+    private name;
+    private owner;
     private players; // image, win rate{}
     private brackets = undefined; // ordered array of ordered array of {username, username, state, winner}
 
@@ -38,7 +38,6 @@ export class Tournament {
     getPlayers(){
         return (this.players);
     }
-
     getBrackets(){
         return (this.brackets);
     }
@@ -52,6 +51,7 @@ export class Tournament {
         if (tournament.brackets !== undefined )
             this.brackets = tournament.brackets;
     }
+
 }
 
 export class TournamentController {
@@ -125,7 +125,7 @@ export class TournamentController {
                     body: JSON.stringify(body)
                 });
                 const data = await resp.json();
-                if (data.success) { 
+                if (data.success) {
                     this.tournament = new Tournament(data.tournament);
                     this.cws = new TournamentClientSocket(this.username, this, this.tournament);
                     // console.log(this.tournament);
@@ -242,9 +242,6 @@ export class TournamentController {
         this.game.startTournamentGame(game_id, game);
     }
 
-    finishGame(){
-        
-    }
     /**
      * VIEW METHODS
      * 

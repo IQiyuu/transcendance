@@ -29,7 +29,6 @@ export class GameClientSocket{
         this.setSocket();
     }
 
-
     get_username(){
         return (this.username);
     }

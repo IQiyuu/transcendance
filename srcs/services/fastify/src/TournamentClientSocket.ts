@@ -29,6 +29,15 @@ export class TournamentClientSocket{
         this.tournament = t;
     }
 
+    isReady(){
+        this.ws.send(JSON.stringify({
+            type: "matchmaking",
+            uname: this.username,
+            state: "enter"
+        }));
+        return (false);
+    }
+
     setSocket(){
         this.ws.onopen = (event) => {
             console.log("Connected to the tournament");
@@ -58,6 +67,7 @@ export class TournamentClientSocket{
             }
         };
 
+
         this.ws.onclose = (event) => {
             console.log("Closing " + this.username);
             this.ctler.clear_tournament();
@@ -75,7 +85,8 @@ export class TournamentClientSocket{
         }));
     }
 
-    finishGame(){
+    // Not usefull ?
+    finishTournament(){
 
     }
 

@@ -1,4 +1,5 @@
 import Fastify from 'fastify';
+
 import * as gameRoute from "./gameRoute.js";
 
 const TOURNAMENT_SIZE = 8;
@@ -259,7 +260,6 @@ class Tournament{
 		if (this.brackets[this.current_round].length === 1)
 			this.state = T_FINISHED;
 	}
-
 };
 
 // Check whether the player is already enrolled in a tournament
