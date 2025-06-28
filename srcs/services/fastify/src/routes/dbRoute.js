@@ -41,7 +41,10 @@ async function dbRoute (fastify, options) {
     fastify.get('/db/select/lang/:user' , async (request, reply) => {
         try {
             const datas = db.prepare(`SELECT lang FROM users WHERE username=?`).get(request.params.user);
-            reply.send({success:true, lang: datas.lang});
+            if (datas)
+                reply.send({success:true, lang: datas.lang});
+            else
+                reply.send({success:false, error: "user not found"});
         } catch (error) {
             console.log("error: ", error);
             return { success: false, error: error };
@@ -137,8 +140,9 @@ async function dbRoute (fastify, options) {
 
     function getIdFromUsername(username) {
         const data = db.prepare('SELECT user_id FROM users WHERE username = ?').get(username);
-        console.log(data, " ", username);
-        return data.user_id;
+        if (data)
+            return data.user_id;
+        return "";
     }
 
     function getFriendList(user) {
@@ -286,6 +290,8 @@ async function dbRoute (fastify, options) {
     fastify.get('/db/friends/friendlist/:username', async (request, reply) => {
         try {
             const userId = getIdFromUsername(request.params.username);
+            if (!userId)
+                reply.send({ succes: false, error: "user not found" });
             const friendlist = getFriendList(userId);
             reply.send({ success: true, friends: friendlist });
         } catch (error) {

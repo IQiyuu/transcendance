@@ -220,15 +220,45 @@ export class   GameController{
         this.interval_id = setInterval(this.moves, 10, this, this.ws);
     }
 
+    async registerGame() {
+        try {
+            console.log("REGISTER1");
+            const winner = this.score_left < this.score_right ? this.right_player : this.left_player;
+            const loser = winner == this.left_player ? this.right_player : this.left_player;
+            const loser_score = this.score_left > this.score_right ? this.score_right.textContent : this.score_left.textContent;
+            console.log(this.right_player, " ", this.left_player, " ", winner, " ", loser, " ", loser_score);
+            const body = {
+                winner_username: winner,
+                loser_username: loser,
+                loser_score: loser_score,
+            }
+            console.log("REGISTER2");
+            const req = await fetch('/game/storeGame', {
+                method: 'POST',
+                credentials: 'include',
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body)
+            });
+            console.log("REGISTER3");
+            const data = await req.json();
+            console.log("REGISTER4");
+            if (!data.success)
+                throw (Error(data.error));
+            console.log("REGISTER5");
+        } catch (error){
+            alert(error);
+        }
+    }
+
     finishGame(){
         document.removeEventListener("keyup", this.key_handler)
         document.removeEventListener("keydown", this.key_handler)
         clearInterval(this.interval_id);
         this.hide_game();
-        // if (false){ // game is from a tournament
-        //     this.tournament.finishGame();
-        // }
         this.print_end_game();
+
+        if (!this.is_local && this.side === "left")
+            this.registerGame();
     }
 
     /**

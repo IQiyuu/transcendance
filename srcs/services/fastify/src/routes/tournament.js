@@ -1,52 +1,15 @@
 import Fastify from 'fastify';
-import * as gameRoute from "./gameRoute.js";
-
+// import {} from './webSocketRoute.js';
 
 const TOURNAMENT_SIZE = 8;
 
-//To put in utils.js
-function randomIntFromInterval(min, max) {
-    return Math.floor(Math.random() * (max - min + 1) + min);
-}
-
-// Return a random partition of order for a tournament bracket
-function    initBracket(size){
-    let nbs = [];
-    let x;
-    let i = 0;
-    while (i < size){
-        x = randomIntFromInterval(1, size);
-        // console.log("random number generated : " + x.toString());
-        if (!nbs.includes(x)){
-            nbs.push(x);
-            i++;
-        }
-    }
-    return (nbs);
-}
-
-function    calculateNbBrackets(nb_p){
-    let x = Math.round(Math.log2(nb_p));
-    return (2 ** x < nb_p ? x + 1 : x);
-}
-
-// States used for the tournament itself and it's games
-const T_STARTING = 0;
-const T_READY = 1;
-const T_ON_GOING = 2;
-const T_FINISHED = 3;
-
 class Tournament{
-    current_round = 0;
 
     constructor(owner, id, name){
         this.id = id;
         this.name = name;
         this.owner = owner;
-        this.players = []; // Objects : {username, socket, bracket_starting_pos}
-        // Is a map for players better ?
-        this.brackets = []; // Array of unordered lists of Objects : {game_id, players(p1, p2), state(STARTING || ON GOING || FINISHED)}
-        this.state = T_STARTING;
+        this.players = []; // {username, socket}
     }
 
     getId(){
@@ -63,10 +26,6 @@ class Tournament{
 
     getSize(){
         return (this.players.length);
-    }
-
-    getState(){
-        return (this.state);
     }
 
     isFull(){
@@ -86,31 +45,16 @@ class Tournament{
         return (true);
     }
 
-    currentRoundIsFinished(){
-        if (this.state === T_STARTING)
-            return (false);
-        for (let i = 0 ; i < this.brackets[this.current_round].length ; i++){
-            if (this.brackets[this.current_round][i].state !== T_FINISHED)
-                return (false);
-        }
-        return (true);
+    hasNextRound(){
+        return (false);
     }
-    
-    // Tell whether the current round can be started
-    isRoundReadyToStart(){
-        let round = this.brackets[this.current_round];
-        if (round === null || round === undefined)
-            return (false);
-        for (let i = 0 ; i < round.length ; i++){
-            if (round[i].state !== T_READY){
-                return (false);
-            }
-        }
-        return (true);
+
+    currentRoundIsFinished(){
+        return (false);
     }
 
     isFinished(){
-        return (this.state === T_FINISHED);
+        return (false);
     }
 
     addPlayer(player) {
@@ -168,65 +112,6 @@ class Tournament{
             i++;
         }
         return (false);
-    }
-
-    /**
-     * Initialize the first round
-     * Each player has a random position given
-     */
-    startTournament(){
-        console.log("Starting tournament");
-        this.state = T_ON_GOING;
-
-        console.log("Tournament will start\nRandom pos are :");
-        this.brackets.length = calculateNbBrackets(this.players.length);
-        
-        this.brackets[0] = [];
-        let bracket_pile = initBracket(this.players.length);
-        let next;
-        while (bracket_pile.length > 0){
-            next = bracket_pile.pop();
-            let p1 = this.players[next - 1];
-            if (bracket_pile.length === 0){
-                this.brackets[0].push({game_id : -1, players : [p1.username, null], state : T_READY});
-                break ;
-            }
-            console.log(next);
-            next = bracket_pile.pop();
-            let p2 = this.players[next - 1];
-            // console.log("players : " + p1.toString() + " | " + p2.toString());
-            // console.log("players : " + p1.username + " | " + p2["username"]);
-            this.brackets[0].push({game_id : -1, players : [p1.username, p2.username], state : T_READY});
-        }
-        // mx = {game_id, players (username1, username2), state}; 
-        // On ajoute directement au rang suivant on win ? 
-
-        console.log("List of matchs (to recheck with more players) :");
-        console.log(this.brackets);
-        // the tournament is handled by the interval
-    }
-
-    startRound(){
-        // Create games for each user in a match
-        console.log("Starting a round");
-        if (this.brackets === undefined || this.brackets[this.current_round] === undefined)
-            console.log("error : the round we want to start is null or undefined");
-        this.brackets[this.current_round].forEach(match => {
-            console.log("Starting a tournament match !");
-            console.log(match);
-            if (match.players[1] === null){
-                console.log("No opponent, to impl");
-                match.state = T_FINISHED;
-            } else {
-                console.log("starting :");
-                gameRoute.createGame(match.players[0], match.players[1]);
-                match.state = T_ON_GOING;
-            }
-        });
-    }
-
-    initNextRound(){
-        
     }
 };
 
@@ -366,33 +251,8 @@ function tournamentRoute (fastify, options) {
         //     updateTournament(t);
         // });
 
-        socket.on('message', (data) => {
-            let message;
-            try {
-                message = JSON.parse(data.toString());
-            } catch (err) {
-                console.error('Invalid JSON:', data.toString());
-                return; // maybe send a mesg to client instead
-            }
-            console.log("Recv message type :");
-            console.log(message.type);
-            if (message.type === "start"){
-                // console.log("Starting tournament");
-                if (!t.isReadyToStart()){
-                    socket.send(JSON.stringify({
-                        type: "error",
-                        message: "Tournament can't be started now"
-                    }));
-                }
-                t.startTournament();
-            } else if (message.type === "match_started"){
-                updateTournament(t);
-            } else if (message.type === "match_finished"){
-                //Clients telling match is finished, we need both approval
-                // Registering the game in db, we just save the game_id (primary key) and the tournament id;
-            } else if (message.type === "match"){
-                
-            }
+        socket.on('message', (message) => {
+            console.log(message);
         });
 
         socket.on("close", (event) => {
@@ -409,7 +269,7 @@ function tournamentRoute (fastify, options) {
     function    getAvailableTournaments(tournaments, username){
         let res = [];
         tournaments.forEach(t => {
-            if (t.getOwner() !== username && !t.contains(username) && !t.isFull() && t.getState() === T_STARTING){
+            if (t.getOwner() !== username && !t.contains(username) && !t.isFull()){
                 res.push(getMasked(t));
             }
         });
@@ -454,7 +314,7 @@ function tournamentRoute (fastify, options) {
         return {success: true, tournament: tournament};
     });
     
-    // Declaring a match is over url to check. Not used for now, it is websocket that handles it
+    // Declaring a match is over url to check
     fastify.get('/tournament/:id/match_over', async (request, reply) => {
         return {success: true};
     });
@@ -521,7 +381,7 @@ function tournamentRoute (fastify, options) {
         return {success: true};
     })
 
-    //Starting the tournament. Not used for now, it is websocket that handles it
+    //Starting the tournament
     fastify.get('/tournament/start/:id', async(request, reply) => {
         let t_id = request.params.id;
         let player = request.query.username;
@@ -540,23 +400,21 @@ function tournamentRoute (fastify, options) {
         return ({success: true});
     })
 
-    // For optimizition, the interval can be set only when at least a tournament exists
+
     setInterval(() => {
         tournaments.forEach(tournament => {
             // console.log(tournament);
             if (tournament === null){
                 return ;
-            }
-            // Tournament garbage collector x)
-            if (tournament.getSize() === 0){
+            } if (tournament.getSize() === 0){
                 tournaments.splice(tournaments.indexOf(tournament));
+            } else if (tournament.isReadyToStart()){
+                tournament.start();
             }
-            if (tournament.isFinished())
-                tournament.endTournament();
-            else if (tournament.isRoundReadyToStart()){
-                tournament.startRound();
-            } else if (tournament.currentRoundIsFinished())
-                tournament.initNextRound();
+            // if (tournament.hasNextRound() && tournament.currentRoundIsFinished())
+            //     tournament.startNextRound();
+            // if (tournament.isFinished())
+            //     tournament.end();
         });
     }, 30);
 }

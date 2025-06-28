@@ -25,7 +25,14 @@ export class   ProfileController{
     private	search_inp = document.getElementById("search_player_in") as HTMLInputElement;
     private	friend_div = document.getElementById("friend_div");
     private	fa_btn = document.getElementById("fa_btn");
+    private upload_btn = document.getElementById("upload_btn");
+    private profile_cross = document.getElementById("profile_cross");
+
+    private profile_card = document.getElementById("profile_card");
+    private file_input = document.getElementById("file_input")
 	
+    private searchError = document.getElementById("searchError");
+
     private	histo_list = document.getElementById("histo_list");
 
     private	camera_icon = document.getElementById("camera_icon");
@@ -49,9 +56,24 @@ export class   ProfileController{
 
     addEvents(){
 
+        this.profile_username_tag.addEventListener("mouseover", async (event) => {
+            event.preventDefault();
+
+            if (this.profile_username == this.username)
+                this.profile_username_tag.textContent = "EMOJI " + this.profile_username_tag.textContent;
+        });
+
+        this.profile_username_tag.addEventListener("mouseout", async (event) => {
+            event.preventDefault();
+            
+            if (this.profile_username == this.username)
+                this.profile_username_tag.textContent = this.profile_username;
+        });
+
         // Player's search
         this.search_inp.addEventListener("keydown", async (event) => {
             if (event.key == 'Enter') {
+                this.searchError.classList.replace("flex", "hidden");
                 this.profile_username = this.search_inp.value;
                 await this.searchPlayerHandler();
                 this.printPage();
@@ -60,6 +82,8 @@ export class   ProfileController{
 
         this.search_btn.addEventListener("click", async (event) => {
             event.preventDefault();
+
+            this.searchError.classList.replace("flex", "hidden");
             this.profile_username = this.search_inp.value;
             console.log(this.profile_username);
             await this.searchPlayerHandler();
@@ -99,6 +123,78 @@ export class   ProfileController{
             window.open('/2fa', '42 AUTH');
         });
 
+        this.upload_btn.addEventListener('click', async (event) => {
+            event.preventDefault();
+
+            console.log("UGGHVDGHASVFJASVUTASJG");
+        });
+
+        // croix du changement de photo de profile
+        this.profile_cross.addEventListener("click", async (event) => {
+            event.preventDefault();
+            document.getElementById("profile_picture_overlay").classList.replace("flex", "hidden");
+            (document.getElementById("previsu_picture") as HTMLImageElement).src = "";
+            (document.getElementById("file_input") as HTMLInputElement).value = "";
+        });
+
+        // echape du changement de photo de profile
+        this.profile_card.addEventListener("keydown", async (event) => {
+            if (!document.getElementById("profile_picture_overlay").classList.contains("hidden")) {
+                event.preventDefault();
+                if (event.key === "Escape") {
+                    document.getElementById("profile_picture_overlay").classList.replace("flex", "hidden");
+                    (document.getElementById("previsu_picture") as HTMLImageElement).src = "";
+                    (document.getElementById("file_input") as HTMLInputElement).value = "";
+                }
+            }
+        });
+
+        // previsualiser la photo de profile selectionnee
+        this.file_input.addEventListener("change", async (event) => {
+            const file = (event.target as HTMLInputElement).files[0];
+            const previsuImage = document.getElementById("previsu_picture") as HTMLImageElement;
+            if (file) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    previsuImage.src = e.target.result as string;
+                };
+                
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // upload une photo de profile avec le boutton
+        this.upload_btn.addEventListener("click", async (event) => {
+            event.preventDefault();
+
+            const formData = new FormData();
+            const fileInput = document.getElementById('file_input') as HTMLInputElement;
+            if (fileInput.files[0]) {
+                formData.append('file', fileInput.files[0]);
+                try {
+                    const response = await fetch(`/upload/picture/${this.username}`, {
+                        method: 'POST',
+                        body: formData,
+                    });
+                    if (!response.ok)
+                        console.log("error in file upload.");
+                    else {
+                        console.log("file uploaded.");
+                        document.getElementById("profile_picture_overlay").classList.replace("flex", "hidden");
+                        (document.getElementById("previsu_picture") as HTMLImageElement).src = "";
+                        (document.getElementById("file_input") as HTMLInputElement).value = "";
+                        this.picture_path = "../assets/imgs/" + this.username + ".jpg";
+                        (this.profile_picture as HTMLImageElement).src = this.picture_path + "?" + new Date().getTime();
+                    }
+                } catch (error) {
+                console.error("error: ", error);
+                }
+            } else {
+                console.log("No file selected.");
+            }
+        });
+
     }
 
     //Search for the player, and store datas
@@ -114,6 +210,7 @@ export class   ProfileController{
 
             if (!data.success){
 				this.profile_username = this.username;
+                this.searchError.classList.replace("hidden", "flex");
                 throw (Error(data.message)); // Fait du rouge, a modifier
 			}
             console.log(data);
@@ -137,8 +234,8 @@ export class   ProfileController{
 
             if (!data.success)
                 throw (Error(data.message));
-            console.log(data);
             this.histo = data.histo;
+            return data;
         } catch (error){
             console.log(error);
         }
@@ -146,8 +243,41 @@ export class   ProfileController{
 
 
 	//VIEW
-	printHisto(){
+	async printHisto(){
+        await this.searchHistoricHandler();
+        var cpt = 0;
+        var w = 0;
+        this.histo.forEach((item) => {
+            console.log(item);
+            cpt++;
+            if (cpt < 6) {
+                let li = document.createElement("li");
+                let a = document.createElement("a");
+                a.innerText = item.winner_username;
+                a.classList.add("text-green-500", "underline");
+                a.href="#";
+                a.id="profileDisplay";
 
+                let a2 = document.createElement("a");
+                a2.innerText = item.loser_username;
+                a2.classList.add("text-green-500", "underline");
+                 a2.href="#";
+                a2.id="profileDisplay";
+
+                li.appendChild(a);
+                li.innerHTML += ": 11 VS ";
+                li.appendChild(a2);
+                li.innerHTML += " : " + item.loser_score + " at " + item.created_at;
+            
+                this.histo_list.appendChild(li);
+                li.style.fontSize = "16px";
+            }
+            if (item.winner_username == this.profile_username)
+                w++;
+            document.getElementById("wr_card").textContent = `wr : ${(w / cpt * 100).toFixed(0)}%`;
+        });
+        if (cpt == 0)
+            document.getElementById("wr_card").textContent = `wr : N/a`;
 	}
 
     async	printPage(){
@@ -159,7 +289,7 @@ export class   ProfileController{
         //profile
         this.profile_page.classList.replace("hidden", "flex");
         this.profile_username_tag.innerText = this.profile_username;
-        (this.profile_picture as HTMLImageElement).src = this.picture_path + "?" + new Date().getTime(); // jsp ??
+        (this.profile_picture as HTMLImageElement).src = "../assets/imgs/" + this.picture_path + "?" + new Date().getTime(); // jsp ??
         this.register_date_tag.innerText = `${this.site.getText("member_since")}: ${this.register_date}`;
 
 		if (this.profile_username != this.username){
@@ -171,6 +301,7 @@ export class   ProfileController{
 			this.fa_btn.classList.replace("hidden", "flex");
 		}
 
+        history.pushState({page: "profile", profile: this.profile_username}, "");
         //historic
 		this.printHisto();
     }
@@ -228,7 +359,8 @@ export class SiteController{
             this.connect();
 
         this.lang = new LangController(this.username);
-        
+        if (this.friends)
+            this.friends.setLang(this.lang);
         this.print_current_page();
     }
 
@@ -260,6 +392,11 @@ export class SiteController{
                 registerLink.textContent = lang["register_text"];
                 logginBtn.textContent = lang["connexion_title"];
             }
+        });
+
+        window.addEventListener("popstate", async (event) => {
+            event.preventDefault();
+            this.loadState(history.state);
         });
 
         this.tmp_btn.addEventListener("click", async (event) => {
@@ -312,15 +449,15 @@ export class SiteController{
                 // console.log("Réponse du serveur :", data);
                 
                 if (data.success) {
+                    this.isRegisterMode = false;
                     this.username = data.username;
                     this.connect();
                     // this.ws.print_info();
-
+                    document.getElementById("errorAuth").classList.replace("block", "hidden");
                 } else {
                     const error = document.getElementById("errorAuth") as HTMLParagraphElement;
                     error.textContent = this.lang.getFile()[data.message];
                     error.classList.replace("hidden", "block");
-                    throw(Error(data.error));
                 }
             } catch (error) {
                 console.log("initFriendList");
@@ -332,6 +469,7 @@ export class SiteController{
         this.title_link.addEventListener("click", async (event) => {
             event.preventDefault();
 
+            this.profile.setProfileUsername(null);
             this.hide_all();
             this.print_menu();
             this.print_btn_menu();
@@ -370,6 +508,16 @@ export class SiteController{
             document.getElementById("site").classList.replace("block", "hidden");
             document.getElementById("login-form").classList.replace("hidden", "flex");
             document.body.classList.add("justify-center", "align-center", "flex");
+            this.username = null;
+            this.friends.removeEvents();
+            this.game.setUsername(null);
+            this.tournament.setUsername(null);
+            this.profile.setUsername(null);
+            this.profile.setProfileUsername(null);
+            this.lang.setUsername(null);
+            this.ws.close();
+            this.ws = null;
+            console.log(this.ws);
         });
 
 		//Registering children events
@@ -401,6 +549,8 @@ export class SiteController{
         console.log("ICI+"+this.username);
         this.ws = new ClientSocket(this.username);
         
+        if (this.lang)
+            this.lang.initLang(this.username);
         this.game.setUsername(this.username);
         this.profile.setUsername(this.username);
         this.tournament.setUsername(this.username);
@@ -410,12 +560,13 @@ export class SiteController{
         console.log("Connected, client socket :");
         console.log(this.ws);
 
-        this.hide_register_page();
+        this.hide_all();
         document.body.classList.remove("justify-center", "align-center", "flex");
-        this.print_main_page();
+        this.print_menu();
         this.friends = new FriendController(this.username, this.lang, this.ws);
+        console.log(this.username);
         this.ws.setFriend(this.friends, this, this.profile);
-        this.friends.setUsername(this.username);
+        console.log(this.friends);
     }
 
     /**
@@ -423,15 +574,16 @@ export class SiteController{
      */
 
     print_register_page(){
-        document.getElementById("login-form").classList.replace("hidden", "block");
+        document.getElementById("login-form").classList.replace("hidden", "flex");
     }
 
     hide_register_page(){
-        document.getElementById("login-form").classList.replace("block", "hidden");
+        document.getElementById("login-form").classList.replace("flex", "hidden");
     }
 
     print_main_page(){
         this.main_page.classList.replace("hidden", "block");
+        history.pushState({page: "main"}, "");
     }
 
     hide_main_page(){
@@ -451,6 +603,7 @@ export class SiteController{
 
     print_about_page(){
         this.about.classList.replace("hidden", "flex");
+        history.pushState({page: "about"}, "");
     }
     
     hide_about_page(){
@@ -571,6 +724,7 @@ export class SiteController{
     print_tournament_btns(){
         this.tournament_create_btn.classList.replace("hidden", "flex");
         this.tournament_join_btn.classList.replace("hidden", "flex");
+        history.pushState({page: "tournament_menu"}, "");
     }
 
     hide_tournament_btns(){
@@ -615,5 +769,30 @@ export class SiteController{
             this.print_menu();
         else
             this.print_register_page();
+    }
+
+    async loadState(obj) {
+        this.hide_all();
+
+        console.log(obj.page);
+        switch (obj.page) {
+            case "main":
+                console.log(obj.page);
+                this.print_menu();
+                break ;
+            case "profile":
+                if (obj && obj.profile) {
+                    this.profile.setProfileUsername(obj.profile);
+                    await this.profile.searchPlayerHandler();
+                }
+                this.profile.printPage();
+                break ;
+            case "about":
+                this.print_about_page();
+                break ;
+            case "tournament_menu":
+                this.print_tournament_btns();
+                break ;
+        }
     }
 };

@@ -94,6 +94,9 @@ export class LangController{
             await this.loadFile(val);
             this.updateContent();
 
+            if (!this.username)
+                return ;
+
             const body = {
                 user: this.username,
                 lang: val

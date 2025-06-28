@@ -11,7 +11,6 @@ export class TournamentClientSocket{
     private view : TournamentController = null;
     protected tournament : Tournament = null;
 
-    // tournament historic on the same page, maybe a button to filter histo matches ?
     constructor(username : string, view : TournamentController, tournament : Tournament){
         this.username = username;
         this.tournament = tournament;
@@ -29,6 +28,15 @@ export class TournamentClientSocket{
         this.tournament = t;
     }
 
+    isReady(){
+        this.ws.send(JSON.stringify({
+            type: "matchmaking",
+            uname: this.username,
+            state: "enter"
+        }));
+        return (false);
+    }
+
     setSocket(){
         this.ws.onopen = (event) => {
             console.log("Connected to the tournament");
@@ -41,20 +49,9 @@ export class TournamentClientSocket{
             if (data === null)
                 return ; // ERROR
             if (data.type === "update") {
-                console.log("   tournament has been updated,");
+                console.log("   tournament is has been updated,");
                 console.log(data.tournament);
                 this.view.updateTournament(data.tournament);
-            } else if (data.type === "started") {
-                console.log("Tournament will start in a few moments");
-                this.view.updateTournament(data.tournament);
-                this.view.print_tournament();
-            } else if (data.type === "new_match"){
-                console.log("Creating a new tournament match");
-                this.view;
-            } else if (data.type === "finished"){
-                console.log("Tournament is finished !");
-            } else if (data.type === "error"){
-                console.log(data.message);
             }
         };
 
@@ -69,14 +66,29 @@ export class TournamentClientSocket{
     }
     
     startTournament(){
-        console.log("Starting tournament ?");
         this.ws.send(JSON.stringify({
-            type: "start"
+            type: "start",
+            uname: this.username,
+            state: "enter"
         }));
     }
 
-    finishGame(){
+    stop_matchmaking(){
+        this.ws.send(JSON.stringify({
+            type: "matchmaking",
+            state: "left"
+        }));
+    }
 
+    // Tell the server game is ready to start
+    say_ready(){
+        this.ws.send(JSON.stringify({
+            type : "game_start"
+        }));
+    }
+
+    print_info(){
+        console.log("Websocket for : " + this.username);
     }
 
     close(){

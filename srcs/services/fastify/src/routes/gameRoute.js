@@ -1,6 +1,5 @@
 import fs from 'fs';
 
-//To put in utils.js
 function randomIntFromInterval(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
@@ -104,13 +103,21 @@ export async function gameRoute (fastify, options) {
     fastify.post('/game/storeGame', async (request, reply) => {
         const { winner_username, loser_username, loser_score } = request.body;
         try {
-            const insert = options.db.prepare('INSERT INTO games (winner_id, loser_id, loser_score) SELECT u1.user_id AS winner_id, u2.user_id AS loser_id, ? AS loser_score FROM users u1, users u2 WHERE u1.username = ? AND u2.username = ?');
+            const insert = options.db.prepare(`
+                INSERT INTO games (winner_id, loser_id, loser_score) 
+                    SELECT
+                        u1.user_id AS winner_id,
+                        u2.user_id AS loser_id, 
+                        ? AS loser_score 
+                    FROM users u1, users u2 
+                    WHERE u1.username = ? AND u2.username = ?`
+            );
             insert.run(loser_score, winner_username, loser_username);
-
+            console.log("REGISTER");
             return { success: true, message: `Game registered` };
         } catch (error) {
             console.error('Error insert data in db.', error);
-            return { success: false, message: 'Error insert data in db.' };
+            return { success: false, error: error };
         }
     });
 
@@ -298,6 +305,9 @@ export async function gameRoute (fastify, options) {
                 } else if (message.type === "game_update"){
                     let game = games[message.game_id];
                     movePaddle(game, message.side, message.move_up);
+
+                    // if (newY > 15 && newY < BOARD_H - 15)
+                    //     game.paddles[message.side].y = newY;
                 } else if (message.type === "matchmaking"){
                     if (message.state === "join"){
                         console.log("A player is joining matchmaking");
@@ -324,31 +334,26 @@ export async function gameRoute (fastify, options) {
 
                             playing_clients.set(socket, new_game_id);
                             playing_clients.set(second_player_socket, new_game_id);
-                            waiting_clients.delete(second_player_name); // poping user before creating the game is better in an async env
+                            waiting_clients.delete(second_player_name);
                         }
                         else{
                             waiting_clients.set(message.username, socket);
                         }
                     } else if (message.state === "leave"){
                         console.log("A player is leaving matchmaking");
+                        // if (isValid)
                         waiting_clients.forEach((sck, username) => {
                             if (sck === socket)
                                 waiting_clients.delete(username);
                         });
                         socket.close();
                     }
-                } else if (message.type === "tournament"){
-                    console.log("tournament msg");
                 }
             })
 
             socket.on('close', (event) => {
                 //If game is active, tell users the game is over
-                // if (isPlaying){
-                //     endGame
-                //     tellOpponent
-                //     saveGame
-                // }
+
                 //At least, closing properly and removing from maps
                 console.log("Closing  socket");
                 // console.log(socket);
@@ -362,6 +367,9 @@ export async function gameRoute (fastify, options) {
     });
 
 
+    // fastify.register(async function (fastify) {
+    //     // Gere le matchmaking et la deconnexion en pleine partie (Le deconnecte perd automatiquement)
+    //     // marche en socket
     //     fastify.get('/matchmaking', { websocket: true }, (socket, req) => {
 
     //         if (waiting_list && w_uname != req.query.username) {
