@@ -2,6 +2,11 @@ import { SiteController } from "./SiteController.js";
 import {GameController} from "./pong.js";
 import { TournamentClientSocket } from "./TournamentClientSocket.js";
 
+const T_STARTING = 0;
+const T_READY = 1;
+const T_ON_GOING = 2;
+const T_FINISHED = 3;
+
 export class Tournament {
     private id : number = -1;
     private name : string = "placeholder";
@@ -336,22 +341,42 @@ export class TournamentController {
     }
 
     print_tournament_state(){
-        this.tournament_state.style.height="80";
-        this.tournament_state.style.width="60";
+        // this.tournament_state.style.height="80";
+        // this.tournament_state.style.width="60";
         let brackets = this.tournament.getBrackets();
         if (brackets === undefined || brackets === null){
-            alert("tournament has not begun ?");
+            // console.log("TOurnament not started")
             return ;
         }
+
+        console.log("Printing state :");
         let nb_round = brackets.length;
         let table = document.createElement("table");
         for (let i = 0; i < nb_round ; i++){
+            console.log(brackets[i]);
             let nb_match = brackets[i].length;
             let round = document.createElement("tr");
             for (let j = 0 ; j < nb_match ; j++){
                 let match = document.createElement("td");
-                // match.innerText = brackets[i][j];
-                match.innerText = "M";
+                let winner = brackets[i][j].winner;
+
+                console.log(brackets[i][j]);
+
+                let p1 = document.createElement("p");
+                p1.innerText = brackets[i][j].p1;
+                if (winner !== null)
+                    p1.style.backgroundColor = (winner === brackets[i][j].p1 ? "green" : "red");
+                match.appendChild(p1);
+
+                if (brackets[i][j].p2 !== null){
+                    let p2 = document.createElement("p");
+                    p2.append(document.createTextNode(" VS "));
+                    p2.append(document.createTextNode(brackets[i][j].p2));
+                    if (winner !== null)
+                        p2.style.backgroundColor = (winner === brackets[i][j].p2 ? "green" : "red");
+                    match.appendChild(p2);
+                }
+                // match.innerText = "M";
                 round.append(match);
             }
             table.append(round);
@@ -367,6 +392,7 @@ export class TournamentController {
 
     print_tournament(){
         this.print_tournament_lobby();
+        this.clear_tournament_state();
         this.print_tournament_state();
         this.print_tournament_div();
         this.print_tournament_page();
@@ -431,6 +457,11 @@ export class TournamentController {
     clear_tournament() {
         this.tournament_lobby.textContent = '';
     }
+
+    clear_tournament_state(){
+        this.tournament_state.textContent = '';
+    }
+
 
     clear_tournaments() {
         this.tournaments_list.textContent = '';

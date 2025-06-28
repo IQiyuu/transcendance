@@ -205,12 +205,8 @@ class Tournament{
 			// console.log(next);
 			next = bracket_pile.pop();
 			let p2 = this.players[next - 1];
-			// console.log("players : " + p1.toString() + " | " + p2.toString());
-			// console.log("players : " + p1.username + " | " + p2["username"]);
 			this.brackets[0].push({game_id : -1, players : [p1, p2], state : T_READY});
-		}
-		// mx = {game_id, players (username1, username2), state}; 
-		
+		}		
 		// console.log("List of matchs (to recheck with more players) :");
 		// console.log(this.brackets);
 	}
@@ -262,8 +258,7 @@ class Tournament{
 		match.state = T_FINISHED;
 		if (this.brackets[this.current_round].length === 1)
 			this.state = T_FINISHED;
-		}
-		// We should tell each client that tournament has been updated
+	}
 
 };
 
@@ -292,16 +287,25 @@ function    getMasked(t){
 	});
 	
 	let b;
+	console.log(" bracket uis :");
+	// console.log(t.brackets);
+	// console.log(t);
 	if (t.brackets === undefined || t.brackets === null){
 		b = null;
 	}else {
 		b = [];
 		t.brackets.forEach(arr => {
+			// console.log(arr);
 			let round = [];
 			arr.forEach(match => {
+				// console.log(match);
+				// console.log(match.players);
+				let p2 = null;
+				if (match.players[1] !== null)
+					p2 = match.players[1].username;
 				round.push({
 					p1 : match.players[0].username,
-					p2 : match.players[1].username,
+					p2 : p2,
 					state : match.state,
 					winner : null
 				});
@@ -454,6 +458,7 @@ function tournamentRoute (fastify, options) {
 					}));
 				}else {
 					t.startTournament();
+					updateTournament(t);
 				}
 			} else if (message.type === "match"){
 				if (message.state === "started"){

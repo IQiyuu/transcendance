@@ -169,11 +169,13 @@ export class   GameController{
     startTournamentGame(game_id, game){
         this.ws = new GameClientSocket(this.username, this, game_id);
 		this.is_tournament = true;
-        // this.site.hide_all();
-        // this.print_game();
-        // this.print_play_page();
-        // this.updateState(game);
-        // this.gameInit();
+        if (this.username === game.players.right)
+            this.side = "right";
+        this.site.hide_all();
+        this.print_game();
+        this.print_play_page();
+        this.updateState(game);
+        this.gameInit();
     }
 
     close(){
@@ -220,15 +222,10 @@ export class   GameController{
     start_matchmaking_animation(){
         let count = 0;
 
-        // good luck ! (need to have dynamcly inserted dialogue)
-        // maybe by getting current value then adding in the handler ?
         this.interval_id = window.setInterval(() => {
             count++;
             document.getElementById("matchmaking").textContent = "waiting" + '.'.repeat(count % 3);
         }, 500);
-        // this.interval_id = setInterval(() => {
-        //     btn.textContent = waiting + '.'.repeat(count % 3);
-        // }, 500);
     }
 
     stop_matchmaking_animation(){
