@@ -50,7 +50,7 @@ class Tournament{
 		this.owner = owner;
 		this.players = []; // Objects : {username, socket}
 		// Is a map for players better ?
-		this.brackets = []; // Array of unordered lists of Objects : {game_id, players(p1, p2), state(STARTING || ON GOING || FINISHED)}
+		this.brackets = []; // Ordered array of ordered array of Objects : {game_id, players(p1, p2), state(STARTING || ON GOING || FINISHED)}
 		this.state = T_STARTING;
 	}
 	
@@ -263,6 +263,8 @@ class Tournament{
 		if (this.brackets[this.current_round].length === 1)
 			this.state = T_FINISHED;
 		}
+		// We should tell each client that tournament has been updated
+
 };
 
 // Check whether the player is already enrolled in a tournament
@@ -282,17 +284,37 @@ function    needAuthRoute(route){ // to recheck
 	);
 }
 
+// Returns a view of the tournament without sensible info
 function    getMasked(t){
 	let players = [];
 	t.players.forEach(p =>{
 		players.push(p.username);
 	});
 	
+	let b;
+	if (t.brackets === undefined || t.brackets === null){
+		b = null;
+	}else {
+		b = [];
+		t.brackets.forEach(arr => {
+			let round = [];
+			arr.forEach(match => {
+				round.push({
+					p1 : match.players[0].username,
+					p2 : match.players[1].username,
+					state : match.state,
+					winner : null
+				});
+			});
+			b.push(round);
+		});
+	}
 	let tournoi = {
 		id : t.id,
 		name : t.name,
 		owner : t.owner,
 		players : players,
+		brackets : b
 	};
 	return (tournoi);
 }

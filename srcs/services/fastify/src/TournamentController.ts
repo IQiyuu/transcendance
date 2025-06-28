@@ -44,7 +44,7 @@ export class Tournament {
 
     update(tournament){
         this.players = tournament.players;
-        if (tournament.brackets !== undefined)
+        if (tournament.brackets !== undefined )
             this.brackets = tournament.brackets;
     }
 }
@@ -125,8 +125,9 @@ export class TournamentController {
                     this.cws = new TournamentClientSocket(this.username, this, this.tournament);
                     // console.log(this.tournament);
                     this.hide_all();
-                    this.print_tournament_lobby();
-                    this.print_tournament_page();
+                    // this.print_tournament_lobby();
+                    // this.print_tournament_page();
+                    this.print_tournament();
                     this.print_tournament_rejoin_btn();
                 }
                 else
@@ -185,8 +186,9 @@ export class TournamentController {
 
                                             this.site.hide_all();
                                             this.clear_tournament();
-                                            this.print_tournament_page();
-                                            this.print_tournament_lobby();
+                                            // this.print_tournament_page();
+                                            // this.print_tournament_lobby();
+                                            this.print_tournament();
                                         } else{
                                             const T_DSNT_EXISTS = 999;
                                             if (data.code === T_DSNT_EXISTS){
@@ -214,8 +216,8 @@ export class TournamentController {
         this.tournament_rejoin_btn.addEventListener("click", async (event) => {
             this.clear_tournament();
             this.site.hide_all();
-            this.print_tournament_page();
-            this.print_tournament_lobby();
+            // this.print_tournament_page();
+            this.print_tournament();
             // state
         });
     }
@@ -224,8 +226,9 @@ export class TournamentController {
         this.tournament.update(tournament);
         this.clear_tournament();
         this.site.hide_all();
-        this.print_tournament_lobby();
-        this.print_tournament_page();
+        this.print_tournament();
+        // this.print_tournament_lobby();
+        // this.print_tournament_page();
     }
 
     createMatch(game_id, game){
@@ -261,19 +264,12 @@ export class TournamentController {
         this.tournaments_page.classList.replace("flex", "hidden");
     }
 
-    // print_on_going_tournament(){
-    //     this.tournament_state.classList.replace("hidden", "flex");
-    // }
-
-    // hide_on_going_tournament(){
-    //     this.tournament_state.classList.replace("flex", "hidden");
-    // }
-
     print_tournament_div(){
         this.tournament_div.classList.replace("hidden", "block");
     }
 
     print_tournament_lobby(){
+        // To recheck 
         console.log("Printing tournament lobby ( I have this :");
         console.log(this.tournament);
         if (this.tournament === null){
@@ -342,20 +338,38 @@ export class TournamentController {
     print_tournament_state(){
         this.tournament_state.style.height="80";
         this.tournament_state.style.width="60";
-        this.tournament.getPlayers().forEach(p => {
-            
-        });
+        let brackets = this.tournament.getBrackets();
+        if (brackets === undefined || brackets === null){
+            alert("tournament has not begun ?");
+            return ;
+        }
+        let nb_round = brackets.length;
+        let table = document.createElement("table");
+        for (let i = 0; i < nb_round ; i++){
+            let nb_match = brackets[i].length;
+            let round = document.createElement("tr");
+            for (let j = 0 ; j < nb_match ; j++){
+                let match = document.createElement("td");
+                // match.innerText = brackets[i][j];
+                match.innerText = "M";
+                round.append(match);
+            }
+            table.append(round);
+        }
+        this.tournament_state.append(table);
+
         this.tournament_state.classList.replace("hidden", "block");
     }
 
-    print_tournament(){
-        console.log("Printing tournament (DEPRECATED)");
-        console.log(this.tournament);
-        if (this.tournament === null){
-            alert("Not implemented yet (print tournament but tournament is null)");
-            return ;
-        }
+    hide_tournament_state(){
+        this.tournament_state.classList.replace("block", "hidden");
+    }
 
+    print_tournament(){
+        this.print_tournament_lobby();
+        this.print_tournament_state();
+        this.print_tournament_div();
+        this.print_tournament_page();
     }
 
     hide_tournament(){
@@ -415,12 +429,10 @@ export class TournamentController {
     }
 
     clear_tournament() {
-        // console.log(this.tournament_div.textContent);/
-        this.tournament_div.textContent = '';
+        this.tournament_lobby.textContent = '';
     }
 
     clear_tournaments() {
-        // console.log(this.tournaments_list.textContent);
         this.tournaments_list.textContent = '';
     }
 
@@ -428,8 +440,9 @@ export class TournamentController {
         this.hide_tournament_page();
         this.hide_tournaments_page();
         this.hide_tournament_form();
+        this.hide_tournament_lobby();
+        this.hide_tournament_state();
         this.hide_tournament_rejoin_btn();
         this.hide_tournament();
-        this.hide_on_going_tournament();
     }
 };
