@@ -370,7 +370,7 @@ export class TournamentController {
 
                 if (brackets[i][j].p2 !== null){
                     let p2 = document.createElement("p");
-                    p2.append(document.createTextNode(" VS "));
+                    match.append(document.createTextNode(" VS "))
                     p2.append(document.createTextNode(brackets[i][j].p2));
                     if (winner !== null)
                         p2.style.backgroundColor = (winner === brackets[i][j].p2 ? "green" : "red");
