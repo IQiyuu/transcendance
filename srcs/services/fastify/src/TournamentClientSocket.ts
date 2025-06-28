@@ -47,7 +47,7 @@ export class TournamentClientSocket{
             } else if (message.type === "started") {
                 console.log("Tournament will start in a few moments");
                 this.ctler.updateTournament(message.tournament);
-                this.ctler.print_tournament();
+                this.ctler.print_tournament_state();
             } else if (message.type === "new_match"){
                 console.log("Creating a new tournament match");
                 this.ctler.createMatch(message.game_id, message.game);

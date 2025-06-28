@@ -92,6 +92,7 @@ export class GameClientSocket{
                     alert("erroererer");
                 } else{
                     if (message === "match_connected"){
+                        console.log("   Match should begin");
                         this.ctl.hide_aal();
                         this.ctl.print_game();
                         this.ctl.print_play_page();
