@@ -26,6 +26,17 @@ async function dbRoute (fastify, options) {
         }
     });
 
+    // retourne les infos du user demande
+    fastify.get('/db/password/:username' , async (request, reply) => {
+        try {
+            const datas = db.prepare(`SELECT password, FROM users WHERE username = ?`).get(request.username);
+            return { success: false, data: datas };
+        } catch (error) {
+            console.log("error: ", error);
+            return { success: false, error: error };
+        }
+    });
+
     // add lang column in users
     fastify.get('/db/tmp/lang', async (req, rep ) => {
         try {
@@ -45,6 +56,52 @@ async function dbRoute (fastify, options) {
         } catch (error) {
             console.log("error: ", error);
             return { success: false, error: error };
+        }
+    });
+
+    // modifying username
+    fastify.post('/db/update/username', async (req, rep) => {
+        const body = request.body;
+
+        try {
+            if (db.prepare(`SELECT username FROM users WHERE username = ?`).get(body.username) != null)
+                return ({ sucess: false, error: "username already used" });
+            db.prepare(`UPDATE users SET username = ? WHERE username = ?`).run(body.username, body.newUsername);
+            return ({ success: true });
+        } catch (error) {
+            return ({ success: false, error: error });
+        }
+    });
+
+    async function isValidPassword(password) {
+        const minLength    = password.length >= 8;
+        const hasUppercase = /[A-Z]/.test(password);
+        const hasLowercase = /[a-z]/.test(password);
+        const hasDigit     = /[0-9]/.test(password);
+        const hasSpecial   = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+        return minLength && hasUppercase && hasLowercase && hasDigit && hasSpecial;
+    }
+
+    // modifying password
+    fastify.post('/db/update/password', async (req, rep) => {
+        const body = request.body;
+
+        try {
+            const user = db.prepare(`SELECT body FROM users WHERE username = ?`).get(body.username);
+            if (user == null)
+                return ({ sucess: false, error: "username not found" });
+            const isMatch = await fastify.bcrypt.compare(body.password, user.password);
+            if (!isMatch)
+                return reply.send({ success: false, error: 'Current password mismatch' });
+            if (isValidPassword(body.newPassword))
+                var hash_pass = await fastify.bcrypt.hash(body.newPassword);
+            else
+                throw Error("Password must contain maj, min, special char and digit");
+            db.prepare(`UPDATE users SET password = ? WHERE username = ?`).run(hash_pass, body.username);
+            return ({ success: true });
+        } catch (error) {
+            return ({ success: false, error: error });
         }
     });
 

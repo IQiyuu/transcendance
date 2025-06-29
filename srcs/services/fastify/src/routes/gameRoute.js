@@ -69,7 +69,7 @@ export function createGame(user, user2) {
                 y: STARTING_Y
             },
             right: {
-                x: BOARD_W - 20,
+                x: BOARD_W - 10,
                 y: STARTING_Y
             }
         }
@@ -81,7 +81,7 @@ export function movePaddle(game, side, moveUp){
     if (side !== "left" && side !== "right")
         return ;
     let new_y = game.paddles[side].y + (moveUp ? -4 : 4);
-    if (new_y > 50 && new_y < BOARD_H - 50)
+    if (new_y > 15 && new_y < BOARD_H - 15)
         game.paddles[side].y = new_y;
 }
 
@@ -236,7 +236,7 @@ export async function gameRoute (fastify, options) {
     fastify.post('/game/:id/move', async (request, reply) => {
         var game = games[request.params.id];
         var newY = game.paddles[request.body.role].y + (request.body.moveUp ? -4 : 4);
-        if (newY > 150 && newY < 580)
+        if (newY > 120 && newY < 580)
             game.paddles[request.body.role].y = newY;
     })
 
@@ -245,15 +245,13 @@ export async function gameRoute (fastify, options) {
         var game = games[request.params.id];
         if (request.body.moveRight != null)
             var newY1 = game.paddles["right"].y + (request.body.moveRight ? -4 : 4);
-            if (newY1 > 50 && newY1 < 380)
+            if (newY1 > 0 && newY1 < 400)
                 game.paddles["right"].y = newY1;
 
         if (request.body.moveLeft != null)
             var newY2 = game.paddles["left"].y + (request.body.moveLeft ? -4 : 4);
-            if (newY2 > 50 && newY2 < 380) {
-                console.log(newY2);
+            if (newY2 > 0 && newY2 < 400)
                 game.paddles["left"].y = newY2;
-            }
     })
 
     /**

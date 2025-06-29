@@ -267,20 +267,17 @@
 <!-- JEU -->
 <div id="game_page" class="hidden inset-0 flex-col items-center justify-center space-y-6">
     <!-- SCOREBOARD au-dessus -->
-    <div id="scoreboard" class="hidden text-3xl font-stretch-ultra-condensed font-roboto text-center" >
+    <div id="scoreboard" class="block text-3xl font-stretch-ultra-condensed font-roboto text-center" >
         <span id="player-left" class="w-[85%] transition-all duration-500 ease-in-out cursor-pointer p-10 text-5xl font-extrabold text-white bg-gradient-to-r from-fuchsia-500 via-red-500 to-orange-400  rounded-xl border-4 border-white shadow-lg text-center tracking-wide select-none">Player 1</span> 
         <span id="score-left" class="w-[85%] transition-all duration-500 ease-in-out cursor-pointer p-10 text-5xl font-extrabold text-white bg-gradient-to-r from-fuchsia-500 via-red-500 to-orange-400  rounded-xl border-4 border-white shadow-lg text-center tracking-wide select-none">0</span>
         <span id="score-right" class="w-[85%] transition-all duration-500 ease-in-out cursor-pointer p-10 text-5xl font-extrabold text-white bg-gradient-to-r from-emerald-400 via-teal-400 to-lime-400 rounded-xl border-4 border-white shadow-lg text-center tracking-wide select-none">0</span>
         <span id="player-right" class="w-[85%] transition-all duration-500 ease-in-out cursor-pointer p-10 text-5xl font-extrabold text-white bg-gradient-to-r from-emerald-400 via-teal-400 to-lime-400 rounded-xl border-4 border-white shadow-lg text-center tracking-wide select-none">Player 2</span>
     </div>
     <!-- Game -->
-    <div id="game" class="hidden w-[720px] h-[480px] bg-red-500 mx-auto my-10">
-        <div id="left_text" class="absolute left-[-100px] top-1/2 transform -translate-y-1/2 text-white text-4xl font-bold rotate-[-90deg]"></div>
-    
-        <div id="right_text" class="absolute right-[-100px] top-1/2 transform -translate-y-1/2 text-white text-4xl font-bold rotate-[90deg]"></div>
+    <div id="game" class="relative w-[700px] h-[480px] bg-red-500 mx-auto my-10">
         <div id="l_paddle" class="absolute left-0 top-1/2 transform -translate-y-1/2 bg-black w-[10px] h-[80px]"></div>
         <div id="ball" class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black w-[10px] h-[10px]"></div>
-        <div id="r_paddle" class="absolute right-[10px] top-1/2 transform -translate-y-1/2 bg-black w-[10px] h-[80px]"></div>
+        <div id="r_paddle" class="absolute right-0 top-1/2 transform -translate-y-1/2 bg-black w-[10px] h-[80px]"></div>
     </div>
 
 </div>
@@ -397,9 +394,31 @@ En haut à gauche du site, une option permet de changer la langue de l’interfa
         });
     }
 
-    function saveUsername(newUsername) {
+    async function saveUsername(newUsername) {
         document.getElementById('profile_username').innerText = newUsername;
         console.log("Nouvelle valeur du nom d'utilisateur : " + newUsername);
+
+        const body = {
+            username: "IQiyu", // changer par this.username dans la classe
+            newUsername: newUsername
+        };
+        try {
+            const req = await fetch('/db/update/username', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { "Content-Type": "application/json" },
+                    boy: JSON.stringify(body)
+                });
+
+            const data = await req.json();
+
+            if (!data.success)
+                throw(Error(data.error));
+
+            console.log("username updated.");
+        } catch (error) {
+            alert(error);
+        }
     }
 </script>
 
@@ -415,7 +434,7 @@ En haut à gauche du site, une option permet de changer la langue de l’interfa
     }
 
     // Validation du formulaire de changement de mot de passe
-    document.getElementById('passwordForm').addEventListener('submit', function(event) {
+    document.getElementById('passwordForm').addEventListener('submit', async function(event) {
         event.preventDefault();
 
         // Récupération des valeurs des champs
@@ -429,12 +448,27 @@ En haut à gauche du site, une option permet de changer la langue de l’interfa
             return;
         }
 
-        // Vérification (si nécessaire) du mot de passe actuel (ici on suppose un mot de passe fictif)
-        const storedPassword = "ancienmotdepasse"; // Simuler un mot de passe existant
+        const body = {
+            username: "IQiyu", // changer par this.username dans la classe
+            password: currentPassword,
+            newPassword: newPassword
+        };
+        try {
+            const req = await fetch('/db/update/password', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { "Content-Type": "application/json" },
+                    boy: JSON.stringify(body)
+                });
 
-        if (currentPassword !== storedPassword) {
-            showError("Le mot de passe actuel est incorrect.");
-            return;
+            const data = await req.json();
+
+            if (!data.success)
+                throw(Error(data.error));
+
+            console.log("password updated.");
+        } catch (error) {
+            alert(error);
         }
 
         // Si tout est correct, effectuer le changement (par exemple, envoyer les données au serveur)

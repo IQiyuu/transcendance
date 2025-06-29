@@ -25,7 +25,7 @@ async function isValidPassword(password) {
         console.log("Mot de passe valide");
       } else {
         console.log("Mot de passe invalide");
-        throw Error("PASSWORD AAAAAAAAAAAA");
+        throw Error("Password must contain maj, min, special char and digit");
       }
     } catch (error) {
       console.error("Erreur : AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", error);

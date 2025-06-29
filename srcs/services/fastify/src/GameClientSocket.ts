@@ -67,12 +67,14 @@ export class GameClientSocket{
                     console.log("side = " + this.game.getSide());
                     this.game.stop_matchmaking_animation();
                     this.game.gameInit();
+                    this.game.hide_all();
                     this.game.hide_menu();
                     this.game.print_play_page();
                 }
             } else if (message.type === "offline_game_created"){
                 this.game.updateState(message.game);
                 this.game.gameInit();
+                this.game.hide_all();
                 this.game.hide_menu();
                 this.game.print_play_page();
             } else if (message.type === "game_finished"){
@@ -125,6 +127,7 @@ export class GameClientSocket{
                 state: "create"
             })
         );
+        
     }
 
     // Update the server with movements
