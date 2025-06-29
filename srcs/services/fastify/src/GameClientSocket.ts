@@ -105,6 +105,7 @@ export class GameClientSocket{
         this.ws.onclose = (event) => {
             console.log("closing socket");
             console.log(event);
+            // if (event) if cause is valid, then nothing
             this.ctl.close();
         }
 

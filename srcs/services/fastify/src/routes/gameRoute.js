@@ -502,41 +502,91 @@ export async function gameRoute (fastify, options) {
             }
         });
 
-        // sending to each socket infos
-        playing_clients.forEach((game_id, socket) => {
+        for ([socket, game_id] of playing_clients.entries()){
             let game = finished_games.find(g => g.id === game_id);
 
-            // If game is finished
+            // If game is finished, end
             if (game !== undefined){
-                games.splice(games.indexOf(game), 1);
                 console.log("game is finished");
                 console.log(game);
-                // end_game(game); // save into db
+
+                playing_clients.delete(socket);
+
+                let p2 = null; // can be null as there are local games too
+                for ([s2, g_id2] of playing_clients.entries()){
+                    if (game_id === g_id2){
+                        p2 = s2;
+                        break ;
+                    }
+                }
+
                 if (game.t_id !== null){
                     console.log("We are descending")
                     matchOver(game); // tell tournaments that a match is over
                 }
+
                 socket.send(JSON.stringify({
                     type: "game_finished",
                     game: game
                 }));
+
+                if (p2 !== null){
+                    p2.send.JSON.stringify({
+                        type: "game_finished",
+                        game: game
+                    });
+                    playing_clients.delete(p2);
+                }
                 
                 saveGame(game, options.db);
+                games.splice(games.indexOf(game), 1);
                 finished_games.splice(finished_games.indexOf(game), 1);
-                delete(game);
                 return ;
             }
-            // console.log("for :" + game_id + " sock : " + socket);
+            // Else, send info to users
             game = games.find(g => g.id === game_id);
-            if (game === undefined)
-                throw (Error("Unexpected."));
+            if (game !== undefined){
+                // NE PAS OUBLIER DE MASKER AVEC UN HOOK
+                socket.send(JSON.stringify({
+                    type: "game_info",
+                    game: game
+                }));
+            }
+        }
+        // sending to each socket infos
+        // playing_clients.forEach((game_id, socket) => {
+        //     let game = finished_games.find(g => g.id === game_id);
 
-            // NE PAS OUBLIER DE MASKER AVEC UN HOOK
-            socket.send(JSON.stringify({
-                type: "game_info",
-                game: game
-            }));
-        });
+        //     // If game is finished
+        //     if (game !== undefined){
+        //         console.log("game is finished");
+        //         console.log(game);
+        //         // end_game(game); // save into db
+        //         if (game.t_id !== null){
+        //             console.log("We are descending")
+        //             matchOver(game); // tell tournaments that a match is over
+        //         }
+        //         socket.send(JSON.stringify({
+        //             type: "game_finished",
+        //             game: game
+        //         }));
+        //         p2 = 
+        //         saveGame(game, options.db);
+        //         games.splice(games.indexOf(game), 1);
+        //         finished_games.splice(finished_games.indexOf(game), 1);
+        //         // delete(game);
+        //         playing_clients.delete(game_id);
+        //         return ;
+        //     }
+        //     game = games.find(g => g.id === game_id);
+        //     if (game !== undefined){
+        //         // NE PAS OUBLIER DE MASKER AVEC UN HOOK
+        //         socket.send(JSON.stringify({
+        //             type: "game_info",
+        //             game: game
+        //         }));
+        //     }
+        // });
     }, 30);
 
 }

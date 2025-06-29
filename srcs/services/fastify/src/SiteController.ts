@@ -397,31 +397,6 @@ export class SiteController{
             this.loadState(history.state);
         });
 
-        this.tmp_btn.addEventListener("click", async (event) => {
-            event.preventDefault();
-
-            const body = { 
-                username: "test",
-                password: "test",
-            };
-            try {
-                const response = await fetch("register", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(body),
-                });
-                
-                const data = await response.json();
-                
-
-                if (!data.success)
-                    throw(Error("Cannot create the user test"));
-            } catch (error) {
-                console.log("tmp btn");
-                alert(error);
-            }
-        });
-
         // Register/login form validation
         this.login_form.addEventListener("submit", async (event) => {
             event.preventDefault();

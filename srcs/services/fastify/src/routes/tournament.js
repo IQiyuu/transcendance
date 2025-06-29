@@ -396,7 +396,7 @@ export function	gameInTournament(game_id){
 }
 
 export function matchOver(game){
-	console.log("Mathc is over");
+	console.log("Match is over");
 
 	let t = getTournament(tournaments, game.t_id);
 	//set

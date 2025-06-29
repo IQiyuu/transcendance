@@ -25,11 +25,11 @@ async function isValidPassword(password) {
         console.log("Mot de passe valide");
       } else {
         console.log("Mot de passe invalide");
-        throw Error("Password must contain maj, min, special char and digit");
+        throw Error("errReg");
       }
     } catch (error) {
-      console.error("Erreur : AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", error);
-      return { success: false, message: 'Error insert data in db.' };
+      console.error("Erreur : ", error);
+      return { success: false, message: error.message };
     }
     
     try {
