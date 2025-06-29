@@ -1,3 +1,6 @@
+import qrcode from 'qrcode';
+import speakeasy from 'speakeasy';
+
 async function logginRoute (fastify, options) {
   const secretKey = options.secretKey;
   fastify.get('/', async (request, reply) => {
@@ -36,6 +39,13 @@ async function logginRoute (fastify, options) {
       });
       // reply.header('Content-Type', 'application/json');
       // reply.code(205).send({ success: true, message: `Welcome ${username}` });
+
+      const secret = speakeasy.generateSecret({ name: 'Transcendance 2FA' }); 
+      options.db.prepare('UPDATE users SET secret = ? WHERE username = ?').run(secret.base32, username);
+      qrcode.toDataURL(secret.otpauth_url, (err, data_url) => {
+        if (err) throw err;
+        options.db.prepare('UPDATE users SET twofa = ? WHERE username = ?').run(data_url, username);
+      });
       return { success: true, message: `Welcome ${username}`, username: username };
     } catch (error) {
       console.error('Error insert data in db.', error);
@@ -59,7 +69,6 @@ async function logginRoute (fastify, options) {
         if (!isMatch) {
             return reply.send({ success: false, message: 'errAuth' });
         }
-
         const payload = {
           username: username,
         };

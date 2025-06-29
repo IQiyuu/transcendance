@@ -25,7 +25,7 @@
         <form class="w-full" id="form">
             <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="username">Username</label>
             <input class="mb-4 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" id="username" name="username" required />
-
+            
             <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="password">Password</label>
             <input class="mb-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" id="password" name="password" type="password" required />
 
@@ -36,6 +36,15 @@
             <button id="login_btn" class="w-full text-white bg-gradient-to-br from-green-400 to-blue-600 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-green-200 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center" type="submit">Se connecter</button>
         </form>
     </div>
+
+    <div id="fa-form"  class="hidden flex-col p-6 items-center justify-center bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 max-w-sm w-full">
+        <input class="mb-4 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" id="keys" name="keys" required />
+        <button id="fa_btn" class="flex relative px-6 py-3 text-white font-bold text-lg rounded-lg bg-gradient-to-r from-pink-500 via-yellow-400 to-green-500 animate-pulse shadow-lg hover:shadow-xl transition duration-300">
+            <span class="relative z-10">Connexion</span>
+            <span class="absolute inset-0 bg-white opacity-10 rounded-lg blur-sm"></span>
+        </button>
+    </div>
+
 
     <div id="site" class="hidden">
         <div id="pong-game">
@@ -147,10 +156,11 @@
                             <span class="absolute inset-0 bg-white opacity-10 rounded-lg blur-sm"></span>
                         </button>
 
-                        <button id="2fa_btn" class="flex relative px-6 py-3 text-white font-bold text-lg rounded-lg bg-gradient-to-r from-pink-500 via-yellow-400 to-green-500 animate-pulse shadow-lg hover:shadow-xl transition duration-300">
+                        <button id="switch_fa_btn" class="flex relative px-6 py-3 text-white font-bold text-lg rounded-lg bg-gradient-to-r from-pink-500 via-yellow-400 to-green-500 animate-pulse shadow-lg hover:shadow-xl transition duration-300">
                             <span id="google_auth" class="relative z-10">Activer la 2FA</span>
                             <span class="absolute inset-0 bg-white opacity-10 rounded-lg blur-sm"></span>
                         </button>
+                        <img id="QRCode" class=" hidden w-full h-full shadow-lg object-cover" src=""/>
 
                         <!-- Date de création -->
                         <p id="profile_creation" class="mt-4 text-sm text-gray-300"></p>

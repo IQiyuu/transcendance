@@ -5,6 +5,7 @@ import {GameClientSocket} from "./GameClientSocket.js";
 import {GameController} from "./pong.js";
 import {TournamentController} from "./TournamentController.js";
 import { FriendController } from "./FriendController.js";
+import { connect } from "http2";
 
 export class   ProfileController{
 
@@ -24,10 +25,13 @@ export class   ProfileController{
     private	search_btn = document.getElementById("search_player_btn");
     private	search_inp = document.getElementById("search_player_in") as HTMLInputElement;
     private	friend_div = document.getElementById("friend_div");
-    private	fa_btn = document.getElementById("auth_btn");
+    private	auth_btn = document.getElementById("auth_btn");
     private	check_btn = document.getElementById("check_btn");
     private google_auth = document.getElementById("google_auth");
-
+    private fa_btn = document.getElementById("fa_btn");
+    private switch_fa_btn = document.getElementById("switch_fa_btn");
+    private QRCode = document.getElementById("QRCode") as HTMLInputElement;
+    private keys = document.getElementById("keys") as HTMLInputElement;
 	
     private	histo_list = document.getElementById("histo_list");
 
@@ -97,7 +101,7 @@ export class   ProfileController{
                 this.camera_icon.classList.replace("opacity-60", "opacity-0");
         });
         // Activate / Desactivate Google authentificator
-        this.fa_btn.addEventListener('click', async (event) => {
+        this.auth_btn.addEventListener('click', async (event) => {
             event.preventDefault();
             if(this.google_auth.textContent === "Activer Google authentificator")
             {
@@ -111,13 +115,66 @@ export class   ProfileController{
                 this.google_auth.id = "auth_btn";
                 this.google_auth.textContent = "Activer Google authentificator";
             }
+
+        // Connexion with Google authentificator
         });
-        
         this.check_btn.addEventListener('click', async (event) => {
             event.preventDefault();
             window.open('/check', '42 AUTH');
-            
+            window.addEventListener("message", (event) => {
+                if (event.origin !== window.location.origin) return; 
+
+                const { username, success } = event.data;
+                if (success) {
+                    this.site.setUsername(username);
+                    this.site.connect();
+                } 
+            });
         });
+
+        this.fa_btn.addEventListener('click', async (event) => {
+            event.preventDefault();
+            console.log(this.keys.value);
+             const res = await fetch('/2fa', {
+                method: 'POST',
+                headers: {
+                'Content-Type': 'application/json'
+                },
+                credentials: 'include', 
+                body: JSON.stringify({ userToken: this.keys.value }) 
+            });
+
+            const data = await res.json();
+            if (data.twofa === 1)
+            {
+                //this.site.setUsername(data.username);
+                this.site.hide_fa_page();
+                this.site.connect();
+               
+            }
+        });
+
+        this.switch_fa_btn.addEventListener('click', async (event) => {
+            event.preventDefault();
+            const res = await fetch('/enable-2fa', {
+                method: 'GET',
+                credentials: 'include'
+            });
+            if (res.ok) {
+            const data = await res.json();
+            if (data.twofa && this.QRCode !== null) {
+                this.QRCode.src = data.twofa.startsWith('data:image') 
+                ? data.twofa 
+                : `data:image/png;base64,${data.twofa}`;
+                this.QRCode.classList.replace("hidden", "block");
+        }
+           else {
+                this.QRCode.classList.replace("block" , "hidden");
+        }
+
+    }
+
+    });
 
     }
 
@@ -257,6 +314,10 @@ export class SiteController{
         return this.lang.getFile()[key];
     }
 
+    setUsername(key: string){
+        this.username = key;
+    }
+
     /**
      * CONTROLLER
      */
@@ -333,7 +394,22 @@ export class SiteController{
                 
                 if (data.success) {
                     this.username = data.username;
-                    this.connect();
+                    const res = await fetch('/check-2fa-status', {
+                        method: 'GET',
+                    });
+                    if (res.ok) {
+                        const twofadata = await res.json();
+                        console.log("2fa :", twofadata.success);
+                        if (twofadata.success == 1)
+                        {
+                            this.print_fa_page();
+                            this.hide_register_page();
+                        }
+                        else 
+                        {
+                            this.connect();
+                        }
+                    }
                     // this.ws.print_info();
 
                 } else {
@@ -388,6 +464,7 @@ export class SiteController{
             
             document.getElementById("site").classList.replace("block", "hidden");
             document.getElementById("login-form").classList.replace("hidden", "flex");
+            document.getElementById("fa-form").classList.replace("hidden", "flex");
             document.body.classList.add("justify-center", "align-center", "flex");
         });
 
@@ -454,6 +531,13 @@ export class SiteController{
         this.main_page.classList.replace("hidden", "block");
     }
 
+    print_fa_page(){
+        document.getElementById("fa-form").classList.replace("hidden", "block");
+    }
+
+    hide_fa_page(){
+        document.getElementById("fa-form").classList.replace("block", "hidden");
+    }
     print_menu(){
         this.print_main_page();
         this.menu.classList.replace("hidden", "block");
@@ -472,6 +556,8 @@ export class SiteController{
     hide_about_page(){
         this.about.classList.replace("flex", "hidden");
     }
+
+
 
     // GET et afficher les infos du profile / historique
 // async function display_profile(username) {

@@ -23,9 +23,9 @@ async function GoogleAuthRoute(fastify, options) {
         return reply.redirect(authUrl);
       else 
       {
-        const value = options.db.prepare('SELECT twofa FROM users WHERE username = ?').get(username);
-        if (value.twofa == null){
-          options.db.prepare('UPDATE users SET twofa = ? WHERE username = ?').run(googleEmail, username);
+        const value = options.db.prepare('SELECT email FROM users WHERE username = ?').get(username);
+        if (value.email == null){
+          options.db.prepare('UPDATE users SET email = ? WHERE username = ?').run(googleEmail, username);
           reply.type('text/html').send("<p>Authentification Google reussie. Cette fenetre va se fermer dans 5 secondes.</p><script>setTimeout(() => {window.close()}, 5000);</script>");
         }
        reply.type('text/html').send("<p>Google Authentificator est deja active. Cette fenetre va se fermer dans 5 secondes.</p><script>setTimeout(() => {window.close()}, 5000);</script>");
@@ -42,7 +42,7 @@ async function GoogleAuthRoute(fastify, options) {
     const token = req.cookies.auth_token;
     const decoded = fastify.jwt.verify(token, secret);
     const username = decoded.username;
-    options.db.prepare('UPDATE users SET twofa = ? WHERE username = ?').run(null, username);
+    options.db.prepare('UPDATE users SET email = ? WHERE username = ?').run(null, username);
     reply.clearCookie('google_email');
 
     return reply.send({ success: true, message: "2FA désactivé" });
@@ -50,7 +50,7 @@ async function GoogleAuthRoute(fastify, options) {
     console.error("Erreur dans /desable_auth :", error);
     return reply.status(500).send({ success: false, message: "Erreur serveur" });
   }
-});
+  });
 
 
   // route principale pour se connecter avec google authentificator 
@@ -63,12 +63,35 @@ async function GoogleAuthRoute(fastify, options) {
     {
       if (!googleEmail)
         return reply.redirect(authUrl2);
-      const value = options.db.prepare('SELECT * FROM users WHERE twofa = ?').get(googleEmail);
+      const value = options.db.prepare('SELECT * FROM users WHERE email = ?').get(googleEmail);
       if (value)
       {
-        console.log("Lance le projet tabanak");
+        const username = value.username;
+        const payload = {
+          username: username,
+        };
+        const token = fastify.jwt.sign(payload, { expiresIn: '1d' });
 
+        reply.setCookie('auth_token', token, {
+          path: '/',
+          httpOnly: true,
+          secure: true,
+          SameSite: 'Strict',
+          maxAge: 3600,
+        });
+        return reply.type('text/html').send(`
+        <html>
+          <body>
+            <script>
+              window.opener.postMessage({ username: "${username}", success: true }, window.location.origin);
+              window.close();
+            </script>
+            <p>Connexion en cours...</p>
+          </body>
+        </html>
+      `);
       }
+      return { user: null};
     } catch (error) {
       return reply.send({ success: false });
     }
