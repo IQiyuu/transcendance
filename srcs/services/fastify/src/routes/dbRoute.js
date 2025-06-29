@@ -52,7 +52,10 @@ async function dbRoute (fastify, options) {
     fastify.get('/db/select/lang/:user' , async (request, reply) => {
         try {
             const datas = db.prepare(`SELECT lang FROM users WHERE username=?`).get(request.params.user);
-            reply.send({success:true, lang: datas.lang});
+            if (datas)
+                reply.send({success:true, lang: datas.lang});
+            else
+                reply.send({success:false, error: "user not found"});
         } catch (error) {
             console.log("error: ", error);
             return { success: false, error: error };
@@ -193,19 +196,26 @@ async function dbRoute (fastify, options) {
     }
 
     function getIdFromUsername(username) {
-        return db.prepare('SELECT user_id FROM users WHERE username = ?').get(username).user_id;
+        const data = db.prepare('SELECT user_id FROM users WHERE username = ?').get(username);
+        if (data)
+            return data.user_id;
+        return "";
     }
 
     function getFriendList(user) {
         return db.prepare(`
             SELECT users.username as username, users.picture_path as pp
             FROM users
-            JOIN friends 
-              ON users.user_id = friends.user_id OR users.user_id = friends.friend_id
-            WHERE users.user_id != ?
-              AND friends.status = 'accepted'
-        `).all(user);
+            JOIN friends ON (
+                (friends.user_id = ? AND friends.friend_id = users.user_id)
+                OR
+                (friends.friend_id = ? AND friends.user_id = users.user_id)
+            )
+            WHERE friends.status = 'accepted'
+        `).all(user, user);
     }
+
+    // SELETCIONNER LE USERNAME ET LA PP DE USERS AVEC FRIENDS QUI A LE MEME ID (friend user ou friend friend) QUAND le user id c'est pas celui de l'utilisateur qui a fait la requete
 
     function getFriendRelation(user1, user2) {
         return db.prepare(`
@@ -337,7 +347,8 @@ async function dbRoute (fastify, options) {
     fastify.get('/db/friends/friendlist/:username', async (request, reply) => {
         try {
             const userId = getIdFromUsername(request.params.username);
-
+            if (!userId)
+                reply.send({ succes: false, error: "user not found" });
             const friendlist = getFriendList(userId);
             reply.send({ success: true, friends: friendlist });
         } catch (error) {

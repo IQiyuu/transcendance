@@ -56,6 +56,7 @@ export class LangController{
                 throw (Error("Not parsed, setting a default file"));
         } catch (error) {     
             alert(error);
+            console.log("loadFile");
             this.file = {
                 "title" : "Trong the game",
                 "username": "Username",
@@ -110,6 +111,9 @@ export class LangController{
             var val = (event.target as HTMLSelectElement).value;
             await this.loadFile(val);
             this.updateContent();
+
+            if (!this.username)
+                return ;
 
             const body = {
                 user: this.username,

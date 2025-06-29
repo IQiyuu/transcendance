@@ -9,9 +9,9 @@
 <!-- <div class="fixed top-4 left-4 z-50"></div> -->
 <body class="h-screen flex items-center justify-center bg-gradient-to-br from-purple-600 to-blue-500">
     <select id="lang_select" class="fixed top-4 left-4 z-50">
+        <option value="en">🇺🇸 English</option>
         <option value="jp">🇯🇵 日本語</option>
         <option value="fr">🇫🇷 Français</option>
-        <option value="en">🇺🇸 English</option>
     </select>
 </div>
 
@@ -158,7 +158,7 @@
                             <img id="profile_picture" class="w-full h-full rounded-full shadow-lg object-cover" src="assets/imgs/standart.jpg"/>
                             <img src="assets/imgs/hoverPicture.png" id="camera_icon" class="absolute inset-0 top-1/4 mx-auto w-1/2 h-1/2 opacity-0 cursor-pointer transition-all duration-200 hover:opacity-80" />
                         </div>
-
+                        
                         <div id="profile_picture_overlay" class="absolute hidden z-50 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
                         <form id="profil_picture_square" class="flex flex-col items-center bg-gray-800 p-6 rounded-lg shadow-lg relative">
                             <p id="div_title" class="text-lg text-white mb-4">Upload your profile picture</p>
@@ -213,6 +213,7 @@
                     <div id="search_container" class="flex items-center mt-10 space-x-4">
                         <input id="search_player_in" type="text" placeholder="" class="p-3 rounded-lg w-64 bg-gray-800 text-white placeholder-gray-400 outline-none focus:ring-2 focus:ring-purple-400" />
                         <button id="search_player_btn" class="py-3 px-4 bg-gradient-to-r from-teal-500 to-lime-500 text-white rounded-lg hover:scale-105 transition-all duration-300">🔎</button>
+                        <p id="searchError" class="hidden text-#960e0e">User does not exists.</p>
                     </div>
 
                     <!-- Historique -->
@@ -223,7 +224,7 @@
                             <path id="percent" class="percent" style="stroke: #6f6fff; fill: none; stroke-width: 2.8; stroke-linecap: round;" stroke-dasharray="30, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
                             <text id="wr" x="18" y="14" text-anchor="middle" dy="7" font-size="10">3/10</text>
                         </svg>
-                        <ul id="histo_list" class="space-y-2 text-sm text-gray-300">
+                        <ul id="histo_list" class="block space-y-2 text-sm text-gray-300">
                         </ul>
                     </div>
                 </div>
@@ -247,7 +248,8 @@
                     </div>
                     <!-- Tournament home's page -->
                     <div id="tournament" class="hidden">
-                        <div id="tournament_state" class="hidden"></div>
+                        <div id="tournament_lobby" class="hidden"></div>
+                        <div id="tournament_state" class="hidden bg-grey"></div>
                     </div>
                 </div>
                 

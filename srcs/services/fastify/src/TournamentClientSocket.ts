@@ -8,14 +8,14 @@ export class TournamentClientSocket{
     private ws : WebSocket = null;
     private username : string = null;
 
-    private view : TournamentController = null;
+    private ctler : TournamentController = null;
     protected tournament : Tournament = null;
 
     // tournament historic on the same page, maybe a button to filter histo matches ?
-    constructor(username : string, view : TournamentController, tournament : Tournament){
+    constructor(username : string, ctler : TournamentController, tournament : Tournament){
         this.username = username;
         this.tournament = tournament;
-        this.view = view;
+        this.ctler = ctler;
 
         this.ws = new WebSocket(`wss://${window.location.host}/tournament/${this.tournament.getId()}/ws?username=${this.username}`);
         this.setSocket();
@@ -29,41 +29,51 @@ export class TournamentClientSocket{
         this.tournament = t;
     }
 
+    isReady(){
+        this.ws.send(JSON.stringify({
+            type: "matchmaking",
+            uname: this.username,
+            state: "enter"
+        }));
+        return (false);
+    }
+
     setSocket(){
         this.ws.onopen = (event) => {
             console.log("Connected to the tournament");
-            this.view.print_tournament_rejoin_btn();
+            this.ctler.print_tournament_rejoin_btn();
         }
         
-        this.ws.onmessage = (message) => {
-            console.log("msg recu");
-            const data = JSON.parse(message.data);
-            if (data === null)
+        this.ws.onmessage = (data) => {
+            // console.log("msg recu");
+            const message = JSON.parse(data.data);
+            if (message === null)
                 return ; // ERROR
-            if (data.type === "update") {
+            if (message.type === "update") {
                 console.log("   tournament has been updated,");
-                console.log(data.tournament);
-                this.view.updateTournament(data.tournament);
-            } else if (data.type === "started") {
+                console.log(message.tournament);
+                this.ctler.updateTournament(message.tournament);
+            } else if (message.type === "started") {
                 console.log("Tournament will start in a few moments");
-                this.view.updateTournament(data.tournament);
-                this.view.print_tournament();
-            } else if (data.type === "new_match"){
+                this.ctler.updateTournament(message.tournament);
+                this.ctler.print_tournament_state();
+            } else if (message.type === "new_match"){
                 console.log("Creating a new tournament match");
-                this.view;
-            } else if (data.type === "finished"){
+                this.ctler.createMatch(message.game_id, message.game);
+            } else if (message.type === "finished"){
                 console.log("Tournament is finished !");
-            } else if (data.type === "error"){
-                console.log(data.message);
+            } else if (message.type === "error"){
+                console.log(message.message);
             }
         };
 
+
         this.ws.onclose = (event) => {
             console.log("Closing " + this.username);
-            this.view.clear_tournament();
-            this.view.clear_tournaments();
-            this.view.hide_all();
-            this.view.print_menu();
+            this.ctler.clear_tournament();
+            this.ctler.clear_tournaments();
+            this.ctler.hide_all();
+            this.ctler.print_menu();
             // if server closed, then parent.err
         }
     }
@@ -75,7 +85,8 @@ export class TournamentClientSocket{
         }));
     }
 
-    finishGame(){
+    // Not usefull ?
+    finishTournament(){
 
     }
 
