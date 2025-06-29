@@ -80,9 +80,13 @@ class Tournament{
 	}
 	
 	getMatch(game_id){
+		// console.log("	fetching :" + game_id);
 		for (let i = 0 ; i < this.brackets[this.current_round].length ; i++){
+			// console.log("--------");
+			// console.log(this.brackets[this.current_round]);
+			// console.log(this.brackets[this.current_round][i]);
 			if (this.brackets[this.current_round][i]?.game_id === game_id)
-				return (this.brackets[this.current_round][i].game_id);
+				return (this.brackets[this.current_round][i]);
 		}
 		return (undefined);
 	}
@@ -227,7 +231,8 @@ class Tournament{
 			} else {
 				console.log("starting a round");
 				//Create the match
-				let g_id = gameRoute.createGame(match.players[0].username, match.players[1].username, this.t_id);
+				let g_id = gameRoute.createGame(match.players[0].username, match.players[1].username, this.id);
+				match.game_id = g_id;
 				let game = gameRoute.games[g_id];
 				match.players[0].socket.send(JSON.stringify({
 					type: "new_match",
@@ -254,6 +259,7 @@ class Tournament{
 	// Update the tournament's current round with the ended match 
 	updateRound(game){
 		let	match = this.getMatch(game.id);
+		console.log(game);
 		if (match === undefined)
 			throw (Error("No match with this game_id"));
 		match.winner = (game.scores.left < game.scores.right) ? game.players.right : game.players.left;
@@ -393,14 +399,14 @@ export function matchOver(game){
 
 	let t = getTournament(tournaments, game.t_id);
 	//set
-	console.log(t);
+	// console.log(t);
 	if (t === undefined){
 		console.log("ERROR MATCH NOT FOUND")
 		return ;
 	}
 	//tell clients
 	t.updateRound(game);
-	updateTournament();
+	updateTournament(t);
 }
 
 function tournamentRoute (fastify, options) {

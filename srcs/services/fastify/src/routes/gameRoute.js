@@ -413,7 +413,7 @@ export async function gameRoute (fastify, options) {
      *  For x, we check that there is a contact
      */
     setInterval(() => {
-        finished_games.length = 0; // clearing array
+        finished_games.length = 0; // clearing array MANY BUG BECAUSE OF THIS
     
         Object.values(games).forEach(game => {
 
@@ -484,14 +484,15 @@ export async function gameRoute (fastify, options) {
             if (finished_games.includes(game_id)){
                 // console.log(game);
                 // end_game(game); // save into db
+                if (game.t_id !== null){
+                    console.log("We are descending")
+                    matchOver(game);
+                }
                 socket.send(JSON.stringify({
                     type: "game_finished",
                     game: game
                 }));
-                // if (gameInTournament(game_id)){
-                if (game.t_id !== null){
-                    matchOver(game);
-                }
+                
                 // We could save the game here instead of letting client
                 //client close the connection after receving last msg
     

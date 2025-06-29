@@ -546,7 +546,7 @@ export class SiteController{
     }
 
     connect(){
-        console.log("ICI+"+this.username);
+        // console.log("ICI+"+this.username);
         this.ws = new ClientSocket(this.username);
         
         if (this.lang)
@@ -564,9 +564,9 @@ export class SiteController{
         document.body.classList.remove("justify-center", "align-center", "flex");
         this.print_menu();
         this.friends = new FriendController(this.username, this.lang, this.ws);
-        console.log(this.username);
+        // console.log(this.username);
         this.ws.setFriend(this.friends, this, this.profile);
-        console.log(this.friends);
+        // console.log(this.friends);
     }
 
     /**
@@ -610,117 +610,6 @@ export class SiteController{
         this.about.classList.replace("flex", "hidden");
     }
 
-    // GET et afficher les infos du profile / historique
-// async function display_profile(username) {
-//     const list =  as HTMLUListElement;
-//     try {
-//         // requete des infos pour afficher le profile
-//         const profile_req = await fetch(`/profile/${username}`, {
-//             method: 'GET',
-//             credentials: 'include',
-//             headers: { "Content-Type": "application/json" },
-//         });
-
-//         const profile = await profile_req.json();
-//         if (!profile.datas) {
-//             console.log("player not found.");
-//             return ;
-//         }
-/******************************************* */
-//         const friendDiv = document.getElementById("friend_div");
-//         const faBtn = document.getElementById("fa_btn");
-//         if (profile.datas.username == _username) {
-//             friendDiv.classList.replace("flex", "hidden");
-//             faBtn.classList.replace("hidden", "relative");
-//         }
-//         else {
-//             const responseFriends = await fetch(`/db/friends/${_username}/${username}`, {
-//                 method: 'GET',
-//                 credentials: 'include',
-//                 headers: { "Content-Type": "application/json" },
-//             });
-
-//             const friends = await responseFriends.json();
-
-//             if (!friends.success)
-//                 console.log("error: ", friends.error);
-//             else {
-//                 console.log(friends);
-//                 document.getElementById("friend_btn").textContent = lang_file[friends.message];
-//                 document.getElementById("block_btn").textContent = friends.emoji;
-//             }
-
-//             console.log(friends.message);
-//             friendDiv.classList.replace("hidden", "flex");
-//             faBtn.classList.replace("relative", "hidden");
-//         }
-
-//         // requete des games
-//         const histo_req = await fetch(`/historic/${username}`, {
-//             method: 'GET',
-//             credentials: 'include',
-//             headers: { "Content-Type": "application/json" },
-//         });
-//         const data = await histo_req.json();
-//         console.log(data);
-//         list.replaceChildren();
-
-//         // affiche l'historique
-//         if (data.success) {
-//             var cpt = 0;
-//             var w = 0;
-//             data.histo.forEach((item) => {
-//                 cpt++;
-//                 if (cpt < 6) {
-//                     let li = document.createElement("li");
-//                     let a = document.createElement("a");
-//                     a.innerText = item.winner_username;
-//                     a.classList.add("text-green-500", "underline");
-//                     a.href="#";
-//                     a.id="profileDisplay";
-
-//                     let a2 = document.createElement("a");
-//                     a2.innerText = item.loser_username;
-//                     a2.classList.add("text-green-500", "underline");
-//                     a2.href="#";
-//                     a2.id="profileDisplay";
-
-//                     li.appendChild(a);
-//                     li.innerHTML += ": 11 VS ";
-//                     li.appendChild(a2);
-//                     li.innerHTML += " : " + item.loser_score + " at " + item.created_at;
-            
-//                     list.appendChild(li);
-//                     li.style.fontSize = "16px";
-//                 }
-//                 if (item.winner_username == profile.datas.username)
-//                     w++;
-//                 document.getElementById("wr_card").textContent = `${lang_file["wr"]} : ${(w / cpt * 100).toFixed(0)}%`;
-//             });
-//             if (cpt == 0)
-//                 document.getElementById("wr_card").textContent = `${lang_file["wr"]} : N/a`;
-//         }
-//         // change les a (lien) de l'historique par des liens qui menent a la page de profile
-//         document.querySelectorAll("a#profileDisplay").forEach((item) => { 
-//             item.addEventListener("click", async (event) => {
-//                     event.preventDefault();
-//                     await display_profile(item.textContent);
-//                 });
-//         });
-//         if (cpt > 0) {
-//             document.getElementById("wr").textContent = `${w} / ${cpt}` ;
-//             let wr = w/(cpt)*100;
-//             document.getElementById("percent").setAttribute("stroke-dasharray", `${wr}, 100`);
-//         } else {
-//             document.getElementById("wr").textContent = "N/A" ;
-//             document.getElementById("percent").setAttribute("stroke-dasharray", `50, 100`);
-//             document.getElementById("histo").classList.replace("hidden", "block");
-//         }
-//         document.getElementById("histo").classList.replace("hidden", "block");
-//     } catch (error) {
-//         console.log("error fetching db: ", error);
-//     }
-// }
     print_tournament_btns(){
         this.tournament_create_btn.classList.replace("hidden", "flex");
         this.tournament_join_btn.classList.replace("hidden", "flex");
@@ -771,13 +660,14 @@ export class SiteController{
             this.print_register_page();
     }
 
+    // AHHHHHHHHHHHHHh LE GRAAL
     async loadState(obj) {
         this.hide_all();
 
-        console.log(obj.page);
+        // console.log(obj.page);
         switch (obj.page) {
             case "main":
-                console.log(obj.page);
+                // console.log(obj.page);
                 this.print_menu();
                 break ;
             case "profile":
