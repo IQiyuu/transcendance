@@ -217,7 +217,7 @@ export class   GameController{
             const body = {
                 winner_username: winner,
                 loser_username: loser,
-                loser_score: loser_score,
+                loser_score: loser_score, // if tournament, 
             }
             console.log("REGISTER2");
             const req = await fetch('/game/storeGame', {
@@ -244,7 +244,7 @@ export class   GameController{
         this.hide_game();
         this.print_end_game();
 
-        if (!this.is_local && this.side === "left")
+        if (!this.is_local && this.side === "left") // then if right user 
             this.registerGame();
     }
 

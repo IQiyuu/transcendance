@@ -51,7 +51,7 @@ class Tournament{
 		this.owner = owner;
 		this.players = []; // Objects : {username, socket}
 		// Is a map for players better ?
-		this.brackets = []; // Ordered array of ordered array of Objects : {game_id, players(p1, p2), state(STARTING || ON GOING || FINISHED)}
+		this.brackets = []; // Ordered array of ordered array of Objects : {game_id, players(p1, p2), state(STARTING || ON GOING || FINISHED), winner}
 		this.state = T_STARTING;
 	}
 	
@@ -81,8 +81,8 @@ class Tournament{
 	
 	getMatch(game_id){
 		for (let i = 0 ; i < this.brackets[this.current_round].length ; i++){
-			if (this.bracket[this.current_round][i].game_id === game_id)
-				return (this.bracket[this.current_round][i].game_id);
+			if (this.brackets[this.current_round][i]?.game_id === game_id)
+				return (this.brackets[this.current_round][i].game_id);
 		}
 		return (undefined);
 	}
@@ -200,13 +200,13 @@ class Tournament{
 			next = bracket_pile.pop();
 			let p1 = this.players[next - 1];
 			if (bracket_pile.length === 0){
-				this.brackets[0].push({game_id : -1, players : [p1, null], state : T_READY});
+				this.brackets[0].push({game_id : -1, players : [p1, null], state : T_READY, winner : null});
 				break ;
 			}
 			// console.log(next);
 			next = bracket_pile.pop();
 			let p2 = this.players[next - 1];
-			this.brackets[0].push({game_id : -1, players : [p1, p2], state : T_READY});
+			this.brackets[0].push({game_id : -1, players : [p1, p2], state : T_READY, winner : null});
 		}		
 		// console.log("List of matchs (to recheck with more players) :");
 		// console.log(this.brackets);
@@ -223,10 +223,11 @@ class Tournament{
 			if (match.players[1] === null){
 				console.log("No opponent, to impl");
 				match.state = T_FINISHED;
+				match.winner = match.players[0].username;
 			} else {
 				console.log("starting a round");
 				//Create the match
-				let g_id = gameRoute.createGame(match.players[0].username, match.players[1].username);
+				let g_id = gameRoute.createGame(match.players[0].username, match.players[1].username, this.t_id);
 				let game = gameRoute.games[g_id];
 				match.players[0].socket.send(JSON.stringify({
 					type: "new_match",
@@ -251,11 +252,11 @@ class Tournament{
 	}
 
 	// Update the tournament's current round with the ended match 
-	updateRound(res){
-		let	match = this.getMatch(res.game_id);
+	updateRound(game){
+		let	match = this.getMatch(game.id);
 		if (match === undefined)
 			throw (Error("No match with this game_id"));
-		match.res = 0;
+		match.winner = (game.scores.left < game.scores.right) ? game.players.right : game.players.left;
 		match.state = T_FINISHED;
 		if (this.brackets[this.current_round].length === 1)
 			this.state = T_FINISHED;
@@ -287,7 +288,7 @@ function    getMasked(t){
 	});
 	
 	let b;
-	console.log(" bracket uis :");
+	console.log(" Masking brackets:");
 	// console.log(t.brackets);
 	// console.log(t);
 	if (t.brackets === undefined || t.brackets === null){
@@ -307,7 +308,7 @@ function    getMasked(t){
 					p1 : match.players[0].username,
 					p2 : p2,
 					state : match.state,
-					winner : null
+					winner : match.winner
 				});
 			});
 			b.push(round);
@@ -377,6 +378,30 @@ function    existsTournament(tournaments, id){
 
 let tournaments = [];
 let max_t_id = tournaments.length;
+
+// Not used for now
+export function	gameInTournament(game_id){
+	for (let i = 0 ; i < tournaments.length; i++){
+		if (tournaments[i]?.getMatch(game_id) !== undefined)
+			return (true);
+	}
+	return (false);
+}
+
+export function matchOver(game){
+	console.log("Mathc is over");
+
+	let t = getTournament(tournaments, game.t_id);
+	//set
+	console.log(t);
+	if (t === undefined){
+		console.log("ERROR MATCH NOT FOUND")
+		return ;
+	}
+	//tell clients
+	t.updateRound(game);
+	updateTournament();
+}
 
 function tournamentRoute (fastify, options) {
 	

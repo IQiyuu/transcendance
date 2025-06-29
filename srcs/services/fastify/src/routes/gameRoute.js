@@ -1,4 +1,5 @@
 import fs from 'fs';
+import {gameInTournament, matchOver} from './tournament.js';
 
 function randomIntFromInterval(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
@@ -11,7 +12,7 @@ function degToRad(degree){
 // Each position is the center of the object
 
 const	SCORE_GOAL = 11;
-const	STARTING_SPEED = 7;
+const	STARTING_SPEED = 14;
 const	ACCELERATION = 1;
 const	LIMIT_SPEED = 15;
 const	BOARD_W = 700;
@@ -35,7 +36,7 @@ let waiting_clients = new Map(); // username, socket
 let playing_clients = new Map(); // socket, game_id as we may have 2 socket for the same game_id
 
 // Creer un objet game cote server
-export function createGame(user, user2) {
+export function createGame(user, user2, t_id = null) {
     const gameId = games.length;
     const angle = degToRad(randomIntFromInterval(0, 45));
     if (randomIntFromInterval(0,1) === 0){
@@ -46,6 +47,7 @@ export function createGame(user, user2) {
     const neg_x = randomIntFromInterval(0,1), neg_y = randomIntFromInterval(0,1);
     games.push({
         id: gameId,
+        t_id: t_id,
         players: {  
             left: user,
             right: user2
@@ -105,7 +107,6 @@ export function addPlayingClients(p1, p2, id){
     playing_clients.set(p1.socket, id);
     playing_clients.set(p2.socket, id);
 }
-
 
 function    getGame(gs, username){
     for (let i = 0; i < gs.length; i++){
@@ -480,28 +481,28 @@ export async function gameRoute (fastify, options) {
             let game = games[game_id];// Tester que la game existe tjrs sinon crash possble
             
             // console.log("for :" + game_id + " sock : " + socket);
-            // console.log(game);
             if (finished_games.includes(game_id)){
+                // console.log(game);
                 // end_game(game); // save into db
                 socket.send(JSON.stringify({
                     type: "game_finished",
                     game: game
                 }));
-                //client close the connection
-/*
-                delete(games[game_id]);
-                close(socket);
-                playing_clients.delete(socket); // to test if no problem arises
-*/
-                return ;
+                // if (gameInTournament(game_id)){
+                if (game.t_id !== null){
+                    matchOver(game);
+                }
+                // We could save the game here instead of letting client
+                //client close the connection after receving last msg
+    
+            } else{
+                // NE PAS OUBLIER DE MASKER AVEC UN HOOK
+                socket.send(JSON.stringify({
+                    type: "game_info",
+                    game: game
+                }));
+
             }
-
-            // NE PAS OUBLIER DE MASKER AVEC UN HOOK
-            socket.send(JSON.stringify({
-                type: "game_info",
-                game: game
-            }));
-
         });
     }, 30);
 
