@@ -413,12 +413,12 @@ export async function gameRoute (fastify, options) {
      *  For x, we check that there is a contact
      */
     setInterval(() => {
-        finished_games.length = 0; // clearing array MANY BUG BECAUSE OF THIS
     
         Object.values(games).forEach(game => {
 
             if (game.scores.left >= SCORE_GOAL || game.scores.right >= SCORE_GOAL){
-                finished_games.push(game.id);
+                finished_games.push(game);
+                // games.splice(games);
                 return ;
             }
             game.ball.x += game.ball.dx * game.ball.v;
@@ -478,31 +478,37 @@ export async function gameRoute (fastify, options) {
 
         // sending to each socket infos
         playing_clients.forEach((game_id, socket) => {
-            let game = games[game_id];// Tester que la game existe tjrs sinon crash possble
-            
-            // console.log("for :" + game_id + " sock : " + socket);
-            if (finished_games.includes(game_id)){
-                // console.log(game);
+            let game = finished_games.find(g => g.id === game_id);
+
+            // If game is finished
+            if (game !== undefined){
+                console.log("game is finished");
+                console.log(game);
                 // end_game(game); // save into db
                 if (game.t_id !== null){
                     console.log("We are descending")
                     matchOver(game);
                 }
+                return ;
+            }
+            // console.log("for :" + game_id + " sock : " + socket);
+            game = games.find(g => g.id === game_id);
+            if (game === undefined)
+                throw (Error("Unexpected."));
+
+            // NE PAS OUBLIER DE MASKER AVEC UN HOOK
+            socket.send(JSON.stringify({
+                type: "game_info",
+                game: game
+            }));
+            // -------------------------------------
+            if (finished_games.includes(game_id)){
+
+                console.log("sending signal");
                 socket.send(JSON.stringify({
                     type: "game_finished",
                     game: game
                 }));
-                
-                // We could save the game here instead of letting client
-                //client close the connection after receving last msg
-    
-            } else{
-                // NE PAS OUBLIER DE MASKER AVEC UN HOOK
-                socket.send(JSON.stringify({
-                    type: "game_info",
-                    game: game
-                }));
-
             }
         });
     }, 30);

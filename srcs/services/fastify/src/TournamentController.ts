@@ -353,6 +353,7 @@ export class TournamentController {
             console.log(brackets[i]);
             let nb_match = brackets[i].length;
             let round = document.createElement("tr");
+            round.style.margin = "10 px";
             for (let j = 0 ; j < nb_match ; j++){
                 let match = document.createElement("td");
                 let winner = brackets[i][j].winner;
@@ -364,7 +365,8 @@ export class TournamentController {
                 if (winner !== null)
                     p1.style.backgroundColor = (winner === brackets[i][j].p1 ? "green" : "red");
                 match.appendChild(p1);
-
+                match.style.padding = "1em";
+                match.style.border = "solid";
                 if (brackets[i][j].p2 !== null){
                     let p2 = document.createElement("p");
                     match.append(document.createTextNode(" VS "))

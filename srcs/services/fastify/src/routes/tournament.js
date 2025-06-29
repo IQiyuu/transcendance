@@ -254,12 +254,14 @@ class Tournament{
 	//
 	initNextRound(){
 		// Get players (winner), then adding them to the next round
+		this.current_round++;
+		console.log("Preparing next round");
 	}
 
 	// Update the tournament's current round with the ended match 
 	updateRound(game){
 		let	match = this.getMatch(game.id);
-		console.log(game);
+		// console.log(game);
 		if (match === undefined)
 			throw (Error("No match with this game_id"));
 		match.winner = (game.scores.left < game.scores.right) ? game.players.right : game.players.left;
@@ -346,7 +348,6 @@ function    updateTournament(tournament){
 	console.log("Trying to update clients");
 	tournament.getPlayers().forEach(player => {
 		if (player.socket !== null){
-			console.log("   Socket found");
 			player.socket.send(JSON.stringify({
 				type: "update",
 				tournament: res
@@ -404,6 +405,7 @@ export function matchOver(game){
 		console.log("ERROR MATCH NOT FOUND")
 		return ;
 	}
+
 	//tell clients
 	t.updateRound(game);
 	updateTournament(t);
