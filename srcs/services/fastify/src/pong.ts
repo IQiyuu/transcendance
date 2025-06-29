@@ -265,8 +265,9 @@ export class   GameController{
         this.hide_game();
         this.print_end_game();
 
-        if (!this.is_local && this.side === "left") // then if right user 
-            this.registerGame();
+        //saving the game on the server
+        // if (!this.is_local && this.side === "left") // then if right user 
+            // this.registerGame();
     }
 
     /**
@@ -278,8 +279,6 @@ export class   GameController{
         document.getElementById("matchmaking").innerHTML = "<span id='waiting_online'>waiting</span>"
             + "<span id='dots'></span>"
             + "<br><span id='cancel_game'>click to cancel ❌</span>";
-        // good luck ! (need to have dynamcly inserted dialogue)
-        // maybe by getting current value then adding in the handler ?
         this.interval_id = window.setInterval(() => {
             count++;
             document.getElementById("dots").innerHTML = '.'.repeat(count % 3) + "<br>";

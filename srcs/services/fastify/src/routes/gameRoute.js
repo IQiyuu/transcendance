@@ -1,5 +1,6 @@
 import fs from 'fs';
 import {gameInTournament, matchOver} from './tournament.js';
+import { finished } from 'stream';
 
 function randomIntFromInterval(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
@@ -88,6 +89,7 @@ export function createGame(user, user2, t_id = null) {
     return gameId;
 };
 
+//why export ?
 export function movePaddle(game, side, moveUp){
     if (side !== "left" && side !== "right")
         return ;
@@ -108,6 +110,30 @@ export function addPlayingClients(p1, p2, id){
     playing_clients.set(p2.socket, id);
 }
 
+//Save a game into the db
+function    saveGame(game, db){
+    const winner = (game.scores.left < game.scores.right) ? game.players.right : game.players.left;
+    const loser = (winner === game.players.left) ? game.players.right : game.players.left;
+    const loser_score = game.scores.left > game.scores.right ? game.scores.right : game.scores.left;
+
+    try {
+        const insert = db.prepare(`
+            INSERT INTO games (winner_id, loser_id, loser_score) 
+                SELECT
+                    u1.user_id AS winner_id,
+                    u2.user_id AS loser_id, 
+                    ? AS loser_score 
+                FROM users u1, users u2 
+                WHERE u1.username = ? AND u2.username = ?`
+        );
+        insert.run(loser_score, winner, loser);
+        return true;
+    } catch (error) {
+        console.error('Error insert data in db.', error);
+        return false;
+    }
+}
+
 function    getGame(gs, username){
     for (let i = 0; i < gs.length; i++){
         if (gs[i].players.left === username || gs[i].players.right === username)
@@ -125,6 +151,7 @@ export async function gameRoute (fastify, options) {
     // Stocke la game dans la db
     fastify.post('/game/storeGame', async (request, reply) => {
         const { winner_username, loser_username, loser_score } = request.body;
+        // saveGame();
         try {
             const insert = options.db.prepare(`
                 INSERT INTO games (winner_id, loser_id, loser_score) 
@@ -418,7 +445,6 @@ export async function gameRoute (fastify, options) {
 
             if (game.scores.left >= SCORE_GOAL || game.scores.right >= SCORE_GOAL){
                 finished_games.push(game);
-                // games.splice(games);
                 return ;
             }
             game.ball.x += game.ball.dx * game.ball.v;
@@ -482,13 +508,22 @@ export async function gameRoute (fastify, options) {
 
             // If game is finished
             if (game !== undefined){
+                games.splice(games.indexOf(game), 1);
                 console.log("game is finished");
                 console.log(game);
                 // end_game(game); // save into db
                 if (game.t_id !== null){
                     console.log("We are descending")
-                    matchOver(game);
+                    matchOver(game); // tell tournaments that a match is over
                 }
+                socket.send(JSON.stringify({
+                    type: "game_finished",
+                    game: game
+                }));
+                
+                saveGame(game, options.db);
+                finished_games.splice(finished_games.indexOf(game), 1);
+                delete(game);
                 return ;
             }
             // console.log("for :" + game_id + " sock : " + socket);
@@ -501,15 +536,6 @@ export async function gameRoute (fastify, options) {
                 type: "game_info",
                 game: game
             }));
-            // -------------------------------------
-            if (finished_games.includes(game_id)){
-
-                console.log("sending signal");
-                socket.send(JSON.stringify({
-                    type: "game_finished",
-                    game: game
-                }));
-            }
         });
     }, 30);
 
