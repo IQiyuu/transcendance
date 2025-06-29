@@ -112,16 +112,37 @@ export class   GameController{
         });
 
         //Local play
-        this.offline_play_btn.addEventListener("click", async (event) => {
-            event.preventDefault();
+    this.offline_play_btn.addEventListener("click", (event) => {
+    event.preventDefault();
 
-            this.stopMatchmaking(); // maybe to handle differently
+    const modal = document.getElementById("offline-confirm-modal");
+    const yesBtn = document.getElementById("modal-confirm-yes");
+    const noBtn = document.getElementById("modal-confirm-no");
 
-            this.print_play_page();
-            this.is_local = true;
-            this.ws = new GameClientSocket(this.username, this);
-            this.ws.startOfflineGame();
-        });
+    modal.classList.remove("hidden");
+
+    const closeModal = () => {
+        modal.classList.add("hidden");
+        yesBtn.removeEventListener("click", onYes);
+        noBtn.removeEventListener("click", onNo);
+    };
+
+    const onYes = () => {
+        closeModal();
+        this.stopMatchmaking();
+        this.print_play_page();
+        this.is_local = true;
+        this.ws = new GameClientSocket(this.username, this);
+        this.ws.startOfflineGame();
+    };
+
+    const onNo = () => {
+        closeModal();
+    };
+
+    yesBtn.addEventListener("click", onYes);
+    noBtn.addEventListener("click", onNo);
+});
     }
 
     /**
@@ -254,13 +275,25 @@ export class   GameController{
     start_matchmaking_animation(){
         let count = 0;
 
+        document.getElementById("matchmaking").innerHTML = "<span id='waiting_online'>waiting</span>"
+            + "<span id='dots'></span>"
+            + "<br><span id='cancel_game'>click to cancel ❌</span>";
+        // good luck ! (need to have dynamcly inserted dialogue)
+        // maybe by getting current value then adding in the handler ?
         this.interval_id = window.setInterval(() => {
             count++;
-            document.getElementById("matchmaking").textContent = "waiting" + '.'.repeat(count % 3);
+            document.getElementById("dots").innerHTML = '.'.repeat(count % 3) + "<br>";
+            //document.getElementById("matchmaking").textContent = "\nclick to cancel";
         }, 500);
+        this.site.loadLang();
+        // this.interval_id = setInterval(() => {
+        //     btn.textContent = waiting + '.'.repeat(count % 3);
+        // }, 500);
     }
 
     stop_matchmaking_animation(){
+        document.getElementById("matchmaking").innerHTML = "";
+        this.site.loadLang();
         clearInterval(this.interval_id);
         this.online_play_btn.textContent = this.site.getText('play_online');
     }
@@ -342,11 +375,11 @@ export class   GameController{
     }
 
     print_play_page(){
-        this.game_page.classList.replace("hidden", "block");
+        this.game_page.classList.replace("hidden", "flex");
     }
 
     hide_play_page(){
-        this.game_page.classList.replace("block", "hidden");
+        this.game_page.classList.replace("flex", "hidden");
     }
 
     print_scoreboard(){
@@ -383,9 +416,10 @@ export class   GameController{
         this.hide_game();
         this.hide_scoreboard();
     }
-
+ 
     //bad design, because we should separate view from ctl
     hide_aal(){
         this.site.hide_all();
     }
 };
+

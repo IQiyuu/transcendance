@@ -346,8 +346,6 @@ export class SiteController{
     private about_btn = document.getElementById("about_button");
     private logout_btn = document.getElementById("logout_btn");
 
-    private tmp_btn = document.getElementById("tmp_create");
-
     constructor(){
         this.profile = new ProfileController(this);
         this.game = new GameController(this);
@@ -543,6 +541,10 @@ export class SiteController{
     
     store_session(username){
         sessionStorage.setItem('username', username);
+    }
+
+    loadLang() {
+        this.lang.updateContent()
     }
 
     connect(){

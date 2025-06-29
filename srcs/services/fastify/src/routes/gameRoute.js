@@ -80,7 +80,7 @@ export function createGame(user, user2, t_id = null) {
                 y: STARTING_Y
             },
             right: {
-                x: BOARD_W - 20,
+                x: BOARD_W - 10,
                 y: STARTING_Y
             }
         }
