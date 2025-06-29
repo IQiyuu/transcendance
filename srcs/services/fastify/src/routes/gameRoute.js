@@ -13,7 +13,7 @@ function degToRad(degree){
 // Each position is the center of the object
 
 const	SCORE_GOAL = 11;
-const	STARTING_SPEED = 14;
+const	STARTING_SPEED = 10;
 const	ACCELERATION = 1;
 const	LIMIT_SPEED = 15;
 const	BOARD_W = 700;
@@ -349,6 +349,8 @@ export async function gameRoute (fastify, options) {
                 } else if (message.type === "game_update"){
                     let game = games[message.game_id];
                     //to check ?
+                    if (game === undefined)
+                        return ;
                     movePaddle(game, message.side, message.move_up);
 
                     // if (newY > 15 && newY < BOARD_H - 15)
@@ -447,51 +449,49 @@ export async function gameRoute (fastify, options) {
                 finished_games.push(game);
                 return ;
             }
-            game.ball.x += game.ball.dx * game.ball.v;
-            game.ball.y += game.ball.dy * game.ball.v;
+
             if (game.ball.y - (BALL_W / 2) <= 0 || game.ball.y + (BALL_W / 2) >= BOARD_H)
                 game.ball.dy *= -1;
 
             if (game.ball.x - (BALL_W / 2) <= game.paddles.left.x + (PADDLE_W / 2)
                 && game.ball.y >= game.paddles.left.y - (PADDLE_H / 2)
                 && game.ball.y <= game.paddles.left.y + (PADDLE_H / 2)) {
-                    // There are 8 zone considered for the bouncing, so we round to the closest quarter
-                    let dist = Math.abs(game.ball.y - game.paddles.left.y);
-                    let sign = game.ball.dy < 0 ? -1 : 1; // test if vector is neg
-                    let angle = 90;
-                    if (dist > (3 * 50) / 4)
-                        angle += 45;
-                    else if (dist > (2 * 50) / 4)
-                        angle += 65;
-                    else if (dist > 50 / 4)
-                        angle += 80;
-                    else
-                        angle += 90;
+                // There are 8 zone considered for the bouncing, so we round to the closest quarter
+                let dist = Math.abs(game.ball.y - game.paddles.left.y);
+                let sign = game.ball.dy < 0 ? -1 : 1; // test if vector is neg
+                let angle = 90;
+                if (dist > (3 * 50) / 4)
+                    angle += 45;
+                else if (dist > (2 * 50) / 4)
+                    angle += 65;
+                else if (dist > 50 / 4)
+                    angle += 80;
+                else
+                    angle += 90;
 
-                    game.ball.dx = Math.cos(degToRad(angle)) * -1;
-                    game.ball.dy = Math.sin(degToRad(angle)) * sign;
-                    game.ball.accelerate();
-                }
-                else if (game.ball.x + (BALL_W / 2) >= game.paddles.right.x - (PADDLE_W / 2)
-                    && game.ball.y >= game.paddles.right.y - (PADDLE_H / 2)
-                    && game.ball.y <= game.paddles.right.y + (PADDLE_H / 2)) {
-                    // There are 8 zone considered for the bouncing, so we round to the closest quarter
-                    let dist = Math.abs(game.ball.y - game.paddles.right.y);
-                    let sign = game.ball.dy < 0 ? -1 : 1;
-                    let angle = 90;
-                    if (dist > (3 * 50) / 4)
-                        angle += 45;
-                    else if (dist > (2 * 50) / 4)
-                        angle += 65;
-                    else if (dist > 50 / 4)
-                        angle += 80;
-                    else
-                        angle += 90;
+                game.ball.dx = Math.cos(degToRad(angle)) * -1;
+                game.ball.dy = Math.sin(degToRad(angle)) * sign;
+                game.ball.accelerate();
+            } else if (game.ball.x + (BALL_W / 2) >= game.paddles.right.x - (PADDLE_W / 2)
+                && game.ball.y >= game.paddles.right.y - (PADDLE_H / 2)
+                && game.ball.y <= game.paddles.right.y + (PADDLE_H / 2)) {
+                // There are 8 zone considered for the bouncing, so we round to the closest quarter
+                let dist = Math.abs(game.ball.y - game.paddles.right.y);
+                let sign = game.ball.dy < 0 ? -1 : 1;
+                let angle = 90;
+                if (dist > (3 * 50) / 4)
+                    angle += 45;
+                else if (dist > (2 * 50) / 4)
+                    angle += 65;
+                else if (dist > 50 / 4)
+                    angle += 80;
+                else
+                    angle += 90;
 
-                    game.ball.dx = Math.cos(degToRad(angle));
-                    game.ball.dy = Math.sin(degToRad(angle)) * sign;
-                    game.ball.accelerate();
-                }
+                game.ball.dx = Math.cos(degToRad(angle));
+                game.ball.dy = Math.sin(degToRad(angle)) * sign;
+                game.ball.accelerate();
+            }
             // checking with centers of objects
             if (game.ball.x <= game.paddles.left.x || game.ball.x >= game.paddles.right.x) {
                 game.scores[game.ball.x <= game.paddles.left.x ? "right" : "left"]++;
@@ -500,9 +500,11 @@ export async function gameRoute (fastify, options) {
                 game.ball.y = STARTING_Y;
                 game.ball.randomizeVector();
             }
+            game.ball.x += game.ball.dx * game.ball.v;
+            game.ball.y += game.ball.dy * game.ball.v;
         });
 
-        for ([socket, game_id] of playing_clients.entries()){
+        for (var [socket, game_id] of playing_clients){
             let game = finished_games.find(g => g.id === game_id);
 
             // If game is finished, end
@@ -513,7 +515,7 @@ export async function gameRoute (fastify, options) {
                 playing_clients.delete(socket);
 
                 let p2 = null; // can be null as there are local games too
-                for ([s2, g_id2] of playing_clients.entries()){
+                for (var [s2, g_id2] of playing_clients){
                     if (game_id === g_id2){
                         p2 = s2;
                         break ;
@@ -531,10 +533,10 @@ export async function gameRoute (fastify, options) {
                 }));
 
                 if (p2 !== null){
-                    p2.send.JSON.stringify({
+                    p2.send(JSON.stringify({
                         type: "game_finished",
                         game: game
-                    });
+                    }));
                     playing_clients.delete(p2);
                 }
                 
@@ -553,40 +555,6 @@ export async function gameRoute (fastify, options) {
                 }));
             }
         }
-        // sending to each socket infos
-        // playing_clients.forEach((game_id, socket) => {
-        //     let game = finished_games.find(g => g.id === game_id);
-
-        //     // If game is finished
-        //     if (game !== undefined){
-        //         console.log("game is finished");
-        //         console.log(game);
-        //         // end_game(game); // save into db
-        //         if (game.t_id !== null){
-        //             console.log("We are descending")
-        //             matchOver(game); // tell tournaments that a match is over
-        //         }
-        //         socket.send(JSON.stringify({
-        //             type: "game_finished",
-        //             game: game
-        //         }));
-        //         p2 = 
-        //         saveGame(game, options.db);
-        //         games.splice(games.indexOf(game), 1);
-        //         finished_games.splice(finished_games.indexOf(game), 1);
-        //         // delete(game);
-        //         playing_clients.delete(game_id);
-        //         return ;
-        //     }
-        //     game = games.find(g => g.id === game_id);
-        //     if (game !== undefined){
-        //         // NE PAS OUBLIER DE MASKER AVEC UN HOOK
-        //         socket.send(JSON.stringify({
-        //             type: "game_info",
-        //             game: game
-        //         }));
-        //     }
-        // });
     }, 30);
 
 }

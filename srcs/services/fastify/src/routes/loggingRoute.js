@@ -4,7 +4,7 @@ async function logginRoute (fastify, options) {
     return reply.view("src/index.ejs");
   })
 
-async function isValidPassword(password) {
+function isValidPassword(password) {
   const minLength    = password.length >= 8;
   const hasUppercase = /[A-Z]/.test(password);
   const hasLowercase = /[a-z]/.test(password);

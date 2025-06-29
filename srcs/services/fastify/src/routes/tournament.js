@@ -254,8 +254,15 @@ class Tournament{
 	//
 	initNextRound(){
 		// Get players (winner), then adding them to the next round
-		this.current_round++;
 		console.log("Preparing next round");
+		let winners = [];
+		
+		this.brackets[this.current_round].forEach(match => {
+			winners.push(match.winner);
+		});
+		console.log("winners are " + winners);
+		
+		this.current_round++;
 	}
 
 	// Update the tournament's current round with the ended match 

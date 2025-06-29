@@ -2,6 +2,7 @@ import {GameClientSocket} from "./GameClientSocket.js";
 import { SiteController } from "./SiteController.js";
 
 const PADDLE_W = 10, PADDLE_H = 80;
+const BALL_W = 10;
 
 // Game for a given client
 export class   GameController{
@@ -220,9 +221,9 @@ export class   GameController{
 
         this.print_player_names();
 
-        this.ball.style.position="relative";
-        this.l_paddle.style.position="relative";
-        this.r_paddle.style.position="relative";
+        this.ball.style.position="absolute";
+        this.l_paddle.style.position="absolute";
+        this.r_paddle.style.position="absolute";
 
         //testing maybe not here
         this.interval_id = setInterval(this.moves, 10, this, this.ws);
@@ -320,39 +321,33 @@ export class   GameController{
         this.right_player = game.players.right;
     }
 
-    // start(){
-    //     //say to server we are ready
-    //     this.ws.say_ready();
-    // }
-
-    /**
-     * View part
-    */
-
-    cooToPos_x(x){
-        return x;
+    cooToPos_x(x, type){
+        if (type === "paddle")
+            return x - (PADDLE_W / 2);
+        else if (type === "ball")
+            return x - (BALL_W / 2);
     }
 
-    cooToPos_y(y){
-        return y;
+    cooToPos_y(y, type){
+        if (type === "paddle")
+            return y - (PADDLE_H / 2);
+        else if (type === "ball")
+            return y - (BALL_W / 2);
     }
 
     // Move both paddles
     draw_paddles(){
-        // Distance
-        this.l_paddle.style.left = this.cooToPos_x(this.l_paddle_x).toString() + "px";
-        this.l_paddle.style.top = this.cooToPos_y(this.l_paddle_y).toString() + "px";
+        this.l_paddle.style.left = this.cooToPos_x(this.l_paddle_x, "paddle").toString() + "px";
+        this.l_paddle.style.top = this.cooToPos_y(this.l_paddle_y, "paddle").toString() + "px";
 
-        this.r_paddle.style.left = this.cooToPos_x(this.r_paddle_x).toString() + "px";
-        this.r_paddle.style.top = this.cooToPos_y(this.r_paddle_y).toString() + "px";
+        this.r_paddle.style.left = this.cooToPos_x(this.r_paddle_x, "paddle").toString() + "px";
+        this.r_paddle.style.top = this.cooToPos_y(this.r_paddle_y, "paddle").toString() + "px";
     }
 
     // Move ball
     draw_ball(){
-        // console.log("Drawing ball");
-        // console.log("Ball : " + this.ball_x + this.ball_y);
-        this.ball.style.left = this.cooToPos_x(this.ball_x).toString() + "px";
-        this.ball.style.top = this.cooToPos_y(this.ball_y).toString() + "px";
+        this.ball.style.left = this.cooToPos_x(this.ball_x, "ball").toString() + "px";
+        this.ball.style.top = this.cooToPos_y(this.ball_y, "ball").toString() + "px";
     }
 
     draw_scores(){
