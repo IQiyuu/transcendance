@@ -259,11 +259,11 @@ export class TournamentController {
     }
 
     print_tournaments_page() {
-        this.tournaments_page.classList.replace("hidden", "flex");
+        this.tournaments_page.classList.replace("hidden", "block");
     }
 
     hide_tournaments_page() {
-        this.tournaments_page.classList.replace("flex", "hidden");
+        this.tournaments_page.classList.replace("block", "hidden");
     }
 
     print_tournament_div(){
@@ -279,57 +279,67 @@ export class TournamentController {
             return ;
         }
 
-        let title = document.createElement("h3");
-        title.append(document.createTextNode(this.tournament.getName()));
+let title = document.createElement("h3");
+title.className = "text-2xl font-bold text-white mb-4 text-center";
+title.append(document.createTextNode(this.tournament.getName()));
 
-        let table = document.createElement("table");
+let table = document.createElement("table");
+table.className = "min-w-full bg-gray-800 rounded-lg overflow-hidden shadow-md";
 
-        //First line
-        let tr = document.createElement("tr");
-        let th = document.createElement("th");
+// First row (thead style)
+let tr = document.createElement("tr");
 
-        th.append(document.createTextNode("User"));
-        tr.append(th);
+let th = document.createElement("th");
+th.className = "px-4 py-2 text-left text-sm font-semibold text-gray-300 bg-gray-700";
+th.append(document.createTextNode("User"));
+tr.append(th);
 
-        th = document.createElement("th");
-        th.append(document.createTextNode("Role"));
-        tr.append(th);
+th = document.createElement("th");
+th.className = "px-4 py-2 text-left text-sm font-semibold text-gray-300 bg-gray-700";
+th.append(document.createTextNode("Role"));
+tr.append(th);
 
-        table.append(tr);
+table.append(tr);
 
-        //Each player info
-        this.tournament.getPlayers().forEach(p => {
-            tr = document.createElement("tr");
-            th = document.createElement("th");
+// Each player row
+this.tournament.getPlayers().forEach(p => {
+    tr = document.createElement("tr");
 
-            th.append(document.createTextNode(p));
-            tr.append(th);
+    th = document.createElement("td");
+    th.className = "px-4 py-2 text-white border-t border-gray-600";
+    th.append(document.createTextNode(p));
+    tr.append(th);
 
-            th = document.createElement("th");
-            if (p === this.tournament.getOwner()) {
-                th.append(document.createTextNode("Owner"));
-            }
-            else {
-                th.append(document.createTextNode("Player"));
-            }
-            tr.append(th);
-            table.append(tr);
-        });
+    th = document.createElement("td");
+    th.className = "px-4 py-2 text-white border-t border-gray-600";
+
+    if (p === this.tournament.getOwner()) {
+        th.append(document.createTextNode("Owner"));
+    } else {
+        th.append(document.createTextNode("Player"));
+    }
+
+    tr.append(th);
+    table.append(tr);
+});
+
         this.tournament_lobby.append(title);
         this.tournament_lobby.append(table);
 
         if (this.username === this.tournament.getOwner()) {
             let start_button = document.createElement("button");
             start_button.append(document.createTextNode("Start"));
+            start_button.className = "bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mr-4";
             start_button.onclick = (event) => this.startTournamentHandler(event);
             this.tournament_lobby.append(start_button);
         }
 
         let leave_button = document.createElement("button");
         leave_button.append(document.createTextNode("Leave"));
-
+        leave_button.className = "bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded";
         leave_button.onclick = (event) => this.leaveTournamentHandler(event);
         this.tournament_lobby.append(leave_button);
+
         this.tournament_lobby.classList.replace("hidden", "block");
     }
 
