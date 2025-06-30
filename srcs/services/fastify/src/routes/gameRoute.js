@@ -1,5 +1,6 @@
 import fs from 'fs';
 import {gameInTournament, matchOver} from './tournament.js';
+import { finished } from 'stream';
 
 function randomIntFromInterval(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
@@ -12,7 +13,7 @@ function degToRad(degree){
 // Each position is the center of the object
 
 const	SCORE_GOAL = 11;
-const	STARTING_SPEED = 14;
+const	STARTING_SPEED = 10;
 const	ACCELERATION = 1;
 const	LIMIT_SPEED = 15;
 const	BOARD_W = 700;
@@ -88,6 +89,7 @@ export function createGame(user, user2, t_id = null) {
     return gameId;
 };
 
+//why export ?
 export function movePaddle(game, side, moveUp){
     if (side !== "left" && side !== "right")
         return ;
@@ -108,6 +110,30 @@ export function addPlayingClients(p1, p2, id){
     playing_clients.set(p2.socket, id);
 }
 
+//Save a game into the db
+function    saveGame(game, db){
+    const winner = (game.scores.left < game.scores.right) ? game.players.right : game.players.left;
+    const loser = (winner === game.players.left) ? game.players.right : game.players.left;
+    const loser_score = game.scores.left > game.scores.right ? game.scores.right : game.scores.left;
+
+    try {
+        const insert = db.prepare(`
+            INSERT INTO games (winner_id, loser_id, loser_score) 
+                SELECT
+                    u1.user_id AS winner_id,
+                    u2.user_id AS loser_id, 
+                    ? AS loser_score 
+                FROM users u1, users u2 
+                WHERE u1.username = ? AND u2.username = ?`
+        );
+        insert.run(loser_score, winner, loser);
+        return true;
+    } catch (error) {
+        console.error('Error insert data in db.', error);
+        return false;
+    }
+}
+
 function    getGame(gs, username){
     for (let i = 0; i < gs.length; i++){
         if (gs[i].players.left === username || gs[i].players.right === username)
@@ -125,6 +151,7 @@ export async function gameRoute (fastify, options) {
     // Stocke la game dans la db
     fastify.post('/game/storeGame', async (request, reply) => {
         const { winner_username, loser_username, loser_score } = request.body;
+        // saveGame();
         try {
             const insert = options.db.prepare(`
                 INSERT INTO games (winner_id, loser_id, loser_score) 
@@ -322,6 +349,8 @@ export async function gameRoute (fastify, options) {
                 } else if (message.type === "game_update"){
                     let game = games[message.game_id];
                     //to check ?
+                    if (game === undefined)
+                        return ;
                     movePaddle(game, message.side, message.move_up);
 
                     // if (newY > 15 && newY < BOARD_H - 15)
@@ -418,99 +447,114 @@ export async function gameRoute (fastify, options) {
 
             if (game.scores.left >= SCORE_GOAL || game.scores.right >= SCORE_GOAL){
                 finished_games.push(game);
-                // games.splice(games);
                 return ;
             }
-            game.ball.x += game.ball.dx * game.ball.v;
-            game.ball.y += game.ball.dy * game.ball.v;
+
             if (game.ball.y - (BALL_W / 2) <= 0 || game.ball.y + (BALL_W / 2) >= BOARD_H)
                 game.ball.dy *= -1;
 
             if (game.ball.x - (BALL_W / 2) <= game.paddles.left.x + (PADDLE_W / 2)
                 && game.ball.y >= game.paddles.left.y - (PADDLE_H / 2)
                 && game.ball.y <= game.paddles.left.y + (PADDLE_H / 2)) {
-                    // There are 8 zone considered for the bouncing, so we round to the closest quarter
-                    let dist = Math.abs(game.ball.y - game.paddles.left.y);
-                    let sign = game.ball.dy < 0 ? -1 : 1; // test if vector is neg
-                    let angle = 90;
-                    if (dist > (3 * 50) / 4)
-                        angle += 45;
-                    else if (dist > (2 * 50) / 4)
-                        angle += 65;
-                    else if (dist > 50 / 4)
-                        angle += 80;
-                    else
-                        angle += 90;
+                // There are 8 zone considered for the bouncing, so we round to the closest quarter
+                let dist = Math.abs(game.ball.y - game.paddles.left.y);
+                let sign = game.ball.dy < 0 ? -1 : 1; // test if vector is neg
+                let angle = 90;
+                if (dist > (3 * 50) / 4)
+                    angle += 45;
+                else if (dist > (2 * 50) / 4)
+                    angle += 65;
+                else if (dist > 50 / 4)
+                    angle += 80;
+                else
+                    angle += 90;
 
-                    game.ball.dx = Math.cos(degToRad(angle)) * -1;
-                    game.ball.dy = Math.sin(degToRad(angle)) * sign;
-                    game.ball.accelerate();
-                }
-                else if (game.ball.x + (BALL_W / 2) >= game.paddles.right.x - (PADDLE_W / 2)
-                    && game.ball.y >= game.paddles.right.y - (PADDLE_H / 2)
-                    && game.ball.y <= game.paddles.right.y + (PADDLE_H / 2)) {
-                    // There are 8 zone considered for the bouncing, so we round to the closest quarter
-                    let dist = Math.abs(game.ball.y - game.paddles.right.y);
-                    let sign = game.ball.dy < 0 ? -1 : 1;
-                    let angle = 90;
-                    if (dist > (3 * 50) / 4)
-                        angle += 45;
-                    else if (dist > (2 * 50) / 4)
-                        angle += 65;
-                    else if (dist > 50 / 4)
-                        angle += 80;
-                    else
-                        angle += 90;
+                game.ball.dx = Math.cos(degToRad(angle)) * -1;
+                game.ball.dy = Math.sin(degToRad(angle)) * sign;
+                game.ball.accelerate();
+            } else if (game.ball.x + (BALL_W / 2) >= game.paddles.right.x - (PADDLE_W / 2)
+                && game.ball.y >= game.paddles.right.y - (PADDLE_H / 2)
+                && game.ball.y <= game.paddles.right.y + (PADDLE_H / 2)) {
+                // There are 8 zone considered for the bouncing, so we round to the closest quarter
+                let dist = Math.abs(game.ball.y - game.paddles.right.y);
+                let sign = game.ball.dy < 0 ? -1 : 1;
+                let angle = 90;
+                if (dist > (3 * 50) / 4)
+                    angle += 45;
+                else if (dist > (2 * 50) / 4)
+                    angle += 65;
+                else if (dist > 50 / 4)
+                    angle += 80;
+                else
+                    angle += 90;
 
-                    game.ball.dx = Math.cos(degToRad(angle));
-                    game.ball.dy = Math.sin(degToRad(angle)) * sign;
-                    game.ball.accelerate();
-                }
+                game.ball.dx = Math.cos(degToRad(angle));
+                game.ball.dy = Math.sin(degToRad(angle)) * sign;
+                game.ball.accelerate();
+            }
             // checking with centers of objects
-            if (game.ball.x <= game.paddles.left.x || game.ball.x >= game.paddles.right.x) {
-                game.scores[game.ball.x <= game.paddles.left.x ? "right" : "left"]++;
+            if (game.ball.x < game.paddles.left.x || game.ball.x > game.paddles.right.x) {
+                game.scores[game.ball.x < game.paddles.left.x ? "right" : "left"]++;
                 game.ball.v = STARTING_SPEED;
                 game.ball.x = STARTING_X;
                 game.ball.y = STARTING_Y;
                 game.ball.randomizeVector();
             }
+            game.ball.x += game.ball.dx * game.ball.v;
+            game.ball.y += game.ball.dy * game.ball.v;
         });
 
-        // sending to each socket infos
-        playing_clients.forEach((game_id, socket) => {
+        for (var [socket, game_id] of playing_clients){
             let game = finished_games.find(g => g.id === game_id);
 
-            // If game is finished
+            // If game is finished, end
             if (game !== undefined){
                 console.log("game is finished");
                 console.log(game);
-                // end_game(game); // save into db
+
+                playing_clients.delete(socket);
+
+                let p2 = null; // can be null as there are local games too
+                for (var [s2, g_id2] of playing_clients){
+                    if (game_id === g_id2){
+                        p2 = s2;
+                        break ;
+                    }
+                }
+
                 if (game.t_id !== null){
                     console.log("We are descending")
-                    matchOver(game);
+                    matchOver(game); // tell tournaments that a match is over
                 }
-                return ;
-            }
-            // console.log("for :" + game_id + " sock : " + socket);
-            game = games.find(g => g.id === game_id);
-            if (game === undefined)
-                throw (Error("Unexpected."));
 
-            // NE PAS OUBLIER DE MASKER AVEC UN HOOK
-            socket.send(JSON.stringify({
-                type: "game_info",
-                game: game
-            }));
-            // -------------------------------------
-            if (finished_games.includes(game_id)){
-
-                console.log("sending signal");
                 socket.send(JSON.stringify({
                     type: "game_finished",
                     game: game
                 }));
+
+                if (p2 !== null){
+                    p2.send(JSON.stringify({
+                        type: "game_finished",
+                        game: game
+                    }));
+                    playing_clients.delete(p2);
+                }
+                
+                saveGame(game, options.db);
+                games.splice(games.indexOf(game), 1);
+                finished_games.splice(finished_games.indexOf(game), 1);
+                return ;
             }
-        });
+            // Else, send info to users
+            game = games.find(g => g.id === game_id);
+            if (game !== undefined){
+                // NE PAS OUBLIER DE MASKER AVEC UN HOOK
+                socket.send(JSON.stringify({
+                    type: "game_info",
+                    game: game
+                }));
+            }
+        }
     }, 30);
 
 }

@@ -67,6 +67,10 @@ class Tournament{
 		return (this.players);
 	}
 	
+	getPlayer(username){
+		return (this.players.find((player) => player.username === username));
+	}
+
 	getSize(){
 		return (this.players.length);
 	}
@@ -254,8 +258,27 @@ class Tournament{
 	//
 	initNextRound(){
 		// Get players (winner), then adding them to the next round
-		this.current_round++;
 		console.log("Preparing next round");
+		let winners = [];
+		
+		this.brackets[this.current_round].forEach(match => {
+			winners.push(match.winner);
+		});
+		console.log("winners are " + winners);
+		this.current_round++;
+		this.brackets[this.current_round] = [];
+		let p1, p2;
+		while (winners.length > 1){
+			p1 = this.getPlayer(winners.shift());// if undefined to do
+			p2 = this.getPlayer(winners.shift());// if undefined to do
+			this.brackets[this.current_round].push({game_id : -1, players : [p1, p2], state : T_READY, winner : null});
+		}
+		if (winners.length == 1){
+			p1 = winners.shift(); //
+			this.brackets[this.current_round].push({game_id : -1, players : [p1, null], state : T_READY, winner : null});
+		}
+		console.log("List of matchs (to recheck with more players) :");
+		console.log(this.brackets);
 	}
 
 	// Update the tournament's current round with the ended match 
@@ -268,6 +291,18 @@ class Tournament{
 		match.state = T_FINISHED;
 		if (this.brackets[this.current_round].length === 1)
 			this.state = T_FINISHED;
+	}
+
+	endTournament(){
+		console.log("TOurnament is finished");
+		//Telling each client the end
+		this.state = T_FINISHED;
+		this.players.forEach( pl => {
+			pl.socket.send(JSON.stringify({
+				type : "finished",
+				tournament : getTournamentMasked(this),
+			}));
+		});
 	}
 };
 
@@ -289,7 +324,7 @@ function    needAuthRoute(route){ // to recheck
 }
 
 // Returns a view of the tournament without sensible info
-function    getMasked(t){
+function    getTournamentMasked(t){
 	let players = [];
 	t.players.forEach(p =>{
 		players.push(p.username);
@@ -337,14 +372,14 @@ function    getAvailableTournaments(tournaments, username){
 	let res = [];
 	tournaments.forEach(t => {
 		if (t.getOwner() !== username && !t.contains(username) && !t.isFull() && t.getState() === T_STARTING){
-			res.push(getMasked(t));
+			res.push(getTournamentMasked(t));
 		}
 	});
 	return (res);
 }
 
 function    updateTournament(tournament){
-	let res = getMasked(tournament);
+	let res = getTournamentMasked(tournament);
 	console.log("Trying to update clients");
 	tournament.getPlayers().forEach(player => {
 		if (player.socket !== null){
@@ -396,7 +431,7 @@ export function	gameInTournament(game_id){
 }
 
 export function matchOver(game){
-	console.log("Mathc is over");
+	console.log("Match is over");
 
 	let t = getTournament(tournaments, game.t_id);
 	//set
@@ -429,7 +464,7 @@ function tournamentRoute (fastify, options) {
 	//Masking data we send
 	fastify.addHook('preSerialization', async (request, reply, payload) => {
 		if (payload.tournament !== null && payload.tournament !== undefined){
-			payload.tournament = getMasked(payload.tournament);
+			payload.tournament = getTournamentMasked(payload.tournament);
 		}
 	});
 	
@@ -650,8 +685,11 @@ function tournamentRoute (fastify, options) {
 			if (tournament.getSize() === 0){
 				tournaments.splice(tournaments.indexOf(tournament));
 			}
-			if (tournament.isFinished())
+			if (tournament.isFinished()){
 				tournament.endTournament();
+				tournaments.splice(tournaments.indexOf(tournament), 1);
+				return ;
+			}
 			else if (tournament.isRoundReadyToStart()){
 				tournament.startRound();
 			} else if (tournament.currentRoundIsFinished())

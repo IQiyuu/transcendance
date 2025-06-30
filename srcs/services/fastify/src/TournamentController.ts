@@ -12,7 +12,7 @@ export class Tournament {
     private name;
     private owner;
     private players; // image, win rate{}
-    private brackets = undefined; // ordered array of ordered array of {username, username, state, winner}
+    private brackets; // ordered array of ordered array of {username, username, state, winner}
 
 
     constructor(tournament) {
@@ -38,20 +38,34 @@ export class Tournament {
     getPlayers(){
         return (this.players);
     }
+
     getBrackets(){
         return (this.brackets);
     }
 
     isStarted(){
-        return (this.brackets !== undefined);
+        console.log("Testing start of tournament");
+        console.log(this.brackets);
+        console.log(this.brackets === null);
+        return (this.brackets === null);
     }
 
     update(tournament){
         this.players = tournament.players;
-        if (tournament.brackets !== undefined )
+        if (tournament.brackets !== null )
             this.brackets = tournament.brackets;
     }
 
+}
+
+function verifyForm(name){
+    if (name.value.length < 1)
+        return (alert("Tournament's name should have at least 3 characters"), false);
+    if (name.value.length > 20)
+        return (alert("Tournament's name too long"), false);
+    // if (/[alnum]|_*|-*/.test(name.value))
+    //     return (alert("Characters can only be letters, digits, and - or _"), false);
+    return (true);
 }
 
 export class TournamentController {
@@ -75,11 +89,9 @@ export class TournamentController {
     private tournament_join_btn = document.getElementById("tournament_join_button");
     private tournament_rejoin_btn = document.getElementById("tournament_rejoin_button");
 
-    // Need to handle if the tournament is disbanded
     constructor(site : SiteController, game : GameController) {
         this.site = site;
         this.game = game;
-        // this.checkTournament();
     }
 
     setUsername(username) {
@@ -94,7 +106,6 @@ export class TournamentController {
         this.tournament_create_btn.addEventListener("click", (event) => {
             event.preventDefault();
 
-            // if (this.tournament !== null && this.tournament !== undefined){
             if (this.tournament !== null) {
                 // print_error("You're already registered for a tournament");
                 alert("You're already registered for a tournament");
@@ -110,8 +121,7 @@ export class TournamentController {
             event.preventDefault();
             const name = document.getElementById("tournament_name") as HTMLInputElement;
             //Verifier que l'input est valide avant de l'envoyer !
-            if (name.value === null || name.value === ""){
-                alert("cant be empty");
+            if (!verifyForm(name)){
                 return ;
             }
             try {
@@ -229,8 +239,8 @@ export class TournamentController {
 
     updateTournament(tournament : Tournament){
         this.tournament.update(tournament);
-        this.clear_tournament();
-        this.site.hide_all();
+        // this.clear_tournament();
+        // this.site.hide_all();
         this.print_tournament();
         // this.print_tournament_lobby();
         // this.print_tournament_page();
@@ -242,6 +252,10 @@ export class TournamentController {
         this.game.startTournamentGame(game_id, game);
     }
 
+    endTournament(){
+        this.tournament = null;
+        console.log("EndingTOurnament");
+    }
     /**
      * VIEW METHODS
      * 
@@ -413,10 +427,8 @@ this.tournament.getPlayers().forEach(p => {
 
     async leaveTournamentHandler(event) {
         event.preventDefault();
-        // console.log("Trying to leave so soon ?");
 
         try {
-            // fetch HERE TODO
             let query = new URLSearchParams();
             query.append("username", this.username);
             console.log("Trying to leave ");
