@@ -67,6 +67,10 @@ class Tournament{
 		return (this.players);
 	}
 	
+	getPlayer(username){
+		return (this.players.find((player) => player.username === username));
+	}
+
 	getSize(){
 		return (this.players.length);
 	}
@@ -261,8 +265,20 @@ class Tournament{
 			winners.push(match.winner);
 		});
 		console.log("winners are " + winners);
-		
 		this.current_round++;
+		this.brackets[this.current_round] = [];
+		let p1, p2;
+		while (winners.length > 1){
+			p1 = this.getPlayer(winners.shift());// if undefined to do
+			p2 = this.getPlayer(winners.shift());// if undefined to do
+			this.brackets[this.current_round].push({game_id : -1, players : [p1, p2], state : T_READY, winner : null});
+		}
+		if (winners.length == 1){
+			p1 = winners.shift(); //
+			this.brackets[this.current_round].push({game_id : -1, players : [p1, null], state : T_READY, winner : null});
+		}
+		console.log("List of matchs (to recheck with more players) :");
+		console.log(this.brackets);
 	}
 
 	// Update the tournament's current round with the ended match 
@@ -275,6 +291,12 @@ class Tournament{
 		match.state = T_FINISHED;
 		if (this.brackets[this.current_round].length === 1)
 			this.state = T_FINISHED;
+	}
+
+	endTournament(){
+		console.log("TOurnament is finished");
+		//Telling each client the end
+		this.state = T_FINISHED;
 	}
 };
 

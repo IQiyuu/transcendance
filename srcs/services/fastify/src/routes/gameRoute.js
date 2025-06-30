@@ -493,8 +493,8 @@ export async function gameRoute (fastify, options) {
                 game.ball.accelerate();
             }
             // checking with centers of objects
-            if (game.ball.x <= game.paddles.left.x || game.ball.x >= game.paddles.right.x) {
-                game.scores[game.ball.x <= game.paddles.left.x ? "right" : "left"]++;
+            if (game.ball.x < game.paddles.left.x || game.ball.x > game.paddles.right.x) {
+                game.scores[game.ball.x < game.paddles.left.x ? "right" : "left"]++;
                 game.ball.v = STARTING_SPEED;
                 game.ball.x = STARTING_X;
                 game.ball.y = STARTING_Y;
