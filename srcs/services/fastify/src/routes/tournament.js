@@ -297,6 +297,12 @@ class Tournament{
 		console.log("TOurnament is finished");
 		//Telling each client the end
 		this.state = T_FINISHED;
+		this.players.forEach( pl => {
+			pl.socket.send(JSON.stringify({
+				type : "finished",
+				tournament : getTournamentMasked(this),
+			}));
+		});
 	}
 };
 
@@ -318,7 +324,7 @@ function    needAuthRoute(route){ // to recheck
 }
 
 // Returns a view of the tournament without sensible info
-function    getMasked(t){
+function    getTournamentMasked(t){
 	let players = [];
 	t.players.forEach(p =>{
 		players.push(p.username);
@@ -366,14 +372,14 @@ function    getAvailableTournaments(tournaments, username){
 	let res = [];
 	tournaments.forEach(t => {
 		if (t.getOwner() !== username && !t.contains(username) && !t.isFull() && t.getState() === T_STARTING){
-			res.push(getMasked(t));
+			res.push(getTournamentMasked(t));
 		}
 	});
 	return (res);
 }
 
 function    updateTournament(tournament){
-	let res = getMasked(tournament);
+	let res = getTournamentMasked(tournament);
 	console.log("Trying to update clients");
 	tournament.getPlayers().forEach(player => {
 		if (player.socket !== null){
@@ -458,7 +464,7 @@ function tournamentRoute (fastify, options) {
 	//Masking data we send
 	fastify.addHook('preSerialization', async (request, reply, payload) => {
 		if (payload.tournament !== null && payload.tournament !== undefined){
-			payload.tournament = getMasked(payload.tournament);
+			payload.tournament = getTournamentMasked(payload.tournament);
 		}
 	});
 	
@@ -679,8 +685,11 @@ function tournamentRoute (fastify, options) {
 			if (tournament.getSize() === 0){
 				tournaments.splice(tournaments.indexOf(tournament));
 			}
-			if (tournament.isFinished())
+			if (tournament.isFinished()){
 				tournament.endTournament();
+				tournaments.splice(tournaments.indexOf(tournament), 1);
+				return ;
+			}
 			else if (tournament.isRoundReadyToStart()){
 				tournament.startRound();
 			} else if (tournament.currentRoundIsFinished())
