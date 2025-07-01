@@ -69,18 +69,22 @@ async function logginRoute (fastify, options) {
         if (!isMatch) {
             return reply.send({ success: false, message: 'errAuth' });
         }
-        const payload = {
-          username: username,
-        };
-        const token = fastify.jwt.sign(payload, { expiresIn: '1d' });
+        const value = options.db.prepare('SELECT * FROM users WHERE username = ?').get(username);
+        if (value.twofa_activate == 0)
+        {
+          const payload = {
+            username: username,
+          };
+          const token = fastify.jwt.sign(payload, { expiresIn: '1d' });
 
-        reply.setCookie('auth_token', token, {
-          path: '/',
-          httpOnly: true,
-          secure: true,
-          SameSite: 'Strict',
-          maxAge: 3600,
-        });
+          reply.setCookie('auth_token', token, {
+            path: '/',
+            httpOnly: true,
+            secure: true,
+            SameSite: 'Strict',
+            maxAge: 3600,
+          });
+      }
 
         return { success: true, message: `Welcome ${username}`, username: username };
 

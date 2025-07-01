@@ -67,18 +67,21 @@ async function GoogleAuthRoute(fastify, options) {
       if (value)
       {
         const username = value.username;
-        const payload = {
-          username: username,
-        };
-        const token = fastify.jwt.sign(payload, { expiresIn: '1d' });
+        if (value.twofa_activate == 0)
+        {
+          const payload = {
+            username: username,
+          };
+          const token = fastify.jwt.sign(payload, { expiresIn: '1d' });
 
-        reply.setCookie('auth_token', token, {
-          path: '/',
-          httpOnly: true,
-          secure: true,
-          SameSite: 'Strict',
-          maxAge: 3600,
-        });
+          reply.setCookie('auth_token', token, {
+            path: '/',
+            httpOnly: true,
+            secure: true,
+            SameSite: 'Strict',
+            maxAge: 3600,
+          });
+      }
         return reply.type('text/html').send(`
         <html>
           <body>

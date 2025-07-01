@@ -121,21 +121,44 @@ export class   ProfileController{
         this.check_btn.addEventListener('click', async (event) => {
             event.preventDefault();
             window.open('/check', '42 AUTH');
-            window.addEventListener("message", (event) => {
+            window.addEventListener("message", async (event) => {
                 if (event.origin !== window.location.origin) return; 
 
                 const { username, success } = event.data;
-                if (success) {
-                    this.site.setUsername(username);
-                    this.site.connect();
-                } 
+                const res = await fetch('/check-2fa-status-in', {
+                    method: 'POST',
+                    headers: {
+                    'Content-Type': 'application/json'
+                    },
+                    credentials: 'include', 
+                    body: JSON.stringify({ username : username }) 
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    console.log(data.success);
+                    if (success && data.success == 0) {
+                        this.site.setUsername(username);
+                        this.site.connect();
+                    }
+                    if (success && data.success == 1)
+                    {
+                        const res = await fetch('/set-user-cookie', {
+                            method: 'POST',
+                            headers: {
+                            'Content-Type': 'application/json'
+                            },
+                            credentials: 'include', 
+                            body: JSON.stringify({ username : username }) 
+                        });
+                        this.site.hide_register_page();
+                        this.site.print_fa_page();
+                    }
+                }
             });
         });
 
         this.fa_btn.addEventListener('click', async (event) => {
-            event.preventDefault();
-            console.log(this.keys.value);
-             const res = await fetch('/2fa', {
+            const res = await fetch('/2fa', {
                 method: 'POST',
                 headers: {
                 'Content-Type': 'application/json'
@@ -394,21 +417,42 @@ export class SiteController{
                 
                 if (data.success) {
                     this.username = data.username;
-                    const res = await fetch('/check-2fa-status', {
-                        method: 'GET',
-                    });
-                    if (res.ok) {
-                        const twofadata = await res.json();
-                        console.log("2fa :", twofadata.success);
-                        if (twofadata.success == 1)
-                        {
-                            this.print_fa_page();
-                            this.hide_register_page();
+                    if (url == "/login")
+                    {
+                        const res = await fetch('/check-2fa-status-in', {
+                            method: 'POST',
+                            headers: {
+                            'Content-Type': 'application/json'
+                            },
+                            credentials: 'include', 
+                            body: JSON.stringify({ username : data.username }) 
+                        });
+                        if (res.ok) {
+                            const twofadata = await res.json();
+                            // console.log("2fa :", twofadata.success);
+                            if (twofadata.success == 1)
+                            {
+                                
+                                const res = await fetch('/set-user-cookie', {
+                                    method: 'POST',
+                                    headers: {
+                                    'Content-Type': 'application/json'
+                                    },
+                                    credentials: 'include', 
+                                    body: JSON.stringify({ username : this.username }) 
+                                });
+                                this.print_fa_page();
+                                this.hide_register_page();
+                            }
+                            else 
+                            {
+                                this.connect();
+                            }
                         }
-                        else 
-                        {
-                            this.connect();
-                        }
+                    }
+                    else 
+                    {
+                        this.connect();
                     }
                     // this.ws.print_info();
 
