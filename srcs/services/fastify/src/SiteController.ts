@@ -34,6 +34,8 @@ export class   ProfileController{
     private searchError = document.getElementById("searchError");
 
     private	histo_list = document.getElementById("histo_list");
+    private	wr = document.getElementById("wr");
+    private wr_card = document.getElementById("wr_card");
 
     private	camera_icon = document.getElementById("camera_icon");
     private	profile_picture = document.getElementById("profile_picture");
@@ -244,6 +246,7 @@ export class   ProfileController{
 
 	//VIEW
 	async printHisto(){
+        this.histo_list.innerHTML = "";
         await this.searchHistoricHandler();
         var cpt = 0;
         var w = 0;
@@ -274,10 +277,13 @@ export class   ProfileController{
             }
             if (item.winner_username == this.profile_username)
                 w++;
-            document.getElementById("wr_card").textContent = `wr : ${(w / cpt * 100).toFixed(0)}%`;
+            this.wr_card.textContent = `wr : ${(w / cpt * 100).toFixed(0)}%`;
+            this.wr.textContent = `${w} / ${cpt}`;
         });
-        if (cpt == 0)
-            document.getElementById("wr_card").textContent = `wr : N/a`;
+        if (cpt == 0) {
+            this.wr_card.textContent = `wr : N/a`;
+            this.wr.textContent = "N/a";
+        }
 	}
 
     async	printPage(){
@@ -301,9 +307,9 @@ export class   ProfileController{
 			this.fa_btn.classList.replace("hidden", "flex");
 		}
 
-        history.pushState({page: "profile", profile: this.profile_username}, "");
         //historic
 		this.printHisto();
+        this.site.navigate({ page: "profile", data: { username: this.profile_username } });
     }
 
     hide_page(){
@@ -346,12 +352,12 @@ export class SiteController{
     private about_btn = document.getElementById("about_button");
     private logout_btn = document.getElementById("logout_btn");
 
-    private tmp_btn = document.getElementById("tmp_create");
-
     constructor(){
         this.profile = new ProfileController(this);
         this.game = new GameController(this);
         this.tournament = new TournamentController(this, this.game);
+        if (history.state)
+            this.renderView(history.state);
     }
 
     async initLang() {
@@ -368,65 +374,10 @@ export class SiteController{
         return this.lang.getFile()[key];
     }
 
-    /**
-     * CONTROLLER
-     */
-    add_events(){
-        // Register/login page
-        this.register_link.addEventListener("click", (event) => {
-            event.preventDefault();
-            const lang = this.lang.getFile();
-
-            const formTitle = document.getElementById("form-title");
-            const registerLink = document.getElementById("register-view"); //link for swapping register/login
-            const logginBtn = document.getElementById("login_btn");
-
-            this.isRegisterMode = !this.isRegisterMode;
-            if (this.isRegisterMode) {
-                formTitle.textContent = lang["register_title"];
-                registerLink.textContent = lang["connexion_text"];
-                logginBtn.textContent = lang["register_title"];
-    
-            } else {
-                formTitle.textContent = lang["connexion_title"];
-                registerLink.textContent = lang["register_text"];
-                logginBtn.textContent = lang["connexion_title"];
-            }
-        });
-
-        window.addEventListener("popstate", async (event) => {
-            event.preventDefault();
-            this.loadState(history.state);
-        });
-
-        this.tmp_btn.addEventListener("click", async (event) => {
+    async log(event: Event) {
             event.preventDefault();
 
-            const body = { 
-                username: "test",
-                password: "test",
-            };
-            try {
-                const response = await fetch("register", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(body),
-                });
-                
-                const data = await response.json();
-                
-
-                if (!data.success)
-                    throw(Error("Cannot create the user test"));
-            } catch (error) {
-                console.log("tmp btn");
-                alert(error);
-            }
-        });
-
-        // Register/login form validation
-        this.login_form.addEventListener("submit", async (event) => {
-            event.preventDefault();
+            this.login_form.removeEventListener("submit", this.log);
             const username = document.getElementById("username") as HTMLInputElement;
             const password = document.getElementById("password") as HTMLInputElement;
             
@@ -458,12 +409,45 @@ export class SiteController{
                     const error = document.getElementById("errorAuth") as HTMLParagraphElement;
                     error.textContent = this.lang.getFile()[data.message];
                     error.classList.replace("hidden", "block");
+                    this.login_form.addEventListener("submit", this.log.bind(this));
                 }
             } catch (error) {
                 console.log("initFriendList");
                 alert(error);
             }
+        };
+
+    /**
+     * CONTROLLER
+     */
+    add_events(){
+        // Register/login page
+        this.register_link.addEventListener("click", (event) => {
+            event.preventDefault();
+            const lang = this.lang.getFile();
+
+            const formTitle = document.getElementById("form-title");
+            const registerLink = document.getElementById("register-view"); //link for swapping register/login
+            const logginBtn = document.getElementById("login_btn");
+
+            this.isRegisterMode = !this.isRegisterMode;
+            if (this.isRegisterMode) {
+                formTitle.textContent = lang["register_title"];
+                registerLink.textContent = lang["connexion_text"];
+                logginBtn.textContent = lang["register_title"];
+            } else {
+                formTitle.textContent = lang["connexion_title"];
+                registerLink.textContent = lang["register_text"];
+                logginBtn.textContent = lang["connexion_title"];
+            }
         });
+
+        window.addEventListener("popstate", (event) => {
+            this.renderView(event.state);
+        });
+
+        // Register/login form validation
+        this.login_form.addEventListener("submit", this.log.bind(this));
 
         // Menu link
         this.title_link.addEventListener("click", async (event) => {
@@ -473,6 +457,7 @@ export class SiteController{
             this.hide_all();
             this.print_menu();
             this.print_btn_menu();
+            this.navigate({ page: "menu" });
         });
 
         // Show about page
@@ -481,10 +466,12 @@ export class SiteController{
 
             this.hide_menu();
             this.print_about_page();
+            this.navigate({ page: "about" });
         });
 
         // Profile display
         this.profile_btn.addEventListener("click", async (event) => {
+            event.preventDefault();
             this.hide_menu();
             this.profile.printPage();
         });
@@ -517,7 +504,7 @@ export class SiteController{
             this.lang.setUsername(null);
             this.ws.close();
             this.ws = null;
-            console.log(this.ws);
+            this.login_form.addEventListener("submit", this.log.bind(this));
         });
 
 		//Registering children events
@@ -583,7 +570,6 @@ export class SiteController{
 
     print_main_page(){
         this.main_page.classList.replace("hidden", "block");
-        history.pushState({page: "main"}, "");
     }
 
     hide_main_page(){
@@ -603,7 +589,6 @@ export class SiteController{
 
     print_about_page(){
         this.about.classList.replace("hidden", "flex");
-        history.pushState({page: "about"}, "");
     }
     
     hide_about_page(){
@@ -612,8 +597,6 @@ export class SiteController{
 
     print_tournament_btns(){
         this.tournament_create_btn.classList.replace("hidden", "flex");
-        this.tournament_join_btn.classList.replace("hidden", "flex");
-        history.pushState({page: "tournament_menu"}, "");
     }
 
     hide_tournament_btns(){
@@ -660,29 +643,35 @@ export class SiteController{
             this.print_register_page();
     }
 
-    // AHHHHHHHHHHHHHh LE GRAAL
-    async loadState(obj) {
+    navigate(state, replace = false) {
+        if (replace)
+            history.replaceState(state, "", "");
+        else
+            history.pushState(state, "", "");
+
+        this.renderView(state);
+    }
+
+    renderView(state) {
         this.hide_all();
 
-        // console.log(obj.page);
-        switch (obj.page) {
-            case "main":
-                // console.log(obj.page);
-                this.print_menu();
-                break ;
-            case "profile":
-                if (obj && obj.profile) {
-                    this.profile.setProfileUsername(obj.profile);
-                    await this.profile.searchPlayerHandler();
-                }
-                this.profile.printPage();
-                break ;
-            case "about":
-                this.print_about_page();
-                break ;
-            case "tournament_menu":
-                this.print_tournament_btns();
-                break ;
+        if (!state || !state.page) {
+            this.print_menu();
+            return;
+        }
+
+        if (state.page === "menu") {
+            this.print_menu();
+        } else if (state.page === "profile") {
+            console.log(state.data.username);
+            this.profile.setProfileUsername(state.data?.username || null);
+            this.profile.printPage();
+        } else if (state.page === "about") {
+            this.print_about_page();
+        } else if (state.page === "tournament") {
+            this.print_tournament_btns();
+        } else {
+            this.print_menu();
         }
     }
 };

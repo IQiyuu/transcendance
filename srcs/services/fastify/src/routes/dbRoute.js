@@ -2,6 +2,22 @@
 async function dbRoute (fastify, options) {
     let db = options.db;
 
+    // Retourne les deux pictures profiles
+    fastify.get('/db/select/pics/:user1/:user2', async (req) => {
+        const { user1, user2 } = req.params;
+
+        try {
+            const datas = db.prepare(`
+                SELECT username, picture_path FROM users WHERE username IN (?, ?)
+            `).all(user1, user2);
+
+            return { success: true, datas };
+        } catch (error) {
+            console.error("error: ", error);
+            return { success: false, error: error.message };
+        }
+    });
+
     // retourne les lignes de la tables
     fastify.get('/db/select/:table' , async (request, reply) => {
         try {
