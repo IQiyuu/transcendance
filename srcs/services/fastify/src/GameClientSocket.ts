@@ -5,7 +5,6 @@ import {GameController} from "./pong.js";
  */
 export class GameClientSocket{
     private ws : WebSocket = null;
-    private username : string;
 
     protected ctl : GameController = null;
     
@@ -14,8 +13,7 @@ export class GameClientSocket{
     private match_id : number = undefined; // if this number is set, then its the game id we have to connect (context : tournament)
 
     constructor(username : string, ctl : any, match_id ?: number){
-        this.username = username;
-        this.ws = new WebSocket(`wss://${window.location.host}/game/ws?username=${this.username}`);
+        this.ws = new WebSocket(`wss://${window.location.host}/game/ws?username=${username}`);
         if (this.ws.readyState === this.ws.CLOSED || this.ws.readyState === this.ws.CLOSING){
             //error handling to do !
             alert("ERROR WHILE CREATING GAMESOCKET");
@@ -29,23 +27,19 @@ export class GameClientSocket{
         this.setSocket();
     }
 
-    get_username(){
-        return (this.username);
-    }
-
     setSocket(){
         this.ws.onopen = (event) => {
             if (this.should_search){
                 this.ws.send(JSON.stringify({
                     type: "matchmaking",
-                    username: this.username, // useless ?
+                    // username: this.ctl.getUsername(), // useless ?
                     state: "join"
                 }));
                 this.should_search = false;
             } else if (this.should_start_solo){
                 this.ws.send(JSON.stringify({
                     type: "create_game_offline",
-                    username: this.username //useless ?
+                    // username: this.ctl.getUsername() //useless ?
                 }));
             } else if (this.match_id !== undefined){
                 this.ws.send(JSON.stringify({
@@ -67,7 +61,7 @@ export class GameClientSocket{
                 console.log("Match found");
                 if (message.state === "found") {
                     this.ctl.updateState(message.game);
-                    let side = (message.game.players.left === this.username ? "left" : "right")
+                    let side = (message.game.players.left === this.ctl.getUsername() ? "left" : "right")
                     this.ctl.setSide(side);
                     console.log("side = " + this.ctl.getSide());
                     this.ctl.stop_matchmaking_animation();
@@ -85,7 +79,6 @@ export class GameClientSocket{
             } else if (message.type === "game_finished"){
                 console.log("Game is finished");
                 this.ctl.finishGame();
-                this.ws.close();
             } else if (message.type === "tournament"){
                 if (!message.success){
                     alert("erroererer");
@@ -123,7 +116,7 @@ export class GameClientSocket{
         }
         this.ws.send(JSON.stringify({
             type: "matchmaking",
-            uname: this.username,
+            uname: this.ctl.getUsername(),
             state: "join"
         }));
     }
@@ -164,5 +157,6 @@ export class GameClientSocket{
         this.ws.close();
         this.should_search = false;
         this.should_start_solo = false;
+        this.match_id = undefined;
     }
 };

@@ -71,6 +71,10 @@ export class   GameController{
         this.username = username;
     }
 
+    getUsername(){
+        return (this.username);
+    }
+
     getSide(){
         return this.side;
     }
@@ -266,6 +270,7 @@ export class   GameController{
         this.hide_game();
         this.print_end_game();
 
+        this.ws.close();
         //saving the game on the server
         // if (!this.is_local && this.side === "left") // then if right user 
             // this.registerGame();

@@ -404,11 +404,16 @@ export class TournamentController {
     }
 
     print_tournament(){
+        this.clear_tournament_lobby();
         this.print_tournament_lobby();
         this.clear_tournament_state();
         this.print_tournament_state();
         this.print_tournament_div();
         this.print_tournament_page();
+    }
+
+    clear_tournament_lobby(){
+        this.tournament_lobby.textContent = ''
     }
 
     hide_tournament(){
