@@ -52,7 +52,6 @@ export class GameClientSocket{
         
         this.ws.onmessage = (data) => {
             const message = JSON.parse(data.data);
-            // console.log(message);
             if (message === null)
                 return ;            
             if (message.type === "game_info"){
@@ -98,7 +97,6 @@ export class GameClientSocket{
         this.ws.onclose = (event) => {
             console.log("closing socket");
             console.log(event);
-            // if (event) if cause is valid, then nothing
             this.ctl.close();
         }
 

@@ -268,9 +268,10 @@ export class   GameController{
         document.removeEventListener("keydown", this.key_handler)
         clearInterval(this.interval_id);
         this.hide_game();
-        this.print_end_game();
+        this.print_match_end();
 
         this.ws.close();
+        this.is_tournament = false;
         //saving the game on the server
         // if (!this.is_local && this.side === "left") // then if right user 
             // this.registerGame();
@@ -397,12 +398,13 @@ export class   GameController{
         this.game.classList.replace("flex", "hidden");
     }
 
-    print_end_game(){
-        alert("To do, but game finished");
+
+    print_match_end(){
+        console.log("MATCH END");
     }
 
-    hide_end_game(){
-        console.log("Maybe clearing the text ?");
+    hide_match_end(){
+        console.log("TODO");
     }
 
     // Not to be added to hide_all

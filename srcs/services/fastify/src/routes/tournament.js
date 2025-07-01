@@ -339,7 +339,6 @@ function    getTournamentMasked(t){
 	}else {
 		b = [];
 		t.brackets.forEach(arr => {
-			// console.log(arr);
 			let round = [];
 			arr.forEach(match => {
 				// console.log(match);
@@ -434,8 +433,6 @@ export function matchOver(game){
 	console.log("Match is over");
 
 	let t = getTournament(tournaments, game.t_id);
-	//set
-	// console.log(t);
 	if (t === undefined){
 		console.log("ERROR MATCH NOT FOUND")
 		return ;
@@ -528,13 +525,6 @@ function tournamentRoute (fastify, options) {
 					t.startTournament();
 					updateTournament(t);
 				}
-			} else if (message.type === "match"){
-				if (message.state === "started"){
-					
-				}else if (message.state === "ended"){
-					
-				}
-				updateTournament(t);
 			} else if (message.type === "match_finished"){
 				//Clients telling match is finished, we need both approval
 				// Registering the game in db, we just save the game_id (primary key) and the tournament id;
@@ -677,7 +667,6 @@ function tournamentRoute (fastify, options) {
 	// For optimizition, the interval can be set only when at least a tournament exists
 	setInterval(() => {
 		tournaments.forEach(tournament => {
-			// console.log(tournament);
 			if (tournament === null){
 				return ;
 			}
@@ -691,8 +680,10 @@ function tournamentRoute (fastify, options) {
 				return ;
 			}
 			else if (tournament.isRoundReadyToStart()){
+				updateTournament(tournament);
 				tournament.startRound();
 			} else if (tournament.currentRoundIsFinished())
+				//We can tell clients "ROUND 2"
 				tournament.initNextRound();
 		});
 	}, 30);

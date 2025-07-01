@@ -44,9 +44,9 @@ export class Tournament {
     }
 
     isStarted(){
-        console.log("Testing start of tournament");
-        console.log(this.brackets);
-        console.log(this.brackets === null);
+        // console.log("Testing start of tournament");
+        // console.log(this.brackets);
+        // console.log(this.brackets === null);
         return (this.brackets === null);
     }
 
@@ -247,7 +247,7 @@ export class TournamentController {
     }
 
     createMatch(game_id, game){
-        console.log("Creating the match :");
+        console.log("Creating the tournament match :");
         console.log(game);
         this.game.startTournamentGame(game_id, game);
     }
@@ -470,6 +470,10 @@ export class TournamentController {
         this.tournament_rejoin_btn.classList.replace("flex", "hidden");
     }
 
+    print_tournament_end(){
+        console.log("ToURNAMENT END");
+    }
+
     clear_tournament() {
         this.tournament_lobby.textContent = '';
     }
@@ -477,7 +481,6 @@ export class TournamentController {
     clear_tournament_state(){
         this.tournament_state.textContent = '';
     }
-
 
     clear_tournaments() {
         this.tournaments_list.textContent = '';

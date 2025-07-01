@@ -15,7 +15,7 @@ function degToRad(degree){
 const	SCORE_GOAL = 11;
 const	STARTING_SPEED = 10;
 const	ACCELERATION = 1;
-const	LIMIT_SPEED = 15;
+const	LIMIT_SPEED = 13;
 const	BOARD_W = 700;
 const	BOARD_H = 480;
 
@@ -512,6 +512,12 @@ export async function gameRoute (fastify, options) {
                 console.log("game is finished");
                 console.log(game);
 
+                
+                socket.send(JSON.stringify({
+                    type: "game_finished",
+                    game: game
+                }));
+                
                 playing_clients.delete(socket);
 
                 let p2 = null; // can be null as there are local games too
@@ -521,18 +527,9 @@ export async function gameRoute (fastify, options) {
                         break ;
                     }
                 }
-
-                if (game.t_id !== null){
-                    console.log("We are descending")
-                    matchOver(game); // tell tournaments that a match is over
-                }
-
-                socket.send(JSON.stringify({
-                    type: "game_finished",
-                    game: game
-                }));
-
+                
                 if (p2 !== null){
+                    console.log("p2 found !");
                     p2.send(JSON.stringify({
                         type: "game_finished",
                         game: game
@@ -540,10 +537,15 @@ export async function gameRoute (fastify, options) {
                     playing_clients.delete(p2);
                 }
                 
+                if (game.t_id !== null){
+                    console.log("We are descending")
+                    matchOver(game); // tell tournaments that a match is over
+                }
+
                 saveGame(game, options.db);
                 games.splice(games.indexOf(game), 1);
                 finished_games.splice(finished_games.indexOf(game), 1);
-                return ;
+                continue ;
             }
             // Else, send info to users
             game = games.find(g => g.id === game_id);
@@ -553,7 +555,8 @@ export async function gameRoute (fastify, options) {
                     type: "game_info",
                     game: game
                 }));
-            }
+            } else
+            playing_clients.delete(socket);
         }
     }, 30);
 
