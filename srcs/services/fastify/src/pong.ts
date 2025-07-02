@@ -4,8 +4,18 @@ import { SiteController } from "./SiteController.js";
 const PADDLE_W = 10, PADDLE_H = 80;
 const BALL_W = 10;
 
-let interval_id;
+let game_interval_id;
 let anim_interval_id;
+
+const key_state = {};
+
+function key_handler(e){
+    //for accessibility, here too
+    // console.log(e);
+    e.preventDefault();
+    if ("KeyW,KeyS,ArrowUp,ArrowDown".includes(e.code))
+        key_state[e.code] = (e.type === "keydown");
+}
 
 // Game for a given client
 export class   GameController{
@@ -23,7 +33,6 @@ export class   GameController{
     // Game
     private game_id : number = -1;
     private side = "left";
-    public key_state = {};
     private is_local : boolean = false;
     
     private left_player : string = null;
@@ -92,12 +101,6 @@ export class   GameController{
         return this.is_local;
     }
 
-    key_handler(e){
-        //for accessibility, here too
-        e.preventDefault();
-        if ("KeyW,KeyS,ArrowUp,ArrowDown".includes(e.code))
-            this.key_state[e.code] = (e.type === "keydown");
-    }
 
 
     /**
@@ -161,16 +164,11 @@ export class   GameController{
      *  */
     moves(obj : GameController, ws : GameClientSocket){
         obj.draw();
-        // console.log("BUG ?" + ws);
-        if (ws === undefined){
-            console.log("Erreur");
-            return ;
+        if (key_state["ArrowUp"] || key_state["ArrowDown"]) {
+            ws.updatePos(obj.getGameId(), key_state["ArrowUp"], obj.isLocal() ? "right" : obj.getSide());
         }
-        if (obj.key_state["ArrowUp"] || obj.key_state["ArrowDown"]) {
-            ws.updatePos(obj.getGameId(), obj.key_state["ArrowUp"], obj.isLocal() ? "right" : obj.getSide());
-        }
-        if (obj.isLocal() && (obj.key_state["KeyW"] || obj.key_state["KeyS"])){
-            ws.updatePos(obj.getGameId(), obj.key_state["KeyW"], "left");
+        if (obj.isLocal() && (key_state["KeyW"] || key_state["KeyS"])){
+            ws.updatePos(obj.getGameId(), key_state["KeyW"], "left");
         }
     }
 
@@ -201,7 +199,14 @@ export class   GameController{
 		this.is_tournament = true;
         if (this.username === game.players.right)
             this.side = "right";
-        this.ws = new GameClientSocket(this.username, this, game_id);
+        console.log("Creating a game :");
+        console.log(game);
+        if (this.ws === null)
+            this.ws = new GameClientSocket(this.username, this, game_id);
+        else{
+            this.ws.setGameId(game_id);
+            this.ws.startTournamentGame();
+        }
         // this.site.hide_all();
         this.updateState(game);
         this.gameInit();
@@ -217,14 +222,14 @@ export class   GameController{
     }
 
     gameInit(){
-        this.key_state["ArrowUp"] = false;
-        this.key_state["ArrowDown"] = false;
-        this.key_state["KeyW"] = false;
-        this.key_state["KeyS"] = false;
+        key_state["ArrowUp"] = false;
+        key_state["ArrowDown"] = false;
+        key_state["KeyW"] = false;
+        key_state["KeyS"] = false;
 
-        this.key_handler = this.key_handler.bind(this); //to unbind ??
-        document.addEventListener("keyup", this.key_handler);
-        document.addEventListener("keydown", this.key_handler);
+        // this.key_handler = this.key_handler.bind(this); //to unbind ??
+        document.addEventListener("keyup", key_handler);
+        document.addEventListener("keydown", key_handler);
 
         this.print_player_names();
         this.print_scoreboard();
@@ -238,7 +243,7 @@ export class   GameController{
         // let moves = this.moves.bind(this);
         //testing maybe not here
         // this.moves.bind(this);
-        interval_id = setInterval(this.moves, 10, this, this.ws);
+        game_interval_id = setInterval(this.moves, 10, this, this.ws);
     }
 
     async registerGame() {
@@ -272,21 +277,21 @@ export class   GameController{
     }
 
     finishGame(){
-        document.removeEventListener("keyup", this.key_handler)
-        document.removeEventListener("keydown", this.key_handler)
-        clearInterval(interval_id);
-
-        console.log("closing socket after game finished");
-        this.ws.close();
-        this.ws = null;
-        
+        clearInterval(game_interval_id);
+        document.removeEventListener("keyup", key_handler);
+        document.removeEventListener("keydown", key_handler);
+        console.log(document);
         this.hide_scoreboard()
         this.hide_game();
         this.print_match_end();
         if (this.is_tournament){
-            console.log("Game finished ending");
-            //sleep here 5 seconds ?? 
+            console.log("Tournament's game is finished ending");
+        } else {
+            console.log("closing socket after game ended");
+            this.ws.close();
+            this.ws = null;
         }
+        this.game_id = -1;
         this.is_local = false;
         this.is_searching = false;
         this.is_tournament = false;

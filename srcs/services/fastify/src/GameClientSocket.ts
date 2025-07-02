@@ -25,7 +25,11 @@ export class GameClientSocket{
             this.match_id = match_id;
         }
         this.setSocket();
-        this.updatePos.bind(this);
+        this.updatePos.bind(this); // maybe ??
+    }
+
+    setGameId(new_g_id){
+        this.match_id = new_g_id;
     }
 
     setSocket(){
@@ -149,8 +153,19 @@ export class GameClientSocket{
         
     }
 
+    startTournamentGame(){
+        console.log("Continuing tournament with " + this.match_id);
+        this.ws.send(JSON.stringify({
+                    type : "tournament",
+                    state : "connecting_match",
+                    game_id : this.match_id
+        }));
+    }
+
     // Update the server with movements
     updatePos(game_id, key, side){
+        if (this.ws.readyState !== this.ws.OPEN)
+            console.log(this.ws.readyState);
         this.ws.send(JSON.stringify({
             type : "game_update",
             game_id : game_id,

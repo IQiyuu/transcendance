@@ -235,7 +235,7 @@ class Tournament{
 				let g_id = gameRoute.createGame(match.players[0].username, match.players[1].username, this.id);
 				match.game_id = g_id;
 				let game = gameRoute.getGameByID(g_id);
-				console.log("Sending :" + game.toString());
+				console.log("Sending :" + game);
 				match.players[0].socket.send(JSON.stringify({
 					type: "new_match",
 					game_id: g_id,

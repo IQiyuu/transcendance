@@ -362,7 +362,7 @@ export class TournamentController {
             return ;
         }
 
-        console.log("Printing state :");
+        // console.log("Printing state :");
         let nb_round = brackets.length;
         let table = document.createElement("table");
         for (let i = 0; i < nb_round ; i++){
