@@ -284,7 +284,8 @@ export class   GameController{
         this.hide_game();
         this.print_match_end();
         if (this.is_tournament){
-            console.log("Game finished ending");    
+            console.log("Game finished ending");
+            //sleep here 5 seconds ?? 
         }
         this.is_local = false;
         this.is_searching = false;
