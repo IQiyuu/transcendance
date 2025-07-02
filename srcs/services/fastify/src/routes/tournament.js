@@ -680,7 +680,7 @@ function tournamentRoute (fastify, options) {
 			} else if (tournament.currentRoundIsFinished())
 				tournament.initNextRound();
 		});
-	}, 30);
+	}, 30); // We can wait more
 }
 
 export default tournamentRoute;

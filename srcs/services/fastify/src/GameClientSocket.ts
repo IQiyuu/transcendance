@@ -25,6 +25,7 @@ export class GameClientSocket{
             this.match_id = match_id;
         }
         this.setSocket();
+        this.updatePos.bind(this);
     }
 
     setSocket(){
@@ -100,7 +101,11 @@ export class GameClientSocket{
 
         this.ws.onclose = (event) => {
             console.log("closing socket");
-            console.log(event);
+            if (event.code === 3005){
+                console.log(event.reason);
+            } else{
+                console.log(event);
+            }
             this.ctl.close();
         }
 
@@ -146,7 +151,6 @@ export class GameClientSocket{
 
     // Update the server with movements
     updatePos(game_id, key, side){
-        // console.log("Sending " +  game_id + key + side);
         this.ws.send(JSON.stringify({
             type : "game_update",
             game_id : game_id,

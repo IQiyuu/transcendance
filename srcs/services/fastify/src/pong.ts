@@ -4,6 +4,9 @@ import { SiteController } from "./SiteController.js";
 const PADDLE_W = 10, PADDLE_H = 80;
 const BALL_W = 10;
 
+let interval_id;
+let anim_interval_id;
+
 // Game for a given client
 export class   GameController{
     /**
@@ -59,10 +62,6 @@ export class   GameController{
     private ball = document.getElementById("ball");
     private l_paddle = document.getElementById("l_paddle");
     private r_paddle = document.getElementById("r_paddle");
-
-    //      Interval for animations
-    private interval_id;
-    private anim_interval_id;
 
 
     constructor(site){
@@ -160,8 +159,13 @@ export class   GameController{
      *  Handler function that tell the server when user move
      * (W and S for left player if 2 player, else UP and DOWN)
      *  */
-    moves(obj, ws){
+    moves(obj : GameController, ws : GameClientSocket){
         obj.draw();
+        // console.log("BUG ?" + ws);
+        if (ws === undefined){
+            console.log("Erreur");
+            return ;
+        }
         if (obj.key_state["ArrowUp"] || obj.key_state["ArrowDown"]) {
             ws.updatePos(obj.getGameId(), obj.key_state["ArrowUp"], obj.isLocal() ? "right" : obj.getSide());
         }
@@ -231,8 +235,10 @@ export class   GameController{
         this.l_paddle.style.position="absolute";
         this.r_paddle.style.position="absolute";
 
+        // let moves = this.moves.bind(this);
         //testing maybe not here
-        this.interval_id = setInterval(this.moves, 10, this, this.ws);
+        // this.moves.bind(this);
+        interval_id = setInterval(this.moves, 10, this, this.ws);
     }
 
     async registerGame() {
@@ -268,7 +274,7 @@ export class   GameController{
     finishGame(){
         document.removeEventListener("keyup", this.key_handler)
         document.removeEventListener("keydown", this.key_handler)
-        clearInterval(this.interval_id);
+        clearInterval(interval_id);
 
         console.log("closing socket after game finished");
         this.ws.close();
@@ -294,7 +300,7 @@ export class   GameController{
         document.getElementById("matchmaking").innerHTML = "<span id='waiting_online'>waiting</span>"
             + "<span id='dots'></span>"
             + "<br><span id='cancel_game'>click to cancel ❌</span>";
-        this.anim_interval_id = window.setInterval(() => {
+        anim_interval_id = window.setInterval(() => {
             count++;
             document.getElementById("dots").innerHTML = '.'.repeat(count % 3) + "<br>";
             //document.getElementById("matchmaking").textContent = "\nclick to cancel";
@@ -306,7 +312,7 @@ export class   GameController{
     stop_matchmaking_animation(){
         document.getElementById("matchmaking").innerHTML = "";
         this.site.loadLang();
-        clearInterval(this.anim_interval_id);
+        clearInterval(anim_interval_id);
         this.online_play_btn.textContent = this.site.getText('play_online');
     }
 

@@ -446,7 +446,7 @@ export async function gameRoute (fastify, options) {
                 console.log("Closing  socket");
                 // console.log(socket);
                 playing_clients.delete(socket);
-                waiting_clients.forEach((sck, username) => {
+                waiting_clients.forEach((sck, username) => { // to re understand
                     if (sck === socket)
                         waiting_clients.delete(username);
                 });
@@ -556,13 +556,14 @@ export async function gameRoute (fastify, options) {
                         game: getMaskedGame(game)
                     }));
                     playing_clients.delete(p2);
+                    // p2.close(3005, "Match is finished"); // here
                 }
                 
                 if (game.t_id !== null){
                     console.log("We are descending")
                     matchOver(game); 
                 }
-
+                // socket.close(3005, "Match is finished");
                 saveGame(game, options.db);
                 games.splice(games.indexOf(game), 1);
                 finished_games.splice(finished_games.indexOf(game), 1);
