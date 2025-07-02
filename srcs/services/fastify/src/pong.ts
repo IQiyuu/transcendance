@@ -161,7 +161,6 @@ export class   GameController{
      * (W and S for left player if 2 player, else UP and DOWN)
      *  */
     moves(obj, ws){
-        // console.log("Moves");
         obj.draw();
         if (obj.key_state["ArrowUp"] || obj.key_state["ArrowDown"]) {
             ws.updatePos(obj.getGameId(), obj.key_state["ArrowUp"], obj.isLocal() ? "right" : obj.getSide());
@@ -195,13 +194,11 @@ export class   GameController{
     }
 
     startTournamentGame(game_id, game){
-        this.ws = new GameClientSocket(this.username, this, game_id);
 		this.is_tournament = true;
         if (this.username === game.players.right)
             this.side = "right";
-        this.site.hide_all();
-        this.print_game();
-        this.print_play_page();
+        this.ws = new GameClientSocket(this.username, this, game_id);
+        // this.site.hide_all();
         this.updateState(game);
         this.gameInit();
     }
@@ -269,19 +266,24 @@ export class   GameController{
     }
 
     finishGame(){
-        clearInterval(this.interval_id);
         document.removeEventListener("keyup", this.key_handler)
         document.removeEventListener("keydown", this.key_handler)
-        this.hide_scoreboard()
-        this.hide_game();
-        this.print_match_end();
+        clearInterval(this.interval_id);
+
         console.log("closing socket after game finished");
         this.ws.close();
         this.ws = null;
-        this.is_tournament = false;
+        
+        this.hide_scoreboard()
+        this.hide_game();
+        this.print_match_end();
+        if (this.is_tournament){
+            console.log("Game finished ending");    
+        }
         this.is_local = false;
         this.is_searching = false;
-    }
+        this.is_tournament = false;
+        }
 
     /**
      * VIEW

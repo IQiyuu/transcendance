@@ -71,7 +71,7 @@ function verifyForm(name){
 export class TournamentController {
 
     /**CONTROLLER */
-    private cws: TournamentClientSocket = null;
+    private ws: TournamentClientSocket = null;
     private site: SiteController = null;
     private username: string = null;
     private tournament: Tournament = null;
@@ -137,7 +137,7 @@ export class TournamentController {
                 const data = await resp.json();
                 if (data.success) {
                     this.tournament = new Tournament(data.tournament);
-                    this.cws = new TournamentClientSocket(this.username, this, this.tournament);
+                    this.ws = new TournamentClientSocket(this.username, this, this.tournament);
                     // console.log(this.tournament);
                     this.hide_all();
                     // this.print_tournament_lobby();
@@ -195,7 +195,7 @@ export class TournamentController {
                                         const data = await resp.json();
                                         if (data.success) {
                                             this.tournament = new Tournament(data.tournament);
-                                            this.cws = new TournamentClientSocket(this.username, this, this.tournament);
+                                            this.ws = new TournamentClientSocket(this.username, this, this.tournament);
 
                                             // console.log(this.tournament);
 
@@ -247,13 +247,15 @@ export class TournamentController {
     }
 
     createMatch(game_id, game){
-        console.log("Creating the tournament match :");
+        console.log("Telling GameCtrler to create the tournament match :");
         console.log(game);
         this.game.startTournamentGame(game_id, game);
     }
 
     endTournament(){
-        this.tournament = null;
+        // this.tournament = null;
+        // this.ws.close();
+        // this.ws = null;
         console.log("EndingTOurnament");
     }
     /**
@@ -438,8 +440,8 @@ export class TournamentController {
             if (data.success) {
                 this.tournament = null;
                 this.hide_all();
-                this.cws.close();
-                this.cws = null;
+                this.ws.close();
+                this.ws = null;
                 this.tournament_join_btn.dispatchEvent(new MouseEvent("click"));
             } else {
                 console.log("Didnt leave");
@@ -451,7 +453,7 @@ export class TournamentController {
     }
 
     async startTournamentHandler(event) {
-        this.cws.startTournament();
+        this.ws.startTournament();
     }
 
     print_tournament_form() {

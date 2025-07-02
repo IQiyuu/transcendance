@@ -142,14 +142,14 @@ function    getGameByUsername(gs, username){
     return (-1)
 }
 
-function    getGameByID(gs, id){
-    let game = gs.find(x => x.id === id);
+export function    getGameByID(id){
+    let game = games.find(x => x.id === id);
     return game;
 }
 
 // Returns a masked view of the game
 function    getMaskedGame(game){
-    console.log(game);
+    // console.log(game);
     if (game === undefined)
         return game;
     let g = {
@@ -185,7 +185,7 @@ export async function gameRoute (fastify, options) {
 
     //Stop a game, to update
     fastify.post('/game/stopGame', async (req, reply) => {
-        delete getGameByID(games, req.body.gameId); // to change
+        delete getGameByID(req.body.gameId); // to change
     });
 
     // Route qui recupere les infos du user :username dans la db et les renvoie
@@ -296,14 +296,14 @@ export async function gameRoute (fastify, options) {
 
     // Route qui renvoie les infos de la game
     fastify.get('/game/:id', async (request, reply) => {
-        const game = getGameByID(games, request_params.id);
+        const game = getGameByID(request_params.id);
         if (!game) return reply.status(404).send({ error: 'Game not found' });
         return game;
     });
 
     // Route qui change les coordonnees du joueur qui bouge
     fastify.post('/game/:id/move', async (request, reply) => {
-        var game = getGameByID(games, request_params.id);
+        var game = getGameByID(request_params.id);
         var newY = game.paddles[request.body.role].y + (request.body.moveUp ? -4 : 4);
         if (newY > 120 && newY < 580)
             game.paddles[request.body.role].y = newY;
@@ -311,7 +311,7 @@ export async function gameRoute (fastify, options) {
 
     // Route qui change les coordonnees du joueur qui bouge
     fastify.post('/game/local/:id/move', async (request, reply) => {
-        var game = getGameByID(games, request_params.id);
+        var game = getGameByID(request_params.id);
         if (request.body.moveRight != null)
             var newY1 = game.paddles["right"].y + (request.body.moveRight ? -4 : 4);
             if (newY1 > 0 && newY1 < 400)
@@ -332,7 +332,6 @@ export async function gameRoute (fastify, options) {
         fastify.get('/game/ws', { websocket: true }, (socket, req) => {
             let username = req.query.username;
             socket.on('open', (event) => {
-                // PROBLEM ; I dont know when this is executed
                 console.log("socket game created for");
                 console.log(username);
                 // waiting_clients.set(username, socket);
@@ -353,18 +352,18 @@ export async function gameRoute (fastify, options) {
                     // console.log("Ceating a solos game");
 
                     // NE PAS OUBLIER DE MASKER AVEC UN HOOK
-                    // console.log(getMaskedGame(getGameByID(games, new_game_id)));
+                    // console.log(getMaskedGame(getGameByID(new_game_id)));
                     socket.send(JSON.stringify({
                         type: "offline_game_created",
-                        game: getMaskedGame(getGameByID(games, new_game_id)),
+                        game: getMaskedGame(getGameByID(new_game_id)),
                         game_id: new_game_id // useless
                     }));
                     playing_clients.set(socket, new_game_id);
                     waiting_clients.delete(username);
                 } else if (message.type === "game_update"){
-                    console.log("MOdofiying a game");
-                    console.log(games);
-                    let game = getGameByID(games, message.game_id);
+                    // console.log("MOdofiying a game");
+                    // console.log(games);
+                    let game = getGameByID(message.game_id);
                     if (game === undefined){
                         console.log("error, game dosnt exists");
                         return ;
@@ -380,7 +379,7 @@ export async function gameRoute (fastify, options) {
                             let second_player_name = waiting_clients.keys().next().value;
                             let second_player_socket = waiting_clients.get(second_player_name);
                             let new_game_id = createGame(message.username, second_player_name);
-                            let game = getMaskedGame(getGameByID(games, new_game_id));
+                            let game = getMaskedGame(getGameByID(new_game_id));
                             console.log(game);
                             console.log(second_player_name);
 
@@ -431,7 +430,7 @@ export async function gameRoute (fastify, options) {
                                 type: 'tournament',
                                 success: true,
                                 state: 'match_connected',
-                                game: getMaskedGame(getGameByID(games, game_id)),
+                                game: getMaskedGame(getGameByID(game_id)),
                                 game_id: game_id // useless
                             }));
                             playing_clients.set(socket, game_id);
@@ -525,7 +524,7 @@ export async function gameRoute (fastify, options) {
 
         // For every player still playing
         for (var [socket, game_id] of playing_clients){
-            let game = getGameByID(games, game_id);
+            let game = getGameByID(game_id);
             // console.log(game);
             
             // If their game is finished, we end it

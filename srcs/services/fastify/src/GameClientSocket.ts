@@ -71,16 +71,14 @@ export class GameClientSocket{
                     console.log("side = " + this.ctl.getSide());
                     this.ctl.stop_matchmaking_animation();
                     this.ctl.hide_all();
-                    // this.ctl.hide_menu();
+                    this.ctl.hide_menu();
                     this.ctl.gameInit();
                 }
             } else if (message.type === "offline_game_created"){
                 this.ctl.updateState(message.game);
-                this.ctl.gameInit();
                 this.ctl.hide_all();
                 this.ctl.hide_menu();
-                this.ctl.print_play_page();
-                this.ctl.print_game();
+                this.ctl.gameInit();
             } else if (message.type === "game_finished"){
                 console.log("Game is finished");
                 this.ctl.finishGame();
@@ -90,11 +88,11 @@ export class GameClientSocket{
                 } else{
                     if (message.state === "match_connected"){
                         console.log("   Match should begin");
-                        this.ctl.hide_aal();
-                        this.ctl.print_game();
-                        this.ctl.print_play_page();
-                        this.ctl.updateState(message.game);
+                        // this.ctl.hide_aal();
                         this.ctl.gameInit();
+                        // this.ctl.print_game();
+                        // this.ctl.print_play_page();
+                        this.ctl.updateState(message.game);
                     }
                 }
             }
