@@ -5,32 +5,27 @@ import {GameController} from "./pong.js";
  */
 export class GameClientSocket{
     private ws : WebSocket = null;
-    private username : string;
 
-    protected game : GameController = null;
+    protected ctl : GameController = null;
     
     private should_search : boolean = false;
     private should_start_solo : boolean = false;
+    private match_id : number = undefined; // if this number is set, then its the game id we have to connect (context : tournament)
 
-    constructor(username : string, game : any);
-    constructor(username : string, game : any, tournament ?: any){
-        this.username = username;
-        // if (!tournament)
-        this.ws = new WebSocket(`wss://${window.location.host}/game/ws?username=${this.username}`);
-        // else
-        //     this.ws = new WebSocket();
+    constructor(username : string, ctl : any, match_id ?: number){
+        this.ws = new WebSocket(`wss://${window.location.host}/game/ws?username=${username}`);
         if (this.ws.readyState === this.ws.CLOSED || this.ws.readyState === this.ws.CLOSING){
             //error handling to do !
-            alert("ERROR WHILE CREAtING GAMESOCKET");
+            alert("ERROR WHILE CREATING GAMESOCKET");
             return ;
         }
-        this.game = game;
+        this.ctl = ctl;
+        if (match_id !== undefined){
+            console.log("game creation socket tournament");
+            this.match_id = match_id;
+        }
         this.setSocket();
-    }
-
-
-    get_username(){
-        return (this.username);
+        this.updatePos.bind(this);
     }
 
     setSocket(){
@@ -38,56 +33,80 @@ export class GameClientSocket{
             if (this.should_search){
                 this.ws.send(JSON.stringify({
                     type: "matchmaking",
-                    username: this.username,
+                    username: this.ctl.getUsername(),
                     state: "join"
                 }));
                 this.should_search = false;
             } else if (this.should_start_solo){
                 this.ws.send(JSON.stringify({
                     type: "create_game_offline",
-                    username: this.username
+                    username: this.ctl.getUsername()
                 }));
+            } else if (this.match_id !== undefined){
+                this.ws.send(JSON.stringify({
+                    type : "tournament",
+                    state : "connecting_match",
+                    game_id : this.match_id
+                }))
             }
         }
         
         this.ws.onmessage = (data) => {
+            // console.log("Recving data");
             const message = JSON.parse(data.data);
-            // console.log(message);
-            if (message === null)
-                return ;            
+            if (message === null){
+                console.log("message is null");
+                return ;
+            }
+            // console.log("game message : " + message.type);
             if (message.type === "game_info"){
-                this.game.updateState(message.game);
+                this.ctl.updateState(message.game);
             } else if (message.type === "matchmaking") {
                 console.log("Match found");
-                // console.log(message);
                 if (message.state === "found") {
-                    this.game.updateState(message.game);
-                    let side = (message.game.players.left === this.username ? "left" : "right")
-                    this.game.setSide(side);
-                    console.log("side = " + this.game.getSide());
-                    this.game.stop_matchmaking_animation();
-                    this.game.gameInit();
-                    this.game.hide_all();
-                    this.game.hide_menu();
-                    this.game.print_play_page();
+                    this.ctl.updateState(message.game);
+                    console.log(message.game);
+                    console.log("this username = " + this.ctl.getUsername());
+                    let side = (message.game.players.left == this.ctl.getUsername() ? "left" : "right")
+                    this.ctl.setSide(side);
+                    console.log("side = " + this.ctl.getSide());
+                    this.ctl.stop_matchmaking_animation();
+                    this.ctl.hide_all();
+                    this.ctl.hide_menu();
+                    this.ctl.gameInit();
                 }
             } else if (message.type === "offline_game_created"){
-                this.game.updateState(message.game);
-                this.game.gameInit();
-                this.game.hide_all();
-                this.game.hide_menu();
-                this.game.print_play_page();
+                this.ctl.updateState(message.game);
+                this.ctl.hide_all();
+                this.ctl.hide_menu();
+                this.ctl.gameInit();
             } else if (message.type === "game_finished"){
                 console.log("Game is finished");
-                this.game.finishGame();
-                this.ws.close();
+                this.ctl.finishGame();
+            } else if (message.type === "tournament"){
+                if (!message.success){
+                    alert("erroererer");
+                } else{
+                    if (message.state === "match_connected"){
+                        console.log("   Match should begin");
+                        // this.ctl.hide_aal();
+                        this.ctl.gameInit();
+                        // this.ctl.print_game();
+                        // this.ctl.print_play_page();
+                        this.ctl.updateState(message.game);
+                    }
+                }
             }
         };
 
         this.ws.onclose = (event) => {
             console.log("closing socket");
-            console.log(event);
-            this.game.close();
+            if (event.code === 3005){
+                console.log(event.reason);
+            } else{
+                console.log(event);
+            }
+            this.ctl.close();
         }
 
         this.ws.onerror = (event) => {
@@ -104,7 +123,7 @@ export class GameClientSocket{
         }
         this.ws.send(JSON.stringify({
             type: "matchmaking",
-            uname: this.username,
+            uname: this.ctl.getUsername(),
             state: "join"
         }));
     }
@@ -132,10 +151,9 @@ export class GameClientSocket{
 
     // Update the server with movements
     updatePos(game_id, key, side){
-        // console.log("Sending " +  game_id + key + side);
         this.ws.send(JSON.stringify({
             type : "game_update",
-            game_id : game_id, // useless ? server should do with socket
+            game_id : game_id,
             move_up : key,
             side : side
         }));
@@ -145,5 +163,6 @@ export class GameClientSocket{
         this.ws.close();
         this.should_search = false;
         this.should_start_solo = false;
+        this.match_id = undefined;
     }
 };

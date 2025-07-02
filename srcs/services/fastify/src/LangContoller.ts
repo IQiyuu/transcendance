@@ -56,6 +56,7 @@ export class LangController{
                 throw (Error("Not parsed, setting a default file"));
         } catch (error) {     
             alert(error);
+            console.log("loadFile");
             this.file = {
                 "title" : "Trong the game",
                 "username": "Username",
@@ -75,14 +76,32 @@ export class LangController{
         document.getElementById('div_title').textContent = this.file['change_pp'];
         document.getElementById('login_btn').textContent = this.file['connexion_title'];
         document.getElementById('offline').textContent = this.file['play_local'];
-        document.getElementById('matchmaking').textContent = this.file['play_online'];
         document.getElementById('tournament_button').textContent = this.file['tournament'];
         document.getElementById('profile_button').textContent = this.file['profile'];
         document.getElementById('upload_btn').textContent = this.file['upload_txt'];
         document.getElementById('about_button').textContent = this.file['about'];
         document.getElementById('friend_text').textContent = this.file['friends'];
         document.getElementById('histo_text').textContent = this.file['historique'];
+
+        document.getElementById('pass_change').textContent = this.file['pass_change'];
+        document.getElementById('pass_current').textContent = this.file['pass_current'];
+        document.getElementById('pass_new').textContent = this.file['pass_new'];
+        document.getElementById('pass_confirm').textContent = this.file['pass_confirm'];
+        document.getElementById('modal-confirm-yes').textContent = this.file['modal-confirm-yes'];
+        document.getElementById('modal-confirm-no').textContent = this.file['modal-confirm-no'];
+        document.getElementById('cancel').textContent = this.file['cancel'];
+        document.getElementById('confirm').textContent = this.file['confirm'];
+        document.getElementById('game_start').textContent = this.file['game_start'];
+        document.getElementById('logout_btn').textContent = this.file['logout_btn'];
+        document.getElementById('wr_card').textContent = this.file['wr'];
         (document.getElementById('search_player_in') as HTMLInputElement).placeholder = this.file['search'];
+
+        if (document.getElementById('waiting_online') && document.getElementById('cancel_game')) {
+            document.getElementById('waiting_online').textContent = this.file['waiting_online'];
+            document.getElementById('cancel_game').innerHTML = this.file['cancel_mm'];
+        }
+        else
+            document.getElementById('matchmaking').textContent = this.file['play_online'];
     }
 
     addEvents() {
@@ -92,6 +111,9 @@ export class LangController{
             var val = (event.target as HTMLSelectElement).value;
             await this.loadFile(val);
             this.updateContent();
+
+            if (!this.username)
+                return ;
 
             const body = {
                 user: this.username,

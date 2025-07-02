@@ -17,13 +17,17 @@ export class FriendController {
         this.lang = lang;
         this.ws = ws;
 
-        this.initFriendlist();
+        this.handleFriendClick = this.handleFriendClick.bind(this);
+        this.handleBlockClick = this.handleBlockClick.bind(this);
+
         this.addEvents();
     }
 
     setUsername(username: string) { this.username = username; }
+    setLang(lang: LangController) { this.lang = lang; }
 
     async initFriendlist() {
+        this.friendlist.innerHTML = "";
         try {
             const response = await fetch(`/db/friends/friendlist/${this.username}`, {
                 method: "GET",
@@ -31,14 +35,26 @@ export class FriendController {
 
             const data = await response.json();
             console.log(data);
+            console.log(response);
             if (!data.success) {
                 throw(Error(data.error));
             } else {
                 for (let user of data.friends) {
+                    console.log(user);
                     this.addFriend(user.username, user.pp);
+                    this.ws.send(JSON.stringify({
+                        type: "connection",
+                        user: this.username,
+                        target: user,
+                    }));
                 }
             }
+            this.ws.send(JSON.stringify({
+                type: "initialized",
+                user: this.username
+            }));
         } catch (error) {
+            console.log("initFriendList");
             alert(error);
         }
     }
@@ -79,85 +95,97 @@ export class FriendController {
         this.friendlist.appendChild(div);
     }
 
-    addEvents() {
-        this.friend_btn.addEventListener("click", async (event) => {
-            const friend_uname = document.getElementById("profile_username").textContent;
-            const body = {
-                user: this.username,
-                friend: friend_uname,
-            }
+    async handleFriendClick(event: Event) {
+        const friend_uname = document.getElementById("profile_username").textContent;
+        console.log(this.username);
+        console.log(friend_uname);
+        const body = {
+            user: this.username,
+            friend: friend_uname,
+        }
 
-            console.log("body: ", body);
-            try {
-                const friend_req = await fetch(`/db/friends/update`, {
-                    method: 'POST',
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(body),
-                });
-
-                const data = await friend_req.json();
-                console.log("reponse du server: ", data);
-                if (data.success) {
-                    document.getElementById("friend_btn").textContent = this.lang.getFile()[data.message];
-                    if (data.status == "accepted") {
-                        try {
-                            const friend = data.friend;
-                            const me = data.user;
-                            this.addFriend(friend.username, friend.pp);
-                            this.ws.send(JSON.stringify({
-                                type: "addFriend",
-                                user: me.username,
-                                pp: me.pp,
-                                target: friend.username,
-                            }));
-                        } catch (error) {
-                            alert(error);
-                        }
-                    } else if (data.status == null) {
-                        this.removeFriend(friend_uname)
-                        this.ws.send(JSON.stringify({
-                            type: "removeFriend",
-                            user: this.username,
-                            target: friend_uname,
-                        }));
-                    }
-                }
-                else
-                    alert(data.error);
-            }catch (error){
-                alert(error);
-            }
-        });
-
-        this.block_btn.addEventListener("click", async (event) => {
-            const toBlock = document.getElementById("profile_username").textContent;
-            const body = {
-                user: this.username,
-                friend: toBlock,
-            }
-
-            const friend_req = await fetch(`/db/friends/block`, {
+        console.log("body: ", body);
+        try {
+            const friend_req = await fetch(`/db/friends/update`, {
                 method: 'POST',
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(body),
             });
 
             const data = await friend_req.json();
+            console.log("reponse du server: ", data);
             if (data.success) {
-                this.block_btn.textContent = data.blocking ? "🔓" : "🔒";
-                this.friend_btn.textContent = 
-                    data.blocking ? this.lang.getFile()["send_yblock"] : this.lang.getFile()["send_inv"];
-                if (data.blocking) {
+                document.getElementById("friend_btn").textContent = this.lang.getFile()[data.message];
+                if (data.status == "accepted") {
+                    try {
+                        const friend = data.friend;
+                        const me = data.user;
+                        this.addFriend(friend.username, friend.pp);
+                        this.ws.send(JSON.stringify({
+                            type: "addFriend",
+                            user: me.username,
+                            pp: me.pp,
+                            target: friend.username,
+                        }));
+                    } catch (error) {
+                        alert(error);
+                    }
+                } else if (data.status == null) {
+                    this.removeFriend(friend_uname)
                     this.ws.send(JSON.stringify({
                         type: "removeFriend",
                         user: this.username,
-                        target: toBlock,
+                        target: friend_uname,
                     }));
-                    this.removeFriend(toBlock);
                 }
             }
             else
-                console.log("error: ", data.error);
-        });
+                alert(data.error);
+        } catch (error) {
+            alert(error);
+        }
     }
+
+    async handleBlockClick(event: Event) {
+        const toBlock = document.getElementById("profile_username").textContent;
+        const body = {
+            user: this.username,
+            friend: toBlock,
+        }
+
+        const friend_req = await fetch(`/db/friends/block`, {
+            method: 'POST',
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+        });
+
+        const data = await friend_req.json();
+        if (data.success) {
+            this.block_btn.textContent = data.blocking ? "🔓" : "🔒";
+            this.friend_btn.textContent = 
+                data.blocking ? this.lang.getFile()["send_yblock"] : this.lang.getFile()["send_inv"];
+            if (data.blocking) {
+                this.ws.send(JSON.stringify({
+                    type: "removeFriend",
+                    user: this.username,
+                    target: toBlock,
+                }));
+                this.removeFriend(toBlock);
+            }
+        }
+        else
+            console.log("error: ", data.error);
+    }
+
+    addEvents() {
+        console.log("F: ", this.username);
+        this.friend_btn.addEventListener("click", this.handleFriendClick);
+        this.block_btn.addEventListener("click", this.handleBlockClick);
+    }
+
+    removeEvents() {
+        this.friend_btn.removeEventListener("click", this.handleFriendClick);
+        this.block_btn.removeEventListener("click", this.handleBlockClick);
+    }
+
 }

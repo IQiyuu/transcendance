@@ -17,13 +17,22 @@ async function websocketRoute(fastify, options) {
 
     function getFriendList(user) {
         return db.prepare(`
-            SELECT users.username
+            SELECT users.username as username, users.picture_path as pp
             FROM users
-            JOIN friends 
-              ON users.user_id = friends.user_id OR users.user_id = friends.friend_id
-            WHERE users.user_id != ?
-              AND friends.status = 'accepted'
-        `).all(user);
+            JOIN friends ON (
+                (friends.user_id = ? AND friends.friend_id = users.user_id)
+                OR
+                (friends.friend_id = ? AND friends.user_id = users.user_id)
+            )
+            WHERE friends.status = 'accepted'
+        `).all(user, user);
+    }
+
+    function getIdFromUsername(username) {
+        const data = db.prepare('SELECT user_id FROM users WHERE username = ?').get(username);
+        if (data)
+            return data.user_id;
+        return "";
     }
 
     fastify.register(async function (fastify) {
@@ -42,8 +51,10 @@ async function websocketRoute(fastify, options) {
             }
             
             function sendInfosFriends(socket, username, type) {
-                const friendlist = getFriendList(username);
-            
+                const user_id = getIdFromUsername(username);
+                if (user_id == "")
+                    return ;
+                const friendlist = getFriendList(user_id);
                 for (let friend of friendlist) {
                     const friendSocket = connectedClients.get(friend.username);
             
@@ -89,13 +100,7 @@ async function websocketRoute(fastify, options) {
                     console.error('Invalid JSON:', rawMessage.toString());
                     return;
                 }
-                if (data.type === 'chat') {
-                    broadcast({
-                        type: 'chat',
-                        sender: username,
-                        message: data.message
-                    });
-                } if (data.type === 'addFriend' || data.type === 'removeFriend') {
+                if (data.type === 'addFriend' || data.type === 'removeFriend') {
                     const targetSocket = connectedClients.get(data.target);
                     if (targetSocket) {
                         targetSocket.send(JSON.stringify(data));
@@ -141,10 +146,11 @@ async function websocketRoute(fastify, options) {
                         // console.log(games[gameId]);
                         delete gameRoute.games[gameId];
                     }
+                } else if (data.type == "initialized") {
+                    sendInfosFriends(socket, username, "connection");
                 }
             });
 
-            sendInfosFriends(socket, username, "connection");
             connectedClients.set(username, socket);
         });
     });

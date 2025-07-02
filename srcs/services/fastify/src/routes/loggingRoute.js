@@ -7,11 +7,34 @@ async function logginRoute (fastify, options) {
     return reply.view("src/index.ejs");
   })
 
+function isValidPassword(password) {
+  const minLength    = password.length >= 8;
+  const hasUppercase = /[A-Z]/.test(password);
+  const hasLowercase = /[a-z]/.test(password);
+  const hasDigit     = /[0-9]/.test(password);
+  const hasSpecial   = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+  return minLength && hasUppercase && hasLowercase && hasDigit && hasSpecial;
+}
+
+
   // Route pour s'inscrire, verifie que le username n'existe pas
   fastify.post('/register', async (request, reply) => {
     const { username, password } = request.body;
     // console.log("Données REGISTER reçues :", username, password);
-
+    try {
+    const valid = await isValidPassword(password);
+      if (valid) {
+        console.log("Mot de passe valide");
+      } else {
+        console.log("Mot de passe invalide");
+        throw Error("errReg");
+      }
+    } catch (error) {
+      console.error("Erreur : ", error);
+      return { success: false, message: error.message };
+    }
+    
     try {
       const userExists = options.db.prepare('SELECT * FROM users WHERE username = ?').get(username);
 
