@@ -441,7 +441,7 @@ En haut à gauche du site, une option permet de changer la langue de l’interfa
         });
     }
 
-    async function saveUsername(newUsername) {
+        async function saveUsername(newUsername) {
         document.getElementById('profile_username').innerText = newUsername;
         console.log("Nouvelle valeur du nom d'utilisateur : " + newUsername);
 
@@ -454,14 +454,18 @@ En haut à gauche du site, une option permet de changer la langue de l’interfa
                     method: 'POST',
                     credentials: 'include',
                     headers: { "Content-Type": "application/json" },
-                    boy: JSON.stringify(body)
+                    body: JSON.stringify(body)
                 });
 
             const data = await req.json();
 
             if (!data.success)
                 throw(Error(data.error));
-
+            // this.username = newUsername;
+            // this.game.setUsername(this.username);
+            // this.profile.setUsername(this.username);
+            // this.tournament.setUsername(this.username);
+            // this.friends.setUsername(this.username);
             console.log("username updated.");
         } catch (error) {
             alert(error);
@@ -488,10 +492,17 @@ En haut à gauche du site, une option permet de changer la langue de l’interfa
         const currentPassword = document.getElementById('currentPassword').value;
         const newPassword = document.getElementById('newPassword').value;
         const confirmPassword = document.getElementById('confirmPassword').value;
-
+        console.log("ERROR1");
         // Vérification que les mots de passe correspondent
         if (newPassword !== confirmPassword) {
             showError("Les nouveaux mots de passe ne correspondent pas.");
+            console.log("ERROR1 MISMATCH");
+            return;
+        }
+
+        if (currentPassword == newPassword) {
+            showError("Les nouveaux mots de passe ne doivent pas etre identiques");
+            console.log("ERROR1 MISMATCH");
             return;
         }
 
@@ -501,27 +512,26 @@ En haut à gauche du site, une option permet de changer la langue de l’interfa
             newPassword: newPassword
         };
         try {
+            console.log(body);
             const req = await fetch('/db/update/password', {
                     method: 'POST',
                     credentials: 'include',
                     headers: { "Content-Type": "application/json" },
-                    boy: JSON.stringify(body)
+                    body: JSON.stringify(body)
                 });
-
+            console.log("ERROR2: ");
             const data = await req.json();
-
+            console.log("ERROR2: ", data);
+            console.log("ERROR3: ", data.error);
             if (!data.success)
                 throw(Error(data.error));
 
             console.log("password updated.");
+            closePasswordPopup();
+            document.getElementById('passwordForm').reset();
         } catch (error) {
             alert(error);
         }
-
-        // Si tout est correct, effectuer le changement (par exemple, envoyer les données au serveur)
-        alert("Mot de passe changé avec succès !");
-        closePasswordPopup();
-        document.getElementById('passwordForm').reset();
     });
 
     // Afficher les messages d'erreur

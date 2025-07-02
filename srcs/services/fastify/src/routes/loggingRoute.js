@@ -25,7 +25,7 @@ function isValidPassword(password) {
         console.log("Mot de passe valide");
       } else {
         console.log("Mot de passe invalide");
-        throw Error("errReg");
+        throw Error("errMdp");
       }
     } catch (error) {
       console.error("Erreur : ", error);

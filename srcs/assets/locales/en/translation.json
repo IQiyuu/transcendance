@@ -27,6 +27,7 @@
   "send_yblock": "You have blocked this user",
   "errAuth": "Incorrect username or password",
   "errReg": "Username already taken",
+  "errMdp": "Password must contain 1 of maj, min, digit, special char",
   "about": "About",
 
   "pass_change": "Change password",
