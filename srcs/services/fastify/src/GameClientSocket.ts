@@ -57,7 +57,7 @@ export class GameClientSocket{
                 console.log("message is null");
                 return ;
             }
-            console.log("game message : " + message.type);
+            // console.log("game message : " + message.type);
             if (message.type === "game_info"){
                 this.ctl.updateState(message.game);
             } else if (message.type === "matchmaking") {
@@ -70,10 +70,9 @@ export class GameClientSocket{
                     this.ctl.setSide(side);
                     console.log("side = " + this.ctl.getSide());
                     this.ctl.stop_matchmaking_animation();
-                    this.ctl.gameInit();
                     this.ctl.hide_all();
-                    this.ctl.hide_menu();
-                    this.ctl.print_play_page();
+                    // this.ctl.hide_menu();
+                    this.ctl.gameInit();
                 }
             } else if (message.type === "offline_game_created"){
                 this.ctl.updateState(message.game);

@@ -143,13 +143,11 @@ function    getGameByUsername(gs, username){
 }
 
 function    getGameByID(gs, id){
-    console.log("searching game " + id);
-    console.log(gs);
     let game = gs.find(x => x.id === id);
-    console.log(game);
     return game;
 }
 
+// Returns a masked view of the game
 function    getMaskedGame(game){
     console.log(game);
     if (game === undefined)
@@ -183,32 +181,7 @@ function    getMaskedGame(game){
     return (g);
 }
 export async function gameRoute (fastify, options) {
-    // let waiting_list = null;
-    // let w_uname = null;
     let img_path = "dist/assets/imgs/"; //to update 
-
-    // Stocke la game dans la db || ! NOT SECURED, so server will save itself
-    // fastify.post('/game/storeGame', async (request, reply) => {
-    //     const { winner_username, loser_username, loser_score } = request.body;
-    //     // saveGame();
-    //     try {
-    //         const insert = options.db.prepare(`
-    //             INSERT INTO games (winner_id, loser_id, loser_score) 
-    //                 SELECT
-    //                     u1.user_id AS winner_id,
-    //                     u2.user_id AS loser_id, 
-    //                     ? AS loser_score 
-    //                 FROM users u1, users u2 
-    //                 WHERE u1.username = ? AND u2.username = ?`
-    //         );
-    //         insert.run(loser_score, winner_username, loser_username);
-    //         console.log("REGISTER");
-    //         return { success: true, message: `Game registered` };
-    //     } catch (error) {
-    //         console.error('Error insert data in db.', error);
-    //         return { success: false, error: error };
-    //     }
-    // });
 
     //Stop a game, to update
     fastify.post('/game/stopGame', async (req, reply) => {
@@ -407,7 +380,7 @@ export async function gameRoute (fastify, options) {
                             let second_player_name = waiting_clients.keys().next().value;
                             let second_player_socket = waiting_clients.get(second_player_name);
                             let new_game_id = createGame(message.username, second_player_name);
-                            // let game = getMaskedGame(getGameByID(games, new_game_id));
+                            let game = getMaskedGame(getGameByID(games, new_game_id));
                             console.log(game);
                             console.log(second_player_name);
 
@@ -550,11 +523,13 @@ export async function gameRoute (fastify, options) {
             game.ball.y += game.ball.dy * game.ball.v;
         });
 
+        // For every player still playing
         for (var [socket, game_id] of playing_clients){
-            let game = getGameByID(finished_games, game_id);
-            console.log(game);
-            // If game is finished, end
-            if (game !== undefined){
+            let game = getGameByID(games, game_id);
+            // console.log(game);
+            
+            // If their game is finished, we end it
+            if (finished_games.includes(game)){
                 console.log("game is finished");
                 console.log(game);
 
@@ -592,8 +567,7 @@ export async function gameRoute (fastify, options) {
                 saveGame(game, options.db);
                 games.splice(games.indexOf(game), 1);
                 finished_games.splice(finished_games.indexOf(game), 1);
-                continue ;
-            } else {
+            } else { // else, we send infos
                 socket.send(JSON.stringify({
                     type: "game_info",
                     game: getMaskedGame(game)

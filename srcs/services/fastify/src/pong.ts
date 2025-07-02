@@ -48,6 +48,7 @@ export class   GameController{
     private offline_play_btn = document.getElementById("offline");
 
     private game = document.getElementById("game");
+    private scoreboard = document.getElementById("scoreboard");
 
     private left_player_tag = document.getElementById("player-left");
     private right_player_tag = document.getElementById("player-right");
@@ -225,8 +226,9 @@ export class   GameController{
         document.addEventListener("keydown", this.key_handler);
 
         this.print_player_names();
-        this.print_game();
         this.print_scoreboard();
+        this.print_game();
+        this.print_play_page();
 
         this.ball.style.position="absolute";
         this.l_paddle.style.position="absolute";
@@ -308,9 +310,6 @@ export class   GameController{
 
     // Update every game values
     updateState(game){
-        // console.log("Updating game");
-        console.log(game);
-
         this.game_id = game.id;
 
         this.l_score = game.scores.left;
@@ -385,11 +384,11 @@ export class   GameController{
     }
 
     print_scoreboard(){
-        this.game.classList.replace("hidden", "flex");
+        this.scoreboard.classList.replace("hidden", "flex");
     }
 
     hide_scoreboard(){
-        this.game.classList.replace("flex", "hidden");
+        this.scoreboard.classList.replace("flex", "hidden");
     }
 
     print_game(){
