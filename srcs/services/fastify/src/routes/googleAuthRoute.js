@@ -1,7 +1,10 @@
-
+import qrcode from 'qrcode';
+import speakeasy from 'speakeasy';
 
 let username = null;
 async function GoogleAuthRoute(fastify, options) {
+  let index = 0;
+
   const secret = options.secretKey;
   const clientId = options.client;
   const clientSecret = options.secretClient;
@@ -10,7 +13,7 @@ async function GoogleAuthRoute(fastify, options) {
   const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=openid%20email%20profile`;
   const authUrl2 = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri2}&response_type=code&scope=openid%20email%20profile`;
   
-  // route principale pour ajouter google auth
+  // route principale pour ajouter google auth au client
 
   fastify.get('/google-auth', async (req, reply) => {
 
@@ -24,11 +27,15 @@ async function GoogleAuthRoute(fastify, options) {
       else 
       {
         const value = options.db.prepare('SELECT email FROM users WHERE username = ?').get(username);
+        const value2 = options.db.prepare('SELECT email FROM users WHERE username = ?').get(value.email);
+        if (value2 != null)
+          return reply.send({sucess: false});
         if (value.email == null){
           options.db.prepare('UPDATE users SET email = ? WHERE username = ?').run(googleEmail, username);
           reply.type('text/html').send("<p>Authentification Google reussie. Cette fenetre va se fermer dans 5 secondes.</p><script>setTimeout(() => {window.close()}, 5000);</script>");
         }
-       reply.type('text/html').send("<p>Google Authentificator est deja active. Cette fenetre va se fermer dans 5 secondes.</p><script>setTimeout(() => {window.close()}, 5000);</script>");
+        reply.clearCookie('google_email');
+        reply.type('text/html').send("<p>Google Authentificator est deja active. Cette fenetre va se fermer dans 5 secondes.</p><script>setTimeout(() => {window.close()}, 5000);</script>");
       }
     } catch (error) {
       return reply.send({ success: false });
@@ -43,7 +50,6 @@ async function GoogleAuthRoute(fastify, options) {
     const decoded = fastify.jwt.verify(token, secret);
     const username = decoded.username;
     options.db.prepare('UPDATE users SET email = ? WHERE username = ?').run(null, username);
-    reply.clearCookie('google_email');
 
     return reply.send({ success: true, message: "2FA désactivé" });
   } catch (error) {
@@ -94,7 +100,50 @@ async function GoogleAuthRoute(fastify, options) {
         </html>
       `);
       }
-      return { user: null};
+      let guess = null;
+      let tmp = null;
+      while (true) {
+        guess = `guess${index}`;
+        tmp = options.db.prepare('SELECT * FROM users WHERE username = ?').get(guess);
+        if (!tmp) 
+          break;
+        index++;
+      }
+      const hash_pass = await fastify.bcrypt.hash("default");
+      const insert = options.db.prepare('INSERT INTO users (username, password) VALUES (?, ?)');
+      insert.run(guess, hash_pass);
+      options.db.prepare('UPDATE users SET email = ? WHERE username = ?').run(googleEmail, guess);
+      const secret = speakeasy.generateSecret({ name: 'Transcendance 2FA' }); 
+        options.db.prepare('UPDATE users SET secret = ? WHERE username = ?').run(secret.base32, guess);
+       // options.db.prepare('UPDATE users SET lang = ? WHERE username = ?').run(null, guess);
+        qrcode.toDataURL(secret.otpauth_url, (err, data_url) => {
+          if (err) throw err;
+          options.db.prepare('UPDATE users SET twofa = ? WHERE username = ?').run(data_url, guess);
+      });
+  
+      const payload = {
+          username: guess,
+      };
+      const token = fastify.jwt.sign(payload, { expiresIn: '1d' });
+
+      reply.setCookie('auth_token', token, {
+        path: '/',
+        httpOnly: true,
+        secure: true,
+        SameSite: 'Strict',
+        maxAge: 3600,
+      });
+      return reply.type('text/html').send(`
+        <html>
+          <body>
+            <script>
+              window.opener.postMessage({ username: "${guess}", success: true }, window.location.origin);
+              window.close();
+            </script>
+            <p>Connexion en cours...</p>
+          </body>
+        </html>
+      `);
     } catch (error) {
       return reply.send({ success: false });
     }
@@ -197,6 +246,18 @@ return reply.redirect('/check');
     return reply.status(500).send("Erreur lors de l'authentification.");
   }
 });
+
+fastify.get('/check-email-status', async (req, reply) => {
+        const token = req.cookies.auth_token;
+        const decoded = fastify.jwt.verify(token, secret);
+        const username = decoded.username;
+        const value = options.db.prepare('SELECT * FROM users WHERE username = ?').get(username);
+        if (value.email === null)
+          return reply.send({success: 0});
+        else 
+          return reply.send({success: 1});
+});
+
 
 }
 export default GoogleAuthRoute;

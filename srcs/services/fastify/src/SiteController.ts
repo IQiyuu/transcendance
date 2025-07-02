@@ -103,17 +103,25 @@ export class   ProfileController{
         // Activate / Desactivate Google authentificator
         this.auth_btn.addEventListener('click', async (event) => {
             event.preventDefault();
-            if(this.google_auth.textContent === "Activer Google authentificator")
-            {
-                window.open('/google-auth', '42 AUTH');
-                this.google_auth.id = "desable_auth_btn";
-                this.google_auth.textContent = "Desactiver Google authentificator";
-            }
-            else 
-            {
-                await fetch('/desable_auth');
-                this.google_auth.id = "auth_btn";
-                this.google_auth.textContent = "Activer Google authentificator";
+            const res = await fetch('/check-email-status', {
+            method: 'GET',
+                credentials: 'include', 
+            });
+            if (res.ok) {
+                const data = await res.json();
+                console.log(data);
+                if(data.success == 0)
+                {
+                    window.open('/google-auth', '42 AUTH');
+                    this.google_auth.id = "desable_auth_btn";
+                    this.google_auth.textContent = "Desactiver Google authentificator";
+                }
+                else 
+                {
+                    await fetch('/desable_auth');
+                    this.google_auth.id = "auth_btn";
+                    this.google_auth.textContent = "Activer Google authentificator";
+                }
             }
 
         // Connexion with Google authentificator
@@ -122,8 +130,8 @@ export class   ProfileController{
             event.preventDefault();
             window.open('/check', '42 AUTH');
             window.addEventListener("message", async (event) => {
-                if (event.origin !== window.location.origin) return; 
-
+                if (event.origin !== window.location.origin) 
+                    return; 
                 const { username, success } = event.data;
                 const res = await fetch('/check-2fa-status-in', {
                     method: 'POST',
@@ -135,7 +143,6 @@ export class   ProfileController{
                 });
                 if (res.ok) {
                     const data = await res.json();
-                    console.log(data.success);
                     if (success && data.success == 0) {
                         this.site.setUsername(username);
                         this.site.connect();
@@ -154,6 +161,8 @@ export class   ProfileController{
                         this.site.print_fa_page();
                     }
                 }
+                else
+                    this.site.connect();
             });
         });
 
@@ -170,10 +179,11 @@ export class   ProfileController{
             const data = await res.json();
             if (data.twofa === 1)
             {
-                //this.site.setUsername(data.username);
+
+                this.site.setUsername(data.username);
                 this.site.hide_fa_page();
+                console.log()
                 this.site.connect();
-               
             }
         });
 
@@ -185,14 +195,17 @@ export class   ProfileController{
             });
             if (res.ok) {
             const data = await res.json();
-            if (data.twofa && this.QRCode !== null) {
+            if (data.twofa && this.QRCode !== null && data.twofa_activate) {
+                this.switch_fa_btn.textContent = "Desactiver la 2FA";
                 this.QRCode.src = data.twofa.startsWith('data:image') 
                 ? data.twofa 
                 : `data:image/png;base64,${data.twofa}`;
                 this.QRCode.classList.replace("hidden", "block");
         }
-           else {
+            else {
                 this.QRCode.classList.replace("block" , "hidden");
+                this.switch_fa_btn.textContent = "Activer la 2FA";
+                
         }
 
     }
@@ -345,6 +358,9 @@ export class SiteController{
      * CONTROLLER
      */
     add_events(){
+
+        const google_auth = document.getElementById("google_auth");
+        const switch_fa_btn = document.getElementById("switch_fa_btn");
         // Register/login page
         this.register_link.addEventListener("click", (event) => {
             event.preventDefault();
@@ -444,10 +460,10 @@ export class SiteController{
                                 this.print_fa_page();
                                 this.hide_register_page();
                             }
-                            else 
-                            {
-                                this.connect();
-                            }
+                            // else 
+                            // {
+                            //     this.connect();
+                            // }
                         }
                     }
                     else 
@@ -487,6 +503,39 @@ export class SiteController{
         // Profile display
         this.profile_btn.addEventListener("click", async (event) => {
             this.hide_menu();
+            event.preventDefault();
+            const res = await fetch('/check-email-status', {
+            method: 'GET',
+                credentials: 'include', 
+            });
+            if (res.ok) {
+                const data = await res.json();
+                console.log(data);
+                if(data.success == 1)
+                {
+                    google_auth.id = "desable_auth_btn";
+                    google_auth.textContent = "Desactiver Google authentificator";
+                }
+                else 
+                {
+                    google_auth.id = "auth_btn";
+                    google_auth.textContent = "Activer Google authentificator";
+                }
+            }
+            const res2 = await fetch('/check-2fa-status', {
+            method: 'GET',
+                credentials: 'include', 
+            });
+            if (res2.ok) {
+                const data = await res2.json();
+                console.log(data);
+                if(data.success == 1)
+                    switch_fa_btn.textContent = "Desactiver la 2FA";
+                else
+                {
+                    switch_fa_btn.textContent = "Activer la 2FA";
+                }
+            }
             this.profile.printPage();
         });
 

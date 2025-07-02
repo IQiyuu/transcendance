@@ -3,6 +3,7 @@ import speakeasy from 'speakeasy';
 async function faRoute (fastify, options) {
   const secret = options.secretKey;
 
+  // Verifie avec l API si le code est bon 
     fastify.post('/2fa', async (req, reply) => {
       try {
         const token = req.cookies.tempo_token;
@@ -16,7 +17,6 @@ async function faRoute (fastify, options) {
             token: userToken,
             window: 1,
           });
-          console.log(verified);
           if (verified) {
             const payload = {
               username: username,
@@ -31,7 +31,7 @@ async function faRoute (fastify, options) {
               maxAge: 3600,
             });
             reply.clearCookie('tempo_token');
-            return reply.send({ twofa: 1});
+            return reply.send({ twofa: 1, username : username});
           } else {
             return reply.send({ twofa: 0});
           }
@@ -44,6 +44,7 @@ async function faRoute (fastify, options) {
     
     });
 
+    // On regarde si l utilisateur a active la 2fa via le cookie 
     fastify.get('/check-2fa-status', async (req, reply) => {
         const token = req.cookies.auth_token;
         const decoded = fastify.jwt.verify(token, secret);
@@ -55,7 +56,7 @@ async function faRoute (fastify, options) {
           return reply.send({success: 1});
     });
 
-
+    // On regarde si l utilisateur a active la 2fa via le parametre mis en entree 
     fastify.post('/check-2fa-status-in', async (req, reply) => {
       try {
             const { username } = req.body;
@@ -72,7 +73,7 @@ async function faRoute (fastify, options) {
           }
     });
 
-
+    // Active ou desactive la 2FA en changeans la valuer dans la db
     fastify.get('/enable-2fa', async (req, reply) => {
     try {
         const token = req.cookies.auth_token;
@@ -98,6 +99,8 @@ async function faRoute (fastify, options) {
         return reply.status(500).send({ error: 'Erreur serveur' });
     }
     });
+
+    // cree un cookie temporaire  pour garder le username 
     fastify.post('/set-user-cookie', async (req, reply) => {
         const { username } = req.body;
         const payload = {
