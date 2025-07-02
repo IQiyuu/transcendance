@@ -1,99 +1,121 @@
-const clientId = 'u-s4t2ud-35286bd3f00c601d663caf2387975ae7802bc026283c7cbe917483ea607f3f8e';
-const redirectUri = 'https://k0r1p8.42mulhouse.fr:3000/callback';
-const clientSecret = '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';
+import speakeasy from 'speakeasy';
 
-let username = null;
+async function faRoute (fastify, options) {
+  const secret = options.secretKey;
 
-async function faRoute(fastify, options) {
-  const secretKey = options.secretKey;
+  // Verifie avec l API si le code est bon 
+    fastify.post('/2fa', async (req, reply) => {
+      try {
+        const token = req.cookies.tempo_token;
+        const decoded = fastify.jwt.verify(token, secret);
+        const username = decoded.username;
+        const { userToken } = req.body;
+        const value = options.db.prepare('SELECT * FROM users WHERE username = ?').get(username);
+         const verified = speakeasy.totp.verify({
+            secret: value.secret,
+            encoding: 'base32',
+            token: userToken,
+            window: 1,
+          });
+          if (verified) {
+            const payload = {
+              username: username,
+            };
+            const token = fastify.jwt.sign(payload, { expiresIn: '1d' });
 
-  async function compareLogin(login, options) {
-    const utilisateur = options.db.prepare('SELECT twofa FROM users WHERE username = ?').run(username);
-    if (utilisateur.twofa && utilisateur.twofa == login) {
-      return true;
-    }
-    return false;
-  }
-  async function registerLogin(login, options) {
-    const utilisateur = options.db.prepare('SELECT twofa FROM users WHERE username = ?').run(username);
-    if (utilisateur.twofa !== null) {
-      return false;
-    }
-    console.log("true");
-    return true;
-  }
-  fastify.get('/2fa', async (req, reply) => {
-    const client_UID = 'u-s4t2ud-35286bd3f00c601d663caf2387975ae7802bc026283c7cbe917483ea607f3f8e';
-    const redirect_URI = 'https://k0r1p8.42mulhouse.fr:3000/callback'
-    const authUrl = `https://api.intra.42.fr/oauth/authorize?client_id=${client_UID}&redirect_uri=${redirect_URI}&response_type=code`;
-
-    const token = req.cookies.auth_token;
-
-    try {
-
-        const decoded = fastify.jwt.verify(token, secretKey);
-        username = decoded.username;
-        console.log(username);
-        return reply.redirect(authUrl);
-    } catch (error) {
-        return reply.send({ success: false });
-    }
+            reply.setCookie('auth_token', token, {
+              path: '/',
+              httpOnly: true,
+              secure: true,
+              SameSite: 'Strict',
+              maxAge: 3600,
+            });
+            reply.clearCookie('tempo_token');
+            return reply.send({ twofa: 1, username : username});
+          } else {
+            return reply.send({ twofa: 0});
+          }
+        }
+        catch (err)
+        {
+          console.error("Erreur 2FA :", err);
+  return reply.status(500).send({ error: "Erreur interne lors de la vérification 2FA" });
+        }
     
-  });
-
-  fastify.get('/callback', async (req, res) => {
-    console.log("Obtention du token 2FA");
-    const code = req.query.code;
-    if (!code) 
-      return res.status(400).send('Code d\'autorisation manquant.');
-
-    try {
-
-      const tokenResponse = await fetch('https://api.intra.42.fr/oauth/token', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: new URLSearchParams({
-          grant_type: 'authorization_code',
-          client_id: clientId,
-          client_secret: clientSecret,
-          redirect_uri: redirectUri,
-          code: code
-        })
     });
 
-    const tokenData = await tokenResponse.json();
-    console.log("tokenData reçu :", tokenData);
+    // On regarde si l utilisateur a active la 2fa via le cookie 
+    fastify.get('/check-2fa-status', async (req, reply) => {
+        const token = req.cookies.auth_token;
+        const decoded = fastify.jwt.verify(token, secret);
+        const username = decoded.username;
+        const value = options.db.prepare('SELECT * FROM users WHERE username = ?').get(username);
+        if (value.twofa_activate === 0)
+          return reply.send({success: 0});
+        else 
+          return reply.send({success: 1});
+    });
 
-    const accessToken = tokenData.access_token;
+    // On regarde si l utilisateur a active la 2fa via le parametre mis en entree 
+    fastify.post('/check-2fa-status-in', async (req, reply) => {
+      try {
+            const { username } = req.body;
+            const value = options.db.prepare('SELECT * FROM users WHERE username = ?').get(username);
+            if (value.twofa_activate === 0)
+              return reply.send({success: 0});
+            else 
+              return reply.send({success: 1});
+          }
+          catch(err)
+          {
+            console.error(err);
+            return reply.status(500).send({ error: 'Erreur serveur' });
+          }
+    });
 
-    const userResponse = await fetch('https://api.intra.42.fr/v2/me', {
-  headers: {
-    Authorization: `Bearer ${accessToken}`
-  }
-});
+    // Active ou desactive la 2FA en changeans la valuer dans la db
+    fastify.get('/enable-2fa', async (req, reply) => {
+    try {
+        const token = req.cookies.auth_token;
+        const decoded = fastify.jwt.verify(token, secret);
+        const username = decoded.username;
 
+        const value = options.db.prepare('SELECT * FROM users WHERE username = ?').get(username);
+        if (!value) return reply.status(404).send({ error: 'Utilisateur introuvable' });
 
-    const userData = await userResponse.json();
-    const login = userData.login;
+        let newStatus;
+        if (value.twofa_activate === 0) {
+        options.db.prepare('UPDATE users SET twofa_activate = ? WHERE username = ?').run(1, username);
+        newStatus = 1;
+        } else {
+        options.db.prepare('UPDATE users SET twofa_activate = ? WHERE username = ?').run(0, username);
+        newStatus = 0;
+        }
 
-    console.log("Utilisateur connecté :", login);
-    const value = await registerLogin(login, options);
-    if (!value){
-      const utilisateur = options.db.prepare('UPDATE users SET twofa = ? WHERE username = ?').run(login, username);
+        const updatedUser = options.db.prepare('SELECT * FROM users WHERE username = ?').get(username);
+        return reply.send({ twofa: updatedUser.twofa, twofa_activate: newStatus });
+    } catch (err) {
+        console.error(err);
+        return reply.status(500).send({ error: 'Erreur serveur' });
     }
-    const value2 = await compareLogin(login, options);
+    });
 
-    if (value2)
-      return reply.send({ success: false, message: 'Pas le bon compte 2fa.' });
-    res.type('text/html').send("<p>Authentification reussie, la page va se fermer dans 5 secondes</p><script>setTimeout(() => {window.close()}, 5000);</script>");
-    //return reply.redirect('/success');
-  } catch (error) {
-    console.error('Erreur lors de l\'authentification :', error);
-    return res.status(500).send('Erreur lors de l\'authentification.');
-  }
-});
+    // cree un cookie temporaire  pour garder le username 
+    fastify.post('/set-user-cookie', async (req, reply) => {
+        const { username } = req.body;
+        const payload = {
+              username: username,
+            };
+            const token = fastify.jwt.sign(payload, { expiresIn: '1d' });
 
-} 
+            reply.setCookie('tempo_token', token, {
+              path: '/',
+              httpOnly: true,
+              secure: true,
+              SameSite: 'Strict',
+              maxAge: 3600,
+            });
+    });
+
+}
 export default faRoute;
