@@ -32,14 +32,14 @@ export class GameClientSocket{
             if (this.should_search){
                 this.ws.send(JSON.stringify({
                     type: "matchmaking",
-                    // username: this.ctl.getUsername(), // useless ?
+                    username: this.ctl.getUsername(),
                     state: "join"
                 }));
                 this.should_search = false;
             } else if (this.should_start_solo){
                 this.ws.send(JSON.stringify({
                     type: "create_game_offline",
-                    // username: this.ctl.getUsername() //useless ?
+                    username: this.ctl.getUsername()
                 }));
             } else if (this.match_id !== undefined){
                 this.ws.send(JSON.stringify({
@@ -51,16 +51,22 @@ export class GameClientSocket{
         }
         
         this.ws.onmessage = (data) => {
+            // console.log("Recving data");
             const message = JSON.parse(data.data);
-            if (message === null)
-                return ;            
+            if (message === null){
+                console.log("message is null");
+                return ;
+            }
+            console.log("game message : " + message.type);
             if (message.type === "game_info"){
                 this.ctl.updateState(message.game);
             } else if (message.type === "matchmaking") {
                 console.log("Match found");
                 if (message.state === "found") {
                     this.ctl.updateState(message.game);
-                    let side = (message.game.players.left === this.ctl.getUsername() ? "left" : "right")
+                    console.log(message.game);
+                    console.log("this username = " + this.ctl.getUsername());
+                    let side = (message.game.players.left == this.ctl.getUsername() ? "left" : "right")
                     this.ctl.setSide(side);
                     console.log("side = " + this.ctl.getSide());
                     this.ctl.stop_matchmaking_animation();
@@ -75,6 +81,7 @@ export class GameClientSocket{
                 this.ctl.hide_all();
                 this.ctl.hide_menu();
                 this.ctl.print_play_page();
+                this.ctl.print_game();
             } else if (message.type === "game_finished"){
                 console.log("Game is finished");
                 this.ctl.finishGame();
@@ -145,7 +152,7 @@ export class GameClientSocket{
         // console.log("Sending " +  game_id + key + side);
         this.ws.send(JSON.stringify({
             type : "game_update",
-            game_id : game_id, // useless ? server should do with socket
+            game_id : game_id,
             move_up : key,
             side : side
         }));

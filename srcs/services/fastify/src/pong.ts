@@ -61,6 +61,7 @@ export class   GameController{
 
     //      Interval for animations
     private interval_id;
+    private anim_interval_id;
 
 
     constructor(site){
@@ -224,6 +225,8 @@ export class   GameController{
         document.addEventListener("keydown", this.key_handler);
 
         this.print_player_names();
+        this.print_game();
+        this.print_scoreboard();
 
         this.ball.style.position="absolute";
         this.l_paddle.style.position="absolute";
@@ -264,17 +267,18 @@ export class   GameController{
     }
 
     finishGame(){
+        clearInterval(this.interval_id);
         document.removeEventListener("keyup", this.key_handler)
         document.removeEventListener("keydown", this.key_handler)
-        clearInterval(this.interval_id);
+        this.hide_scoreboard()
         this.hide_game();
         this.print_match_end();
-
+        console.log("closing socket after game finished");
         this.ws.close();
+        this.ws = null;
         this.is_tournament = false;
-        //saving the game on the server
-        // if (!this.is_local && this.side === "left") // then if right user 
-            // this.registerGame();
+        this.is_local = false;
+        this.is_searching = false;
     }
 
     /**
@@ -286,28 +290,26 @@ export class   GameController{
         document.getElementById("matchmaking").innerHTML = "<span id='waiting_online'>waiting</span>"
             + "<span id='dots'></span>"
             + "<br><span id='cancel_game'>click to cancel ❌</span>";
-        this.interval_id = window.setInterval(() => {
+        this.anim_interval_id = window.setInterval(() => {
             count++;
             document.getElementById("dots").innerHTML = '.'.repeat(count % 3) + "<br>";
             //document.getElementById("matchmaking").textContent = "\nclick to cancel";
         }, 500);
         this.site.loadLang();
-        // this.interval_id = setInterval(() => {
-        //     btn.textContent = waiting + '.'.repeat(count % 3);
-        // }, 500);
+
     }
 
     stop_matchmaking_animation(){
         document.getElementById("matchmaking").innerHTML = "";
         this.site.loadLang();
-        clearInterval(this.interval_id);
+        clearInterval(this.anim_interval_id);
         this.online_play_btn.textContent = this.site.getText('play_online');
     }
 
     // Update every game values
     updateState(game){
         // console.log("Updating game");
-        // console.log(game);
+        console.log(game);
 
         this.game_id = game.id;
 
@@ -397,7 +399,6 @@ export class   GameController{
     hide_game(){
         this.game.classList.replace("flex", "hidden");
     }
-
 
     print_match_end(){
         console.log("MATCH END");

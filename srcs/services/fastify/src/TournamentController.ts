@@ -286,8 +286,8 @@ export class TournamentController {
 
     print_tournament_lobby(){
         // To recheck 
-        console.log("Printing tournament lobby ( I have this :");
-        console.log(this.tournament);
+        // console.log("Printing tournament lobby ( I have this :");
+        // console.log(this.tournament);
         if (this.tournament === null){
             alert("Not implemented yet (print tournament but tournament is null)");
             return ;

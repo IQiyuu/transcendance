@@ -249,7 +249,7 @@ class Tournament{
 					game_id: g_id,
 					game: game // not used, only there for debugging
 				}));
-				gameRoute.addPlayingClients(match.players[0], match.players[1], g_id);
+				// gameRoute.addPlayingClients(match.players[0], match.players[1], g_id);
 				match.state = T_ON_GOING;
 			}
 		});

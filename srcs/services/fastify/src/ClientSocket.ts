@@ -118,16 +118,15 @@ export class ClientSocket{
         }));
     }
 
-    // Update the server with movements
-    updatePos(game_id, key, side){
-        console.log("Sending " +  game_id + key + side);
-        this.ws.send(JSON.stringify({
-            type : "game_update",
-            game_id : game_id,
-            moveUp : key,
-            side : side
-        }));
-    }
+    // updatePos(game_id, key, side){
+    //     console.log("Sending " +  game_id + key + side);
+    //     this.ws.send(JSON.stringify({
+    //         type : "game_update",
+    //         game_id : game_id,
+    //         moveUp : key,
+    //         side : side
+    //     }));
+    // }
 
     print_info(){
         console.log("Websocket for : " + this.username);
