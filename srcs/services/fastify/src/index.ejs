@@ -61,7 +61,7 @@
     <div id="login-form" class="hidden flex-col p-6 items-center justify-center bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 max-w-sm w-full">
         <h1 class="underline text-white text-4xl text-center mb-4" id="form-title">Connexion</h1>
         <button id="check_btn" class="flex relative px-6 py-3 text-white font-bold text-lg rounded-lg bg-gradient-to-r from-pink-500 via-yellow-400 to-green-500 animate-pulse shadow-lg hover:shadow-xl transition duration-300">
-            <span class="relative z-10">Se connecter avec Google authentificator</span>
+            <span id="google_auth" class="relative z-10">Se connecter avec Google authentificator</span>
             <span class="absolute inset-0 bg-white opacity-10 rounded-lg blur-sm"></span>
         </button>
         <form class="w-full" id="form">
@@ -207,12 +207,12 @@
                         </div>
 
                         <button id="auth_btn" class="flex relative px-6 py-3 text-white font-bold text-lg rounded-lg bg-gradient-to-r from-pink-500 via-yellow-400 to-green-500 animate-pulse shadow-lg hover:shadow-xl transition duration-300">
-                            <span id="google_auth" class="relative z-10">Activer Google authentificator</span>
+                            <span id="google_auth_enable" class="relative z-10">Activer Google authentificator</span>
                             <span class="absolute inset-0 bg-white opacity-10 rounded-lg blur-sm"></span>
                         </button>
 
                         <button id="switch_fa_btn" class="flex relative px-6 py-3 text-white font-bold text-lg rounded-lg bg-gradient-to-r from-pink-500 via-yellow-400 to-green-500 animate-pulse shadow-lg hover:shadow-xl transition duration-300">
-                            <span id="google_auth" class="relative z-10">Activer la 2FA</span>
+                            <span id="fa_btn_enable" class="relative z-10">Activer la 2FA</span>
                             <span class="absolute inset-0 bg-white opacity-10 rounded-lg blur-sm"></span>
                         </button>
                         <img id="QRCode" class=" hidden w-full h-full shadow-lg object-cover" src=""/>

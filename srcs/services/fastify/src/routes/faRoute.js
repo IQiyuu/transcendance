@@ -39,7 +39,7 @@ async function faRoute (fastify, options) {
         catch (err)
         {
           console.error("Erreur 2FA :", err);
-  return reply.status(500).send({ error: "Erreur interne lors de la vérification 2FA" });
+  return reply.send({ error: "Erreur interne lors de la vérification 2FA" });
         }
     
     });
@@ -69,7 +69,7 @@ async function faRoute (fastify, options) {
           catch(err)
           {
             console.error(err);
-            return reply.status(500).send({ error: 'Erreur serveur' });
+            return reply.send({ error: 'Erreur serveur' });
           }
     });
 
@@ -96,7 +96,7 @@ async function faRoute (fastify, options) {
         return reply.send({ twofa: updatedUser.twofa, twofa_activate: newStatus });
     } catch (err) {
         console.error(err);
-        return reply.status(500).send({ error: 'Erreur serveur' });
+        return reply.send({ error: 'Erreur serveur' });
     }
     });
 

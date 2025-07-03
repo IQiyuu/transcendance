@@ -27,17 +27,23 @@ async function GoogleAuthRoute(fastify, options) {
       else 
       {
         const value = options.db.prepare('SELECT email FROM users WHERE username = ?').get(username);
-        const value2 = options.db.prepare('SELECT email FROM users WHERE username = ?').get(value.email);
-        if (value2 != null)
-          return reply.send({sucess: false});
+        const value2 = options.db.prepare('SELECT username FROM users WHERE email = ?').get(googleEmail);
+        if (value2 != undefined)
+        {
+          reply.type('text/html').send("<p>Ce mail est deja active sur un autre compte. Cette fenetre va se fermer dans 5 secondes.</p><script>setTimeout(() => {window.close()}, 5000);</script>");
+          return reply.send({ success: false });
+        }
         if (value.email == null){
           options.db.prepare('UPDATE users SET email = ? WHERE username = ?').run(googleEmail, username);
           reply.type('text/html').send("<p>Authentification Google reussie. Cette fenetre va se fermer dans 5 secondes.</p><script>setTimeout(() => {window.close()}, 5000);</script>");
+          return reply.send({ success: true });
         }
         reply.clearCookie('google_email');
         reply.type('text/html').send("<p>Google Authentificator est deja active. Cette fenetre va se fermer dans 5 secondes.</p><script>setTimeout(() => {window.close()}, 5000);</script>");
+        return reply.send({ success: false });
       }
     } catch (error) {
+      reply.type('text/html').send("<p>Erreur avec Google Authentificator. Cette fenetre va se fermer dans 5 secondes.</p><script>setTimeout(() => {window.close()}, 5000);</script>");
       return reply.send({ success: false });
     }
   });
@@ -53,7 +59,7 @@ async function GoogleAuthRoute(fastify, options) {
 
     return reply.send({ success: true, message: "2FA désactivé" });
   } catch (error) {
-    console.error("Erreur dans /desable_auth :", error);
+    console.error("Erreur Google OAuth :", error);
     return reply.status(500).send({ success: false, message: "Erreur serveur" });
   }
   });
@@ -115,7 +121,6 @@ async function GoogleAuthRoute(fastify, options) {
       options.db.prepare('UPDATE users SET email = ? WHERE username = ?').run(googleEmail, guess);
       const secret = speakeasy.generateSecret({ name: 'Transcendance 2FA' }); 
         options.db.prepare('UPDATE users SET secret = ? WHERE username = ?').run(secret.base32, guess);
-       // options.db.prepare('UPDATE users SET lang = ? WHERE username = ?').run(null, guess);
         qrcode.toDataURL(secret.otpauth_url, (err, data_url) => {
           if (err) throw err;
           options.db.prepare('UPDATE users SET twofa = ? WHERE username = ?').run(data_url, guess);
@@ -189,9 +194,7 @@ fastify.get('/callback', async (req, reply) => {
       secure: true,
       path: '/'
     });
-
     return reply.redirect('/google-auth');
-
   } catch (error) {
     console.error("Erreur Google OAuth :", error);
     return reply.status(500).send("Erreur lors de l'authentification.");
@@ -246,7 +249,7 @@ return reply.redirect('/check');
     return reply.status(500).send("Erreur lors de l'authentification.");
   }
 });
-
+// Fomction pour voir si le username via le cookie a un mail dans la db
 fastify.get('/check-email-status', async (req, reply) => {
         const token = req.cookies.auth_token;
         const decoded = fastify.jwt.verify(token, secret);

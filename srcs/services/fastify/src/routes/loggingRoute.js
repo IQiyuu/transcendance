@@ -21,7 +21,6 @@ function isValidPassword(password) {
   // Route pour s'inscrire, verifie que le username n'existe pas
   fastify.post('/register', async (request, reply) => {
     const { username, password } = request.body;
-    // console.log("Données REGISTER reçues :", username, password);
     try {
     const valid = await isValidPassword(password);
       if (valid) {
@@ -45,8 +44,6 @@ function isValidPassword(password) {
       const insert = options.db.prepare('INSERT INTO users (username, password) VALUES (?, ?)');
       insert.run(username, hash_pass);
 
-      // console.log(`User '${username}' added to db`);
-
       const payload = {
         username: username,
       };
@@ -60,8 +57,6 @@ function isValidPassword(password) {
         SameSite: 'Strict',
         maxAge: 86400000,
       });
-      // reply.header('Content-Type', 'application/json');
-      // reply.code(205).send({ success: true, message: `Welcome ${username}` });
 
       const secret = speakeasy.generateSecret({ name: 'Transcendance 2FA' }); 
       options.db.prepare('UPDATE users SET secret = ? WHERE username = ?').run(secret.base32, username);

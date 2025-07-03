@@ -29,6 +29,12 @@
   "errReg": "このユーザー名はすでに使われています",
   "about": "このゲームについて",
 
+  "google_auth": "Google の認証を取得したコネクタを接続します",
+  "google_switch_enable": "Google認証を有効にする",
+  "google_switch_desable": "Google認証を無効にする",
+  "2FA_enable": "2FA を有効にする",
+  "2FA_disable": "2FA を無効にする",
+
   "pass_change": "パスワードを変更する",
   "pass_current": "現在のパスワード",
   "pass_new": "新しいパスワード",

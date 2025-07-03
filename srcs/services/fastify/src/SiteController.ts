@@ -5,7 +5,7 @@ import {GameClientSocket} from "./GameClientSocket.js";
 import {GameController} from "./pong.js";
 import {TournamentController} from "./TournamentController.js";
 import { FriendController } from "./FriendController.js";
-import { connect } from "http2";
+// import { connect } from "http2";
 
 export class   ProfileController{
 
@@ -94,7 +94,6 @@ export class   ProfileController{
 
             this.searchError.classList.replace("flex", "hidden");
             this.profile_username = this.search_inp.value;
-            console.log(this.profile_username);
             await this.searchPlayerHandler();
             this.printPage();
         });
@@ -135,18 +134,28 @@ export class   ProfileController{
             });
             if (res.ok) {
                 const data = await res.json();
-                console.log(data);
                 if(data.success == 0)
                 {
                     window.open('/google-auth', '42 AUTH');
-                    this.google_auth.id = "desable_auth_btn";
-                    this.google_auth.textContent = "Desactiver Google authentificator";
+                    const res2 = await fetch('/check-email-status', {
+                    method: 'GET',
+                        credentials: 'include', 
+                    });
+                    if (res2.ok)
+                    {
+                        const data2 = await res2.json();
+                        if (data2.success == 1)
+                        {
+                            this.google_auth.id = "desable_auth_btn";
+                           // this.google_auth.textContent = "Desactiver Google authentificator";
+                        }
+                    }
                 }
                 else 
                 {
                     await fetch('/desable_auth');
                     this.google_auth.id = "auth_btn";
-                    this.google_auth.textContent = "Activer Google authentificator";
+                    //this.google_auth.textContent = "Activer Google authentificator";
                 }
             }
 
@@ -208,7 +217,6 @@ export class   ProfileController{
 
                 this.site.setUsername(data.username);
                 this.site.hide_fa_page();
-                console.log()
                 this.site.connect();
             }
         });
@@ -240,7 +248,6 @@ export class   ProfileController{
         this.upload_btn.addEventListener('click', async (event) => {
             event.preventDefault();
 
-            console.log("UGGHVDGHASVFJASVUTASJG");
         });
 
         // croix du changement de photo de profile
@@ -294,7 +301,6 @@ export class   ProfileController{
                     if (!response.ok)
                         console.log("error in file upload.");
                     else {
-                        console.log("file uploaded.");
                         document.getElementById("profile_picture_overlay").classList.replace("flex", "hidden");
                         (document.getElementById("previsu_picture") as HTMLImageElement).src = "";
                         (document.getElementById("file_input") as HTMLInputElement).value = "";
@@ -324,9 +330,8 @@ export class   ProfileController{
             if (!data.success){
 				this.profile_username = this.username;
                 this.searchError.classList.replace("hidden", "flex");
-                throw (Error(data.message)); // Fait du rouge, a modifier
+                throw (Error(data.message));
 			}
-            console.log(data);
             this.profile_username = data.profile.username;
             this.register_date = data.profile.created_at;
             this.picture_path = data.profile.picture_path;
@@ -361,7 +366,6 @@ export class   ProfileController{
         var cpt = 0;
         var w = 0;
         this.histo.forEach((item) => {
-            console.log(item);
             cpt++;
             if (cpt < 6) {
                 let li = document.createElement("li");
@@ -530,17 +534,13 @@ export class SiteController{
                 password: password.value,
             };
 
-            // console.log(`Envoi vers ${url}`, body);
             try {
                 const response = await fetch(url, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(body),
                 });
-                
-                // console.log(response);
                 const data = await response.json();
-                // console.log("Réponse du serveur :", data);
                 
                 if (data.success) {
                     this.isRegisterMode = false;
@@ -557,7 +557,6 @@ export class SiteController{
                         });
                         if (res.ok) {
                             const twofadata = await res.json();
-                            // console.log("2fa :", twofadata.success);
                             if (twofadata.success == 1)
                             {
                                 
@@ -572,17 +571,12 @@ export class SiteController{
                                 this.print_fa_page();
                                 this.hide_register_page();
                             }
-                            // else 
-                            // {
-                            //     this.connect();
-                            // }
                         }
                     }
                     else 
                     {
                         this.connect();
                     }
-                    // this.ws.print_info();
                     document.getElementById("errorAuth").classList.replace("block", "hidden");
                 } else {
                     const error = document.getElementById("errorAuth") as HTMLParagraphElement;
@@ -623,16 +617,15 @@ export class SiteController{
             });
             if (res.ok) {
                 const data = await res.json();
-                console.log(data);
                 if(data.success == 1)
                 {
-                    google_auth.id = "desable_auth_btn";
-                    google_auth.textContent = "Desactiver Google authentificator";
+                    google_auth.id = "auth_btn_enable";
+                    //google_auth.textContent = "Desactiver Google authentificator";
                 }
                 else 
                 {
-                    google_auth.id = "auth_btn";
-                    google_auth.textContent = "Activer Google authentificator";
+                    google_auth.id = "auth_btn_disable";
+                   // google_auth.textContent = "Activer Google authentificator";
                 }
             }
             const res2 = await fetch('/check-2fa-status', {
@@ -641,13 +634,10 @@ export class SiteController{
             });
             if (res2.ok) {
                 const data = await res2.json();
-                console.log(data);
                 if(data.success == 1)
-                    switch_fa_btn.textContent = "Desactiver la 2FA";
+                    google_auth.id = "fa_btn_enable";
                 else
-                {
-                    switch_fa_btn.textContent = "Activer la 2FA";
-                }
+                    google_auth.id = "fa_btn_disable";
             }
             this.profile.printPage();
         });
@@ -670,7 +660,7 @@ export class SiteController{
             
             document.getElementById("site").classList.replace("block", "hidden");
             document.getElementById("login-form").classList.replace("hidden", "flex");
-            document.getElementById("fa-form").classList.replace("hidden", "flex");
+            document.getElementById("fa-form").classList.replace("block", "hidden");
             document.body.classList.add("justify-center", "align-center", "flex");
             this.username = null;
             this.friends.removeEvents();
@@ -714,7 +704,6 @@ export class SiteController{
     }
 
     connect(){
-        // console.log("ICI+"+this.username);
         this.ws = new ClientSocket(this.username);
         
         if (this.lang)
@@ -722,19 +711,12 @@ export class SiteController{
         this.game.setUsername(this.username);
         this.profile.setUsername(this.username);
         this.tournament.setUsername(this.username);
-
         this.store_session(this.username);
-
-        // console.log("Connected, client socket :");
-        // console.log(this.ws);
-
         this.hide_all();
         document.body.classList.remove("justify-center", "align-center", "flex");
         this.print_menu();
         this.friends = new FriendController(this.username, this.lang, this.ws);
-        // console.log(this.username);
         this.ws.setFriend(this.friends, this, this.profile);
-        // console.log(this.friends);
     }
 
     /**
@@ -835,14 +817,11 @@ export class SiteController{
             this.print_register_page();
     }
 
-    // AHHHHHHHHHHHHHh LE GRAAL
     async loadState(obj) {
         this.hide_all();
 
-        // console.log(obj.page);
         switch (obj.page) {
             case "main":
-                // console.log(obj.page);
                 this.print_menu();
                 break ;
             case "profile":
