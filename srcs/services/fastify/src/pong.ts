@@ -4,14 +4,22 @@ import { SiteController } from "./SiteController.js";
 const PADDLE_W = 10, PADDLE_H = 80;
 const BALL_W = 10;
 
-let interval_id;
+let game_interval_id;
 let anim_interval_id;
+
+const key_state = {};
+
+function key_handler(e){
+    //for accessibility, here too
+    e.preventDefault();
+    if ("KeyW,KeyS,ArrowUp,ArrowDown".includes(e.code))
+        key_state[e.code] = (e.type === "keydown");
+}
 
 // Game for a given client
 export class   GameController{
-    /**
-     * Controller
-     */
+    
+    // Controller
     private ws : GameClientSocket = null;
     private site : SiteController = null;
 
@@ -22,8 +30,7 @@ export class   GameController{
 
     // Game
     private game_id : number = -1;
-    private side = "left";
-    public key_state = {};
+    private side : string = "left";
     private is_local : boolean = false;
     
     private left_player : string = null;
@@ -41,10 +48,7 @@ export class   GameController{
     private ball_x : number = 0;
     private ball_y : number = 0;
 
-
-    /**
-     * View
-    */
+    // View
     private game_page = document.getElementById("game_page");
 
     private online_play_btn = document.getElementById("matchmaking");
@@ -69,7 +73,7 @@ export class   GameController{
         this.site = site;
     }
 
-    setUsername(username){
+    setUsername(username : string){
         this.username = username;
     }
 
@@ -81,7 +85,7 @@ export class   GameController{
         return this.side;
     }
 
-    setSide(new_side){
+    setSide(new_side : string){
         this.side = new_side;
     }
 
@@ -90,14 +94,7 @@ export class   GameController{
     }
 
     isLocal(){
-        return this.is_local;
-    }
-
-    key_handler(e){
-        //for accessibility, here too
-        e.preventDefault();
-        if ("KeyW,KeyS,ArrowUp,ArrowDown".includes(e.code))
-            this.key_state[e.code] = (e.type === "keydown");
+        return (this.is_local);
     }
 
 
@@ -107,8 +104,13 @@ export class   GameController{
 
     addEvents(){
         //Online playing
-        this.online_play_btn.addEventListener("click", async (event) => {
+        this.online_play_btn.addEventListener("click", (event) => {
             event.preventDefault();
+
+            if (this.ws !== null && !this.is_searching){
+                alert("ALready in a game");
+                return ;
+            }
 
             if (this.is_searching){
                 this.stopMatchmaking();
@@ -119,67 +121,52 @@ export class   GameController{
         });
 
         //Local play
-    this.offline_play_btn.addEventListener("click", (event) => {
-    event.preventDefault();
+        this.offline_play_btn.addEventListener("click", (event) => {
+            event.preventDefault();
 
-    const modal = document.getElementById("offline-confirm-modal");
-    const yesBtn = document.getElementById("modal-confirm-yes");
-    const noBtn = document.getElementById("modal-confirm-no");
+            if (this.ws !== null){
+                alert("ALready in a game");
+                return ;
+            }
 
-    modal.classList.remove("hidden");
+            const modal = document.getElementById("offline-confirm-modal");
+            const yesBtn = document.getElementById("modal-confirm-yes");
+            const noBtn = document.getElementById("modal-confirm-no");
 
-    const closeModal = () => {
-        modal.classList.add("hidden");
-        yesBtn.removeEventListener("click", onYes);
-        noBtn.removeEventListener("click", onNo);
-    };
+            modal.classList.remove("hidden");
 
-    const onYes = () => {
-        closeModal();
-        this.stopMatchmaking();
-        this.print_play_page();
-        this.is_local = true;
-        this.ws = new GameClientSocket(this.username, this);
-        this.ws.startOfflineGame();
-    };
+            const closeModal = () => {
+                modal.classList.add("hidden");
+                yesBtn.removeEventListener("click", onYes);
+                noBtn.removeEventListener("click", onNo);
+            };
 
-    const onNo = () => {
-        closeModal();
-    };
+            const onYes = () => {
+                closeModal();
+                this.stopMatchmaking();
+                this.print_play_page();
+                this.is_local = true;
+                this.ws = new GameClientSocket(this.username, this);
+                this.ws.startOfflineGame();
+            };
 
-    yesBtn.addEventListener("click", onYes);
-    noBtn.addEventListener("click", onNo);
-});
+            const onNo = () => {
+                closeModal();
+            };
+
+            yesBtn.addEventListener("click", onYes);
+            noBtn.addEventListener("click", onNo);
+        });
     }
 
     /**
      * Model
      */
 
-    /**
-     *  Handler function that tell the server when user move
-     * (W and S for left player if 2 player, else UP and DOWN)
-     *  */
-    moves(obj : GameController, ws : GameClientSocket){
-        obj.draw();
-        // console.log("BUG ?" + ws);
-        if (ws === undefined){
-            console.log("Erreur");
-            return ;
-        }
-        if (obj.key_state["ArrowUp"] || obj.key_state["ArrowDown"]) {
-            ws.updatePos(obj.getGameId(), obj.key_state["ArrowUp"], obj.isLocal() ? "right" : obj.getSide());
-        }
-        if (obj.isLocal() && (obj.key_state["KeyW"] || obj.key_state["KeyS"])){
-            ws.updatePos(obj.getGameId(), obj.key_state["KeyW"], "left");
-        }
-    }
-
-
     startMatchmaking(){
         this.start_matchmaking_animation();
         this.is_local = false;
-        if (this.ws !== null && this.ws !== undefined){
+        if (this.ws !== null){ // maybe deprecated
             console.error("You cant start a matchmaking while having a match");
             return ;
         }
@@ -194,16 +181,25 @@ export class   GameController{
             this.ws.stopMatchmaking();
             this.ws.close();
             this.ws = null;
-            console.log("Socket closed for pong");
+            console.log("Matchmaking left");
         }
     }
+
+    // 2 cas de fermeture de socket (local and online ) to check later !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     startTournamentGame(game_id, game){
 		this.is_tournament = true;
         if (this.username === game.players.right)
             this.side = "right";
-        this.ws = new GameClientSocket(this.username, this, game_id);
-        // this.site.hide_all();
+        console.log("Creating a tournament game :");
+        if (this.ws === null)
+            this.ws = new GameClientSocket(this.username, this, game_id);
+        else{
+            console.log("Game received , lets continue the tournament");
+            // console.log(game);
+            this.ws.setGameId(game_id);
+            this.ws.startTournamentGame();
+        }
         this.updateState(game);
         this.gameInit();
     }
@@ -214,18 +210,21 @@ export class   GameController{
             this.ws.close();
             this.ws = null;
         }
-		// is_tournament ?
+        this.game_id = -1;
+        this.is_local = false;
+        this.is_searching = false;
+        this.is_tournament = false;
     }
 
     gameInit(){
-        this.key_state["ArrowUp"] = false;
-        this.key_state["ArrowDown"] = false;
-        this.key_state["KeyW"] = false;
-        this.key_state["KeyS"] = false;
+        key_state["ArrowUp"] = false;
+        key_state["ArrowDown"] = false;
+        key_state["KeyW"] = false;
+        key_state["KeyS"] = false;
 
-        this.key_handler = this.key_handler.bind(this); //to unbind ??
-        document.addEventListener("keyup", this.key_handler);
-        document.addEventListener("keydown", this.key_handler);
+        // this.key_handler = this.key_handler.bind(this); //to unbind ??
+        document.addEventListener("keyup", key_handler);
+        document.addEventListener("keydown", key_handler);
 
         this.print_player_names();
         this.print_scoreboard();
@@ -236,62 +235,61 @@ export class   GameController{
         this.l_paddle.style.position="absolute";
         this.r_paddle.style.position="absolute";
 
-        // let moves = this.moves.bind(this);
-        //testing maybe not here
-        // this.moves.bind(this);
-        interval_id = setInterval(this.moves, 10, this, this.ws);
-    }
-
-    async registerGame() {
-        try {
-            console.log("REGISTER1");
-            const winner = this.score_left < this.score_right ? this.right_player : this.left_player;
-            const loser = winner == this.left_player ? this.right_player : this.left_player;
-            const loser_score = this.score_left > this.score_right ? this.score_right.textContent : this.score_left.textContent;
-            console.log(this.right_player, " ", this.left_player, " ", winner, " ", loser, " ", loser_score);
-            const body = {
-                winner_username: winner,
-                loser_username: loser,
-                loser_score: loser_score, // if tournament, 
-            }
-            console.log("REGISTER2");
-            const req = await fetch('/game/storeGame', {
-                method: 'POST',
-                credentials: 'include',
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(body)
-            });
-            console.log("REGISTER3");
-            const data = await req.json();
-            console.log("REGISTER4");
-            if (!data.success)
-                throw (Error(data.error));
-            console.log("REGISTER5");
-        } catch (error){
-            alert(error);
-        }
+        game_interval_id = setInterval(this.moves, 10, this, this.ws);
     }
 
     finishGame(){
-        document.removeEventListener("keyup", this.key_handler)
-        document.removeEventListener("keydown", this.key_handler)
-        clearInterval(interval_id);
+        clearInterval(game_interval_id);
+        document.removeEventListener("keyup", key_handler);
+        document.removeEventListener("keydown", key_handler);
 
-        console.log("closing socket after game finished");
-        this.ws.close();
-        this.ws = null;
-        
         this.hide_scoreboard()
         this.hide_game();
-        this.print_match_end();
+        
         if (this.is_tournament){
-            console.log("Game finished ending");
-            //sleep here 5 seconds ?? 
+            console.log("Tournament's game is finished ending");
+            console.log("Not closing socket for it can be used later");
+            this.game_id = -1;
+        } else {
+            this.print_match_end();
+            console.log("closing socket after game ended");
+            this.close();
         }
-        this.is_local = false;
-        this.is_searching = false;
-        this.is_tournament = false;
+    }
+
+    // Update every game values
+    updateState(game){
+        this.game_id = game.id;
+
+        this.l_score = game.scores.left;
+        this.r_score = game.scores.right;
+
+        this.ball_x = game.ball.x;
+        this.ball_y = game.ball.y;
+
+        this.l_paddle_x = game.paddles.left.x;
+        this.l_paddle_y = game.paddles.left.y;
+
+        this.r_paddle_x = game.paddles.right.x;
+        this.r_paddle_y = game.paddles.right.y;
+
+        this.left_player = game.players.left;
+        this.right_player = game.players.right;
+    }
+
+    /**
+     *  Handler function that tell the server when user move
+     * (W and S for left player if 2 player, else UP and DOWN)
+     *  */
+    moves(obj : GameController, ws : GameClientSocket){
+        obj.draw();
+        if (key_state["ArrowUp"] || key_state["ArrowDown"]) {
+            ws.updatePos(obj.getGameId(), key_state["ArrowUp"], obj.isLocal() ? "right" : obj.getSide());
         }
+        if (obj.isLocal() && (key_state["KeyW"] || key_state["KeyS"])){
+            ws.updatePos(obj.getGameId(), key_state["KeyW"], "left");
+        }
+    }
 
     /**
      * VIEW
@@ -313,29 +311,9 @@ export class   GameController{
 
     stop_matchmaking_animation(){
         document.getElementById("matchmaking").innerHTML = "";
-        this.site.loadLang();
+        this.site.loadLang(); // ?
         clearInterval(anim_interval_id);
         this.online_play_btn.textContent = this.site.getText('play_online');
-    }
-
-    // Update every game values
-    updateState(game){
-        this.game_id = game.id;
-
-        this.l_score = game.scores.left;
-        this.r_score = game.scores.right;
-
-        this.ball_x = game.ball.x;
-        this.ball_y = game.ball.y;
-
-        this.l_paddle_x = game.paddles.left.x;
-        this.l_paddle_y = game.paddles.left.y;
-
-        this.r_paddle_x = game.paddles.right.x;
-        this.r_paddle_y = game.paddles.right.y;
-
-        this.left_player = game.players.left;
-        this.right_player = game.players.right;
     }
 
     cooToPos_x(x, type){
@@ -426,11 +404,6 @@ export class   GameController{
         this.hide_play_page();
         this.hide_game();
         this.hide_scoreboard();
-    }
- 
-    //bad design, because we should separate view from ctl
-    hide_aal(){
-        this.site.hide_all();
     }
 };
 

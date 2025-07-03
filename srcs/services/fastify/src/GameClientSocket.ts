@@ -21,11 +21,15 @@ export class GameClientSocket{
         }
         this.ctl = ctl;
         if (match_id !== undefined){
-            console.log("game creation socket tournament");
+            console.log("game creation socket for tournament");
             this.match_id = match_id;
         }
+        this.updatePos.bind(this); // maybe ??
         this.setSocket();
-        this.updatePos.bind(this);
+    }
+
+    setGameId(new_g_id){
+        this.match_id = new_g_id;
     }
 
     setSocket(){
@@ -52,7 +56,6 @@ export class GameClientSocket{
         }
         
         this.ws.onmessage = (data) => {
-            // console.log("Recving data");
             const message = JSON.parse(data.data);
             if (message === null){
                 console.log("message is null");
@@ -89,10 +92,8 @@ export class GameClientSocket{
                 } else{
                     if (message.state === "match_connected"){
                         console.log("   Match should begin");
-                        // this.ctl.hide_aal();
+
                         this.ctl.gameInit();
-                        // this.ctl.print_game();
-                        // this.ctl.print_play_page();
                         this.ctl.updateState(message.game);
                     }
                 }
@@ -100,12 +101,7 @@ export class GameClientSocket{
         };
 
         this.ws.onclose = (event) => {
-            console.log("closing socket");
-            if (event.code === 3005){
-                console.log(event.reason);
-            } else{
-                console.log(event);
-            }
+            console.log("closing game socket");
             this.ctl.close();
         }
 
@@ -129,6 +125,8 @@ export class GameClientSocket{
     }
 
     stopMatchmaking(){
+        if (this.ws === null)
+            return ;
         this.ws.send(JSON.stringify({
             type: "matchmaking",
             state: "leave"
@@ -140,17 +138,28 @@ export class GameClientSocket{
             this.should_start_solo = true;
             return ;
         }
-        this.ws.send(
-            JSON.stringify({
+        this.ws.send(JSON.stringify({
                 type: "create_game_offline",
                 state: "create"
-            })
-        );
-        
+            }
+        ));
+    }
+
+    startTournamentGame(){
+        console.log("Continuing tournament with " + this.match_id);
+        this.ws.send(JSON.stringify({
+            type : "tournament",
+            state : "connecting_match",
+            game_id : this.match_id
+        }));
     }
 
     // Update the server with movements
     updatePos(game_id, key, side){
+        if (this.ws === null)
+            return ;
+        if (this.ws.readyState !== this.ws.OPEN)
+            console.log(this.ws.readyState);
         this.ws.send(JSON.stringify({
             type : "game_update",
             game_id : game_id,
@@ -160,7 +169,9 @@ export class GameClientSocket{
     }
 
     close(){
-        this.ws.close();
+        if (this.ws !== null)
+            this.ws.close();
+        this.ws = null;
         this.should_search = false;
         this.should_start_solo = false;
         this.match_id = undefined;

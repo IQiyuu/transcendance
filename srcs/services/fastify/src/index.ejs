@@ -249,74 +249,33 @@
                     </div>
                 </div>
 
-                
-                
-                
-                
-<!-- TOURNAMENT PAGE -->
-<div id="tournament_page" class="hidden p-6 font-sans text-gray-100">
+                <!--TOURNAMENT PAGE-->
+                <div id="tournament_page" class="hidden p-6 font-sans text-gray-100">
+                    <!--Creation form of the tournament-->
+                    <div id="tournament_form" class="hidden max-w-md mx-auto bg-gray-800 rounded-2xl shadow-xl p-8 space-y-6">
+                        <h3 class="text-2xl font-bold text-white text-center"> 🎯 Creating a tournament</h3>
+                        <form novalidate="true" class="space-y-5">
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Tournament's name</label>
+                            <input type="text" name="tname" id="tournament_name" class="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-500 focus:outline-none" placeholder="Ex: Evo" />
+                            <input type="submit" id="tournament_creation" class="w-full py-3 bg-cyan-500 hover:bg-cyan-600 text-white font-semibold rounded-lg transition duration-200"/>
+                        </form>
+                    </div>
+                    <!-- 🚀 Launch Tournament [BUTTON]-->
 
-    <!-- CREATE TOURNAMENT CARD -->
-    <div id="tournament_form" class="hidden max-w-md mx-auto bg-gray-800 rounded-2xl shadow-xl p-8 space-y-6">
-        <h3 class="text-2xl font-bold text-white text-center">🎯 Create a Tournament</h3>
-
-        <form novalidate="true" class="space-y-5">
-            <div>
-                <label for="tournament_name" class="block text-sm font-medium text-gray-300 mb-2">
-                    Tournament Name
-                </label>
-                <input
-                    type="text"
-                    name="tname"
-                    id="tournament_name"
-                    class="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-500 focus:outline-none"
-                    placeholder="Ex: Evo"
-                />
-            </div>
-
-            <button
-                type="submit"
-                id="tournament_creation"
-                class="w-full py-3 bg-cyan-500 hover:bg-cyan-600 text-white font-semibold rounded-lg transition duration-200"
-            >
-                🚀 Launch Tournament
-            </button>
-        </form>
-    </div>
-
-    <!-- LIST OF TOURNAMENTS CARD -->
-    <div id="tournaments_join" class="hidden max-w-3xl mx-auto mt-12 bg-gray-800 rounded-xl p-6 shadow-lg">
-        <h3 class="text-2xl font-bold text-white mb-4">🏆 Available Tournaments</h3>
-        <div id="tournaments_list" class="space-y-3 flex flex-col">
-            <!-- Tournament cards will go here -->
-        </div>
-    </div>
-
-    <!-- TOURNAMENT HOME PAGE -->
-    <div id="tournament" class="hidden mt-12 space-y-6 max-w-4xl mx-auto">
-        <!-- LOBBY CARD -->
-        <div id="tournament_lobby" class="hidden bg-gray-800 rounded-xl p-6 shadow-lg text-white">
-            <!-- Lobby content -->
-        </div>
-
-        <!-- TOURNAMENT STATE CARD -->
-        <div id="tournament_state">
-            <!-- Tournament state content -->
-        </div>
-    </div>
-</div>
-
-
-
-
-
-               
-               
-               
-
-
-
-
+                    <!--List of tournaments available-->
+                    <div id="tournaments_join" class="hidden max-w-3xl mx-auto mt-12 bg-gray-800 rounded-xl p-6 shadow-lg">
+                        <h3 class="text-2xl font-bold text-white mb-4">🏆 Available Tournaments</h3>
+                        
+                        <search id="tournaments_list" class="space-y-3 flex flex-col">
+                        </search>
+                    </div>
+                    
+                    <!-- View of the current tournament -->
+                    <div id="tournament" class="hidden mt-12 space-y-6 max-w-4xl mx-auto">
+                        <div id="tournament_lobby" class="hidden bg-gray-800 rounded-xl p-6 shadow-lg text-white"></div>
+                        <div id="tournament_state" class="hidden bg-grey"></div>
+                    </div>
+                </div>
                 
                 <!-- Friendlist box -->
                 <div class="w-[20%] absolute bottom-4 right-4 overflow-y-auto bg-gray-100 dark:bg-gray-800 rounded-lg p-4 border border-gray-300 dark:border-gray-700 shadow-inner">

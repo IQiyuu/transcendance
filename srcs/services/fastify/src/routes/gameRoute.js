@@ -12,7 +12,7 @@ function degToRad(degree){
 
 // Each position is the center of the object
 
-const	SCORE_GOAL = 11;
+const	SCORE_GOAL = 5;
 const	STARTING_SPEED = 10;
 const	ACCELERATION = 1;
 const	LIMIT_SPEED = 13;
@@ -332,7 +332,7 @@ export async function gameRoute (fastify, options) {
         fastify.get('/game/ws', { websocket: true }, (socket, req) => {
             let username = req.query.username;
             socket.on('open', (event) => {
-                console.log("socket game created for");
+                console.log(" IF PRINTED, YOU NEED TO SEE WHY socket game connection for");
                 console.log(username);
                 // waiting_clients.set(username, socket);
             });
@@ -345,7 +345,6 @@ export async function gameRoute (fastify, options) {
                     console.error('Invalid JSON:', data.toString());
                     return;
                 }
-                // console.log(message);
                 if (message.type === "create_game_offline"){
                     let new_game_id = createGame(message.username, message.username + "-2");
                     // console.log(games);
@@ -361,8 +360,6 @@ export async function gameRoute (fastify, options) {
                     playing_clients.set(socket, new_game_id);
                     waiting_clients.delete(username);
                 } else if (message.type === "game_update"){
-                    // console.log("MOdofiying a game");
-                    // console.log(games);
                     let game = getGameByID(message.game_id);
                     if (game === undefined){
                         console.log("error, game dosnt exists");
@@ -444,8 +441,8 @@ export async function gameRoute (fastify, options) {
 
                 //At least, closing properly and removing from maps
                 console.log("Closing  socket");
-                // console.log(socket);
                 playing_clients.delete(socket);
+                socket.close();
                 waiting_clients.forEach((sck, username) => { // to re understand
                     if (sck === socket)
                         waiting_clients.delete(username);
@@ -523,57 +520,61 @@ export async function gameRoute (fastify, options) {
         });
 
         // For every player still playing
-        for (var [socket, game_id] of playing_clients){
+        playing_clients.forEach((game_id, sock) => {
             let game = getGameByID(game_id);
             // console.log(game);
             
             // If their game is finished, we end it
             if (finished_games.includes(game)){
-                console.log("game is finished");
+                console.log("GAME is finished");
                 console.log(game);
 
                 // console.log("Sending to");
                 // console.log(socket);
-                // console.log("a message to finish");
-                socket.send(JSON.stringify({
+                sock.send(JSON.stringify({
                     type: "game_finished",
                     game: getMaskedGame(game)
                 }));
-                playing_clients.delete(socket);
-
-                let p2 = null; // can be null as there are local games too
-                for (var [s2, g_id2] of playing_clients){
-                    if (game_id === g_id2){
-                        p2 = s2;
-                        break ;
-                    }
-                }
                 
+                let p2 = null; // can be null as there are local games too
+                // console.log("playing :");
+                // console.log(playing_clients);
+                playing_clients.forEach( (g_id2, sock2) => {
+                    if (sock2 === sock)
+                        return ;
+                    if (g_id2 === game_id)
+                        p2 = sock2;
+                })
+                // console.log(p2);
+                playing_clients.delete(sock);
                 if (p2 !== null){
-                    console.log("p2 found !");
+                    // console.log("p2 found !");
                     p2.send(JSON.stringify({
                         type: "game_finished",
                         game: getMaskedGame(game)
                     }));
                     playing_clients.delete(p2);
+
                     // p2.close(3005, "Match is finished"); // here
                 }
                 
                 if (game.t_id !== null){
-                    console.log("We are descending")
+                    // console.log("We are descending")
                     matchOver(game); 
                 }
+                // sock = null;
+                // p2 = null;
                 // socket.close(3005, "Match is finished");
                 saveGame(game, options.db);
                 games.splice(games.indexOf(game), 1);
                 finished_games.splice(finished_games.indexOf(game), 1);
             } else { // else, we send infos
-                socket.send(JSON.stringify({
+                sock.send(JSON.stringify({
                     type: "game_info",
                     game: getMaskedGame(game)
                 }));
             }
-        }
+        });
     }, 30);
 
 }
