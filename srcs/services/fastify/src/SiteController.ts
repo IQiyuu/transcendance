@@ -29,7 +29,7 @@ export class   ProfileController{
 
 
     private	check_btn = document.getElementById("check_btn");
-    private google_auth = document.getElementById("google_auth");
+    private enable_auth_btn = document.getElementById("google_auth_enable");
     private fa_btn = document.getElementById("fa_btn");
     private switch_fa_btn = document.getElementById("switch_fa_btn");
     private QRCode = document.getElementById("QRCode") as HTMLInputElement;
@@ -177,7 +177,7 @@ export class   ProfileController{
                         const data2 = await res2.json();
                         if (data2.success == 1)
                         {
-                            this.google_auth.id = "desable_auth_btn";
+                            this.enable_auth_btn.classList.replace("enable_auth_btn", "disable_auth_btn");
                            // this.google_auth.textContent = "Desactiver Google authentificator";
                         }
                     }
@@ -185,7 +185,7 @@ export class   ProfileController{
                 else 
                 {
                     await fetch('/desable_auth');
-                    this.google_auth.id = "auth_btn";
+                    this.enable_auth_btn.classList.replace("disable_auth_btn", "enable_auth_btn");
                     //this.google_auth.textContent = "Activer Google authentificator";
                 }
             }
@@ -261,7 +261,7 @@ export class   ProfileController{
             if (res.ok) {
             const data = await res.json();
             if (data.twofa && this.QRCode !== null && data.twofa_activate) {
-                this.switch_fa_btn.textContent = "Desactiver la 2FA";
+                this.switch_fa_btn.textContent = this.site.getText("2FA_disable");
                 this.QRCode.src = data.twofa.startsWith('data:image') 
                 ? data.twofa 
                 : `data:image/png;base64,${data.twofa}`;
@@ -269,7 +269,7 @@ export class   ProfileController{
         }
             else {
                 this.QRCode.classList.replace("block" , "hidden");
-                this.switch_fa_btn.textContent = "Activer la 2FA";
+                this.switch_fa_btn.textContent = this.site.getText("2FA_enable");
                 
         }
 
@@ -630,6 +630,9 @@ export class SiteController{
     private about_btn = document.getElementById("about_button");
     private logout_btn = document.getElementById("logout_btn");
 
+    private enable_fa_btn = document.getElementById("fa_btn_enable");
+    private enable_auth_btn = document.getElementById("google_auth_enable");
+
     constructor(){
         this.profile = new ProfileController(this);
         this.game = new GameController(this);
@@ -746,7 +749,7 @@ export class SiteController{
                     document.getElementById("errorAuth").classList.replace("block", "hidden");
                 } else {
                     const error = document.getElementById("errorAuth") as HTMLParagraphElement;
-                    error.textContent = this.lang.getFile()[data.message];
+                    error.textContent = this.getText(data.message];
                     error.classList.replace("hidden", "block");
                 }
             } catch (error) {
@@ -787,12 +790,12 @@ export class SiteController{
                 const data = await res.json();
                 if(data.success == 1)
                 {
-                    google_auth.id = "auth_btn_enable";
+                    this.enable_auth_btn.classList.replace("enable_auth_btn", "disable_auth_btn");
                     //google_auth.textContent = "Desactiver Google authentificator";
                 }
                 else 
                 {
-                    google_auth.id = "auth_btn_disable";
+                    this.enable_auth_btn.classList.replace("disable_auth_btn", "enable_auth_btn");
                    // google_auth.textContent = "Activer Google authentificator";
                 }
             }
@@ -803,9 +806,9 @@ export class SiteController{
             if (res2.ok) {
                 const data = await res2.json();
                 if(data.success == 1)
-                    google_auth.id = "fa_btn_enable";
+                    this.enable_fa_btn.classList.replace("fa_btn_disable", "fa_btn_enable");
                 else
-                    google_auth.id = "fa_btn_disable";
+                    this.enable_fa_btn.classList.replace("fa_btn_enable", "fa_btn_disable");
             }
             this.profile.printPage();
         });
