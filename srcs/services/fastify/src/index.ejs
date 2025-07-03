@@ -43,7 +43,7 @@
             </div>
 
             <div class="flex justify-between items-center">
-                <button id="cancel" type="button" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400" onclick="closePasswordPopup()">Annuler</button>
+                <button id="cancel" type="button" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400">Annuler</button>
                 <button id="confirm" type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-700">Valider</button>
             </div>
         </form>
@@ -183,7 +183,7 @@
                         </div> -->
 
                         <!-- Infos utilisateur -->
-                        <h5 class="mb-1 text-2xl font-semibold text-center cursor-pointer" id="profile_username" onclick="editUsername()">Username</h5>
+                        <h5 class="mb-1 text-2xl font-semibold text-center cursor-pointer" id="profile_username">Username</h5>
                         <span id="wr_card" class="text-sm font-medium">Winrate N/A</span>
 
 
@@ -200,7 +200,7 @@
                             </button>
                           
                             <!-- Deuxième bouton (popup) -->
-                            <button class="flex relative px-6 py-3 bg-pink-700 text-white rounded-full hover:bg-blue-700" onclick="openPasswordPopup()">
+                            <button id="jsp_btn" class="flex relative px-6 py-3 bg-pink-700 text-white rounded-full hover:bg-blue-700">
                               <i class="fas fa-key mr-2"></i> 🔑
                             </button>
                         </div>
@@ -387,162 +387,6 @@ En haut à gauche du site, une option permet de changer la langue de l’interfa
     </div>
   </div>
 </div>
-
-<script>
-  const cameraIcon = document.getElementById("camera_icon");
-  const profileOverlay = document.getElementById("profile_picture_overlay");
-  const closeBtn = document.getElementById("profile_cross");
-
-  // Clique sur l'icône → montre la modale
-  cameraIcon.addEventListener("click", () => {
-    profileOverlay.classList.remove("hidden");
-  });
-
-  // Clique sur la croix ✖ → cache la modale
-  closeBtn.addEventListener("click", () => {
-    profileOverlay.classList.add("hidden");
-  });
-</script>
-
-<script>
-    function editUsername() {
-        var currentUsername = document.getElementById('profile_username').innerText;
-        var inputField = document.createElement('input');
-        inputField.type = 'text';
-        inputField.value = currentUsername;
-        inputField.id = 'profile_username_input';
-
-        inputField.classList.add(
-            'text-xl',
-            'font-semibold',
-            'text-center',
-            'border-b',
-            'border-gray-400',
-            'focus:outline-none',
-            'focus:border-blue-500',
-            'px-2',
-            'py-1'
-        );
-
-        var usernameElement = document.getElementById('profile_username');
-        usernameElement.innerHTML = '';
-        usernameElement.appendChild(inputField);
-
-        inputField.focus();
-
-        inputField.addEventListener('blur', function() {
-            saveUsername(inputField.value);
-        });
-
-        inputField.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                saveUsername(inputField.value);
-            }
-        });
-    }
-
-        async function saveUsername(newUsername) {
-        document.getElementById('profile_username').innerText = newUsername;
-        console.log("Nouvelle valeur du nom d'utilisateur : " + newUsername);
-
-        const body = {
-            username: "IQiyu", // changer par this.username dans la classe
-            newUsername: newUsername
-        };
-        try {
-            const req = await fetch('/db/update/username', {
-                    method: 'POST',
-                    credentials: 'include',
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(body)
-                });
-
-            const data = await req.json();
-
-            if (!data.success)
-                throw(Error(data.error));
-            // this.username = newUsername;
-            // this.game.setUsername(this.username);
-            // this.profile.setUsername(this.username);
-            // this.tournament.setUsername(this.username);
-            // this.friends.setUsername(this.username);
-            console.log("username updated.");
-        } catch (error) {
-            alert(error);
-        }
-    }
-</script>
-
-<script>
-    // Ouvrir la popup
-    function openPasswordPopup() {
-        document.getElementById('passwordPopup').classList.remove('hidden');
-    }
-
-    // Fermer la popup
-    function closePasswordPopup() {
-        document.getElementById('passwordPopup').classList.add('hidden');
-    }
-
-    // Validation du formulaire de changement de mot de passe
-    document.getElementById('passwordForm').addEventListener('submit', async function(event) {
-        event.preventDefault();
-
-        // Récupération des valeurs des champs
-        const currentPassword = document.getElementById('currentPassword').value;
-        const newPassword = document.getElementById('newPassword').value;
-        const confirmPassword = document.getElementById('confirmPassword').value;
-        console.log("ERROR1");
-        // Vérification que les mots de passe correspondent
-        if (newPassword !== confirmPassword) {
-            showError("Les nouveaux mots de passe ne correspondent pas.");
-            console.log("ERROR1 MISMATCH");
-            return;
-        }
-
-        if (currentPassword == newPassword) {
-            showError("Les nouveaux mots de passe ne doivent pas etre identiques");
-            console.log("ERROR1 MISMATCH");
-            return;
-        }
-
-        const body = {
-            username: "IQiyu", // changer par this.username dans la classe
-            password: currentPassword,
-            newPassword: newPassword
-        };
-        try {
-            console.log(body);
-            const req = await fetch('/db/update/password', {
-                    method: 'POST',
-                    credentials: 'include',
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(body)
-                });
-            console.log("ERROR2: ");
-            const data = await req.json();
-            console.log("ERROR2: ", data);
-            console.log("ERROR3: ", data.error);
-            if (!data.success)
-                throw(Error(data.error));
-
-            console.log("password updated.");
-            closePasswordPopup();
-            document.getElementById('passwordForm').reset();
-        } catch (error) {
-            alert(error);
-        }
-    });
-
-    // Afficher les messages d'erreur
-    function showError(message) {
-        const errorMessagesDiv = document.getElementById('errorMessages');
-        const errorMessageText = document.getElementById('errorMessageText');
-        errorMessageText.innerText = message;
-        errorMessagesDiv.classList.remove('hidden');
-    }
-</script>
-
 
     <script type="module" src="app.js"></script>
 

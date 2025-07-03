@@ -28,6 +28,8 @@ export class   ProfileController{
     private upload_btn = document.getElementById("upload_btn");
     private profile_cross = document.getElementById("profile_cross");
 
+    private password_form = (document.getElementById("passwordForm") as HTMLFormElement);
+
     private profile_card = document.getElementById("profile_card");
     private file_input = document.getElementById("file_input")
 	
@@ -42,6 +44,14 @@ export class   ProfileController{
     private	profile_username_tag = document.getElementById("profile_username");
     private	register_date_tag = document.getElementById("profile_creation");
 
+    private cameraIcon = document.getElementById("camera_icon");
+    private profileOverlay = document.getElementById("profile_picture_overlay");
+    private closeBtn = document.getElementById("profile_cross");
+
+    private cancelBtn = document.getElementById("cancel");
+    private usernameJps = document.getElementById("profile_username");
+    private jspBtn = document.getElementById("jsp_btn");
+
     constructor(site){
         this.site = site;
     }
@@ -55,13 +65,34 @@ export class   ProfileController{
     }
 
     addEvents(){
-
-        this.profile_username_tag.addEventListener("mouseover", async (event) => {
-            event.preventDefault();
-
-            if (this.profile_username == this.username)
-                this.profile_username_tag.textContent = "EMOJI " + this.profile_username_tag.textContent;
+        // Clique sur l'icône → montre la modale
+        this.cameraIcon.addEventListener("click", () => {
+            this.profileOverlay.classList.remove("hidden");
         });
+
+        // Clique sur la croix ✖ → cache la modale
+        this.closeBtn.addEventListener("click", () => {
+            this.profileOverlay.classList.add("hidden");
+        });
+
+        this.cancelBtn.addEventListener("click", () => {
+            this.closePasswordPopup();
+        });
+
+        this.usernameJps.addEventListener("click", () => {
+            this.editUsername();
+        });
+
+        this.jspBtn.addEventListener("click", () => {
+            this.openPasswordPopup();
+        });
+
+        // this.profile_username_tag.addEventListener("mouseover", async (event) => {
+        //     event.preventDefault();
+
+        //     if (this.profile_username == this.username && )
+        //         this.profile_username_tag.textContent = "EMOJI " + this.profile_username_tag.textContent;
+        // });
 
         this.profile_username_tag.addEventListener("mouseout", async (event) => {
             event.preventDefault();
@@ -195,10 +226,144 @@ export class   ProfileController{
             }
         });
 
+        // Validation du formulaire de changement de mot de passe
+        this.password_form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            // Récupération des valeurs des champs
+            const currentPassword = (document.getElementById('currentPassword') as HTMLInputElement).value;
+            const newPassword = (document.getElementById('newPassword') as HTMLInputElement).value;
+            const confirmPassword = (document.getElementById('confirmPassword') as HTMLInputElement).value;
+            console.log("ERROR1");
+            // Vérification que les mots de passe correspondent
+            if (newPassword !== confirmPassword) {
+                this.showError("Les nouveaux mots de passe ne correspondent pas.");
+                console.log("ERROR1 MISMATCH");
+                return;
+            }
+
+            if (currentPassword == newPassword) {
+                this.showError("Les nouveaux mots de passe ne doivent pas etre identiques");
+                console.log("ERROR1 MISMATCH");
+                return;
+            }
+
+            const body = {
+                username: "IQiyu", // changer par this.username dans la classe
+                password: currentPassword,
+                newPassword: newPassword
+            };
+            try {
+                console.log(body);
+                const req = await fetch('/db/update/password', {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(body)
+                    });
+                console.log("ERROR2: ");
+                const data = await req.json();
+                console.log("ERROR2: ", data);
+                console.log("ERROR3: ", data.error);
+                if (!data.success)
+                    throw(Error(data.error));
+
+                console.log("password updated.");
+                this.closePasswordPopup();
+                this.password_form.reset();
+            } catch (error) {
+                alert(error);
+            }
+        });
+
+    }
+        // Ouvrir la popup
+    openPasswordPopup() {
+        document.getElementById('passwordPopup').classList.remove('hidden');
     }
 
+    // Fermer la popup
+    closePasswordPopup() {
+        document.getElementById('passwordPopup').classList.add('hidden');
+    }
+
+    // Afficher les messages d'erreur
+    showError(message) {
+        const errorMessagesDiv = document.getElementById('errorMessages');
+        const errorMessageText = document.getElementById('errorMessageText');
+        errorMessageText.innerText = message;
+        errorMessagesDiv.classList.remove('hidden');
+    }
+
+    editUsername() {
+        var currentUsername = document.getElementById('profile_username').innerText;
+        var inputField = document.createElement('input');
+        inputField.type = 'text';
+        inputField.value = currentUsername;
+        inputField.id = 'profile_username_input';
+
+        inputField.classList.add(
+            'text-xl',
+            'font-semibold',
+            'text-center',
+            'border-b',
+            'border-gray-400',
+            'focus:outline-none',
+            'focus:border-blue-500',
+            'px-2',
+            'py-1'
+        );
+
+        var usernameElement = document.getElementById('profile_username');
+        usernameElement.innerHTML = '';
+        usernameElement.appendChild(inputField);
+
+        inputField.focus();
+
+        inputField.addEventListener('blur', () => {
+            this.saveUsername(inputField.value);
+        });
+
+        inputField.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                this.saveUsername(inputField.value);
+            }
+        });
+    }
+
+        async saveUsername(newUsername) {
+            document.getElementById('profile_username').innerText = newUsername;
+            console.log("Nouvelle valeur du nom d'utilisateur : " + newUsername);
+
+            const body = {
+                username: "IQiyu", // changer par this.username dans la classe
+                newUsername: newUsername
+            };
+            try {
+                const req = await fetch('/db/update/username', {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(body)
+                    });
+
+                const data = await req.json();
+
+                if (!data.success)
+                    throw(Error(data.error));
+                // this.username = newUsername;
+                // this.game.setUsername(this.username);
+                // this.profile.setUsername(this.username);
+                // this.tournament.setUsername(this.username);
+                // this.friends.setUsername(this.username);
+                console.log("username updated.");
+            } catch (error) {
+                alert(error);
+            }
+        }
+
     //Search for the player, and store datas
-    async	searchPlayerHandler(){
+    async searchPlayerHandler(){
         try {
             const req = await fetch(`/profile/${this.profile_username}`, {
                 method: 'GET',
