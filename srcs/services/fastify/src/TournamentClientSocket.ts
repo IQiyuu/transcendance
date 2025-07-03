@@ -74,6 +74,7 @@ export class TournamentClientSocket{
 
         this.ws.onclose = (event) => {
             console.log("Closing " + this.username);
+            console.log(event);
             this.ctler.clear_tournament();
             this.ctler.clear_tournaments();
             this.ctler.hide_all();

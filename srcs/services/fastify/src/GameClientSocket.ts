@@ -21,7 +21,7 @@ export class GameClientSocket{
         }
         this.ctl = ctl;
         if (match_id !== undefined){
-            console.log("game creation socket tournament");
+            console.log("game creation socket for tournament");
             this.match_id = match_id;
         }
         this.setSocket();
@@ -56,7 +56,6 @@ export class GameClientSocket{
         }
         
         this.ws.onmessage = (data) => {
-            // console.log("Recving data");
             const message = JSON.parse(data.data);
             if (message === null){
                 console.log("message is null");
@@ -93,10 +92,8 @@ export class GameClientSocket{
                 } else{
                     if (message.state === "match_connected"){
                         console.log("   Match should begin");
-                        // this.ctl.hide_aal();
+
                         this.ctl.gameInit();
-                        // this.ctl.print_game();
-                        // this.ctl.print_play_page();
                         this.ctl.updateState(message.game);
                     }
                 }
@@ -104,12 +101,7 @@ export class GameClientSocket{
         };
 
         this.ws.onclose = (event) => {
-            console.log("closing socket");
-            if (event.code === 3005){
-                console.log(event.reason);
-            } else{
-                console.log(event);
-            }
+            console.log("closing game socket");
             this.ctl.close();
         }
 

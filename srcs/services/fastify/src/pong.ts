@@ -11,7 +11,6 @@ const key_state = {};
 
 function key_handler(e){
     //for accessibility, here too
-    // console.log(e);
     e.preventDefault();
     if ("KeyW,KeyS,ArrowUp,ArrowDown".includes(e.code))
         key_state[e.code] = (e.type === "keydown");
@@ -191,7 +190,7 @@ export class   GameController{
             this.ws.stopMatchmaking();
             this.ws.close();
             this.ws = null;
-            console.log("Socket closed for pong");
+            console.log("Matchmaking leaved");
         }
     }
 
@@ -199,11 +198,12 @@ export class   GameController{
 		this.is_tournament = true;
         if (this.username === game.players.right)
             this.side = "right";
-        console.log("Creating a game :");
-        console.log(game);
+        console.log("Creating a tournament game :");
         if (this.ws === null)
             this.ws = new GameClientSocket(this.username, this, game_id);
         else{
+            console.log("Game received (tournament)");
+            // console.log(game);
             this.ws.setGameId(game_id);
             this.ws.startTournamentGame();
         }
@@ -290,6 +290,7 @@ export class   GameController{
         this.print_match_end();
         if (this.is_tournament){
             console.log("Tournament's game is finished ending");
+            console.log("Not closing socket for it can be used later");
         } else {
             console.log("closing socket after game ended");
             this.ws.close();
@@ -299,7 +300,7 @@ export class   GameController{
         this.is_local = false;
         this.is_searching = false;
         this.is_tournament = false;
-        }
+    }
 
     /**
      * VIEW

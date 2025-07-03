@@ -8,9 +8,9 @@ const T_ON_GOING = 2;
 const T_FINISHED = 3;
 
 export class Tournament {
-    private id;
-    private name;
-    private owner;
+    private id : number;
+    private name : string;
+    private owner : string;
     private players; // image, win rate{}
     private brackets; // ordered array of ordered array of {username, username, state, winner}
 
@@ -44,16 +44,15 @@ export class Tournament {
     }
 
     isStarted(){
-        // console.log("Testing start of tournament");
         // console.log(this.brackets);
-        // console.log(this.brackets === null);
-        return (this.brackets === null);
+        return (this.brackets !== null);
     }
 
     update(tournament){
         this.players = tournament.players;
         if (tournament.brackets !== null )
             this.brackets = tournament.brackets;
+        // console.log(tournament.brackets);
     }
 
 }
@@ -107,7 +106,6 @@ export class TournamentController {
             event.preventDefault();
 
             if (this.tournament !== null) {
-                // print_error("You're already registered for a tournament");
                 alert("You're already registered for a tournament");
                 return;
             }
@@ -122,6 +120,7 @@ export class TournamentController {
             const name = document.getElementById("tournament_name") as HTMLInputElement;
             //Verifier que l'input est valide avant de l'envoyer !
             if (!verifyForm(name)){
+                // Error to print here (or in verifyForm) ?
                 return ;
             }
             try {
@@ -138,12 +137,8 @@ export class TournamentController {
                 if (data.success) {
                     this.tournament = new Tournament(data.tournament);
                     this.ws = new TournamentClientSocket(this.username, this, this.tournament);
-                    // console.log(this.tournament);
                     this.hide_all();
-                    // this.print_tournament_lobby();
-                    // this.print_tournament_page();
                     this.print_tournament();
-                    this.print_tournament_rejoin_btn();
                 }
                 else
                     throw (Error(data.error));
@@ -155,11 +150,6 @@ export class TournamentController {
         this.tournament_join_btn.addEventListener("click", async (event) => {
             event.preventDefault();
 
-            this.site.hide_all();
-
-            this.print_tournament_page();
-            this.print_tournaments_page();
-            this.clear_tournaments();
             try {
                 const resp = await fetch('/tournament/list?username=' + this.username, {
                     method: 'GET',
@@ -184,6 +174,7 @@ export class TournamentController {
                                 el.setAttribute("tournament_id", data.tournaments[i].id);
                                 el.addEventListener("click", async (event) => {
                                     event.preventDefault();
+                                    // We test if we can join the tournament
                                     try {
                                         let query = new URLSearchParams();
                                         query.append("username", this.username);
@@ -196,13 +187,7 @@ export class TournamentController {
                                         if (data.success) {
                                             this.tournament = new Tournament(data.tournament);
                                             this.ws = new TournamentClientSocket(this.username, this, this.tournament);
-
-                                            // console.log(this.tournament);
-
                                             this.site.hide_all();
-                                            this.clear_tournament();
-                                            // this.print_tournament_page();
-                                            // this.print_tournament_lobby();
                                             this.print_tournament();
                                         } else{
                                             const T_DSNT_EXISTS = 999;
@@ -226,14 +211,17 @@ export class TournamentController {
             } catch (err) {
                 console.log(err);
             }
+            this.site.hide_all();
+
+            this.print_tournament_page();
+            this.print_tournaments_page();
+            this.clear_tournaments();
         });
 
         this.tournament_rejoin_btn.addEventListener("click", async (event) => {
-            this.clear_tournament();
+            // this.clear_tournament();
             this.site.hide_all();
-            // this.print_tournament_page();
             this.print_tournament();
-            // state
         });
     }
 
@@ -258,6 +246,7 @@ export class TournamentController {
         // this.ws = null;
         console.log("EndingTOurnament");
         this.game.close()
+        this.tournament = null
     }
     /**
      * VIEW METHODS
@@ -285,6 +274,10 @@ export class TournamentController {
 
     print_tournament_div(){
         this.tournament_div.classList.replace("hidden", "block");
+    }
+
+    hide_tournament_div(){
+        this.tournament_div.classList.replace("block", "hidden");
     }
 
     print_tournament_lobby(){
@@ -336,6 +329,7 @@ export class TournamentController {
         this.tournament_lobby.append(table);
 
         if (!this.tournament.isStarted()){
+            console.log("   Tournament has not started yet");
             if (this.username === this.tournament.getOwner()) {
                 let start_button = document.createElement("button");
                 start_button.append(document.createTextNode("Start"));
@@ -352,6 +346,10 @@ export class TournamentController {
 
     hide_tournament_lobby(){
         this.tournament_lobby.classList.replace("block", "hidden");
+    }
+
+    clear_tournament_lobby(){
+        this.tournament_lobby.textContent = ''
     }
 
     print_tournament_state(){
@@ -406,6 +404,10 @@ export class TournamentController {
         this.tournament_state.classList.replace("block", "hidden");
     }
 
+    clear_tournament_state(){
+        this.tournament_state.textContent = '';
+    }
+
     print_tournament(){
         this.clear_tournament_lobby();
         this.print_tournament_lobby();
@@ -413,10 +415,6 @@ export class TournamentController {
         this.print_tournament_state();
         this.print_tournament_div();
         this.print_tournament_page();
-    }
-
-    clear_tournament_lobby(){
-        this.tournament_lobby.textContent = ''
     }
 
     hide_tournament(){
@@ -477,14 +475,6 @@ export class TournamentController {
         console.log("ToURNAMENT END");
     }
 
-    clear_tournament() {
-        this.tournament_lobby.textContent = '';
-    }
-
-    clear_tournament_state(){
-        this.tournament_state.textContent = '';
-    }
-
     clear_tournaments() {
         this.tournaments_list.textContent = '';
     }
@@ -492,6 +482,7 @@ export class TournamentController {
     hide_all() {
         this.hide_tournament_page();
         this.hide_tournaments_page();
+        this.hide_tournament_div();
         this.hide_tournament_form();
         this.hide_tournament_lobby();
         this.hide_tournament_state();

@@ -327,10 +327,10 @@ function    getTournamentMasked(t){
 	});
 	
 	let b;
-	console.log(" Masking brackets:");
+	// console.log(" Masking brackets:");
 	// console.log(t.brackets);
 	// console.log(t);
-	if (t.brackets === undefined || t.brackets === null){
+	if (t.brackets === null || t.brackets.length === 0){
 		b = null;
 	}else {
 		b = [];
@@ -352,14 +352,15 @@ function    getTournamentMasked(t){
 			b.push(round);
 		});
 	}
-	let tournoi = {
+	let masked_tournament = {
 		id : t.id,
 		name : t.name,
 		owner : t.owner,
 		players : players,
 		brackets : b
 	};
-	return (tournoi);
+	console.log(masked_tournament);
+	return (masked_tournament);
 }
 
 //Return all tournaments that username can join. Also mask every private info
@@ -373,7 +374,8 @@ function    getAvailableTournaments(tournaments, username){
 	return (res);
 }
 
-function    updateTournament(tournament){
+// Update players view of the tournament
+function    updateTournamentPlayers(tournament){
 	let res = getTournamentMasked(tournament);
 	console.log("Trying to update clients");
 	tournament.getPlayers().forEach(player => {
@@ -436,7 +438,7 @@ export function matchOver(game){
 
 	//tell clients
 	t.updateRound(game);
-	updateTournament(t);
+	updateTournamentPlayers(t);
 }
 
 function tournamentRoute (fastify, options) {
@@ -491,13 +493,13 @@ function tournamentRoute (fastify, options) {
 		if (socket.readyState === OPEN_STATE){
 			console.log("Player connected " + username.toString());
 			t.connectPlayer(username, socket);
-			updateTournament(t);
+			updateTournamentPlayers(t);
 		}
 		// socket.on("open", event => {
 			//     console.log("Opening socket");
 		//     console.log("Player connected " + username.toString());
 		//     t.connectPlayer(username, socket);
-		//     updateTournament(t);
+		//     updateTournamentPlayers(t);
 		// });
 		
 		socket.on('message', (data) => {
@@ -519,7 +521,7 @@ function tournamentRoute (fastify, options) {
 					}));
 				}else {
 					t.startTournament();
-					updateTournament(t);
+					updateTournamentPlayers(t);
 				}
 			} else if (message.type === "disconnection"){
 				console.log("A player has left an on-going tournament");
@@ -531,7 +533,7 @@ function tournamentRoute (fastify, options) {
 			console.log("Player disconnected " + username.toString());
 			t.disconnectPlayer(username, socket);
 			t.removePlayer(username);
-			updateTournament(t);
+			updateTournamentPlayers(t);
 		});
 	});
 	
@@ -675,12 +677,12 @@ function tournamentRoute (fastify, options) {
 				return ;
 			}
 			else if (tournament.isRoundReadyToStart()){
-				updateTournament(tournament);
+				updateTournamentPlayers(tournament);
 				tournament.startRound();
 			} else if (tournament.currentRoundIsFinished())
 				tournament.initNextRound();
 		});
-	}, 30); // We can wait more
+	}, 100); // We can wait more
 }
 
 export default tournamentRoute;
