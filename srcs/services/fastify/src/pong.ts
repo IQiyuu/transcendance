@@ -237,56 +237,43 @@ export class   GameController{
         game_interval_id = setInterval(this.moves, 10, this, this.ws);
     }
 
-    // async registerGame() {
-    //     try {
-    //         console.log("REGISTER1");
-    //         const winner = this.score_left < this.score_right ? this.right_player : this.left_player;
-    //         const loser = winner == this.left_player ? this.right_player : this.left_player;
-    //         const loser_score = this.score_left > this.score_right ? this.score_right.textContent : this.score_left.textContent;
-    //         console.log(this.right_player, " ", this.left_player, " ", winner, " ", loser, " ", loser_score);
-    //         const body = {
-    //             winner_username: winner,
-    //             loser_username: loser,
-    //             loser_score: loser_score, // if tournament, 
-    //         }
-    //         console.log("REGISTER2");
-    //         const req = await fetch('/game/storeGame', {
-    //             method: 'POST',
-    //             credentials: 'include',
-    //             headers: { "Content-Type": "application/json" },
-    //             body: JSON.stringify(body)
-    //         });
-    //         console.log("REGISTER3");
-    //         const data = await req.json();
-    //         console.log("REGISTER4");
-    //         if (!data.success)
-    //             throw (Error(data.error));
-    //         console.log("REGISTER5");
-    //     } catch (error){
-    //         alert(error);
-    //     }
-    // }
-
     finishGame(){
         clearInterval(game_interval_id);
         document.removeEventListener("keyup", key_handler);
         document.removeEventListener("keydown", key_handler);
-        // console.log(document);
+
         this.hide_scoreboard()
         this.hide_game();
-        this.print_match_end();
+        
         if (this.is_tournament){
             console.log("Tournament's game is finished ending");
             console.log("Not closing socket for it can be used later");
+            this.game_id = -1;
         } else {
+            this.print_match_end();
             console.log("closing socket after game ended");
-            this.ws.close();
-            this.ws = null;
+            this.close();
         }
-        this.game_id = -1;
-        this.is_local = false;
-        this.is_searching = false;
-        this.is_tournament = false;
+    }
+
+    // Update every game values
+    updateState(game){
+        this.game_id = game.id;
+
+        this.l_score = game.scores.left;
+        this.r_score = game.scores.right;
+
+        this.ball_x = game.ball.x;
+        this.ball_y = game.ball.y;
+
+        this.l_paddle_x = game.paddles.left.x;
+        this.l_paddle_y = game.paddles.left.y;
+
+        this.r_paddle_x = game.paddles.right.x;
+        this.r_paddle_y = game.paddles.right.y;
+
+        this.left_player = game.players.left;
+        this.right_player = game.players.right;
     }
 
     /**
@@ -323,29 +310,9 @@ export class   GameController{
 
     stop_matchmaking_animation(){
         document.getElementById("matchmaking").innerHTML = "";
-        this.site.loadLang();
+        this.site.loadLang(); // ?
         clearInterval(anim_interval_id);
         this.online_play_btn.textContent = this.site.getText('play_online');
-    }
-
-    // Update every game values
-    updateState(game){
-        this.game_id = game.id;
-
-        this.l_score = game.scores.left;
-        this.r_score = game.scores.right;
-
-        this.ball_x = game.ball.x;
-        this.ball_y = game.ball.y;
-
-        this.l_paddle_x = game.paddles.left.x;
-        this.l_paddle_y = game.paddles.left.y;
-
-        this.r_paddle_x = game.paddles.right.x;
-        this.r_paddle_y = game.paddles.right.y;
-
-        this.left_player = game.players.left;
-        this.right_player = game.players.right;
     }
 
     cooToPos_x(x, type){
@@ -437,6 +404,5 @@ export class   GameController{
         this.hide_game();
         this.hide_scoreboard();
     }
- 
 };
 
