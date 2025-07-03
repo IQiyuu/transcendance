@@ -84,8 +84,6 @@ db.exec(`
   
 `)
 
-const schema = db.prepare("PRAGMA table_info(friends);").all();
-
 fastify.register(fastifyWebsocket);
 
 fastify.register(fastifyMultipart, {

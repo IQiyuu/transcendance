@@ -102,7 +102,7 @@ function isValidPassword(password) {
             SameSite: 'Strict',
             maxAge: 3600,
           });
-      }
+        }
 
         return { success: true, message: `Welcome ${username}`, username: username };
 
