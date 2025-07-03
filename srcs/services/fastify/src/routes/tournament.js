@@ -271,11 +271,11 @@ class Tournament{
 			this.brackets[this.current_round].push({game_id : -1, players : [p1, p2], state : T_READY, winner : null});
 		}
 		if (winners.length == 1){
-			p1 = winners.shift(); //
+			p1 = this.getPlayer(winners.shift()); // CT ICI PPPPPPPPPPPPPFJSDBXKFDBBDFBN
 			this.brackets[this.current_round].push({game_id : -1, players : [p1, null], state : T_READY, winner : null});
 		}
 		console.log("List of matchs (to recheck with more players) :");
-		console.log(this.brackets);
+		console.log(this.brackets[this.current_round]);
 	}
 
 	// Update the tournament's current round with the ended match 
@@ -494,6 +494,9 @@ function tournamentRoute (fastify, options) {
 			console.log("Player connected " + username.toString());
 			t.connectPlayer(username, socket);
 			updateTournamentPlayers(t);
+		} else{
+			socket.close();
+			return ;
 		}
 		// socket.on("open", event => {
 			//     console.log("Opening socket");
@@ -530,7 +533,7 @@ function tournamentRoute (fastify, options) {
 		});
 		
 		socket.on("close", (event) => {
-			console.log("Player disconnected " + username.toString());
+			console.log("Player disconnected : " + username.toString());
 			t.disconnectPlayer(username, socket);
 			t.removePlayer(username);
 			updateTournamentPlayers(t);

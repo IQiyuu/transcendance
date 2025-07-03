@@ -75,10 +75,12 @@ export class TournamentClientSocket{
         this.ws.onclose = (event) => {
             console.log("Closing " + this.username);
             console.log(event);
-            this.ctler.clear_tournament();
+            this.ctler.clear_tournament_lobby();
+            this.ctler.clear_tournament_state();
             this.ctler.clear_tournaments();
             this.ctler.hide_all();
             this.ctler.print_menu();
+            this.ctler.close();
             // if server closed, then parent.err
         }
     }
@@ -95,5 +97,6 @@ export class TournamentClientSocket{
 
     close(){
         this.ws.close();
+        this.ws = null;
     }
 };

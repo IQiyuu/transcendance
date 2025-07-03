@@ -18,9 +18,8 @@ function key_handler(e){
 
 // Game for a given client
 export class   GameController{
-    /**
-     * Controller
-     */
+    
+    // Controller
     private ws : GameClientSocket = null;
     private site : SiteController = null;
 
@@ -31,7 +30,7 @@ export class   GameController{
 
     // Game
     private game_id : number = -1;
-    private side = "left";
+    private side : string = "left";
     private is_local : boolean = false;
     
     private left_player : string = null;
@@ -49,10 +48,7 @@ export class   GameController{
     private ball_x : number = 0;
     private ball_y : number = 0;
 
-
-    /**
-     * View
-    */
+    // View
     private game_page = document.getElementById("game_page");
 
     private online_play_btn = document.getElementById("matchmaking");
@@ -76,7 +72,7 @@ export class   GameController{
         this.site = site;
     }
 
-    setUsername(username){
+    setUsername(username : string){
         this.username = username;
     }
 
@@ -88,7 +84,7 @@ export class   GameController{
         return this.side;
     }
 
-    setSide(new_side){
+    setSide(new_side : string){
         this.side = new_side;
     }
 
@@ -97,9 +93,8 @@ export class   GameController{
     }
 
     isLocal(){
-        return this.is_local;
+        return (this.is_local);
     }
-
 
 
     /**
@@ -108,8 +103,13 @@ export class   GameController{
 
     addEvents(){
         //Online playing
-        this.online_play_btn.addEventListener("click", async (event) => {
+        this.online_play_btn.addEventListener("click", (event) => {
             event.preventDefault();
+
+            if (this.ws !== null){
+                alert("ALready in a game");
+                return ;
+            }
 
             if (this.is_searching){
                 this.stopMatchmaking();
@@ -120,62 +120,52 @@ export class   GameController{
         });
 
         //Local play
-    this.offline_play_btn.addEventListener("click", (event) => {
-    event.preventDefault();
+        this.offline_play_btn.addEventListener("click", (event) => {
+            event.preventDefault();
 
-    const modal = document.getElementById("offline-confirm-modal");
-    const yesBtn = document.getElementById("modal-confirm-yes");
-    const noBtn = document.getElementById("modal-confirm-no");
+            if (this.ws !== null){
+                alert("ALready in a game");
+                return ;
+            }
 
-    modal.classList.remove("hidden");
+            const modal = document.getElementById("offline-confirm-modal");
+            const yesBtn = document.getElementById("modal-confirm-yes");
+            const noBtn = document.getElementById("modal-confirm-no");
 
-    const closeModal = () => {
-        modal.classList.add("hidden");
-        yesBtn.removeEventListener("click", onYes);
-        noBtn.removeEventListener("click", onNo);
-    };
+            modal.classList.remove("hidden");
 
-    const onYes = () => {
-        closeModal();
-        this.stopMatchmaking();
-        this.print_play_page();
-        this.is_local = true;
-        this.ws = new GameClientSocket(this.username, this);
-        this.ws.startOfflineGame();
-    };
+            const closeModal = () => {
+                modal.classList.add("hidden");
+                yesBtn.removeEventListener("click", onYes);
+                noBtn.removeEventListener("click", onNo);
+            };
 
-    const onNo = () => {
-        closeModal();
-    };
+            const onYes = () => {
+                closeModal();
+                this.stopMatchmaking();
+                this.print_play_page();
+                this.is_local = true;
+                this.ws = new GameClientSocket(this.username, this);
+                this.ws.startOfflineGame();
+            };
 
-    yesBtn.addEventListener("click", onYes);
-    noBtn.addEventListener("click", onNo);
-});
+            const onNo = () => {
+                closeModal();
+            };
+
+            yesBtn.addEventListener("click", onYes);
+            noBtn.addEventListener("click", onNo);
+        });
     }
 
     /**
      * Model
      */
 
-    /**
-     *  Handler function that tell the server when user move
-     * (W and S for left player if 2 player, else UP and DOWN)
-     *  */
-    moves(obj : GameController, ws : GameClientSocket){
-        obj.draw();
-        if (key_state["ArrowUp"] || key_state["ArrowDown"]) {
-            ws.updatePos(obj.getGameId(), key_state["ArrowUp"], obj.isLocal() ? "right" : obj.getSide());
-        }
-        if (obj.isLocal() && (key_state["KeyW"] || key_state["KeyS"])){
-            ws.updatePos(obj.getGameId(), key_state["KeyW"], "left");
-        }
-    }
-
-
     startMatchmaking(){
         this.start_matchmaking_animation();
         this.is_local = false;
-        if (this.ws !== null && this.ws !== undefined){
+        if (this.ws !== null){ // maybe deprecated
             console.error("You cant start a matchmaking while having a match");
             return ;
         }
@@ -190,9 +180,11 @@ export class   GameController{
             this.ws.stopMatchmaking();
             this.ws.close();
             this.ws = null;
-            console.log("Matchmaking leaved");
+            console.log("Matchmaking left");
         }
     }
+
+    // 2 cas de fermeture de socket (local and online ) to check later !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     startTournamentGame(game_id, game){
 		this.is_tournament = true;
@@ -202,12 +194,11 @@ export class   GameController{
         if (this.ws === null)
             this.ws = new GameClientSocket(this.username, this, game_id);
         else{
-            console.log("Game received (tournament)");
+            console.log("Game received , lets continue the tournament");
             // console.log(game);
             this.ws.setGameId(game_id);
             this.ws.startTournamentGame();
         }
-        // this.site.hide_all();
         this.updateState(game);
         this.gameInit();
     }
@@ -222,7 +213,6 @@ export class   GameController{
         this.is_local = false;
         this.is_searching = false;
         this.is_tournament = false;
-		// is_tournament ?
     }
 
     gameInit(){
@@ -244,41 +234,38 @@ export class   GameController{
         this.l_paddle.style.position="absolute";
         this.r_paddle.style.position="absolute";
 
-        // let moves = this.moves.bind(this);
-        //testing maybe not here
-        // this.moves.bind(this);
         game_interval_id = setInterval(this.moves, 10, this, this.ws);
     }
 
-    async registerGame() {
-        try {
-            console.log("REGISTER1");
-            const winner = this.score_left < this.score_right ? this.right_player : this.left_player;
-            const loser = winner == this.left_player ? this.right_player : this.left_player;
-            const loser_score = this.score_left > this.score_right ? this.score_right.textContent : this.score_left.textContent;
-            console.log(this.right_player, " ", this.left_player, " ", winner, " ", loser, " ", loser_score);
-            const body = {
-                winner_username: winner,
-                loser_username: loser,
-                loser_score: loser_score, // if tournament, 
-            }
-            console.log("REGISTER2");
-            const req = await fetch('/game/storeGame', {
-                method: 'POST',
-                credentials: 'include',
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(body)
-            });
-            console.log("REGISTER3");
-            const data = await req.json();
-            console.log("REGISTER4");
-            if (!data.success)
-                throw (Error(data.error));
-            console.log("REGISTER5");
-        } catch (error){
-            alert(error);
-        }
-    }
+    // async registerGame() {
+    //     try {
+    //         console.log("REGISTER1");
+    //         const winner = this.score_left < this.score_right ? this.right_player : this.left_player;
+    //         const loser = winner == this.left_player ? this.right_player : this.left_player;
+    //         const loser_score = this.score_left > this.score_right ? this.score_right.textContent : this.score_left.textContent;
+    //         console.log(this.right_player, " ", this.left_player, " ", winner, " ", loser, " ", loser_score);
+    //         const body = {
+    //             winner_username: winner,
+    //             loser_username: loser,
+    //             loser_score: loser_score, // if tournament, 
+    //         }
+    //         console.log("REGISTER2");
+    //         const req = await fetch('/game/storeGame', {
+    //             method: 'POST',
+    //             credentials: 'include',
+    //             headers: { "Content-Type": "application/json" },
+    //             body: JSON.stringify(body)
+    //         });
+    //         console.log("REGISTER3");
+    //         const data = await req.json();
+    //         console.log("REGISTER4");
+    //         if (!data.success)
+    //             throw (Error(data.error));
+    //         console.log("REGISTER5");
+    //     } catch (error){
+    //         alert(error);
+    //     }
+    // }
 
     finishGame(){
         clearInterval(game_interval_id);
@@ -300,6 +287,20 @@ export class   GameController{
         this.is_local = false;
         this.is_searching = false;
         this.is_tournament = false;
+    }
+
+    /**
+     *  Handler function that tell the server when user move
+     * (W and S for left player if 2 player, else UP and DOWN)
+     *  */
+    moves(obj : GameController, ws : GameClientSocket){
+        obj.draw();
+        if (key_state["ArrowUp"] || key_state["ArrowDown"]) {
+            ws.updatePos(obj.getGameId(), key_state["ArrowUp"], obj.isLocal() ? "right" : obj.getSide());
+        }
+        if (obj.isLocal() && (key_state["KeyW"] || key_state["KeyS"])){
+            ws.updatePos(obj.getGameId(), key_state["KeyW"], "left");
+        }
     }
 
     /**
@@ -437,9 +438,5 @@ export class   GameController{
         this.hide_scoreboard();
     }
  
-    //bad design, because we should separate view from ctl
-    hide_aal(){
-        this.site.hide_all();
-    }
 };
 

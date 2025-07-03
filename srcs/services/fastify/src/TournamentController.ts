@@ -149,6 +149,13 @@ export class TournamentController {
 
         this.tournament_join_btn.addEventListener("click", async (event) => {
             event.preventDefault();
+            
+            if (this.tournament !== null) {
+                alert("You're already registered for a tournament");
+                return;
+            }
+
+            this.clear_tournaments();
 
             try {
                 const resp = await fetch('/tournament/list?username=' + this.username, {
@@ -215,11 +222,9 @@ export class TournamentController {
 
             this.print_tournament_page();
             this.print_tournaments_page();
-            this.clear_tournaments();
         });
 
         this.tournament_rejoin_btn.addEventListener("click", async (event) => {
-            // this.clear_tournament();
             this.site.hide_all();
             this.print_tournament();
         });
@@ -241,12 +246,16 @@ export class TournamentController {
     }
 
     endTournament(){
-        // this.tournament = null;
-        // this.ws.close();
         // this.ws = null;
         console.log("EndingTOurnament");
-        this.game.close()
-        this.tournament = null
+        this.close()
+    }
+
+    close(){
+        this.game.close();
+        this.ws.close();
+        this.ws = null;
+        this.tournament = null;
     }
     /**
      * VIEW METHODS

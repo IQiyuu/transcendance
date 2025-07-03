@@ -446,7 +446,7 @@ export class SiteController{
             this.hide_all();
             this.print_menu();
             this.print_btn_menu();
-            if (this.tournament.hasTournament)
+            if (this.tournament.hasTournament())
                 this.tournament.print_tournament_rejoin_btn();
         });
 

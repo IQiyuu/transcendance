@@ -168,6 +168,7 @@ export class GameClientSocket{
 
     close(){
         this.ws.close();
+        this.ws = null;
         this.should_search = false;
         this.should_start_solo = false;
         this.match_id = undefined;
