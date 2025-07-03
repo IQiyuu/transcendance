@@ -332,7 +332,7 @@ export async function gameRoute (fastify, options) {
         fastify.get('/game/ws', { websocket: true }, (socket, req) => {
             let username = req.query.username;
             socket.on('open', (event) => {
-                console.log("socket game created for");
+                console.log(" IF PRINTED, YOU NEED TO SEE WHY socket game connection for");
                 console.log(username);
                 // waiting_clients.set(username, socket);
             });
@@ -345,7 +345,6 @@ export async function gameRoute (fastify, options) {
                     console.error('Invalid JSON:', data.toString());
                     return;
                 }
-                // console.log(message);
                 if (message.type === "create_game_offline"){
                     let new_game_id = createGame(message.username, message.username + "-2");
                     // console.log(games);
@@ -361,8 +360,6 @@ export async function gameRoute (fastify, options) {
                     playing_clients.set(socket, new_game_id);
                     waiting_clients.delete(username);
                 } else if (message.type === "game_update"){
-                    // console.log("MOdofiying a game");
-                    // console.log(games);
                     let game = getGameByID(message.game_id);
                     if (game === undefined){
                         console.log("error, game dosnt exists");
@@ -444,7 +441,6 @@ export async function gameRoute (fastify, options) {
 
                 //At least, closing properly and removing from maps
                 console.log("Closing  socket");
-                // console.log(socket);
                 playing_clients.delete(socket);
                 socket.close();
                 waiting_clients.forEach((sck, username) => { // to re understand
@@ -530,7 +526,7 @@ export async function gameRoute (fastify, options) {
             
             // If their game is finished, we end it
             if (finished_games.includes(game)){
-                console.log("game is finished");
+                console.log("GAME is finished");
                 console.log(game);
 
                 // console.log("Sending to");
@@ -552,7 +548,7 @@ export async function gameRoute (fastify, options) {
                 // console.log(p2);
                 playing_clients.delete(sock);
                 if (p2 !== null){
-                    console.log("p2 found !");
+                    // console.log("p2 found !");
                     p2.send(JSON.stringify({
                         type: "game_finished",
                         game: getMaskedGame(game)
@@ -563,7 +559,7 @@ export async function gameRoute (fastify, options) {
                 }
                 
                 if (game.t_id !== null){
-                    console.log("We are descending")
+                    // console.log("We are descending")
                     matchOver(game); 
                 }
                 // sock = null;

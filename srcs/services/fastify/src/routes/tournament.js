@@ -16,7 +16,6 @@ function    initBracket(size){
 	let i = 0;
 	while (i < size){
 		x = randomIntFromInterval(1, size);
-		// console.log("random number generated : " + x.toString());
 		if (!nbs.includes(x)){
 			nbs.push(x);
 			i++;
@@ -219,19 +218,20 @@ class Tournament{
 	
 	async startRound(){
 		// Create games for each user in a match
-		console.log("Starting a round");
+		console.log("	Starting a new round");
 		if (this.brackets === undefined || this.brackets[this.current_round] === undefined)
 			console.log("error : the round we want to start is null or undefined");
 		this.brackets[this.current_round].forEach(match => {
-			console.log("Starting a tournament match !");
+			console.log("		Creating a tournament match !");
 			console.log(match);
 			if (match.players[1] === null){
-				console.log("No opponent, to impl");
+				console.log("No opponent easy winnnn");
 				match.state = T_FINISHED;
 				match.winner = match.players[0].username;
 			} else {
-				console.log("starting a round");
+				console.log("Match has 2 players");
 				//Create the match
+				console.log(match.players[0].username + " vs " + match.players[1].username);
 				let g_id = gameRoute.createGame(match.players[0].username, match.players[1].username, this.id);
 				match.game_id = g_id;
 				let game = gameRoute.getGameByID(g_id);
@@ -239,13 +239,13 @@ class Tournament{
 				match.players[0].socket.send(JSON.stringify({
 					type: "new_match",
 					game_id: g_id,
-					game: game // not used, only there for debugging
+					game: game
 				}));
 				
 				match.players[1].socket.send(JSON.stringify({
 					type: "new_match",
 					game_id: g_id,
-					game: game // not used, only there for debugging
+					game: game 
 				}));
 				match.state = T_ON_GOING;
 			}
@@ -255,6 +255,7 @@ class Tournament{
 	//
 	initNextRound(){
 		// Get players (winner), then adding them to the next round
+		console.log("=======================");
 		console.log("Preparing next round");
 		let winners = [];
 		
@@ -359,7 +360,7 @@ function    getTournamentMasked(t){
 		players : players,
 		brackets : b
 	};
-	console.log(masked_tournament);
+	// console.log(masked_tournament);
 	return (masked_tournament);
 }
 
@@ -377,7 +378,7 @@ function    getAvailableTournaments(tournaments, username){
 // Update players view of the tournament
 function    updateTournamentPlayers(tournament){
 	let res = getTournamentMasked(tournament);
-	console.log("Trying to update clients");
+	// console.log("Trying to update clients");
 	tournament.getPlayers().forEach(player => {
 		if (player.socket !== null){
 			player.socket.send(JSON.stringify({
@@ -428,7 +429,7 @@ export function	gameInTournament(game_id){
 }
 
 export function matchOver(game){
-	console.log("Match is over");
+	console.log("A Match is over");
 
 	let t = getTournament(tournaments, game.t_id);
 	if (t === undefined){
@@ -513,8 +514,7 @@ function tournamentRoute (fastify, options) {
 				console.error('Invalid JSON:', data.toString());
 				return; // maybe send a mesg to client instead
 			}
-			console.log("Tournament has received a message of type :");
-			console.log(message.type);
+			console.log("Tournament has received a message of type : " + message.type);
 			if (message.type === "start"){
 				// console.log("Starting tournament");
 				if (!t.isReadyToStart()){

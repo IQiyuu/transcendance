@@ -106,7 +106,7 @@ export class   GameController{
         this.online_play_btn.addEventListener("click", (event) => {
             event.preventDefault();
 
-            if (this.ws !== null){
+            if (this.ws !== null && !this.is_searching){
                 alert("ALready in a game");
                 return ;
             }

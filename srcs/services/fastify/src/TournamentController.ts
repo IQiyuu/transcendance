@@ -253,7 +253,8 @@ export class TournamentController {
 
     close(){
         this.game.close();
-        this.ws.close();
+        if (this.ws != null)
+            this.ws.close();
         this.ws = null;
         this.tournament = null;
     }
