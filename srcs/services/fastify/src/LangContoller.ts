@@ -83,6 +83,15 @@ export class LangController{
         document.getElementById('friend_text').textContent = this.file['friends'];
         document.getElementById('histo_text').textContent = this.file['historique'];
 
+        document.getElementById('google_auth_btn').textContent = this.file['google_auth'];
+        if (document.getElementById('fa_btn_enable') != null)
+            document.getElementById('fa_btn_enable').textContent = this.file['2FA_enable'];
+        else
+            document.getElementById('fa_btn_disable').textContent = this.file['2FA_disable'];
+        if (document.getElementById('google_auth_enable') != null)
+            document.getElementById('google_auth_enable').textContent = this.file['google_switch_enabled'];
+        document.getElementById('google_auth_desable').textContent = this.file['google_switch_desable'];
+
         document.getElementById('pass_change').textContent = this.file['pass_change'];
         document.getElementById('pass_current').textContent = this.file['pass_current'];
         document.getElementById('pass_new').textContent = this.file['pass_new'];

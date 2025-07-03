@@ -53,6 +53,7 @@ export class   GameController{
 
     private online_play_btn = document.getElementById("matchmaking");
     private offline_play_btn = document.getElementById("offline");
+    private google_auth = document.getElementById("google_auth");
 
     private game = document.getElementById("game");
     private scoreboard = document.getElementById("scoreboard");

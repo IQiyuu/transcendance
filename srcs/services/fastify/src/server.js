@@ -5,10 +5,12 @@ import fastifyWebsocket from '@fastify/websocket';
 import fastifyMultipart from '@fastify/multipart';
 import jwt from '@fastify/jwt';
 
+
 import ejs from 'ejs'
 import fs from 'fs';
 
 import faRoute from './routes/faRoute.js';
+import GoogleAuthRoute from './routes/googleAuthRoute.js';
 import LogginRoute from './routes/loggingRoute.js'
 import GameRoute from './routes/gameRoute.js'
 import tournamentRoute from './routes/tournament.js'
@@ -26,6 +28,13 @@ import { dirname, join } from "node:path";
 // Removing mongodb, to remove view 
 
 const secretKey = 'bommerang-fleche-upair'; // pas sur de ce que je fais la
+
+//TEMPO FAUT ETTRE CA DANS DES FICHIER
+
+const client = '991272817830-b5g9dhidimfed8nu4d5e9sjcjumr2hnm.apps.googleusercontent.com';
+const secretClient = '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';
+const redirectionUri = 'https://k0r2p5.42mulhouse.fr:3000/callback';
+const redirectionUri2 = 'https://k0r2p5.42mulhouse.fr:3000/callback2';
 
 const rootDir = dirname(dirname(fileURLToPath(import.meta.url))); // Root of the website
 
@@ -55,8 +64,11 @@ db.exec(`
     username TEXT NOT NULL,
     password TEXT NOT NULL,
     twofa TEXT DEFAULT NULL,
-    lang TEXT NOT NULL DEFAULT 'en',
-    picture_path TEXT DEFAULT "standart.jpg",
+    secret TEXT DEFAULT NULL,
+    twofa_activate BOOL DEFAULT FALSE,
+    email TEXT DEFAULT NULL,
+    lang TEXT DEFAULT NULL,
+    picture_path TEXT DEFAULT "../assets/imgs/standart.jpg",
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   );
 
@@ -71,8 +83,6 @@ db.exec(`
   );
   
 `)
-
-const schema = db.prepare("PRAGMA table_info(friends);").all();
 
 fastify.register(fastifyWebsocket);
 
@@ -100,6 +110,15 @@ fastify.register(LogginRoute, {
 fastify.register(faRoute, {
   db: db,
   secretKey: secretKey
+});
+
+fastify.register(GoogleAuthRoute, {
+  db: db,
+  secretKey: secretKey,
+  client: client,
+  secretClient: secretClient,
+  redirectionUri: redirectionUri,
+  redirectionUri2: redirectionUri2
 });
 
 fastify.register(GameRoute, {

@@ -1,8 +1,6 @@
 
 import * as gameRoute from "./gameRoute.js"; // relative to this file
 
-import { request } from "node:http";
-
 async function websocketRoute(fastify, options) {
     const db = options.db;
     let waiting_list = null;
@@ -39,8 +37,6 @@ async function websocketRoute(fastify, options) {
         fastify.get('/ws', { websocket: true }, (socket, req) => {
             const username = req.query.username;
 
-            // console.log(`${username} connected.`);
-
             // Diffuser un message à tout le monde
             function broadcast(message) {
                 for (const [socket, username] of connectedClients) {
@@ -75,7 +71,6 @@ async function websocketRoute(fastify, options) {
 
             // Quand un user ferme sa connexion
             socket.on('close', (rawMessage) => {
-                console.log("CLOSING SOCKET SITE");
                 const data = JSON.parse(rawMessage.toString());
                 if (data.gameId != -1) {
                     if (data.mod == 'l') {
@@ -143,7 +138,6 @@ async function websocketRoute(fastify, options) {
                     } 
                 } else if (data.type === "disconnection") {
                     if (gameId != -1) {
-                        // console.log(games[gameId]);
                         delete gameRoute.games[gameId];
                     }
                 } else if (data.type == "initialized") {

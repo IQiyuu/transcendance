@@ -28,6 +28,11 @@
   "errAuth": "Nom d'utilisateur ou mot de passe incorrect",
   "errReg": "Ce nom d'utilisateur est déjà utilisé",
   "about": "À propos",
+  "google_auth": "Se connecter avec l'authentification Google",
+  "google_switch_enable": "Activer l'authentification Google",
+  "google_switch_desable": "Desactiver l'authentification Google",
+  "2FA_enable": "Activer 2FA",
+  "2FA_disable": "Desactiver 2FA",
 
   "pass_change": "Changer le mot de pass",
   "pass_current": "Mot de passe actuel",

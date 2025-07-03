@@ -33,52 +33,21 @@ export class ClientSocket{
         this.friends = friend;
     }
 
-    // async isLoggedIn() { // maybe useless, as I copied it to controller
-    //     try {
-    //         const response = await fetch('/protected', {
-    //             method: 'GET',
-    //             credentials: 'include',
-    //         });
-
-    //         const data = await response.json();
-
-    //         if (response.ok && data.success) {
-    //             sessionStorage.setItem('username', data.username);
-    //             sessionStorage.setItem('userId', data.id);
-    //             this.username = data.username;
-    //             console.log('Utilisateur connecté:', data.username);
-    //             return (true);
-    //         }
-    //         console.log('Utilisateur non connecté');
-    //         return (false);
-    //     } catch (error) {
-    //         console.error('Erreur lors de la vérification de la connexion:', error);
-    //         return (false);
-    //     }
-    // }
-
     async set_socket(){
         this.ws.onopen = (event) => {
             console.log("Auth connected");
             this.friends.initFriendlist();
-            // this.view_profile.updateProfile();
         }
         
         this.ws.onmessage = (message) => {
             console.log("msg recu: ", message);
             const data = JSON.parse(message.data);
             if (data === null)
-                return ; // ERROR
-            // console.log("You got a mail, ", data.type);
-            // appendMessage(message);
+                return ; 
             if (data.type == "connection") {
-                // this.view.friend_connect();
                 const div = document.getElementById(`${data.user}_friendlist`);
                 const dot = div.getElementsByTagName("span")[0];
                 dot.classList.replace("bg-red-500", "bg-green-500");
-                console.log(dot.classList[4]);
-                console.log(div);
-                console.log(dot);
             } else if (data.type == "disconnection") {
                 const div = document.getElementById(`${data.user}_friendlist`);
                 const dot = div.getElementsByTagName("span")[0];
@@ -89,11 +58,6 @@ export class ClientSocket{
                 this.friends.removeFriend(data.user);
             }
         };
-
-        this.ws.onclose = () => {
-            //
-        }
-
     }
     
     start_matchmaking(){
@@ -111,22 +75,11 @@ export class ClientSocket{
         }));
     }
 
-    // Tell the server game is ready to start
     say_ready(){
         this.ws.send(JSON.stringify({
             type : "game_start"
         }));
     }
-
-    // updatePos(game_id, key, side){
-    //     console.log("Sending " +  game_id + key + side);
-    //     this.ws.send(JSON.stringify({
-    //         type : "game_update",
-    //         game_id : game_id,
-    //         moveUp : key,
-    //         side : side
-    //     }));
-    // }
 
     print_info(){
         console.log("Websocket for : " + this.username);

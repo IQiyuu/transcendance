@@ -27,7 +27,13 @@
   "send_yblock": "You have blocked this user",
   "errAuth": "Incorrect username or password",
   "errReg": "Username already taken",
+  "errMdp": "Password must contain 1 of maj, min, digit, special char",
   "about": "About",
+  "google_auth": "Connecting with Google authentificator",
+  "google_switch_enable": "Enable Google authentificator",
+  "google_switch_desable": "Disable Google authentificator",
+  "2FA_enable": "Enable 2FA",
+  "2FA_disable": "Disable 2FA",
 
   "pass_change": "Change password",
   "pass_current": "Current password",
