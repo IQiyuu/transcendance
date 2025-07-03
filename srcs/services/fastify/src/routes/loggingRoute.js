@@ -1,3 +1,6 @@
+import qrcode from 'qrcode';
+import speakeasy from 'speakeasy';
+
 async function logginRoute (fastify, options) {
   const secretKey = options.secretKey;
   fastify.get('/', async (request, reply) => {
@@ -18,7 +21,6 @@ function isValidPassword(password) {
   // Route pour s'inscrire, verifie que le username n'existe pas
   fastify.post('/register', async (request, reply) => {
     const { username, password } = request.body;
-    // console.log("Données REGISTER reçues :", username, password);
     try {
     const valid = await isValidPassword(password);
       if (valid) {
@@ -42,8 +44,6 @@ function isValidPassword(password) {
       const insert = options.db.prepare('INSERT INTO users (username, password) VALUES (?, ?)');
       insert.run(username, hash_pass);
 
-      // console.log(`User '${username}' added to db`);
-
       const payload = {
         username: username,
       };
@@ -57,8 +57,13 @@ function isValidPassword(password) {
         SameSite: 'Strict',
         maxAge: 86400000,
       });
-      // reply.header('Content-Type', 'application/json');
-      // reply.code(205).send({ success: true, message: `Welcome ${username}` });
+
+      const secret = speakeasy.generateSecret({ name: 'Transcendance 2FA' }); 
+      options.db.prepare('UPDATE users SET secret = ? WHERE username = ?').run(secret.base32, username);
+      qrcode.toDataURL(secret.otpauth_url, (err, data_url) => {
+        if (err) throw err;
+        options.db.prepare('UPDATE users SET twofa = ? WHERE username = ?').run(data_url, username);
+      });
       return { success: true, message: `Welcome ${username}`, username: username };
     } catch (error) {
       console.error('Error insert data in db.', error);
@@ -82,19 +87,22 @@ function isValidPassword(password) {
         if (!isMatch) {
             return reply.send({ success: false, message: 'errAuth' });
         }
+        const value = options.db.prepare('SELECT * FROM users WHERE username = ?').get(username);
+        if (value.twofa_activate == 0)
+        {
+          const payload = {
+            username: username,
+          };
+          const token = fastify.jwt.sign(payload, { expiresIn: '1d' });
 
-        const payload = {
-          username: username,
-        };
-        const token = fastify.jwt.sign(payload, { expiresIn: '1d' });
-
-        reply.setCookie('auth_token', token, {
-          path: '/',
-          httpOnly: true,
-          secure: true,
-          SameSite: 'Strict',
-          maxAge: 3600,
-        });
+          reply.setCookie('auth_token', token, {
+            path: '/',
+            httpOnly: true,
+            secure: true,
+            SameSite: 'Strict',
+            maxAge: 3600,
+          });
+      }
 
         return { success: true, message: `Welcome ${username}`, username: username };
 

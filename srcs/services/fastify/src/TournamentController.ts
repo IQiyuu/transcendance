@@ -44,9 +44,9 @@ export class Tournament {
     }
 
     isStarted(){
-        console.log("Testing start of tournament");
-        console.log(this.brackets);
-        console.log(this.brackets === null);
+        // console.log("Testing start of tournament");
+        // console.log(this.brackets);
+        // console.log(this.brackets === null);
         return (this.brackets === null);
     }
 
@@ -71,7 +71,7 @@ function verifyForm(name){
 export class TournamentController {
 
     /**CONTROLLER */
-    private cws: TournamentClientSocket = null;
+    private ws: TournamentClientSocket = null;
     private site: SiteController = null;
     private username: string = null;
     private tournament: Tournament = null;
@@ -137,7 +137,7 @@ export class TournamentController {
                 const data = await resp.json();
                 if (data.success) {
                     this.tournament = new Tournament(data.tournament);
-                    this.cws = new TournamentClientSocket(this.username, this, this.tournament);
+                    this.ws = new TournamentClientSocket(this.username, this, this.tournament);
                     // console.log(this.tournament);
                     this.hide_all();
                     // this.print_tournament_lobby();
@@ -195,7 +195,7 @@ export class TournamentController {
                                         const data = await resp.json();
                                         if (data.success) {
                                             this.tournament = new Tournament(data.tournament);
-                                            this.cws = new TournamentClientSocket(this.username, this, this.tournament);
+                                            this.ws = new TournamentClientSocket(this.username, this, this.tournament);
 
                                             // console.log(this.tournament);
 
@@ -247,13 +247,15 @@ export class TournamentController {
     }
 
     createMatch(game_id, game){
-        console.log("Creating the match :");
+        console.log("Telling GameCtrler to create the tournament match :");
         console.log(game);
         this.game.startTournamentGame(game_id, game);
     }
 
     endTournament(){
-        this.tournament = null;
+        // this.tournament = null;
+        // this.ws.close();
+        // this.ws = null;
         console.log("EndingTOurnament");
     }
     /**
@@ -286,8 +288,8 @@ export class TournamentController {
 
     print_tournament_lobby(){
         // To recheck 
-        console.log("Printing tournament lobby ( I have this :");
-        console.log(this.tournament);
+        // console.log("Printing tournament lobby ( I have this :");
+        // console.log(this.tournament);
         if (this.tournament === null){
             alert("Not implemented yet (print tournament but tournament is null)");
             return ;
@@ -414,11 +416,16 @@ this.tournament.getPlayers().forEach(p => {
     }
 
     print_tournament(){
+        this.clear_tournament_lobby();
         this.print_tournament_lobby();
         this.clear_tournament_state();
         this.print_tournament_state();
         this.print_tournament_div();
         this.print_tournament_page();
+    }
+
+    clear_tournament_lobby(){
+        this.tournament_lobby.textContent = ''
     }
 
     hide_tournament(){
@@ -443,8 +450,8 @@ this.tournament.getPlayers().forEach(p => {
             if (data.success) {
                 this.tournament = null;
                 this.hide_all();
-                this.cws.close();
-                this.cws = null;
+                this.ws.close();
+                this.ws = null;
                 this.tournament_join_btn.dispatchEvent(new MouseEvent("click"));
             } else {
                 console.log("Didnt leave");
@@ -456,7 +463,7 @@ this.tournament.getPlayers().forEach(p => {
     }
 
     async startTournamentHandler(event) {
-        this.cws.startTournament();
+        this.ws.startTournament();
     }
 
     print_tournament_form() {
@@ -475,6 +482,10 @@ this.tournament.getPlayers().forEach(p => {
         this.tournament_rejoin_btn.classList.replace("flex", "hidden");
     }
 
+    print_tournament_end(){
+        console.log("ToURNAMENT END");
+    }
+
     clear_tournament() {
         this.tournament_lobby.textContent = '';
     }
@@ -482,7 +493,6 @@ this.tournament.getPlayers().forEach(p => {
     clear_tournament_state(){
         this.tournament_state.textContent = '';
     }
-
 
     clear_tournaments() {
         this.tournaments_list.textContent = '';

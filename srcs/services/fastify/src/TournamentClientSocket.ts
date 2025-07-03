@@ -45,23 +45,27 @@ export class TournamentClientSocket{
         }
         
         this.ws.onmessage = (data) => {
-            // console.log("msg recu");
+            console.log("Tournament got a msg");
             const message = JSON.parse(data.data);
-            if (message === null)
+            console.log(message);
+            if (message === null){
+                console.log("TODO");
                 return ; // ERROR
+            }
             if (message.type === "update") {
-                console.log("   tournament has been updated,");
+                console.log("TOUR_S : Tournament has been updated,");
                 console.log(message.tournament);
                 this.ctler.updateTournament(message.tournament);
             } else if (message.type === "started") {
-                console.log("Tournament will start in a few moments");
+                console.log("TOUR_S :Tournament will start in a few moments");
                 this.ctler.updateTournament(message.tournament);
                 this.ctler.print_tournament_state();
             } else if (message.type === "new_match"){
-                console.log("Creating a new tournament match");
+                console.log("TOUR_S : Creating a new tournament match");
                 this.ctler.createMatch(message.game_id, message.game);
             } else if (message.type === "finished"){
-                console.log("Tournament is finished !");
+                console.log("TOUR_S : Tournament is finished !");
+                this.ctler.endTournament();
             } else if (message.type === "error"){
                 console.log(message.message);
             }
@@ -79,13 +83,11 @@ export class TournamentClientSocket{
     }
     
     startTournament(){
-        console.log("Starting tournament ?");
         this.ws.send(JSON.stringify({
             type: "start"
         }));
     }
 
-    // Not usefull ?
     finishTournament(){
 
     }

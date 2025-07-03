@@ -5,6 +5,7 @@ import {GameClientSocket} from "./GameClientSocket.js";
 import {GameController} from "./pong.js";
 import {TournamentController} from "./TournamentController.js";
 import { FriendController } from "./FriendController.js";
+// import { connect } from "http2";
 
 export class   ProfileController{
 
@@ -24,7 +25,15 @@ export class   ProfileController{
     private	search_btn = document.getElementById("search_player_btn");
     private	search_inp = document.getElementById("search_player_in") as HTMLInputElement;
     private	friend_div = document.getElementById("friend_div");
-    private	fa_btn = document.getElementById("fa_btn");
+    private	auth_btn = document.getElementById("auth_btn");
+
+
+    private	check_btn = document.getElementById("check_btn");
+    private google_auth = document.getElementById("google_auth");
+    private fa_btn = document.getElementById("fa_btn");
+    private switch_fa_btn = document.getElementById("switch_fa_btn");
+    private QRCode = document.getElementById("QRCode") as HTMLInputElement;
+    private keys = document.getElementById("keys") as HTMLInputElement;
     private upload_btn = document.getElementById("upload_btn");
     private profile_cross = document.getElementById("profile_cross");
 
@@ -116,7 +125,6 @@ export class   ProfileController{
 
             this.searchError.classList.replace("flex", "hidden");
             this.profile_username = this.search_inp.value;
-            console.log(this.profile_username);
             await this.searchPlayerHandler();
             this.printPage();
         });
@@ -148,16 +156,129 @@ export class   ProfileController{
             if (this.profile_username == this.username)
                 this.camera_icon.classList.replace("opacity-60", "opacity-0");
         });
-        // Activate 2fa
-        this.fa_btn.addEventListener('click', async (event) => {
+        // Activate / Desactivate Google authentificator
+        this.auth_btn.addEventListener('click', async (event) => {
             event.preventDefault();
-            window.open('/2fa', '42 AUTH');
+            const res = await fetch('/check-email-status', {
+            method: 'GET',
+                credentials: 'include', 
+            });
+            if (res.ok) {
+                const data = await res.json();
+                if(data.success == 0)
+                {
+                    window.open('/google-auth', '42 AUTH');
+                    const res2 = await fetch('/check-email-status', {
+                    method: 'GET',
+                        credentials: 'include', 
+                    });
+                    if (res2.ok)
+                    {
+                        const data2 = await res2.json();
+                        if (data2.success == 1)
+                        {
+                            this.google_auth.id = "desable_auth_btn";
+                           // this.google_auth.textContent = "Desactiver Google authentificator";
+                        }
+                    }
+                }
+                else 
+                {
+                    await fetch('/desable_auth');
+                    this.google_auth.id = "auth_btn";
+                    //this.google_auth.textContent = "Activer Google authentificator";
+                }
+            }
+
+        // Connexion with Google authentificator
+        });
+        this.check_btn.addEventListener('click', async (event) => {
+            event.preventDefault();
+            window.open('/check', '42 AUTH');
+            window.addEventListener("message", async (event) => {
+                if (event.origin !== window.location.origin) 
+                    return; 
+                const { username, success } = event.data;
+                const res = await fetch('/check-2fa-status-in', {
+                    method: 'POST',
+                    headers: {
+                    'Content-Type': 'application/json'
+                    },
+                    credentials: 'include', 
+                    body: JSON.stringify({ username : username }) 
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (success && data.success == 0) {
+                        this.site.setUsername(username);
+                        this.site.connect();
+                    }
+                    if (success && data.success == 1)
+                    {
+                        const res = await fetch('/set-user-cookie', {
+                            method: 'POST',
+                            headers: {
+                            'Content-Type': 'application/json'
+                            },
+                            credentials: 'include', 
+                            body: JSON.stringify({ username : username }) 
+                        });
+                        this.site.hide_register_page();
+                        this.site.print_fa_page();
+                    }
+                }
+                else
+                    this.site.connect();
+            });
         });
 
+        this.fa_btn.addEventListener('click', async (event) => {
+            const res = await fetch('/2fa', {
+                method: 'POST',
+                headers: {
+                'Content-Type': 'application/json'
+                },
+                credentials: 'include', 
+                body: JSON.stringify({ userToken: this.keys.value }) 
+            });
+
+            const data = await res.json();
+            if (data.twofa === 1)
+            {
+
+                this.site.setUsername(data.username);
+                this.site.hide_fa_page();
+                this.site.connect();
+            }
+        });
+
+        this.switch_fa_btn.addEventListener('click', async (event) => {
+            event.preventDefault();
+            const res = await fetch('/enable-2fa', {
+                method: 'GET',
+                credentials: 'include'
+            });
+            if (res.ok) {
+            const data = await res.json();
+            if (data.twofa && this.QRCode !== null && data.twofa_activate) {
+                this.switch_fa_btn.textContent = "Desactiver la 2FA";
+                this.QRCode.src = data.twofa.startsWith('data:image') 
+                ? data.twofa 
+                : `data:image/png;base64,${data.twofa}`;
+                this.QRCode.classList.replace("hidden", "block");
+        }
+            else {
+                this.QRCode.classList.replace("block" , "hidden");
+                this.switch_fa_btn.textContent = "Activer la 2FA";
+                
+        }
+
+    }
+
+    });
         this.upload_btn.addEventListener('click', async (event) => {
             event.preventDefault();
 
-            console.log("UGGHVDGHASVFJASVUTASJG");
         });
 
         // croix du changement de photo de profile
@@ -211,7 +332,6 @@ export class   ProfileController{
                     if (!response.ok)
                         console.log("error in file upload.");
                     else {
-                        console.log("file uploaded.");
                         document.getElementById("profile_picture_overlay").classList.replace("flex", "hidden");
                         (document.getElementById("previsu_picture") as HTMLImageElement).src = "";
                         (document.getElementById("file_input") as HTMLInputElement).value = "";
@@ -376,9 +496,8 @@ export class   ProfileController{
             if (!data.success){
 				this.profile_username = this.username;
                 this.searchError.classList.replace("hidden", "flex");
-                throw (Error(data.message)); // Fait du rouge, a modifier
+                throw (Error(data.message));
 			}
-            console.log(data);
             this.profile_username = data.profile.username;
             this.register_date = data.profile.created_at;
             this.picture_path = data.profile.picture_path;
@@ -413,7 +532,6 @@ export class   ProfileController{
         var cpt = 0;
         var w = 0;
         this.histo.forEach((item) => {
-            console.log(item);
             cpt++;
             if (cpt < 6) {
                 let li = document.createElement("li");
@@ -473,6 +591,7 @@ export class   ProfileController{
 
     hide_page(){
         this.profile_page.classList.replace("flex", "hidden");
+
     }
 
     hide_all(){
@@ -531,10 +650,17 @@ export class SiteController{
         return this.lang.getFile()[key];
     }
 
+    setUsername(key: string){
+        this.username = key;
+    }
+
     /**
      * CONTROLLER
      */
     add_events(){
+
+        const google_auth = document.getElementById("google_auth");
+        const switch_fa_btn = document.getElementById("switch_fa_btn");
         // Register/login page
         this.register_link.addEventListener("click", (event) => {
             event.preventDefault();
@@ -574,23 +700,49 @@ export class SiteController{
                 password: password.value,
             };
 
-            // console.log(`Envoi vers ${url}`, body);
             try {
                 const response = await fetch(url, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(body),
                 });
-                
-                // console.log(response);
                 const data = await response.json();
-                // console.log("Réponse du serveur :", data);
                 
                 if (data.success) {
                     this.isRegisterMode = false;
                     this.username = data.username;
-                    this.connect();
-                    // this.ws.print_info();
+                    if (url == "/login")
+                    {
+                        const res = await fetch('/check-2fa-status-in', {
+                            method: 'POST',
+                            headers: {
+                            'Content-Type': 'application/json'
+                            },
+                            credentials: 'include', 
+                            body: JSON.stringify({ username : data.username }) 
+                        });
+                        if (res.ok) {
+                            const twofadata = await res.json();
+                            if (twofadata.success == 1)
+                            {
+                                
+                                const res = await fetch('/set-user-cookie', {
+                                    method: 'POST',
+                                    headers: {
+                                    'Content-Type': 'application/json'
+                                    },
+                                    credentials: 'include', 
+                                    body: JSON.stringify({ username : this.username }) 
+                                });
+                                this.print_fa_page();
+                                this.hide_register_page();
+                            }
+                        }
+                    }
+                    else 
+                    {
+                        this.connect();
+                    }
                     document.getElementById("errorAuth").classList.replace("block", "hidden");
                 } else {
                     const error = document.getElementById("errorAuth") as HTMLParagraphElement;
@@ -624,6 +776,35 @@ export class SiteController{
         // Profile display
         this.profile_btn.addEventListener("click", async (event) => {
             this.hide_menu();
+            event.preventDefault();
+            const res = await fetch('/check-email-status', {
+            method: 'GET',
+                credentials: 'include', 
+            });
+            if (res.ok) {
+                const data = await res.json();
+                if(data.success == 1)
+                {
+                    google_auth.id = "auth_btn_enable";
+                    //google_auth.textContent = "Desactiver Google authentificator";
+                }
+                else 
+                {
+                    google_auth.id = "auth_btn_disable";
+                   // google_auth.textContent = "Activer Google authentificator";
+                }
+            }
+            const res2 = await fetch('/check-2fa-status', {
+            method: 'GET',
+                credentials: 'include', 
+            });
+            if (res2.ok) {
+                const data = await res2.json();
+                if(data.success == 1)
+                    google_auth.id = "fa_btn_enable";
+                else
+                    google_auth.id = "fa_btn_disable";
+            }
             this.profile.printPage();
         });
 
@@ -645,6 +826,7 @@ export class SiteController{
             
             document.getElementById("site").classList.replace("block", "hidden");
             document.getElementById("login-form").classList.replace("hidden", "flex");
+            document.getElementById("fa-form").classList.replace("block", "hidden");
             document.body.classList.add("justify-center", "align-center", "flex");
             this.username = null;
             this.friends.removeEvents();
@@ -688,7 +870,6 @@ export class SiteController{
     }
 
     connect(){
-        // console.log("ICI+"+this.username);
         this.ws = new ClientSocket(this.username);
         
         if (this.lang)
@@ -696,19 +877,12 @@ export class SiteController{
         this.game.setUsername(this.username);
         this.profile.setUsername(this.username);
         this.tournament.setUsername(this.username);
-
         this.store_session(this.username);
-
-        // console.log("Connected, client socket :");
-        // console.log(this.ws);
-
         this.hide_all();
         document.body.classList.remove("justify-center", "align-center", "flex");
         this.print_menu();
         this.friends = new FriendController(this.username, this.lang, this.ws);
-        // console.log(this.username);
         this.ws.setFriend(this.friends, this, this.profile);
-        // console.log(this.friends);
     }
 
     /**
@@ -732,6 +906,13 @@ export class SiteController{
         this.main_page.classList.replace("hidden", "block");
     }
 
+    print_fa_page(){
+        document.getElementById("fa-form").classList.replace("hidden", "block");
+    }
+
+    hide_fa_page(){
+        document.getElementById("fa-form").classList.replace("block", "hidden");
+    }
     print_menu(){
         this.print_main_page();
         this.menu.classList.replace("hidden", "block");
@@ -802,14 +983,11 @@ export class SiteController{
             this.print_register_page();
     }
 
-    // AHHHHHHHHHHHHHh LE GRAAL
     async loadState(obj) {
         this.hide_all();
 
-        // console.log(obj.page);
         switch (obj.page) {
             case "main":
-                // console.log(obj.page);
                 this.print_menu();
                 break ;
             case "profile":

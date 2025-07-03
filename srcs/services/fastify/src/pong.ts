@@ -4,6 +4,9 @@ import { SiteController } from "./SiteController.js";
 const PADDLE_W = 10, PADDLE_H = 80;
 const BALL_W = 10;
 
+let interval_id;
+let anim_interval_id;
+
 // Game for a given client
 export class   GameController{
     /**
@@ -46,8 +49,10 @@ export class   GameController{
 
     private online_play_btn = document.getElementById("matchmaking");
     private offline_play_btn = document.getElementById("offline");
+    private google_auth = document.getElementById("google_auth");
 
     private game = document.getElementById("game");
+    private scoreboard = document.getElementById("scoreboard");
 
     private left_player_tag = document.getElementById("player-left");
     private right_player_tag = document.getElementById("player-right");
@@ -59,9 +64,6 @@ export class   GameController{
     private l_paddle = document.getElementById("l_paddle");
     private r_paddle = document.getElementById("r_paddle");
 
-    //      Interval for animations
-    private interval_id;
-
 
     constructor(site){
         this.site = site;
@@ -69,6 +71,10 @@ export class   GameController{
 
     setUsername(username){
         this.username = username;
+    }
+
+    getUsername(){
+        return (this.username);
     }
 
     getSide(){
@@ -154,9 +160,13 @@ export class   GameController{
      *  Handler function that tell the server when user move
      * (W and S for left player if 2 player, else UP and DOWN)
      *  */
-    moves(obj, ws){
-        // console.log("Moves");
+    moves(obj : GameController, ws : GameClientSocket){
         obj.draw();
+        // console.log("BUG ?" + ws);
+        if (ws === undefined){
+            console.log("Erreur");
+            return ;
+        }
         if (obj.key_state["ArrowUp"] || obj.key_state["ArrowDown"]) {
             ws.updatePos(obj.getGameId(), obj.key_state["ArrowUp"], obj.isLocal() ? "right" : obj.getSide());
         }
@@ -189,13 +199,11 @@ export class   GameController{
     }
 
     startTournamentGame(game_id, game){
-        this.ws = new GameClientSocket(this.username, this, game_id);
 		this.is_tournament = true;
         if (this.username === game.players.right)
             this.side = "right";
-        this.site.hide_all();
-        this.print_game();
-        this.print_play_page();
+        this.ws = new GameClientSocket(this.username, this, game_id);
+        // this.site.hide_all();
         this.updateState(game);
         this.gameInit();
     }
@@ -220,13 +228,18 @@ export class   GameController{
         document.addEventListener("keydown", this.key_handler);
 
         this.print_player_names();
+        this.print_scoreboard();
+        this.print_game();
+        this.print_play_page();
 
         this.ball.style.position="absolute";
         this.l_paddle.style.position="absolute";
         this.r_paddle.style.position="absolute";
 
+        // let moves = this.moves.bind(this);
         //testing maybe not here
-        this.interval_id = setInterval(this.moves, 10, this, this.ws);
+        // this.moves.bind(this);
+        interval_id = setInterval(this.moves, 10, this, this.ws);
     }
 
     async registerGame() {
@@ -262,14 +275,23 @@ export class   GameController{
     finishGame(){
         document.removeEventListener("keyup", this.key_handler)
         document.removeEventListener("keydown", this.key_handler)
-        clearInterval(this.interval_id);
-        this.hide_game();
-        this.print_end_game();
+        clearInterval(interval_id);
 
-        //saving the game on the server
-        // if (!this.is_local && this.side === "left") // then if right user 
-            // this.registerGame();
-    }
+        console.log("closing socket after game finished");
+        this.ws.close();
+        this.ws = null;
+        
+        this.hide_scoreboard()
+        this.hide_game();
+        this.print_match_end();
+        if (this.is_tournament){
+            console.log("Game finished ending");
+            //sleep here 5 seconds ?? 
+        }
+        this.is_local = false;
+        this.is_searching = false;
+        this.is_tournament = false;
+        }
 
     /**
      * VIEW
@@ -280,29 +302,24 @@ export class   GameController{
         document.getElementById("matchmaking").innerHTML = "<span id='waiting_online'>waiting</span>"
             + "<span id='dots'></span>"
             + "<br><span id='cancel_game'>click to cancel ❌</span>";
-        this.interval_id = window.setInterval(() => {
+        anim_interval_id = window.setInterval(() => {
             count++;
             document.getElementById("dots").innerHTML = '.'.repeat(count % 3) + "<br>";
             //document.getElementById("matchmaking").textContent = "\nclick to cancel";
         }, 500);
         this.site.loadLang();
-        // this.interval_id = setInterval(() => {
-        //     btn.textContent = waiting + '.'.repeat(count % 3);
-        // }, 500);
+
     }
 
     stop_matchmaking_animation(){
         document.getElementById("matchmaking").innerHTML = "";
         this.site.loadLang();
-        clearInterval(this.interval_id);
+        clearInterval(anim_interval_id);
         this.online_play_btn.textContent = this.site.getText('play_online');
     }
 
     // Update every game values
     updateState(game){
-        // console.log("Updating game");
-        // console.log(game);
-
         this.game_id = game.id;
 
         this.l_score = game.scores.left;
@@ -377,11 +394,11 @@ export class   GameController{
     }
 
     print_scoreboard(){
-        this.game.classList.replace("hidden", "flex");
+        this.scoreboard.classList.replace("hidden", "flex");
     }
 
     hide_scoreboard(){
-        this.game.classList.replace("flex", "hidden");
+        this.scoreboard.classList.replace("flex", "hidden");
     }
 
     print_game(){
@@ -392,12 +409,12 @@ export class   GameController{
         this.game.classList.replace("flex", "hidden");
     }
 
-    print_end_game(){
-        alert("To do, but game finished");
+    print_match_end(){
+        console.log("MATCH END");
     }
 
-    hide_end_game(){
-        console.log("Maybe clearing the text ?");
+    hide_match_end(){
+        console.log("TODO");
     }
 
     // Not to be added to hide_all

@@ -60,11 +60,14 @@
     <!-- LOGIN FORM -->
     <div id="login-form" class="hidden flex-col p-6 items-center justify-center bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 max-w-sm w-full">
         <h1 class="underline text-white text-4xl text-center mb-4" id="form-title">Connexion</h1>
-
+        <button id="check_btn" class="flex relative px-6 py-3 text-white font-bold text-lg rounded-lg bg-gradient-to-r from-pink-500 via-yellow-400 to-green-500 animate-pulse shadow-lg hover:shadow-xl transition duration-300">
+            <span id="google_auth" class="relative z-10">Se connecter avec Google authentificator</span>
+            <span class="absolute inset-0 bg-white opacity-10 rounded-lg blur-sm"></span>
+        </button>
         <form class="w-full" id="form">
             <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="username">Username</label>
             <input class="mb-4 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" id="username" name="username" required />
-
+            
             <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="password">Password</label>
             <input class="mb-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" id="password" name="password" type="password" required />
 
@@ -75,6 +78,16 @@
             <button id="login_btn" class="w-full text-white bg-gradient-to-br from-green-400 to-blue-600 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-green-200 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center" type="submit">Se connecter</button>
         </form>
     </div>
+
+    <div id="fa-form"  class="hidden flex-col p-6 items-center justify-center bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 max-w-sm w-full">
+         <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="username">Code 2FA</label>
+        <input class="mb-4 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" id="keys" name="keys" required />
+        <button id="fa_btn" class="flex relative px-6 py-3 text-white font-bold text-lg rounded-lg bg-gradient-to-r from-pink-500 via-yellow-400 to-green-500 animate-pulse shadow-lg hover:shadow-xl transition duration-300">
+            <span class="relative z-10">Connexion</span>
+            <span class="absolute inset-0 bg-white opacity-10 rounded-lg blur-sm"></span>
+        </button>
+    </div>
+
 
     <div id="site" class="hidden">
         <div id="pong-game">
@@ -192,18 +205,25 @@
                             <button id="friend_btn" class="px-6 py-2 bg-gradient-to-r from-green-400 to-blue-600 text-white rounded-lg hover:bg-gradient-to-bl transition-all duration-300">Add Friend</button>
                             <button id="block_btn" class="px-6 py-2 bg-gradient-to-r from-red-400 to-yellow-600 text-white rounded-lg hover:bg-gradient-to-bl transition-all duration-300">Block</button>
                         </div>
+
+                        <button id="auth_btn" class="flex relative px-6 py-3 text-white font-bold text-lg rounded-lg bg-gradient-to-r from-pink-500 via-yellow-400 to-green-500 animate-pulse shadow-lg hover:shadow-xl transition duration-300">
+                            <span id="google_auth_enable" class="relative z-10">Activer Google authentificator</span>
+                            <span class="absolute inset-0 bg-white opacity-10 rounded-lg blur-sm"></span>
+                        </button>
+
+                        <button id="switch_fa_btn" class="flex relative px-6 py-3 text-white font-bold text-lg rounded-lg bg-gradient-to-r from-pink-500 via-yellow-400 to-green-500 animate-pulse shadow-lg hover:shadow-xl transition duration-300">
+                            <span id="fa_btn_enable" class="relative z-10">Activer la 2FA</span>
+                            <span class="absolute inset-0 bg-white opacity-10 rounded-lg blur-sm"></span>
+                        </button>
+                        <img id="QRCode" class=" hidden w-full h-full shadow-lg object-cover" src=""/>
                         <div class="flex">
-                            <!-- Premier bouton -->
-                            <button id="fa_btn" class="flex relative px-6 py-3 text-white font-bold text-lg rounded-lg bg-gradient-to-r from-pink-500 via-yellow-400 to-green-500 animate-pulse shadow-lg hover:shadow-xl transition duration-300 mr-5">
-                              <span class="relative z-10">2FA</span>
-                              <span class="absolute inset-0 bg-white opacity-10 rounded-lg blur-sm"></span>
-                            </button>
                           
                             <!-- Deuxième bouton (popup) -->
                             <button id="jsp_btn" class="flex relative px-6 py-3 bg-pink-700 text-white rounded-full hover:bg-blue-700">
                               <i class="fas fa-key mr-2"></i> 🔑
                             </button>
                         </div>
+
 
                         <!-- Date de création -->
                         <p id="profile_creation" class="mt-4 text-sm text-gray-300"></p>
@@ -314,14 +334,14 @@
 <!-- JEU -->
 <div id="game_page" class="hidden inset-0 flex-col items-center justify-center space-y-6">
     <!-- SCOREBOARD au-dessus -->
-    <div id="scoreboard" class="block text-3xl font-stretch-ultra-condensed font-roboto text-center" >
+    <div id="scoreboard" class="hidden block text-3xl font-stretch-ultra-condensed font-roboto text-center" >
         <span id="player-left" class="w-[85%] transition-all duration-500 ease-in-out cursor-pointer p-10 text-5xl font-extrabold text-white bg-gradient-to-r from-fuchsia-500 via-red-500 to-orange-400  rounded-xl border-4 border-white shadow-lg text-center tracking-wide select-none">Player 1</span> 
         <span id="score-left" class="w-[85%] transition-all duration-500 ease-in-out cursor-pointer p-10 text-5xl font-extrabold text-white bg-gradient-to-r from-fuchsia-500 via-red-500 to-orange-400  rounded-xl border-4 border-white shadow-lg text-center tracking-wide select-none">0</span>
         <span id="score-right" class="w-[85%] transition-all duration-500 ease-in-out cursor-pointer p-10 text-5xl font-extrabold text-white bg-gradient-to-r from-emerald-400 via-teal-400 to-lime-400 rounded-xl border-4 border-white shadow-lg text-center tracking-wide select-none">0</span>
         <span id="player-right" class="w-[85%] transition-all duration-500 ease-in-out cursor-pointer p-10 text-5xl font-extrabold text-white bg-gradient-to-r from-emerald-400 via-teal-400 to-lime-400 rounded-xl border-4 border-white shadow-lg text-center tracking-wide select-none">Player 2</span>
     </div>
     <!-- Game -->
-    <div id="game" class="relative w-[700px] h-[480px] bg-red-500 mx-auto my-10">
+    <div id="game" class="hidden relative w-[700px] h-[480px] bg-red-500 mx-auto my-10">
         <div id="l_paddle" class="absolute bg-black w-[10px] h-[80px]"></div>
         <div id="ball" class="absolute bg-black w-[10px] h-[10px]"></div>
         <div id="r_paddle" class="absolute bg-black w-[10px] h-[80px]"></div>
