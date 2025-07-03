@@ -218,6 +218,10 @@ export class   GameController{
             this.ws.close();
             this.ws = null;
         }
+        this.game_id = -1;
+        this.is_local = false;
+        this.is_searching = false;
+        this.is_tournament = false;
 		// is_tournament ?
     }
 
@@ -280,7 +284,7 @@ export class   GameController{
         clearInterval(game_interval_id);
         document.removeEventListener("keyup", key_handler);
         document.removeEventListener("keydown", key_handler);
-        console.log(document);
+        // console.log(document);
         this.hide_scoreboard()
         this.hide_game();
         this.print_match_end();

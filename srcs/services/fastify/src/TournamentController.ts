@@ -257,6 +257,7 @@ export class TournamentController {
         // this.ws.close();
         // this.ws = null;
         console.log("EndingTOurnament");
+        this.game.close()
     }
     /**
      * VIEW METHODS

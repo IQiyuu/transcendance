@@ -12,7 +12,7 @@ function degToRad(degree){
 
 // Each position is the center of the object
 
-const	SCORE_GOAL = 11;
+const	SCORE_GOAL = 5;
 const	STARTING_SPEED = 10;
 const	ACCELERATION = 1;
 const	LIMIT_SPEED = 13;
