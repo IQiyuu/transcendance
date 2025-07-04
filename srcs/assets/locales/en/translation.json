@@ -69,5 +69,9 @@
   "lst_tour": "List of tournaments",
   "crea_tour": "🎯 Create tournament",
   "nam_tour": "Tournament name",
-  "crea_tour_btn": "Create"
+  "crea_tour_btn": "Create",
+  "tour_win_msg": "You won the tournament 👑",
+  "tour_quit_btn": "Leave",
+  "tour_lose_msg": "You lost the tournament 😞🪢",
+  "tour_bracket": "Bracket"
 }

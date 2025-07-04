@@ -67,5 +67,9 @@
   "lst_tour": "Liste des tournois",
   "crea_tour": "🎯 Creation du tournoi",
   "nam_tour": "Nom du tournoi",
-  "crea_tour_btn": "Creer"
+  "crea_tour_btn": "Creer",
+  "tour_win_msg": "Tu as remporté le tournoi 👑",
+  "tour_quit_btn": "Quitter",
+  "tour_lose_msg": "Tu as perdu le tournoi 😞🪢",
+  "tour_bracket": "Arbre du tournoi"
 }

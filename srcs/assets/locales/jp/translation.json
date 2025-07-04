@@ -69,5 +69,9 @@
   "lst_tour": "トーナメント一覧",
   "crea_tour": "🎯トーナメントを作成する",
   "nam_tour": "トーナメント名",
-  "crea_tour_btn": "作成"
+  "crea_tour_btn": "作成",
+  "tour_win_msg": "あなたはトーナメントで優勝しました 👑",
+  "tour_quit_btn": "離れる",
+  "tour_lose_msg": "あなたはトーナメントに負けました 😞🪢",
+  "tour_bracket": "ブラケット"
 }
