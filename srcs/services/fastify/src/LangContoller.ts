@@ -83,6 +83,7 @@ export class LangController{
         document.getElementById('about_button').textContent = this.file['about'];
         document.getElementById('friend_text').textContent = this.file['friends'];
         document.getElementById('histo_text').textContent = this.file['historique'];
+        document.getElementById('about').textContent = this.file['about_content'];
 
         document.getElementById('google_auth_btn').textContent = this.file['google_auth'];
         if (document.getElementById('fa_btn_enable') != null)

@@ -308,53 +308,70 @@
 
 </div>
     
-<div id="about" class="hidden overflow-y-auto h-[500px] whitespace-pre-line text-white font-bold flex-col items-center justify-start px-4 w-3/4 mx-auto bg-gradient-to-br from-green-400 via-cyan-500 to-blue-500 p-6 rounded-xl shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
-
-🎮 Transcendence - Pong Multijoueur en ligne
-🧠 À propos du projet
-
-Transcendence est un projet de l'école 42 qui consiste à développer un jeu Pong moderne et complet en fullstack, avec une interface utilisateur interactive et des fonctionnalités de réseau.
-Ce projet a pour but de consolider les compétences en développement web en utilisant des technologies modernes côté frontend et backend, tout en intégrant des fonctionnalités temps réel comme des parties en ligne, un chat, et un système d'amis.
-
-⚙️ Technologies utilisées :
-
-    Frontend : React, TypeScript, WebSocket, Tailwindcss
-    Backend : TypeScript, Fastify
-    Authentification : 2FA (Two-Factor Authentication)
-    WebSocket : pour le jeu en temps réel et le chat
-    Docker : pour le déploiement
-
-🏓 Description du jeu
-
-Le jeu est une version améliorée du classique Pong, avec des parties 1v1 jouables en ligne, des tournois et un classement. Les joueurs peuvent s'inscrire, personnaliser leur profil, discuter entre eux et défier leurs amis.
-
-🕹️ Commandes pour jouer
-
-Commandes clavier disponibles :
-Action                 Touche(s)
-Monter la raquette     ↑ (Flèche Haut) ou W
-Descendre la raquette  ↓ (Flèche Bas) ou S
-
-💡 Fonctionnalités du site
-
-- 🎮 Jeu multijoueur en temps réel
-- 💬 Chat en direct avec les autres joueurs
-- 🧑‍🤝‍🧑 Système d’amis et invitations aux matchs
-- 🏆 Tournois et classement global
-- 🔒 Authentification sécurisée avec 2FA
-- 🌐 Interface multilingue (FR/EN)
-- 👤 Profils utilisateurs personnalisables
-- 📱 Interface responsive adaptée à toutes les tailles d’écran
-
-🔐 Bouton "Logout" (Déconnexion)
-
-En haut à droite de l’interface, le bouton "Logout" permet à l’utilisateur de se déconnecter en toute sécurité de son compte. Cette action met fin à la session active et redirige vers la page d'accueil ou de connexion.
-
-🌍 Changement de langue
-
-En haut à gauche du site, une option permet de changer la langue de l’interface. Cela permet à l'utilisateur de naviguer en français ou en anglais, selon sa préférence. Les textes de l'interface, les boutons et les messages s’adaptent dynamiquement à la langue sélectionnée.
+<div id="about" class="hidden overflow-y-auto h-[600px] whitespace-pre-wrap text-white font-bold flex-col items-center justify-start px-4 w-3/4 mx-auto bg-gradient-to-br from-green-400 via-cyan-500 to-blue-500 p-6 rounded-xl shadow-lg transform transition-all duration-300">
 </div>
-      
+
+<!-- 🏓 Transcendence — Jeu Pong Multijoueur en Ligne
+
+Transcendence est une version modernisée du célèbre jeu Pong, conçue pour une expérience en ligne fluide, compétitive et sociale. Il inclut des tournois, un système d’amis, et une interface multilingue.
+⚙️ Technologies utilisées
+
+    Frontend : React, TypeScript, WebSocket, TailwindCSS
+
+    Backend : TypeScript, Fastify
+
+    WebSocket : pour le jeu en temps réel et le chat
+
+    Authentification : 2FA (Two-Factor Authentication), Google OAuth
+
+    Docker : pour le déploiement en container
+
+🧩 Description du jeu
+
+Le jeu se joue en 1v1 en ligne. Chaque joueur contrôle une raquette et tente de marquer des points en dépassant son adversaire. Le jeu inclut :
+
+    Des parties en ligne
+
+    Des tournois à élimination directe
+
+    Un classement global
+
+    🕹️ Commandes de jeu
+    Monter la raquette	↑ ou W
+    Descendre la raquette	↓ ou S
+
+💡 Fonctionnalités principales
+
+    🎮 Jeu multijoueur en temps réel via WebSocket
+
+    🧑‍🤝‍🧑 Système d’amis
+
+    🏆 Organisation de tournois
+
+    🔒 Connexion sécurisée avec authentification 2FA, Google OAuth
+
+    🌐 Interface multilingue : Français 🇫🇷, Anglais 🇬🇧, Japonais 🇯🇵
+
+    👤 Profils utilisateurs personnalisables
+    \t📸 Changement d’image de profil
+    ✏️ Changement de pseudo en double-cliquant dessus
+
+🔐 Déconnexion sécurisée
+
+Le bouton Logout est situé en haut à droite de l’interface. Il permet à l’utilisateur de mettre fin à sa session en toute sécurité et de revenir à l’écran de connexion.
+🌍 Sélecteur de langue
+
+Une option en haut à gauche permet de changer la langue de l’interface à tout moment. Tous les textes (boutons, messages, menus) s’adaptent automatiquement selon la langue choisie.
+
+🔐 Connexion via Google
+
+Lorsque vous vous connectez pour la première fois avec votre compte Google, un pseudo temporaire vous est automatiquement attribué sous la forme :
+
+guess_0, guess_1, guess_2, etc.
+
+Un mot de passe par défaut "default" est également défini pour votre compte.
+Vous pouvez à tout moment personnaliser votre pseudo et votre mot de passe depuis votre profil utilisateur. -->
+
     </div>
 
 <div id="offline-confirm-modal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
