@@ -339,7 +339,7 @@ export class   ProfileController{
                         document.getElementById("profile_picture_overlay").classList.replace("flex", "hidden");
                         this.previ_pp.src = "";
                         (document.getElementById("file_input") as HTMLInputElement).value = "";
-                        this.picture_path = "../assets/imgs/" + this.username + ".jpg";
+                        this.picture_path = "assets/imgs/" + this.username + ".jpg";
                         (this.profile_picture as HTMLImageElement).src = this.picture_path + "?" + new Date().getTime();
                     }
                 } catch (error) {
@@ -503,6 +503,8 @@ export class   ProfileController{
             this.profile_username = data.profile.username;
             this.register_date = data.profile.created_at;
             this.picture_path = data.profile.picture_path;
+            console.log(this.picture_path);
+            console.log(data.profile);
         } catch (error){
             console.log(error);
         }
@@ -574,7 +576,7 @@ export class   ProfileController{
         //profile
         this.profile_page.classList.replace("hidden", "flex");
         this.profile_username_tag.innerText = this.profile_username;
-        (this.profile_picture as HTMLImageElement).src = "../assets/imgs/" + this.picture_path + "?" + new Date().getTime(); // jsp ??
+        (this.profile_picture as HTMLImageElement).src = "assets/imgs/" + this.picture_path + "?" + new Date().getTime(); // jsp ??
         this.register_date_tag.innerText = `${this.site.getText("member_since")}: ${this.register_date}`;
 
 		if (this.profile_username != this.username){
@@ -722,6 +724,7 @@ export class SiteController{
                 const data = await response.json();
                 
                 if (data.success) {
+                    console.log("OUIII");
                     this.isRegisterMode = false;
                     this.username = data.username;
                     if (url == "/login")
@@ -735,10 +738,11 @@ export class SiteController{
                             body: JSON.stringify({ username : data.username }) 
                         });
                         if (res.ok) {
+                            console.log("OUIII2");
                             const twofadata = await res.json();
                             if (twofadata.success == 1)
                             {
-                                
+                                console.log("OUIII3");
                                 const res = await fetch('/set-user-cookie', {
                                     method: 'POST',
                                     headers: {
@@ -749,13 +753,12 @@ export class SiteController{
                                 });
                                 this.print_fa_page();
                                 this.hide_register_page();
-                            }
+                            } else 
+                                this.connect();
                         }
                     }
                     else 
-                    {
                         this.connect();
-                    }
                     document.getElementById("errorAuth").classList.replace("block", "hidden");
                 } else {
                     const error = document.getElementById("errorAuth") as HTMLParagraphElement;

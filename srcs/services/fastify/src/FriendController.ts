@@ -99,7 +99,7 @@ export class FriendController {
         console.log(this.username);
         console.log(friend_uname);
         const body = {
-            user: this.username,
+            username: this.username,
             friend: friend_uname,
         }
 
@@ -148,7 +148,7 @@ export class FriendController {
     async handleBlockClick(event: Event) {
         const toBlock = document.getElementById("profile_username").textContent;
         const body = {
-            user: this.username,
+            username: this.username,
             friend: toBlock,
         }
 

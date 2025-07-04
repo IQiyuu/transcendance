@@ -181,7 +181,6 @@ function    getMaskedGame(game){
     return (g);
 }
 export async function gameRoute (fastify, options) {
-    let img_path = "dist/assets/imgs/"; //to update 
 
     const amIInGame = async (request, reply) => {
         const { id } = request.body.id;

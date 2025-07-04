@@ -2,18 +2,16 @@
 async function dbRoute (fastify, options) {
     let db = options.db;
     let secretKey = options.secretKey;
+    let img_path = "dist/assets/imgs/";
 
     const usernameTester = async (request, reply) => {
         var username = null;
         if (request.body)
             username = request.body.username;
-        console.log(username);
         if (username == null && request.params)
             username = request.params.username;
-        console.log(username);
         if (username == null)
             return reply.send({ success: false, error: "username error" });
-        console.log(username);
         const token = request.cookies.auth_token;
 
         if (!token) {
@@ -46,8 +44,8 @@ async function dbRoute (fastify, options) {
             const username = request.params.username;
             // console.log(username);
             // ajouter l'image de profile
-            if (!userExistsInDb(username, options.db))
-                return {success: false, message: "User doesn't exists"};
+            if (!db.prepare(`SELECT username FROM users WHERE username = ?`).get(username))
+                return {success: false, message: "User don't exists"};
             const data = options.db.prepare('SELECT username, created_at, picture_path FROM users WHERE username = ?').get(username);
             // console.log(`Profile fetched from db: `, data);
             if (data === null || data === undefined)
@@ -227,7 +225,7 @@ async function dbRoute (fastify, options) {
             db.prepare(`UPDATE users
                 SET lang = ?
                 WHERE username = ?;
-            `).run(body.lang, body.user);
+            `).run(body.lang, body.username);
             reply.send({success: true});
         } catch (error) {
             console.log("error: ", error);
@@ -314,7 +312,7 @@ async function dbRoute (fastify, options) {
         const body = request.body;
         
         try {
-            const userId = getIdFromUsername(body.user);
+            const userId = getIdFromUsername(body.username);
             const friendId = getIdFromUsername(body.friend);
 
             const datas = getFriendRelation(userId, friendId);
@@ -353,7 +351,7 @@ async function dbRoute (fastify, options) {
         const body = request.body;
         
         try {
-            const userId = getIdFromUsername(body.user);
+            const userId = getIdFromUsername(body.username);
             const friendId = getIdFromUsername(body.friend);
 
             const datas = getFriendRelation(userId, friendId);

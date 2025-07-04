@@ -145,7 +145,7 @@ export class LangController{
                 return ;
 
             const body = {
-                user: this.username,
+                username: this.username,
                 lang: val
             };
             try {
