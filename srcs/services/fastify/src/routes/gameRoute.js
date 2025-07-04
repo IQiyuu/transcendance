@@ -11,9 +11,9 @@ function degToRad(degree){
 // Each position is the center of the object
 
 const	SCORE_GOAL = 5;
-const	STARTING_SPEED = 10;
+const	STARTING_SPEED = 5;
 const	ACCELERATION = 1;
-const	LIMIT_SPEED = 13;
+const	LIMIT_SPEED = 10;
 const	BOARD_W = 700;
 const	BOARD_H = 480;
 
@@ -60,14 +60,13 @@ export function createGame(user, user2, t_id = null) {
             y: STARTING_Y,
             dx: Math.cos(angle) * (neg_x ? -1 : 1),
             dy: Math.sin(angle) * (neg_y ? -1 : 1),
-            dist: -1,
             v: STARTING_SPEED,
             accelerate: function() {
                 if (this.v < LIMIT_SPEED)
                     this.v += ACCELERATION;
             },
             randomizeVector: function() {
-                const angle = degToRad(randomIntFromInterval(0, 45));
+                const angle = degToRad(randomIntFromInterval(15, 45));
                 const neg_x = randomIntFromInterval(0,1), neg_y = randomIntFromInterval(0,1);
                 this.dx = Math.cos(angle) * (neg_x ? -1 : 1);
                 this.dy = Math.sin(angle) * (neg_y ? -1 : 1);
@@ -434,11 +433,11 @@ export async function gameRoute (fastify, options) {
                 let dist = Math.abs(game.ball.y - game.paddles.left.y);
                 let sign = game.ball.dy < 0 ? -1 : 1; // test if vector is neg
                 let angle = 90;
-                if (dist > (3 * 50) / 4)
+                if (dist > (3 * (PADDLE_H / 2)) / 4)
                     angle += 45;
-                else if (dist > (2 * 50) / 4)
+                else if (dist > (2 * (PADDLE_H / 2)) / 4)
                     angle += 65;
-                else if (dist > 50 / 4)
+                else if (dist > (PADDLE_H / 2) / 4)
                     angle += 80;
                 else
                     angle += 90;
@@ -453,11 +452,11 @@ export async function gameRoute (fastify, options) {
                 let dist = Math.abs(game.ball.y - game.paddles.right.y);
                 let sign = game.ball.dy < 0 ? -1 : 1;
                 let angle = 90;
-                if (dist > (3 * 50) / 4)
+                if (dist > (3 * (PADDLE_H / 2)) / 4)
                     angle += 45;
-                else if (dist > (2 * 50) / 4)
+                else if (dist > (2 * (PADDLE_H / 2)) / 4)
                     angle += 65;
-                else if (dist > 50 / 4)
+                else if (dist > (PADDLE_H / 2) / 4)
                     angle += 80;
                 else
                     angle += 90;

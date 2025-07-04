@@ -185,8 +185,6 @@ export class   GameController{
         }
     }
 
-    // 2 cas de fermeture de socket (local and online ) to check later !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
     startTournamentGame(game_id, game){
 		this.is_tournament = true;
         console.log("Creating a tournament game :");

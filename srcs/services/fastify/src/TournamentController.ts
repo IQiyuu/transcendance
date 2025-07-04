@@ -470,7 +470,8 @@ export class TournamentController {
             if (data.success) {
                 this.tournament = null;
                 this.hide_all();
-                this.ws.close();
+                if (this.ws != null)
+                    this.ws.close();
                 this.ws = null;
                 this.tournament_join_btn.dispatchEvent(new MouseEvent("click"));
             } else {

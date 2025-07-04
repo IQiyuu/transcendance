@@ -6,7 +6,7 @@
 #    By: ggiboury <ggiboury@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/22 15:00:40 by ggiboury          #+#    #+#              #
-#    Updated: 2025/06/16 15:05:45 by ggiboury         ###   ########.fr        #
+#    Updated: 2025/07/04 18:39:49 by ggiboury         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -85,6 +85,7 @@ check: $(SRCS)
 
 $(SECRETS):
 	mkdir -p $(SECRETS)
+	touch $(SECRETS)/api.txt
 
 $(SSL_CERTIFICATE) &: | $(SECRETS)
 	@if [ -e ${SECRETS}/ssl.crt -a -e ${SECRETS}/ssl.key ] ; then \
