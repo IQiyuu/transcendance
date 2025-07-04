@@ -188,8 +188,6 @@ export class   GameController{
 
     startTournamentGame(game_id, game){
 		this.is_tournament = true;
-        if (this.username === game.players.right)
-            this.side = "right";
         console.log("Creating a tournament game :");
         if (this.ws === null)
             this.ws = new GameClientSocket(this.username, this, game_id);
@@ -199,6 +197,8 @@ export class   GameController{
             this.ws.setGameId(game_id);
             this.ws.startTournamentGame();
         }
+        if (this.username === game.players.right)
+            this.side = "right";
         this.updateState(game);
         this.gameInit();
     }

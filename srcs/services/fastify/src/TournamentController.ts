@@ -248,6 +248,9 @@ export class TournamentController {
     endTournament(){
         // this.ws = null;
         console.log("EndingTOurnament");
+        this.clear_tournament_lobby();
+        this.hide_tournament_lobby();
+        this.print_tournament_end()
         this.close()
     }
 
