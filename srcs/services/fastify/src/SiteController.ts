@@ -248,7 +248,7 @@ export class   ProfileController{
             if (res.ok) {
                 const data = await res.json();
                 if (data.twofa && this.QRCode !== null && data.twofa_activate) {
-                    this.switch_fa_btn.textContent = this.site.getText("2FA_disable");
+                    document.getElementById("fa_btn_enable").textContent = this.site.getText("2FA_disable");
                     this.QRCode.src = data.twofa.startsWith('data:image') 
                     ? data.twofa 
                     : `data:image/png;base64,${data.twofa}`;
@@ -256,7 +256,7 @@ export class   ProfileController{
                 }
                 else {
                     this.QRCode.classList.replace("block" , "hidden");
-                    this.switch_fa_btn.textContent = this.site.getText("2FA_enable");
+                    document.getElementById("fa_btn_enable").textContent = this.site.getText("2FA_enable");
                 }
             }
 
@@ -376,6 +376,7 @@ export class   ProfileController{
                 this.closePasswordPopup();
                 this.password_form.reset();
             } catch (error) {
+                console.log("AFBHJDKFBJBFGJSDHKYUSJFVSGJDJGSDHFGJHSDKSHJDFBJHKSDBJ");
                 this.passError.textContent = this.site.getText(error);
                 alert(error.message);
             }
@@ -462,7 +463,7 @@ export class   ProfileController{
                 this.site.setUsernames(this.username);
                 console.log("username updated.");
             } catch (error) {
-
+                console.log("sfsdfSUFHUFHfsdfdsfsdfdsfsfdsSDHDSLFHS");
                 alert(error.message);
             }
         }
@@ -548,6 +549,7 @@ export class   ProfileController{
             
             this.wr_card.textContent = `wr : ${(w / cpt * 100).toFixed(0)}%`;
             this.wr.textContent = `${w} / ${cpt}`;
+            document.getElementById("percent").setAttribute("stroke-dasharray", `${(w/cpt)*100}, 100`);
         });
 
         if (cpt == 0) {
@@ -558,6 +560,7 @@ export class   ProfileController{
 
     async	printPage(){
         if (this.profile_username === null){
+            this.resetBtn();
             this.profile_username = this.username;
             await this.searchPlayerHandler();
         }
@@ -591,14 +594,13 @@ export class   ProfileController{
                 body: JSON.stringify({ username: this.username }) 
             });
             if (res.ok) {
+                console.log("SUFHUFHSDHDSLFHS");
                 const data = await res.json();
                 if (data.success == 1) {
                     document.getElementById("fa_btn_enable").textContent = this.site.getText("2FA_disable");
-                    document.getElementById("fa_btn_enable").classList.replace("fa_btn_enable", "fa_btn_disable");
                 }
                 else {
                     document.getElementById("fa_btn_enable").textContent = this.site.getText("2FA_enable");
-                    document.getElementById("fa_btn_enable").classList.replace("fa_btn_disable", "fa_btn_enable");
                 }
             }
             const resp = await fetch('/check-email-status', {
@@ -617,6 +619,7 @@ export class   ProfileController{
                 }
             }
         } catch (error) {
+            console.log("SUFHUFHSDHDSLFHS9999999999999999999");
             alert(error.message);
         }
     }
@@ -662,7 +665,6 @@ export class SiteController{
     private about_btn = document.getElementById("about_button");
     private logout_btn = document.getElementById("logout_btn");
 
-    private enable_fa_btn = document.getElementById("fa_btn_enable");
     private enable_auth_btn = document.getElementById("google_auth_enable");
 
     constructor(){
@@ -675,14 +677,17 @@ export class SiteController{
         if (await this.is_logged())
             this.connect();
 
-        this.lang = new LangController(this.username);
+        this.lang = await new LangController(this.username);
         if (this.friends)
             this.friends.setLang(this.lang);
         this.print_current_page();
     }
 
+    resetBtn() { this.profile.resetBtn(); }
+
     getText(key: string){
-        return this.lang.getFile()[key];
+        if (this.lang)
+            return this.lang.getFile()[key];
     }
 
     setUsername(key: string){
@@ -705,9 +710,6 @@ export class SiteController{
      * CONTROLLER
      */
     add_events(){
-
-        const google_auth = document.getElementById("google_auth");
-        const switch_fa_btn = document.getElementById("switch_fa_btn");
         // Register/login page
         this.register_link.addEventListener("click", (event) => {
             event.preventDefault();
@@ -798,6 +800,7 @@ export class SiteController{
                     error.classList.replace("hidden", "block");
                 }
             } catch (error) {
+                console.log("AAAAAAAAAAAAAAAAAAAAAAAAaa");
                 alert(error.message);
             }
         });
@@ -850,9 +853,9 @@ export class SiteController{
             if (res2.ok) {
                 const data = await res2.json();
                 if(data.success == 1)
-                    this.enable_fa_btn.classList.replace("fa_btn_disable", "fa_btn_enable");
+                    document.getElementById("fa_btn_enable").textContent = this.getText("2FA_disable");
                 else
-                    this.enable_fa_btn.classList.replace("fa_btn_enable", "fa_btn_disable");
+                    document.getElementById("fa_btn_enable").textContent = this.getText("2FA_enable");
             }
             this.profile.printPage();
         });
@@ -938,7 +941,6 @@ export class SiteController{
         this.print_menu();
         this.friends = new FriendController(this.username, this.lang, this.ws);
         this.ws.setFriend(this.friends, this, this.profile);
-        this.profile.resetBtn();
     }
 
     /**

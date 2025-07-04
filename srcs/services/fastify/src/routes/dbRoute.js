@@ -442,7 +442,7 @@ async function dbRoute (fastify, options) {
                     reply.send({ success: true, message: message, status: friendship.status, emoji: emoji });
                 } else if (friendship.status == "both_blocking") {
                     const emoji = friendship.user == userId ? "🔓" : "🔒";
-                    reply.send({ success: true, message: "Unblock", status: friendship.status, emoji: emoji });
+                    reply.send({ success: true, message: "unblock", status: friendship.status, emoji: emoji });
                 } else {
                     reply.send({ success: true, message: "send_rem", status: friendship.status, emoji: "🔒" });
                 }

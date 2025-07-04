@@ -6,57 +6,56 @@
     <link href="style.css" rel="stylesheet">
     <title>Trong</title>
 </head>
-<!-- <div class="fixed top-4 left-4 z-50"></div> -->
+
 <body class="h-screen flex items-center justify-center bg-gradient-to-br from-purple-600 to-blue-500">
     <select id="lang_select" class="fixed top-4 left-4 z-50" value="en">
         <option value="en">🇺🇸 English</option>
         <option value="jp">🇯🇵 日本語</option>
         <option value="fr">🇫🇷 Français</option>
     </select>
-</div>
 
-<!-- Popup pour le changement de mot de passe -->
-<div id="passwordPopup" class="fixed inset-0 flex items-center justify-center hidden z-50">
-    <div class="bg-gray-800 p-6 rounded-lg w-96 shadow-lg">
-        <h3 id="pass_change" class="text-xl font-semibold mb-4 text-teal-400 text-center">Changer le mot de passe</h3>
-        
-        <!-- Formulaire pour changer le mot de passe -->
-        <form id="passwordForm">
-            <div class="mb-4">
-                <label id="pass_current" for="currentPassword" class="block text-sm font-medium text-white">Mot de passe actuel</label>
-                <input type="password" id="currentPassword" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required />
-            </div>
+    <!-- Popup pour le changement de mot de passe -->
+    <div id="passwordPopup" class="fixed inset-0 flex items-center justify-center hidden z-50">
+        <div class="bg-gray-800 p-6 rounded-lg w-96 shadow-lg">
+            <h3 id="pass_change" class="text-xl font-semibold mb-4 text-teal-400 text-center">Changer le mot de passe</h3>
+            
+            <!-- Formulaire pour changer le mot de passe -->
+            <form id="passwordForm">
+                <div class="mb-4">
+                    <label id="pass_current" for="currentPassword" class="block text-sm font-medium text-white">Mot de passe actuel</label>
+                    <input type="password" id="currentPassword" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+                </div>
 
-            <div class="mb-4">
-                <label id="pass_new" for="newPassword" class="block text-sm font-medium text-white">Nouveau mot de passe</label>
-                <input type="password" id="newPassword" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required />
-            </div>
+                <div class="mb-4">
+                    <label id="pass_new" for="newPassword" class="block text-sm font-medium text-white">Nouveau mot de passe</label>
+                    <input type="password" id="newPassword" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+                </div>
 
-            <div class="mb-4">
-                <label id="pass_confirm" for="confirmPassword" class="block text-sm font-medium text-white">Confirmer le nouveau mot de passe</label>
-                <input type="password" id="confirmPassword" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required />
-            </div>
+                <div class="mb-4">
+                    <label id="pass_confirm" for="confirmPassword" class="block text-sm font-medium text-white">Confirmer le nouveau mot de passe</label>
+                    <input type="password" id="confirmPassword" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+                </div>
 
-            <!-- Messages d'erreur -->
-            <div id="errorMessages" class="text-red-500 mb-4 hidden">
-                <p id="errorMessageText"></p>
-            </div>
+                <!-- Messages d'erreur -->
+                <div id="errorMessages" class="text-red-500 mb-4 hidden">
+                    <p id="errorMessageText"></p>
+                </div>
 
-            <div class="flex justify-between items-center">
-                <button id="cancel" type="button" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400">Annuler</button>
-                <button id="confirm" type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-700">Valider</button>
-            </div>
-        </form>
+                <div class="flex justify-between items-center">
+                    <button id="cancel" type="button" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400">Annuler</button>
+                    <button id="confirm" type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-700">Valider</button>
+                </div>
+            </form>
+        </div>
     </div>
-</div>
 
 
 
     <div class="fixed top-4 right-4 z-50">
-  <button id="logout_btn" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded shadow-md transition duration-300 ease-in-out cursor-pointer">
-    Logout
-  </button>
-</div>
+        <button id="logout_btn" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded shadow-md transition duration-300 ease-in-out cursor-pointer">
+            Logout
+        </button>
+    </div>
     <!-- LOGIN FORM -->
     <div id="login-form" class="hidden flex-col p-6 items-center justify-center bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 max-w-sm w-full">
         <h1 class="underline text-white text-4xl text-center mb-4" id="form-title">Connexion</h1>
@@ -290,82 +289,81 @@
                     </div>
                 </div>
             </div> 
-<!-- JEU -->
-<div id="game_page" class="hidden inset-0 flex-col items-center justify-center space-y-6">
-    <!-- SCOREBOARD au-dessus -->
-    <div id="scoreboard" class="hidden block text-3xl font-stretch-ultra-condensed font-roboto text-center" >
-        <span id="player-left" class="w-[85%] transition-all duration-500 ease-in-out cursor-pointer p-10 text-5xl font-extrabold text-white bg-gradient-to-r from-fuchsia-500 via-red-500 to-orange-400  rounded-xl border-4 border-white shadow-lg text-center tracking-wide select-none">Player 1</span> 
-        <span id="score-left" class="w-[85%] transition-all duration-500 ease-in-out cursor-pointer p-10 text-5xl font-extrabold text-white bg-gradient-to-r from-fuchsia-500 via-red-500 to-orange-400  rounded-xl border-4 border-white shadow-lg text-center tracking-wide select-none">0</span>
-        <span id="score-right" class="w-[85%] transition-all duration-500 ease-in-out cursor-pointer p-10 text-5xl font-extrabold text-white bg-gradient-to-r from-emerald-400 via-teal-400 to-lime-400 rounded-xl border-4 border-white shadow-lg text-center tracking-wide select-none">0</span>
-        <span id="player-right" class="w-[85%] transition-all duration-500 ease-in-out cursor-pointer p-10 text-5xl font-extrabold text-white bg-gradient-to-r from-emerald-400 via-teal-400 to-lime-400 rounded-xl border-4 border-white shadow-lg text-center tracking-wide select-none">Player 2</span>
+        <!-- JEU -->
+        <div id="game_page" class="hidden inset-0 flex-col items-center justify-center space-y-6">
+            <!-- SCOREBOARD au-dessus -->
+            <div id="scoreboard" class="hidden block text-3xl font-stretch-ultra-condensed font-roboto text-center" >
+                <span id="player-left" class="w-[85%] transition-all duration-500 ease-in-out cursor-pointer p-10 text-5xl font-extrabold text-white bg-gradient-to-r from-fuchsia-500 via-red-500 to-orange-400  rounded-xl border-4 border-white shadow-lg text-center tracking-wide select-none">Player 1</span> 
+                <span id="score-left" class="w-[85%] transition-all duration-500 ease-in-out cursor-pointer p-10 text-5xl font-extrabold text-white bg-gradient-to-r from-fuchsia-500 via-red-500 to-orange-400  rounded-xl border-4 border-white shadow-lg text-center tracking-wide select-none">0</span>
+                <span id="score-right" class="w-[85%] transition-all duration-500 ease-in-out cursor-pointer p-10 text-5xl font-extrabold text-white bg-gradient-to-r from-emerald-400 via-teal-400 to-lime-400 rounded-xl border-4 border-white shadow-lg text-center tracking-wide select-none">0</span>
+                <span id="player-right" class="w-[85%] transition-all duration-500 ease-in-out cursor-pointer p-10 text-5xl font-extrabold text-white bg-gradient-to-r from-emerald-400 via-teal-400 to-lime-400 rounded-xl border-4 border-white shadow-lg text-center tracking-wide select-none">Player 2</span>
+            </div>
+            <!-- Game -->
+            <div id="game" class="hidden relative w-[700px] h-[480px] bg-red-500 mx-auto my-10">
+                <div id="l_paddle" class="absolute bg-black w-[10px] h-[80px]"></div>
+                <div id="ball" class="absolute bg-black w-[10px] h-[10px]"></div>
+                <div id="r_paddle" class="absolute bg-black w-[10px] h-[80px]"></div>
+            </div>
+
+        </div>
+        <div id="offline-confirm-modal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
+            <div class="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg p-6 w-80 text-center">
+                <p id="game_start" class="text-base font-medium text-gray-800 dark:text-gray-100 mb-4">La partie va commencer. Prêt ?</p>
+                <div class="flex justify-center space-x-4">
+                <button id="modal-confirm-yes" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">Oui</button>
+                <button id="modal-confirm-no" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition">Annuler</button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="about" class="hidden overflow-y-auto h-[500px] whitespace-pre-line text-white font-bold flex-col items-center justify-start px-4 w-3/4 mx-auto bg-gradient-to-br from-green-400 via-cyan-500 to-blue-500 p-6 rounded-xl shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
+
+        🎮 Transcendence - Pong Multijoueur en ligne
+        🧠 À propos du projet
+
+        Transcendence est un projet de l'école 42 qui consiste à développer un jeu Pong moderne et complet en fullstack, avec une interface utilisateur interactive et des fonctionnalités de réseau.
+        Ce projet a pour but de consolider les compétences en développement web en utilisant des technologies modernes côté frontend et backend, tout en intégrant des fonctionnalités temps réel comme des parties en ligne, un chat, et un système d'amis.
+
+        ⚙️ Technologies utilisées :
+
+            Frontend : React, TypeScript, WebSocket, Tailwindcss
+            Backend : TypeScript, Fastify
+            Authentification : 2FA (Two-Factor Authentication)
+            WebSocket : pour le jeu en temps réel et le chat
+            Docker : pour le déploiement
+
+        🏓 Description du jeu
+
+        Le jeu est une version améliorée du classique Pong, avec des parties 1v1 jouables en ligne, des tournois et un classement. Les joueurs peuvent s'inscrire, personnaliser leur profil, discuter entre eux et défier leurs amis.
+
+        🕹️ Commandes pour jouer
+
+        Commandes clavier disponibles :
+        Action                 Touche(s)
+        Monter la raquette     ↑ (Flèche Haut) ou W
+        Descendre la raquette  ↓ (Flèche Bas) ou S
+
+        💡 Fonctionnalités du site
+
+        - 🎮 Jeu multijoueur en temps réel
+        - 💬 Chat en direct avec les autres joueurs
+        - 🧑‍🤝‍🧑 Système d’amis et invitations aux matchs
+        - 🏆 Tournois et classement global
+        - 🔒 Authentification sécurisée avec 2FA
+        - 🌐 Interface multilingue (FR/EN)
+        - 👤 Profils utilisateurs personnalisables
+        - 📱 Interface responsive adaptée à toutes les tailles d’écran
+
+        🔐 Bouton "Logout" (Déconnexion)
+
+        En haut à droite de l’interface, le bouton "Logout" permet à l’utilisateur de se déconnecter en toute sécurité de son compte. Cette action met fin à la session active et redirige vers la page d'accueil ou de connexion.
+
+        🌍 Changement de langue
+
+        En haut à gauche du site, une option permet de changer la langue de l’interface. Cela permet à l'utilisateur de naviguer en français ou en anglais, selon sa préférence. Les textes de l'interface, les boutons et les messages s’adaptent dynamiquement à la langue sélectionnée.
+        </div>
+        
     </div>
-    <!-- Game -->
-    <div id="game" class="hidden relative w-[700px] h-[480px] bg-red-500 mx-auto my-10">
-        <div id="l_paddle" class="absolute bg-black w-[10px] h-[80px]"></div>
-        <div id="ball" class="absolute bg-black w-[10px] h-[10px]"></div>
-        <div id="r_paddle" class="absolute bg-black w-[10px] h-[80px]"></div>
-    </div>
-
-</div>
-    
-<div id="about" class="hidden overflow-y-auto h-[500px] whitespace-pre-line text-white font-bold flex-col items-center justify-start px-4 w-3/4 mx-auto bg-gradient-to-br from-green-400 via-cyan-500 to-blue-500 p-6 rounded-xl shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
-
-🎮 Transcendence - Pong Multijoueur en ligne
-🧠 À propos du projet
-
-Transcendence est un projet de l'école 42 qui consiste à développer un jeu Pong moderne et complet en fullstack, avec une interface utilisateur interactive et des fonctionnalités de réseau.
-Ce projet a pour but de consolider les compétences en développement web en utilisant des technologies modernes côté frontend et backend, tout en intégrant des fonctionnalités temps réel comme des parties en ligne, un chat, et un système d'amis.
-
-⚙️ Technologies utilisées :
-
-    Frontend : React, TypeScript, WebSocket, Tailwindcss
-    Backend : TypeScript, Fastify
-    Authentification : 2FA (Two-Factor Authentication)
-    WebSocket : pour le jeu en temps réel et le chat
-    Docker : pour le déploiement
-
-🏓 Description du jeu
-
-Le jeu est une version améliorée du classique Pong, avec des parties 1v1 jouables en ligne, des tournois et un classement. Les joueurs peuvent s'inscrire, personnaliser leur profil, discuter entre eux et défier leurs amis.
-
-🕹️ Commandes pour jouer
-
-Commandes clavier disponibles :
-Action                 Touche(s)
-Monter la raquette     ↑ (Flèche Haut) ou W
-Descendre la raquette  ↓ (Flèche Bas) ou S
-
-💡 Fonctionnalités du site
-
-- 🎮 Jeu multijoueur en temps réel
-- 💬 Chat en direct avec les autres joueurs
-- 🧑‍🤝‍🧑 Système d’amis et invitations aux matchs
-- 🏆 Tournois et classement global
-- 🔒 Authentification sécurisée avec 2FA
-- 🌐 Interface multilingue (FR/EN)
-- 👤 Profils utilisateurs personnalisables
-- 📱 Interface responsive adaptée à toutes les tailles d’écran
-
-🔐 Bouton "Logout" (Déconnexion)
-
-En haut à droite de l’interface, le bouton "Logout" permet à l’utilisateur de se déconnecter en toute sécurité de son compte. Cette action met fin à la session active et redirige vers la page d'accueil ou de connexion.
-
-🌍 Changement de langue
-
-En haut à gauche du site, une option permet de changer la langue de l’interface. Cela permet à l'utilisateur de naviguer en français ou en anglais, selon sa préférence. Les textes de l'interface, les boutons et les messages s’adaptent dynamiquement à la langue sélectionnée.
-</div>
-      
-    </div>
-
-<div id="offline-confirm-modal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
-  <div class="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg p-6 w-80 text-center">
-    <p id="game_start" class="text-base font-medium text-gray-800 dark:text-gray-100 mb-4">La partie va commencer. Prêt ?</p>
-    <div class="flex justify-center space-x-4">
-      <button id="modal-confirm-yes" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">Oui</button>
-      <button id="modal-confirm-no" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition">Annuler</button>
-    </div>
-  </div>
-</div>
 
     <script type="module" src="app.js"></script>
 
