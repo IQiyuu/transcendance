@@ -267,12 +267,12 @@ class Tournament{
 		this.brackets[this.current_round] = [];
 		let p1, p2;
 		while (winners.length > 1){
-			p1 = this.getPlayer(winners.shift());// if undefined to do
-			p2 = this.getPlayer(winners.shift());// if undefined to do
+			p1 = this.getPlayer(winners.shift());
+			p2 = this.getPlayer(winners.shift());
 			this.brackets[this.current_round].push({game_id : -1, players : [p1, p2], state : T_READY, winner : null});
 		}
 		if (winners.length == 1){
-			p1 = this.getPlayer(winners.shift()); // CT ICI PPPPPPPPPPPPPFJSDBXKFDBBDFBN
+			p1 = this.getPlayer(winners.shift()); 
 			this.brackets[this.current_round].push({game_id : -1, players : [p1, null], state : T_READY, winner : null});
 		}
 		console.log("List of matchs (to recheck with more players) :");

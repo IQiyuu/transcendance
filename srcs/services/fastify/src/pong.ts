@@ -196,7 +196,7 @@ export class   GameController{
             this.ws = new GameClientSocket(this.username, this, game_id);
         else{
             console.log("Game received , lets continue the tournament");
-            // console.log(game);
+            console.log(game);
             this.ws.setGameId(game_id);
             this.ws.startTournamentGame();
         }
@@ -249,6 +249,7 @@ export class   GameController{
         if (this.is_tournament){
             console.log("Tournament's game is finished ending");
             console.log("Not closing socket for it can be used later");
+            
             this.game_id = -1;
         } else {
             this.print_match_end();
