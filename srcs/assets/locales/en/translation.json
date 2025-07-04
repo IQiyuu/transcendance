@@ -42,6 +42,9 @@
   "2FA_enable": "Enable 2FA",
   "2FA_disable": "Disable 2FA",
 
+  "add_friend": "Add as friend",
+  "rem_friend": "Remove from friend",
+
   "pass_change": "Change password",
   "pass_current": "Current password",
   "pass_new": "New password",

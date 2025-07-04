@@ -129,7 +129,7 @@ async function logginRoute (fastify, options) {
         if (decoded == null)
             throw Error("Wrong cookie");
         try {
-          const user = db.prepare('SELECT username FROM users WHERE username = ?').get(decoded.username);
+          const user = options.db.prepare('SELECT username FROM users WHERE username = ?').get(decoded.username);
           if (!user)
             throw Error("Wrong cookie");
           request.user = decoded.username;

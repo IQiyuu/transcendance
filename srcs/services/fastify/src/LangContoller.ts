@@ -82,6 +82,7 @@ export class LangController{
         document.getElementById('upload_btn').textContent = this.file['upload_txt'];
         document.getElementById('about_button').textContent = this.file['about'];
         document.getElementById('friend_text').textContent = this.file['friends'];
+        // document.getElementById('friend_btn').textContent = this.file['friends'];
         document.getElementById('histo_text').textContent = this.file['historique'];
 
         document.getElementById('google_auth_btn').textContent = this.file['google_auth'];
@@ -145,7 +146,7 @@ export class LangController{
                 return ;
 
             const body = {
-                user: this.username,
+                username: this.username,
                 lang: val
             };
             try {

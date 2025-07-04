@@ -27,6 +27,8 @@ export class   ProfileController{
     private	friend_div = document.getElementById("friend_div");
     private	auth_btn = document.getElementById("auth_btn");
 
+    private	wr = document.getElementById("wr");
+    private wr_card = document.getElementById("wr_card");
 
     private	check_btn = document.getElementById("check_btn");
     private enable_auth_btn = document.getElementById("google_auth_enable");
@@ -59,7 +61,6 @@ export class   ProfileController{
     private closeBtn = document.getElementById("profile_cross");
 
     private cancelBtn = document.getElementById("cancel");
-    private usernameJps = document.getElementById("profile_username");
     private jspBtn = document.getElementById("jsp_btn");
 
     private passError = document.getElementById("errorMessageText");
@@ -92,26 +93,14 @@ export class   ProfileController{
             this.closePasswordPopup();
         });
 
-        this.usernameJps.addEventListener("click", () => {
-            this.editUsername();
+        this.profile_username_tag.addEventListener("click", () => {
+            if (this.username == this.profile_username)
+                this.editUsername();
         });
 
         this.jspBtn.addEventListener("click", () => {
-            this.openPasswordPopup();
-        });
-
-        // this.profile_username_tag.addEventListener("mouseover", async (event) => {
-        //     event.preventDefault();
-
-        //     if (this.profile_username == this.username && )
-        //         this.profile_username_tag.textContent = "EMOJI " + this.profile_username_tag.textContent;
-        // });
-
-        this.profile_username_tag.addEventListener("mouseout", async (event) => {
-            event.preventDefault();
-            
-            if (this.profile_username == this.username)
-                this.profile_username_tag.textContent = this.profile_username;
+            if (this.username == this.profile_username)
+                this.openPasswordPopup();
         });
 
         // Player's search
@@ -336,10 +325,10 @@ export class   ProfileController{
                     if (!response.ok)
                         console.log("error in file upload.");
                     else {
-                        document.getElementById("profile_picture_overlay").classList.replace("flex", "hidden");
+                        document.getElementById("profile_picture_overlay").classList.replace("absolute", "hidden");
                         this.previ_pp.src = "";
                         (document.getElementById("file_input") as HTMLInputElement).value = "";
-                        this.picture_path = "../assets/imgs/" + this.username + ".jpg";
+                        this.picture_path = "assets/imgs/" + this.username + ".jpg";
                         (this.profile_picture as HTMLImageElement).src = this.picture_path + "?" + new Date().getTime();
                     }
                 } catch (error) {
@@ -475,6 +464,7 @@ export class   ProfileController{
 
                 if (!data.success)
                     throw Error(data.error);
+                this.site.send({type:"pseudo_swap", username: this.username, newUsername: newUsername});
                 this.username = newUsername;
                 this.site.setUsernames(this.username);
                 console.log("username updated.");
@@ -503,6 +493,8 @@ export class   ProfileController{
             this.profile_username = data.profile.username;
             this.register_date = data.profile.created_at;
             this.picture_path = data.profile.picture_path;
+            console.log(this.picture_path);
+            console.log(data.profile);
         } catch (error){
             console.log(error);
         }
@@ -531,6 +523,7 @@ export class   ProfileController{
 	//VIEW
 	async printHisto(){
         await this.searchHistoricHandler();
+        this.histo_list.innerHTML = "";
         var cpt = 0;
         var w = 0;
         this.histo.forEach((item) => {
@@ -559,10 +552,15 @@ export class   ProfileController{
             }
             if (item.winner_username == this.profile_username)
                 w++;
-            document.getElementById("wr_card").textContent = `wr : ${(w / cpt * 100).toFixed(0)}%`;
+            
+            this.wr_card.textContent = `wr : ${(w / cpt * 100).toFixed(0)}%`;
+            this.wr.textContent = `${w} / ${cpt}`;
         });
-        if (cpt == 0)
-            document.getElementById("wr_card").textContent = `wr : N/a`;
+
+        if (cpt == 0) {
+            this.wr_card.textContent = `wr : N/a`;
+            this.wr.textContent = "N/a";
+        }
 	}
 
     async	printPage(){
@@ -574,7 +572,7 @@ export class   ProfileController{
         //profile
         this.profile_page.classList.replace("hidden", "flex");
         this.profile_username_tag.innerText = this.profile_username;
-        (this.profile_picture as HTMLImageElement).src = "../assets/imgs/" + this.picture_path + "?" + new Date().getTime(); // jsp ??
+        (this.profile_picture as HTMLImageElement).src = "assets/imgs/" + this.picture_path + "?" + new Date().getTime(); // jsp ??
         this.register_date_tag.innerText = `${this.site.getText("member_since")}: ${this.register_date}`;
 
 		if (this.profile_username != this.username){
@@ -667,6 +665,10 @@ export class SiteController{
         this.friends.setUsername(this.username);
     }
 
+    send(data: Object) {
+        this.ws.send(JSON.stringify(data));
+    }
+
     /**
      * CONTROLLER
      */
@@ -722,6 +724,7 @@ export class SiteController{
                 const data = await response.json();
                 
                 if (data.success) {
+                    console.log("OUIII");
                     this.isRegisterMode = false;
                     this.username = data.username;
                     if (url == "/login")
@@ -735,27 +738,27 @@ export class SiteController{
                             body: JSON.stringify({ username : data.username }) 
                         });
                         if (res.ok) {
+                            console.log("OUIII2");
                             const twofadata = await res.json();
                             if (twofadata.success == 1)
                             {
-                                
+                                console.log("OUIII3");
                                 const res = await fetch('/set-user-cookie', {
                                     method: 'POST',
                                     headers: {
-                                    'Content-Type': 'application/json'
+                                        'Content-Type': 'application/json'
                                     },
                                     credentials: 'include', 
                                     body: JSON.stringify({ username : this.username }) 
                                 });
                                 this.print_fa_page();
                                 this.hide_register_page();
-                            }
+                            } else 
+                                this.connect();
                         }
                     }
                     else 
-                    {
                         this.connect();
-                    }
                     document.getElementById("errorAuth").classList.replace("block", "hidden");
                 } else {
                     const error = document.getElementById("errorAuth") as HTMLParagraphElement;

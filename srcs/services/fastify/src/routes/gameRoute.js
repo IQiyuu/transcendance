@@ -1,6 +1,4 @@
-import fs from 'fs';
-import {gameInTournament, matchOver} from './tournament.js';
-import { finished } from 'stream';
+import {matchOver} from './tournament.js';
 
 function randomIntFromInterval(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
@@ -181,7 +179,6 @@ function    getMaskedGame(game){
     return (g);
 }
 export async function gameRoute (fastify, options) {
-    let img_path = "dist/assets/imgs/"; //to update 
 
     const amIInGame = async (request, reply) => {
         const { id } = request.body.id;

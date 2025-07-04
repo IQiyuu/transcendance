@@ -54,8 +54,13 @@ export class ClientSocket{
                 dot.classList.replace("bg-green-500", "bg-red-500");
             } else if (data.type == "addFriend") {
                 this.friends.addFriend(data.user, data.pp);
+                document.getElementById("friend_btn").textContent = this.view_site.getText("rem_friend");
             } else if (data.type == "removeFriend") {
                 this.friends.removeFriend(data.user);
+                document.getElementById("friend_btn").textContent = this.view_site.getText("add_friend");
+            } else if (data.type == "pseudo_swap") {
+                document.getElementById(`${data.username}_friendlist`).id = `${data.newUsername}_friendlist`;
+                document.getElementById(`${data.username}_friendlist`).textContent = data.newUsername;
             }
         };
     }
