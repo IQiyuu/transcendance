@@ -405,8 +405,8 @@ export class   GameController{
         this.end_screen = document.createElement("div");
         this.end_screen.id = "end_screen";
         this.end_screen.className = `
-            fixed top-0 left-0 w-screen h-screen 
-            bg-black bg-opacity-80 text-white 
+            fixed top-1/3 left-1/3 right-1/3 bottom-1/3 w-1/4 h-[500px] 
+            bg-black bg-opacity-60 text-white 
             flex flex-col justify-center items-center 
             z-50 font-sans text-center p-5 box-border
         `;
@@ -538,6 +538,10 @@ export class   GameController{
     // Not to be added to hide_all
     hide_menu(){
         this.site.hide_menu();
+    }
+    
+    hide_site() {
+        this.site.hide_all();
     }
 
     hide_all(){

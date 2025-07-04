@@ -60,6 +60,19 @@ async function websocketRoute(fastify, options) {
                 }
             }
 
+            function broadcast(data, username) {
+                const user_id = getIdFromUsername(username);
+                    if (user_id == "")
+                        return ;
+                    const friendlist = getFriendList(user_id);
+                    for (let friend of friendlist) {
+                        const friendSocket = connectedClients.get(friend.username);
+                        if (friendSocket && friendSocket !== socket) {
+                            friendSocket.send(JSON.stringify(data));
+                        }
+                    }
+            }
+
             // Quand un user ferme sa connexion
             socket.on('close', (rawMessage) => {
                 const data = JSON.parse(rawMessage.toString());
@@ -92,19 +105,17 @@ async function websocketRoute(fastify, options) {
                         targetSocket.send(JSON.stringify(data));
                     }
                 } else if (data.type === 'pseudo_swap') {
-                    const user_id = getIdFromUsername(data.newUsername);
-                    if (user_id == "")
-                        return ;
-                    const friendlist = getFriendList(user_id);
-                    for (let friend of friendlist) {
-                        const friendSocket = connectedClients.get(friend.username);
-
-                        friendSocket.send(JSON.stringify({
-                            type: data.type,
-                            username: data.username,
-                            newUsername: data.newUsername
-                        }));
-                    }
+                    broadcast({
+                        type: data.type,
+                        username: data.username,
+                        newUsername: data.newUsername
+                    }, data.newUsername);
+                } else if (data.type === 'pp_swap') {
+                    broadcast({
+                        type: data.type,
+                        username: data.username,
+                        pp: data.pp
+                    }, data.username);
                 } else if (data.type === 'matchmaking') {
                     if (data.state == 'enter' && waiting_list == null) {
                         waiting_list = socket;

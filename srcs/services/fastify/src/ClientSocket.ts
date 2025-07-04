@@ -44,6 +44,7 @@ export class ClientSocket{
             const data = JSON.parse(message.data);
             if (data === null)
                 return ; 
+            console.log("msg recu: ", data.data);
             if (data.type == "connection") {
                 const div = document.getElementById(`${data.user}_friendlist`);
                 const dot = div.getElementsByTagName("span")[0];
@@ -60,7 +61,12 @@ export class ClientSocket{
                 document.getElementById("friend_btn").textContent = this.view_site.getText("add_friend");
             } else if (data.type == "pseudo_swap") {
                 document.getElementById(`${data.username}_friendlist`).id = `${data.newUsername}_friendlist`;
-                document.getElementById(`${data.username}_friendlist`).textContent = data.newUsername;
+                document.getElementById(`${data.newUsername}_friendlist`).getElementsByTagName("p")[0].textContent = data.newUsername;
+            } else if (data.type == "pp_swap") {
+                console.log(document.getElementById(`${data.username}_friendlist`));
+                console.log(data.pp)
+                console.log(document.getElementById(`${data.username}_friendlist`).getElementsByTagName("img"));
+                document.getElementById(`${data.username}_friendlist`).getElementsByTagName("img")[0].src = data.pp;
             }
         };
     }
