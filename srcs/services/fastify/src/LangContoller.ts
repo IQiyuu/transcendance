@@ -75,6 +75,7 @@ export class LangController{
         document.getElementById('game_title').textContent = this.file['title'];
         document.getElementById('div_title').textContent = this.file['change_pp'];
         document.getElementById('login_btn').textContent = this.file['connexion_title'];
+        document.getElementById('logout_btn').textContent = this.file['logout_btn'];
         document.getElementById('offline').textContent = this.file['play_local'];
         document.getElementById('tournament_button').textContent = this.file['tournament'];
         document.getElementById('profile_button').textContent = this.file['profile'];
@@ -88,9 +89,8 @@ export class LangController{
             document.getElementById('fa_btn_enable').textContent = this.file['2FA_enable'];
         else
             document.getElementById('fa_btn_disable').textContent = this.file['2FA_disable'];
-        if (document.getElementById('google_auth_enable') != null)
-            document.getElementById('google_auth_enable').textContent = this.file['google_switch_enabled'];
-        document.getElementById('google_auth_desable').textContent = this.file['google_switch_desable'];
+
+        document.getElementById('google_auth_enable').textContent = this.file['google_switch_enable'];
 
         document.getElementById('pass_change').textContent = this.file['pass_change'];
         document.getElementById('pass_current').textContent = this.file['pass_current'];
@@ -101,7 +101,6 @@ export class LangController{
         document.getElementById('cancel').textContent = this.file['cancel'];
         document.getElementById('confirm').textContent = this.file['confirm'];
         document.getElementById('game_start').textContent = this.file['game_start'];
-        document.getElementById('logout_btn').textContent = this.file['logout_btn'];
         document.getElementById('wr_card').textContent = this.file['wr'];
         (document.getElementById('search_player_in') as HTMLInputElement).placeholder = this.file['search'];
 
@@ -111,6 +110,27 @@ export class LangController{
         }
         else
             document.getElementById('matchmaking').textContent = this.file['play_online'];
+    
+        document.getElementById("profile_creation").textContent
+            = this.file["member_since"] + " " + (document.getElementById("profile_creation").textContent).split(":")[1];
+    
+        // tournament
+        document.getElementById("create_tournament").textContent = this.file["create_tour"];
+        document.getElementById("cr_tour").textContent = this.file["crea_tour"];
+        document.getElementById("nam_tour").textContent = this.file["nam_tour"];
+        document.getElementById("av_tour").textContent = this.file["av_tour"];
+        document.getElementById("curr_tour").textContent = this.file["curr_tour"];
+        document.getElementById("join_tour").textContent = this.file["join_tour"];
+        document.getElementById("tournament_creation").textContent = this.file["crea_tour_btn"];
+
+        if (document.getElementById("usr_tour") != null) {
+            document.getElementById("usr_tour").textContent = this.file["usr_tour"];
+            document.getElementById("role_tour").textContent = this.file["role_tour"];
+            document.getElementById("own_tour").textContent = this.file["own_tour"];
+            for (let element of document.getElementsByClassName("play_tour")) element.textContent = this.file["play_tour"];
+            document.getElementById("start_tour").textContent = this.file["start_tour"];
+            document.getElementById("leav_tour").textContent = this.file["leav_tour"];
+        }
     }
 
     addEvents() {
@@ -132,6 +152,7 @@ export class LangController{
                 const resp = await fetch(`/db/update/lang`, {
                     method: 'POST',
                     headers: { "Content-Type": "application/json" },
+                    credentials: 'include',
                     body: JSON.stringify(body)
                 });
                 const data = await resp.json();

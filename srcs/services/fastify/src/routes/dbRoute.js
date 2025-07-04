@@ -1,15 +1,111 @@
 
 async function dbRoute (fastify, options) {
     let db = options.db;
+    let secretKey = options.secretKey;
 
-    // retourne les lignes de la tables
-    fastify.get('/db/select/:table' , async (request, reply) => {
+    const usernameTester = async (request, reply) => {
+        var username = null;
+        if (request.body)
+            username = request.body.username;
+        console.log(username);
+        if (username == null && request.params)
+            username = request.params.username;
+        console.log(username);
+        if (username == null)
+            return reply.send({ success: false, error: "username error" });
+        console.log(username);
+        const token = request.cookies.auth_token;
+
+        if (!token) {
+            return reply.send({ success: false });
+        }
+
         try {
-            const datas = db.prepare(`SELECT * FROM ${request.params.table}`).all();
-            reply.send(datas);
+            const decoded = fastify.jwt.verify(token, secretKey);
+            if (decoded == null)
+                throw Error("Not authorized");
+            try {
+            const user = db.prepare('SELECT username FROM users WHERE username = ?').get(decoded.username);
+            if (!user)
+                throw Error("Not authorized2");
+            if (decoded.username == username)
+                request.user = decoded.username;
+            else
+                throw Error("Not authorized3");
+            } catch (error) {
+            return reply.send({ success: false, error: error.message });
+            }
+        } catch (error) {
+            return reply.send({ success: false, error: error.message });
+        }
+    };
+
+    // Route qui recupere les infos du user :username dans la db et les renvoie
+    fastify.get('/db/profile/:username', async (request, reply) => {
+        try {
+            const username = request.params.username;
+            // console.log(username);
+            // ajouter l'image de profile
+            if (!userExistsInDb(username, options.db))
+                return {success: false, message: "User doesn't exists"};
+            const data = options.db.prepare('SELECT username, created_at, picture_path FROM users WHERE username = ?').get(username);
+            // console.log(`Profile fetched from db: `, data);
+            if (data === null || data === undefined)
+                   throw (Error("Unkown error while retreiving profile info in db"));
+            return { success: true, message: `Profile fetched`, profile: data };
         } catch (error) {
             console.log("error: ", error);
-            return { success: false, error: error };
+            return { success: false, message: 'Error data db.' };
+        }
+    });
+
+    // Route qui modifie la photo de profile ../assets/imgs et change le path dans la db
+    fastify.post('/db/update/picture/:username', {
+        preHandler: usernameTester,
+    }, async (request, reply) => {
+        const data = await request.parts();
+        let uploadedFile;
+        const username = request.params.username;
+        for await (const part of data) {
+            if (part.file) {
+                // console.log(username);
+                    uploadedFile = part;
+        
+                const filename = username + ".jpg";
+        
+                const filepath = img_path + filename;
+            
+                const fileStream = fs.createWriteStream(filepath);
+                part.file.pipe(fileStream);
+    
+                fileStream.on('finish', () => {
+                    try {
+                        options.db.prepare('UPDATE users SET picture_path = ? WHERE username = ?').run(filename, username);
+                        
+                        // console.log('Picture uploaded in db for: ', username);
+                        return { success: true, message: 'File uploaded' };
+                    } catch (error) {
+                        console.error('Error updating data in db.', error);
+                        return { success: false, message: 'Error updating data in db' };
+                    }
+                    
+                });
+            }
+        }
+    });
+    
+    // Pareil que au dessus avec les games
+    fastify.get('/db/historic/:username', async (request, reply) => {
+        try {
+            const username = request.params.username;
+            // console.log(username);
+            const data = options.db.prepare('SELECT g.game_id, uw.username AS winner_username, ul.username AS loser_username, g.loser_score, g.created_at FROM games g JOIN users uw ON g.winner_id = uw.user_id JOIN users ul ON g.loser_id = ul.user_id WHERE uw.username = ? OR ul.username = ? ORDER BY g.created_at DESC;').all(username,username);
+    
+            // console.log(`historic fetched from db: `, data);
+            return { success: true, message: `Game fetched`, histo: data };
+        } catch (error) {
+            console.error('Error data db.', error);
+            return { success: false, message: 'Error data db.' };
         }
     });
 
@@ -22,34 +118,27 @@ async function dbRoute (fastify, options) {
             reply.send(datas);
         } catch (error) {
             console.log("error: ", error);
-            return { success: false, error: error };
+            return { success: false, error: error.message };
         }
     });
 
-    // retourne les infos du user demande
-    fastify.get('/db/password/:username' , async (request, reply) => {
+    // retourne le password du user demande
+    fastify.get('/db/password/:username', {
+        preHandler: usernameTester,
+    }, async (request, reply) => {
         try {
             const datas = db.prepare(`SELECT password, FROM users WHERE username = ?`).get(request.username);
             return { success: false, data: datas };
         } catch (error) {
             console.log("error: ", error);
-            return { success: false, error: error };
-        }
-    });
-
-    // add lang column in users
-    fastify.get('/db/tmp/lang', async (req, rep ) => {
-        try {
-            db.prepare(`ALTER TABLE users 
-                ADD COLUMN lang TEXT NOT NULL DEFAULT 'en'`).run();
-            return ({success: true});
-        } catch {
-            return ({success: false});
+            return { success: false, error: error.message };
         }
     });
 
     // get lang
-    fastify.get('/db/select/lang/:user' , async (request, reply) => {
+    fastify.get('/db/select/lang/:user' , {
+        preHandler: usernameTester,
+    }, async (request, reply) => {
         try {
             const datas = db.prepare(`SELECT lang FROM users WHERE username=?`).get(request.params.user);
             if (datas)
@@ -58,21 +147,36 @@ async function dbRoute (fastify, options) {
                 reply.send({success:false, error: "user not found"});
         } catch (error) {
             console.log("error: ", error);
-            return { success: false, error: error };
+            return { success: false, error: error.message };
         }
     });
 
+    async function isValidUsername(username) {
+        const minLength    = username.length >= 3;
+        const maxLength    = username.length <= 15;
+        const hasSpecial   = /[!@#$%^&*(),.?":{}|<>]/.test(username);
+
+        return minLength && maxLength && !hasSpecial;
+    }
+
     // modifying username
-    fastify.post('/db/update/username', async (req, rep) => {
-        const body = req.body;
+    fastify.post('/db/update/username', {
+        preHandler: usernameTester,
+    }, async (req, rep) => {
+        const { newUsername, username } = req.body;
 
         try {
-            if (db.prepare(`SELECT username FROM users WHERE username = ?`).get(body.newUsername) != null)
-                return ({ sucess: false, error: "username already used" });
-            db.prepare(`UPDATE users SET username = ? WHERE username = ?`).run(body.newUsername, body.username);
+            if (newusername == username) 
+                return { success: false, error: 'errUSame' };
+            if (!(await isValidUsername(newUsername))) 
+                return { success: false, error: 'errUname' };
+
+            if (db.prepare(`SELECT username FROM users WHERE username = ?`).get(newUsername) != null)
+                return ({ sucess: false, error: "errUTaken" });
+            db.prepare(`UPDATE users SET username = ? WHERE username = ?`).run(newUsername, username);
             return ({ success: true });
         } catch (error) {
-            return ({ success: false, error: error });
+            return ({ success: false, error: error.message });
         }
     });
 
@@ -87,35 +191,37 @@ async function dbRoute (fastify, options) {
     }
 
     // modifying password
-    fastify.post('/db/update/password', async (req, rep) => {
+    fastify.post('/db/update/password', {
+        preHandler: usernameTester,
+    }, async (req, rep) => {
         const body = req.body;
 
         try {
             console.log(body);
             const user = db.prepare(`SELECT password FROM users WHERE username = ?`).get(body.username);
-            if (user == null) {
-            
-                return ({ sucess: false, error: "username not found" });
-            }
+            if (user == null)
+                return ({ sucess: false, error: "errorInt" });
             const isMatch = await fastify.bcrypt.compare(body.password, user.password);
             console.log(isMatch);
             if (!isMatch) {
                 console.log("mismatch");
-                return ({ success: false, error: "Current password mismatch" });
+                return ({ success: false, error: "errMismatch" });
             }
             if (await isValidPassword(body.newPassword))
                 var hash_pass = await fastify.bcrypt.hash(body.newPassword);
             else
-                return ({ success: false, error: "Password must contain maj, min, special char and digit" });
+                return ({ success: false, error: "errMdp" });
             db.prepare(`UPDATE users SET password = ? WHERE username = ?`).run(hash_pass, body.username);
             return ({ success: true });
         } catch (error) {
-            return ({ success: false, error: error });
+            return ({ success: false, error: error.message });
         }
     });
 
     // modifiyng lang
-    fastify.post('/db/update/lang' , async (request, reply) => {
+    fastify.post('/db/update/lang', {
+        preHandler: usernameTester,
+    }, async (request, reply) => {
         const body = request.body;
         try {
             db.prepare(`UPDATE users
@@ -125,42 +231,7 @@ async function dbRoute (fastify, options) {
             reply.send({success: true});
         } catch (error) {
             console.log("error: ", error);
-            return { success: false, error: error };
-        }
-    });
-
-    // retourne les tables de la db
-    fastify.get('/db/tables' , async (request, reply) => {
-        try {
-            const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table';").all();
-            reply.send(tables);
-        } catch (error) {
-            console.log("error: ", error);
-            return { success: false, error: error };
-        }
-    });
-
-    // retourne comment sont faites les tables
-    fastify.get('/db/pragma/:table' , async (request, reply) => {
-        try {
-            const tableInfo = db.prepare(`PRAGMA table_info(${request.params.table});`).all();
-            reply.send(tableInfo);
-        } catch (error) {
-            console.log("error: ", error);
-            return { success: false, error: error };
-        }
-    });
-
-    // update une ligne de la table
-    fastify.get('/db/update/:table' , async (request, reply) => {
-        const body = request.body;
-        try {
-            const insert = db.prepare('UPDATE ? SET ? = ? WHERE ? = ?')
-            insert.run(request.params.table, body.colum, body.val, body.column2, body.val2);
-            return { success: true };
-        } catch (error) {
-            console.log("error: ", error);
-            return { success: false, error: error };
+            return { success: false, error: error.message };
         }
     });
 
@@ -237,7 +308,9 @@ async function dbRoute (fastify, options) {
     }
 
     // insert un ami
-    fastify.post('/db/friends/update', async (request, reply) => {
+    fastify.post('/db/friends/update',  {
+        preHandler: usernameTester,
+    }, async (request, reply) => {
         const body = request.body;
         
         try {
@@ -274,7 +347,9 @@ async function dbRoute (fastify, options) {
         }
     });
 
-    fastify.post('/db/friends/block', async (request, reply) => {
+    fastify.post('/db/friends/block', {
+        preHandler: usernameTester,
+    }, async (request, reply) => {
         const body = request.body;
         
         try {
@@ -316,13 +391,15 @@ async function dbRoute (fastify, options) {
                 return { success: true, blocking: true };
             }
         } catch (error) {
-            reply.send({ success: false, error: error });
+            reply.send({ success: false, error: error.message });
         }
     });
 
 
     // Verifie si il y a un lien d amitie
-    fastify.get('/db/friends/:user/:friend', async (request, reply) => {
+    fastify.get('/db/friends/:user/:friend',  {
+        preHandler: usernameTester,
+    }, async (request, reply) => {
         try {
             const userId = getIdFromUsername(request.params.user);
             const friendId = getIdFromUsername(request.params.friend);
@@ -350,7 +427,10 @@ async function dbRoute (fastify, options) {
         }
     });
 
-    fastify.get('/db/friends/friendlist/:username', async (request, reply) => {
+    fastify.get('/db/friends/friendlist/:username', {
+        preHandler: usernameTester,
+    }, async (request, reply) => {
+        console.log("OUIII");
         try {
             const userId = getIdFromUsername(request.params.username);
             if (!userId)
@@ -359,7 +439,7 @@ async function dbRoute (fastify, options) {
             reply.send({ success: true, friends: friendlist });
         } catch (error) {
             console.log(error);
-            reply.send({ succes: false, error: error });
+            reply.send({ succes: false, error: error.message });
         }
     });
 

@@ -67,8 +67,8 @@ db.exec(`
     secret TEXT DEFAULT NULL,
     twofa_activate BOOL DEFAULT FALSE,
     email TEXT DEFAULT NULL,
-    lang TEXT DEFAULT NULL,
-    picture_path TEXT DEFAULT "../assets/imgs/standart.jpg",
+    lang TEXT DEFAULT 'en',
+    picture_path TEXT DEFAULT "standart.jpg",
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   );
 
@@ -132,7 +132,8 @@ fastify.register(websocketRoute, {
 });
 
 fastify.register(DbRoute, {
-  db: db
+  db: db,
+  secretKey: secretKey
 });
 
 fastify.register(FastifyStatic, {

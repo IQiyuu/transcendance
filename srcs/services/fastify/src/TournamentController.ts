@@ -171,9 +171,9 @@ export class TournamentController {
                         let i = 0, size = data.tournaments.length;
                         let list = document.createElement("ul");
                         if (size == 0)
-                            this.tournaments_list.append(document.createTextNode("No tournament found. Try creating one !"));
+                            this.tournaments_list.append(document.createTextNode(this.site.getText("no_tour")));
                         else {
-                            list.appendChild(document.createTextNode("List of tournaments available"));
+                            list.appendChild(document.createTextNode(this.site.getText("no_tour")));
                             while (i < size) {
                                 let el = document.createElement("li");
                                 el.appendChild(document.createTextNode(data.tournaments[i].name));
@@ -311,12 +311,14 @@ let tr = document.createElement("tr");
 
 let th = document.createElement("th");
 th.className = "px-4 py-2 text-left text-sm font-semibold text-gray-300 bg-gray-700";
-th.append(document.createTextNode("User"));
+th.id="usr_tour";
+th.append(document.createTextNode(this.site.getText("usr_tour")));
 tr.append(th);
 
 th = document.createElement("th");
 th.className = "px-4 py-2 text-left text-sm font-semibold text-gray-300 bg-gray-700";
-th.append(document.createTextNode("Role"));
+th.id="role_tour";
+th.append(document.createTextNode(this.site.getText("role_tour")));
 tr.append(th);
 
 table.append(tr);
@@ -334,9 +336,11 @@ this.tournament.getPlayers().forEach(p => {
     th.className = "px-4 py-2 text-white border-t border-gray-600";
 
     if (p === this.tournament.getOwner()) {
-        th.append(document.createTextNode("Owner"));
+        th.id = "own_tour";
+        th.append(document.createTextNode(this.site.getText("own_tour")));
     } else {
-        th.append(document.createTextNode("Player"));
+        th.classList.add("play_tour");
+        th.append(document.createTextNode(this.site.getText("play_tour")));
     }
 
     tr.append(th);
@@ -350,13 +354,15 @@ this.tournament.getPlayers().forEach(p => {
             console.log("   Tournament has not started yet");
             if (this.username === this.tournament.getOwner()) {
                 let start_button = document.createElement("button");
-                start_button.append(document.createTextNode("Start"));
+                start_button.id = "start_tour";
+                start_button.append(document.createTextNode(this.site.getText("start_tour")));
                 start_button.className = "bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mr-4";
                 start_button.onclick = (event) => this.startTournamentHandler(event);
                 this.tournament_lobby.append(start_button);
             }
             let leave_button = document.createElement("button");
-            leave_button.append(document.createTextNode("Leave"));
+            leave_button.id = "leav_tour";
+            leave_button.append(document.createTextNode(this.site.getText("leav_tour")));
             leave_button.className = "bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded";
             leave_button.onclick = (event) => this.leaveTournamentHandler(event);
             this.tournament_lobby.append(leave_button);
