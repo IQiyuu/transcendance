@@ -302,59 +302,59 @@ export class TournamentController {
             return ;
         }
 
-let title = document.createElement("h3");
-title.className = "text-2xl font-bold text-white mb-4 text-center";
-title.append(document.createTextNode(this.tournament.getName()));
+        let title = document.createElement("h3");
+        title.className = "text-2xl font-bold text-white mb-4 text-center";
+        title.append(document.createTextNode(this.tournament.getName()));
 
-let table = document.createElement("table");
-table.className = "min-w-full bg-gray-800 rounded-lg overflow-hidden shadow-md";
+        let table = document.createElement("table");
+        table.className = "min-w-full bg-gray-800 rounded-lg overflow-hidden shadow-md";
 
-// First row (thead style)
-let tr = document.createElement("tr");
+        // First row (thead style)
+        let tr = document.createElement("tr");
 
-let th = document.createElement("th");
-th.className = "px-4 py-2 text-left text-sm font-semibold text-gray-300 bg-gray-700";
-th.id="usr_tour";
-th.append(document.createTextNode(this.site.getText("usr_tour")));
-tr.append(th);
+        let th = document.createElement("th");
+        th.className = "px-4 py-2 text-left text-sm font-semibold text-gray-300 bg-gray-700";
+        th.id="usr_tour";
+        th.append(document.createTextNode(this.site.getText("usr_tour")));
+        tr.append(th);
 
-th = document.createElement("th");
-th.className = "px-4 py-2 text-left text-sm font-semibold text-gray-300 bg-gray-700";
-th.id="role_tour";
-th.append(document.createTextNode(this.site.getText("role_tour")));
-tr.append(th);
+        th = document.createElement("th");
+        th.className = "px-4 py-2 text-left text-sm font-semibold text-gray-300 bg-gray-700";
+        th.id="role_tour";
+        th.append(document.createTextNode(this.site.getText("role_tour")));
+        tr.append(th);
 
-table.append(tr);
+        table.append(tr);
 
-// Each player row
-this.tournament.getPlayers().forEach(p => {
-    tr = document.createElement("tr");
+        // Each player row
+        this.tournament.getPlayers().forEach(p => {
+            tr = document.createElement("tr");
 
-    th = document.createElement("td");
-    th.className = "px-4 py-2 text-white border-t border-gray-600";
-    th.append(document.createTextNode(p));
-    tr.append(th);
+            th = document.createElement("td");
+            th.className = "px-4 py-2 text-white border-t border-gray-600";
+            th.append(document.createTextNode(p));
+            tr.append(th);
 
-    th = document.createElement("td");
-    th.className = "px-4 py-2 text-white border-t border-gray-600";
+            th = document.createElement("td");
+            th.className = "px-4 py-2 text-white border-t border-gray-600";
 
-    if (p === this.tournament.getOwner()) {
-        th.id = "own_tour";
-        th.append(document.createTextNode(this.site.getText("own_tour")));
-    } else {
-        th.classList.add("play_tour");
-        th.append(document.createTextNode(this.site.getText("play_tour")));
-    }
+            if (p === this.tournament.getOwner()) {
+                th.id = "own_tour";
+                th.append(document.createTextNode(this.site.getText("own_tour")));
+            } else {
+                th.classList.add("play_tour");
+                th.append(document.createTextNode(this.site.getText("play_tour")));
+            }
 
-    tr.append(th);
-    table.append(tr);
-});
+            tr.append(th);
+            table.append(tr);
+        });
 
         this.tournament_lobby.append(title);
         this.tournament_lobby.append(table);
    
         if (!this.tournament.isStarted()){
-            console.log("   Tournament has not started yet");
+            // console.log("   Tournament has not started yet");
             if (this.username === this.tournament.getOwner()) {
                 let start_button = document.createElement("button");
                 start_button.id = "start_tour";
@@ -440,7 +440,8 @@ this.tournament.getPlayers().forEach(p => {
 
     print_tournament(){
         this.clear_tournament_lobby();
-        this.print_tournament_lobby();
+        if (!this.tournament.isStarted())
+            this.print_tournament_lobby();
         this.clear_tournament_state();
         this.print_tournament_state();
         this.print_tournament_div();

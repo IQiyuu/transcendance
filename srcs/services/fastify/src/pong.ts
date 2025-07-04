@@ -226,6 +226,9 @@ export class   GameController{
         document.addEventListener("keyup", key_handler);
         document.addEventListener("keydown", key_handler);
 
+        // if (this.username === game.players.right)
+        //     this.side = "right";
+
         this.print_player_names();
         this.print_scoreboard();
         this.print_game();
@@ -274,8 +277,8 @@ export class   GameController{
         this.r_paddle_x = game.paddles.right.x;
         this.r_paddle_y = game.paddles.right.y;
 
-        this.left_player = game.players.left;
-        this.right_player = game.players.right;
+        this.left_player = game.players.left; // should be removed
+        this.right_player = game.players.right; // should be removed
     }
 
     /**

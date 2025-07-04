@@ -428,7 +428,7 @@ export function	gameInTournament(game_id){
 	return (false);
 }
 
-export function matchOver(game){
+export function matchOver(game, isErr = false){
 	console.log("A Match is over");
 
 	let t = getTournament(tournaments, game.t_id);
@@ -438,7 +438,10 @@ export function matchOver(game){
 	}
 
 	//tell clients
-	t.updateRound(game);
+	if (isErr){
+		t.updateRound(game);
+	}else
+		t.updateRound(game);
 	updateTournamentPlayers(t);
 }
 
