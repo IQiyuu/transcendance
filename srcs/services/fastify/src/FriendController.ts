@@ -54,8 +54,7 @@ export class FriendController {
                 user: this.username
             }));
         } catch (error) {
-            console.log("initFriendList");
-            alert(error);
+            alert(error.message);
         }
     }
 

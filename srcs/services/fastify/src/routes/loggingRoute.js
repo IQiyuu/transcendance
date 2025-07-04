@@ -7,28 +7,33 @@ async function logginRoute (fastify, options) {
     return reply.view("src/index.ejs");
   })
 
-function isValidPassword(password) {
-  const minLength    = password.length >= 8;
-  const hasUppercase = /[A-Z]/.test(password);
-  const hasLowercase = /[a-z]/.test(password);
-  const hasDigit     = /[0-9]/.test(password);
-  const hasSpecial   = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+  async function isValidPassword(password) {
+    const minLength    = password.length >= 8;
+    const hasUppercase = /[A-Z]/.test(password);
+    const hasLowercase = /[a-z]/.test(password);
+    const hasDigit     = /[0-9]/.test(password);
+    const hasSpecial   = /[!@#$%^&*(),.?":{}|<>]/.test(password);
 
-  return minLength && hasUppercase && hasLowercase && hasDigit && hasSpecial;
-}
+    return minLength && hasUppercase && hasLowercase && hasDigit && hasSpecial;
+  }
+
+  async function isValidUsername(username) {
+      const minLength    = username.length >= 3;
+      const maxLength    = username.length <= 15;
+      const hasSpecial   = /[!@#$%^&*(),.?":{}|<>]/.test(username);
+
+      return minLength && maxLength && !hasSpecial;
+  }
 
 
   // Route pour s'inscrire, verifie que le username n'existe pas
   fastify.post('/register', async (request, reply) => {
     const { username, password } = request.body;
     try {
-    const valid = await isValidPassword(password);
-      if (valid) {
-        console.log("Mot de passe valide");
-      } else {
-        console.log("Mot de passe invalide");
+      if (!(await isValidPassword(password)))
         throw Error("errMdp");
-      }
+      if (!(await isValidUsername(username)))
+        throw Error("errUname");
     } catch (error) {
       console.error("Erreur : ", error);
       return { success: false, message: error.message };
@@ -116,17 +121,25 @@ function isValidPassword(password) {
   const isAuthenticated = async (request, reply) => {
     const token = request.cookies.auth_token;
 
-    if (!token) {
-        return reply.send({ success: false });
-    }
+    if (!token)
+        return reply.send({ success: false, error: "" });
 
     try {
         const decoded = fastify.jwt.verify(token, secretKey);
         if (decoded == null)
-            throw Error("Cookie not recognized");
-        request.user = decoded.username;
+            throw Error("Wrong cookie");
+        try {
+          const user = db.prepare('SELECT username FROM users WHERE username = ?').get(decoded.username);
+          if (!user)
+            throw Error("Wrong cookie");
+          request.user = decoded.username;
+        } catch (error) {
+          reply.clearCookie('auth_token');
+          return reply.send({ success: false, error: error.message });
+        }
     } catch (error) {
-        return reply.send({ success: false });
+        reply.clearCookie('auth_token');
+        return reply.send({ success: false, error: error.message });
     }
   };
 

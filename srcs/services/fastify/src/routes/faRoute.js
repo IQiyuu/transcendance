@@ -3,6 +3,41 @@ import speakeasy from 'speakeasy';
 async function faRoute (fastify, options) {
   const secret = options.secretKey;
 
+  const usernameTester = async (request, reply) => {
+        const { username } = request.body.username;
+
+        if (username == null)
+            username = request.params.username;
+
+        if (username == null)
+            return reply.send({ success: false, error: "username error" });
+
+        const token = request.cookies.auth_token;
+
+        if (!token) {
+            return reply.send({ success: false });
+        }
+
+        try {
+            const decoded = fastify.jwt.verify(token, secretKey);
+            if (decoded == null)
+                throw Error("errNA");
+            try {
+            const user = db.prepare('SELECT username FROM users WHERE username = ?').get(decoded.username);
+            if (!user)
+                throw Error("errNA");
+            if (decoded.username == username)
+                request.user = decoded.username;
+            else
+                throw Error("errNA");
+            } catch (error) {
+            return reply.send({ success: false, error: error.message });
+            }
+        } catch (error) {
+            return reply.send({ success: false, error: error.message });
+        }
+    };
+
   // Verifie avec l API si le code est bon 
     fastify.post('/2fa', async (req, reply) => {
       try {
@@ -57,7 +92,9 @@ async function faRoute (fastify, options) {
     });
 
     // On regarde si l utilisateur a active la 2fa via le parametre mis en entree 
-    fastify.post('/check-2fa-status-in', async (req, reply) => {
+    fastify.post('/check-2fa-status-in', {
+        preHandler: usernameTester,
+    }, async (req, reply) => {
       try {
             const { username } = req.body;
             const value = options.db.prepare('SELECT * FROM users WHERE username = ?').get(username);
@@ -101,7 +138,9 @@ async function faRoute (fastify, options) {
     });
 
     // cree un cookie temporaire  pour garder le username 
-    fastify.post('/set-user-cookie', async (req, reply) => {
+    fastify.post('/set-user-cookie', {
+        preHandler: usernameTester,
+    }, async (req, reply) => {
         const { username } = req.body;
         const payload = {
               username: username,

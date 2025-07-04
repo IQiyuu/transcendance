@@ -13,7 +13,7 @@ export class   ProfileController{
 
     private	profile_username : string = null;
 
-    private	picture_path : string = "imgs/standart.jpg";
+    private	picture_path : string = null;
     private	register_date : string = "placeholder";
 
     private	histo = null;
@@ -40,7 +40,8 @@ export class   ProfileController{
     private password_form = (document.getElementById("passwordForm") as HTMLFormElement);
 
     private profile_card = document.getElementById("profile_card");
-    private file_input = document.getElementById("file_input")
+    private file_input = document.getElementById("file_input");
+    private previ_pp = (document.getElementById("previsu_picture") as HTMLImageElement);
 	
     private searchError = document.getElementById("searchError");
 
@@ -60,6 +61,9 @@ export class   ProfileController{
     private cancelBtn = document.getElementById("cancel");
     private usernameJps = document.getElementById("profile_username");
     private jspBtn = document.getElementById("jsp_btn");
+
+    private passError = document.getElementById("errorMessageText");
+    private passPopUp = document.getElementById("passwordPopup");
 
     constructor(site){
         this.site = site;
@@ -285,7 +289,7 @@ export class   ProfileController{
         this.profile_cross.addEventListener("click", async (event) => {
             event.preventDefault();
             document.getElementById("profile_picture_overlay").classList.replace("flex", "hidden");
-            (document.getElementById("previsu_picture") as HTMLImageElement).src = "";
+            this.previ_pp.src = "";
             (document.getElementById("file_input") as HTMLInputElement).value = "";
         });
 
@@ -295,7 +299,7 @@ export class   ProfileController{
                 event.preventDefault();
                 if (event.key === "Escape") {
                     document.getElementById("profile_picture_overlay").classList.replace("flex", "hidden");
-                    (document.getElementById("previsu_picture") as HTMLImageElement).src = "";
+                    this.previ_pp.src = "";
                     (document.getElementById("file_input") as HTMLInputElement).value = "";
                 }
             }
@@ -325,7 +329,7 @@ export class   ProfileController{
             if (fileInput.files[0]) {
                 formData.append('file', fileInput.files[0]);
                 try {
-                    const response = await fetch(`/upload/picture/${this.username}`, {
+                    const response = await fetch(`/db/update/picture/${this.username}`, {
                         method: 'POST',
                         body: formData,
                     });
@@ -333,7 +337,7 @@ export class   ProfileController{
                         console.log("error in file upload.");
                     else {
                         document.getElementById("profile_picture_overlay").classList.replace("flex", "hidden");
-                        (document.getElementById("previsu_picture") as HTMLImageElement).src = "";
+                        this.previ_pp.src = "";
                         (document.getElementById("file_input") as HTMLInputElement).value = "";
                         this.picture_path = "../assets/imgs/" + this.username + ".jpg";
                         (this.profile_picture as HTMLImageElement).src = this.picture_path + "?" + new Date().getTime();
@@ -369,7 +373,7 @@ export class   ProfileController{
             }
 
             const body = {
-                username: "IQiyu", // changer par this.username dans la classe
+                username: this.username,
                 password: currentPassword,
                 newPassword: newPassword
             };
@@ -381,30 +385,30 @@ export class   ProfileController{
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify(body)
                     });
-                console.log("ERROR2: ");
                 const data = await req.json();
-                console.log("ERROR2: ", data);
-                console.log("ERROR3: ", data.error);
                 if (!data.success)
                     throw(Error(data.error));
 
                 console.log("password updated.");
+                this.passError.textContent = "";
                 this.closePasswordPopup();
                 this.password_form.reset();
             } catch (error) {
-                alert(error);
+                this.passError.textContent = this.site.getText(error);
+                alert(error.message);
             }
         });
 
     }
         // Ouvrir la popup
     openPasswordPopup() {
-        document.getElementById('passwordPopup').classList.remove('hidden');
+        this.passPopUp.classList.remove('hidden');
     }
 
     // Fermer la popup
     closePasswordPopup() {
-        document.getElementById('passwordPopup').classList.add('hidden');
+        this.passError.textContent = "";
+        this.passPopUp.classList.add('hidden');
     }
 
     // Afficher les messages d'erreur
@@ -456,7 +460,7 @@ export class   ProfileController{
             console.log("Nouvelle valeur du nom d'utilisateur : " + newUsername);
 
             const body = {
-                username: "IQiyu", // changer par this.username dans la classe
+                username: this.username,
                 newUsername: newUsername
             };
             try {
@@ -470,22 +474,20 @@ export class   ProfileController{
                 const data = await req.json();
 
                 if (!data.success)
-                    throw(Error(data.error));
-                // this.username = newUsername;
-                // this.game.setUsername(this.username);
-                // this.profile.setUsername(this.username);
-                // this.tournament.setUsername(this.username);
-                // this.friends.setUsername(this.username);
+                    throw Error(data.error);
+                this.username = newUsername;
+                this.site.setUsernames(this.username);
                 console.log("username updated.");
             } catch (error) {
-                alert(error);
+
+                alert(error.message);
             }
         }
 
     //Search for the player, and store datas
     async searchPlayerHandler(){
         try {
-            const req = await fetch(`/profile/${this.profile_username}`, {
+            const req = await fetch(`/db/profile/${this.profile_username}`, {
                 method: 'GET',
                 credentials: 'include',
                 headers: { "Content-Type": "application/json" },
@@ -508,7 +510,7 @@ export class   ProfileController{
 
     async	searchHistoricHandler(){
         try {
-            const req = await fetch(`/historic/${this.profile_username}`, {
+            const req = await fetch(`/db/historic/${this.profile_username}`, {
                 method: 'GET',
                 credentials: 'include',
                 headers: { "Content-Type": "application/json" },
@@ -657,6 +659,14 @@ export class SiteController{
         this.username = key;
     }
 
+    setUsernames(username: string) {
+        this.username = username;
+        this.game.setUsername(this.username);
+        this.profile.setUsername(this.username);
+        this.tournament.setUsername(this.username);
+        this.friends.setUsername(this.username);
+    }
+
     /**
      * CONTROLLER
      */
@@ -749,12 +759,11 @@ export class SiteController{
                     document.getElementById("errorAuth").classList.replace("block", "hidden");
                 } else {
                     const error = document.getElementById("errorAuth") as HTMLParagraphElement;
-                    error.textContent = this.getText(data.message];
+                    error.textContent = this.getText(data.message);
                     error.classList.replace("hidden", "block");
                 }
             } catch (error) {
-                console.log("initFriendList");
-                alert(error);
+                alert(error.message);
             }
         });
 
@@ -859,10 +868,15 @@ export class SiteController{
                 credentials: 'include'
             });
             const data = await response.json();
+            if (!data.success) {
+                if (data.error)
+                    alert(data.error);
+                return false;
+            }
             this.username = data.username
             return (response.ok === true && data.success === true);
         } catch (error) {
-            return (false);
+            alert (error.message);
         }
     }
     
