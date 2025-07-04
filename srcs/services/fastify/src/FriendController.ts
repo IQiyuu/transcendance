@@ -78,7 +78,7 @@ export class FriendController {
         div.className = "w-full flex items-center justify-between p-3 rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white shadow hover:bg-gray-200 dark:hover:bg-gray-600 transition cursor-pointer";
         div.id = username+"_friendlist";
 
-        img.src = pp;
+        img.src = "assets/imgs/" + pp;
         img.className = "rounded-full";
         img.style.width = "7%";
 
@@ -177,7 +177,6 @@ export class FriendController {
     }
 
     addEvents() {
-        console.log("F: ", this.username);
         this.friend_btn.addEventListener("click", this.handleFriendClick);
         this.block_btn.addEventListener("click", this.handleBlockClick);
     }

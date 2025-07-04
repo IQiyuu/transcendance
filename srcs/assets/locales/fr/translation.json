@@ -39,6 +39,8 @@
   "google_switch_desable": "Desactiver l'authentification Google",
   "2FA_enable": "Activer 2FA",
   "2FA_disable": "Desactiver 2FA",
+  "add_friend": "Ajouter en amis",
+  "rem_friend": "Retirer des amis",
 
   "pass_change": "Changer le mot de pass",
   "pass_current": "Mot de passe actuel",

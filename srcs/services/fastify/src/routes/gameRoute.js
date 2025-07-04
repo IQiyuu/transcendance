@@ -1,6 +1,4 @@
-import fs from 'fs';
-import {gameInTournament, matchOver} from './tournament.js';
-import { finished } from 'stream';
+import {matchOver} from './tournament.js';
 
 function randomIntFromInterval(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);

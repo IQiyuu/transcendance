@@ -1,3 +1,4 @@
+import fs from 'fs';
 
 async function dbRoute (fastify, options) {
     let db = options.db;
@@ -161,10 +162,11 @@ async function dbRoute (fastify, options) {
     fastify.post('/db/update/username', {
         preHandler: usernameTester,
     }, async (req, rep) => {
-        const { newUsername, username } = req.body;
+        const username = req.body.username;
+        const newUsername = req.body.newUsername;
 
         try {
-            if (newusername == username) 
+            if (newUsername == username) 
                 return { success: false, error: 'errUSame' };
             if (!(await isValidUsername(newUsername))) 
                 return { success: false, error: 'errUname' };
@@ -172,6 +174,18 @@ async function dbRoute (fastify, options) {
             if (db.prepare(`SELECT username FROM users WHERE username = ?`).get(newUsername) != null)
                 return ({ sucess: false, error: "errUTaken" });
             db.prepare(`UPDATE users SET username = ? WHERE username = ?`).run(newUsername, username);
+            const payload = {
+                username: newUsername,
+            };
+            const token = fastify.jwt.sign(payload, { expiresIn: '1d' });
+
+            rep.setCookie('auth_token', token, {
+                path: '/',
+                httpOnly: true,
+                secure: true,
+                SameSite: 'Strict',
+                maxAge: 3600,
+            });
             return ({ success: true });
         } catch (error) {
             return ({ success: false, error: error.message });
@@ -187,6 +201,21 @@ async function dbRoute (fastify, options) {
 
         return minLength && hasUppercase && hasLowercase && hasDigit && hasSpecial;
     }
+
+
+    fastify.get('/db/select/pics/:user1/:user2', async (req) => {
+        const { user1, user2 } = req.params;
+
+        try {
+            const datas = db.prepare(`
+                SELECT username, picture_path FROM users WHERE username IN (?, ?)
+            `).all(user1, user2);
+            return { success: true, datas };
+        } catch (error) {
+            console.error("error: ", error);
+            return { success: false, error: error.message };
+        }
+    });
 
     // modifying password
     fastify.post('/db/update/password', {

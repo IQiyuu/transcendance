@@ -37,15 +37,6 @@ async function websocketRoute(fastify, options) {
         fastify.get('/ws', { websocket: true }, (socket, req) => {
             const username = req.query.username;
 
-            // Diffuser un message à tout le monde
-            function broadcast(message) {
-                for (const [socket, username] of connectedClients) {
-                    if (client.readyState === 1) {
-                        client.send(JSON.stringify(message));
-                    }
-                }
-            }
-            
             function sendInfosFriends(socket, username, type) {
                 const user_id = getIdFromUsername(username);
                 if (user_id == "")
@@ -99,6 +90,20 @@ async function websocketRoute(fastify, options) {
                     const targetSocket = connectedClients.get(data.target);
                     if (targetSocket) {
                         targetSocket.send(JSON.stringify(data));
+                    }
+                } else if (data.type === 'pseudo_swap') {
+                    const user_id = getIdFromUsername(data.newUsername);
+                    if (user_id == "")
+                        return ;
+                    const friendlist = getFriendList(user_id);
+                    for (let friend of friendlist) {
+                        const friendSocket = connectedClients.get(friend.username);
+
+                        friendSocket.send(JSON.stringify({
+                            type: data.type,
+                            username: data.username,
+                            newUsername: data.newUsername
+                        }));
                     }
                 } else if (data.type === 'matchmaking') {
                     if (data.state == 'enter' && waiting_list == null) {
