@@ -90,7 +90,7 @@ export class LangController{
         document.getElementById('fa_btn_enable').textContent = this.file['2FA_enable'];
 
         document.getElementById('google_auth_enable').textContent = this.file['google_switch_enable'];
-        document.getElementById('google_auth_disable').textContent = this.file['google_switch_disable'];
+        // document.getElementById('google_auth_disable').textContent = this.file['google_switch_disable'];
 
 
         document.getElementById('pass_change').textContent = this.file['pass_change'];

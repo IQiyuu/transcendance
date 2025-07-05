@@ -35,6 +35,7 @@
   "errUSmall": "Username too small",
   "errUSame": "Same username enters",
   "errUTaken": "Username already taken",
+  "errIsPlaying": "to do",
   "errNA": "Not authorized",
   "about": "About",
   "google_auth": "Connecting with Google authentificator",

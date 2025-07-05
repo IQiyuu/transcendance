@@ -179,7 +179,6 @@ export class   ProfileController{
                     //this.enable_auth_btn.classList.replace("disable_auth_btn", "enable_auth_btn");
                     console.log("je desactive !");
                     this.enable_auth_btn.textContent = this.site.getText("google_switch_enable");
-                    
                 }
             }
 
@@ -813,6 +812,10 @@ export class SiteController{
         this.title_link.addEventListener("click", async (event) => {
             event.preventDefault();
 
+            if (this.game.isPlaying()){
+                alert(this.getText("errIsPlaying"));
+                return ;
+            }
             this.profile.setProfileUsername(null);
             this.hide_all();
             this.print_menu();
@@ -869,13 +872,18 @@ export class SiteController{
         // Tournament menu
         this.tournament_btn.addEventListener("click", async(event) => {
             event.preventDefault();
-            this.hide_btn_menu();
-            this.navigate({ page: "tournament" });
+            // this.hide_btn_menu();
+            this.navigate({page: "tournament"});
         });
 
 
         this.logout_btn.addEventListener("click", async (event) => {
             event.preventDefault();
+
+            if (this.game.isPlaying()){
+                alert(this.getText("errIsPlaying"));
+                return ;
+            }
 
             const response = await fetch("/logout", {
                 method: "POST",
@@ -979,7 +987,6 @@ export class SiteController{
     }
     print_menu(){
         this.print_main_page();
-        this.print_btn_menu();
         this.menu.classList.replace("hidden", "block");
         if (this.tournament !== null && this.tournament.hasTournament())
             this.tournament.print_tournament_rejoin_btn();

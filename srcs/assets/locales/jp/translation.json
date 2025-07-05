@@ -36,6 +36,7 @@
   "errUSame": "同じユーザー名が入力されました",
   "errUTaken": "ユーザー名は既に使用されています",
   "errNA": "権限がありません",
+  "errIsPlaying": "to do",
   "about": "このゲームについて",
 
   "add_friend": "友達に追加",
