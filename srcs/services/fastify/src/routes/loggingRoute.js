@@ -9,12 +9,13 @@ async function logginRoute (fastify, options) {
 
   async function isValidPassword(password) {
     const minLength    = password.length >= 8;
+    const maxLength    = password.length <= 42;
     const hasUppercase = /[A-Z]/.test(password);
     const hasLowercase = /[a-z]/.test(password);
     const hasDigit     = /[0-9]/.test(password);
     const hasSpecial   = /[!@#$%^&*(),.?":{}|<>]/.test(password);
 
-    return minLength && hasUppercase && hasLowercase && hasDigit && hasSpecial;
+    return minLength && maxLength && hasUppercase && hasLowercase && hasDigit && hasSpecial;
   }
 
   async function isValidUsername(username) {

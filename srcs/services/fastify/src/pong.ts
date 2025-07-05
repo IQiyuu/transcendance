@@ -412,7 +412,7 @@ export class   GameController{
 
         // Le title
         const title = document.createElement("h1");
-        title.innerText = "Game Over";
+        title.innerText = this.site.getText("Game_over");
         title.className = "mb-5 text-4xl";
         this.end_screen.appendChild(title);
 
@@ -499,8 +499,12 @@ export class   GameController{
 
         // texte win
         let winner = "Match nul";
-        if (this.l_score > this.r_score) winner = `${this.left_player} wins!`;
-        else if (this.r_score > this.l_score) winner = `${this.right_player} wins!`;
+
+        if (this.l_score > this.r_score) {
+            winner = this.site.getText("win_txt").replace("{player}", this.left_player);
+        } else if (this.r_score > this.l_score) {
+            winner = this.site.getText("win_txt").replace("{player}", this.right_player);
+        }
 
         const winnerText = document.createElement("p");
         winnerText.innerText = winner;
@@ -509,7 +513,7 @@ export class   GameController{
 
         // bouton retour menu
         const btn = document.createElement("button");
-        btn.innerText = "Menu";
+        btn.innerText = this.site.getText("end_game_btn");
         btn.className = `
             px-8 py-4 text-lg 
             rounded-lg bg-green-600 text-white 

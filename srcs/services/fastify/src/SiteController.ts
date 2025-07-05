@@ -482,6 +482,10 @@ export class   ProfileController{
             this.profile_username = data.profile.username;
             this.register_date = data.profile.created_at;
             this.picture_path = data.profile.picture_path;
+
+            //front remove friend to fix
+            
+
             console.log(this.picture_path);
             console.log(data.profile);
         } catch (error){
