@@ -145,7 +145,7 @@ export class   ProfileController{
             if (this.profile_username == this.username)
                 this.camera_icon.classList.replace("opacity-60", "opacity-0");
         });
-        // Activate / Desactivate Google authentificator
+        // Enable / Disable Google authentificator
         this.auth_btn.addEventListener('click', async (event) => {
             event.preventDefault();
             const res = await fetch('/check-email-status', {
@@ -167,15 +167,19 @@ export class   ProfileController{
                         if (data2.success == 1)
                         {
                             this.enable_auth_btn.classList.replace("enable_auth_btn", "disable_auth_btn");
-                           // this.google_auth.textContent = "Desactiver Google authentificator";
+                            console.log("j'active !");
+                            this.enable_auth_btn.textContent = this.site.getText("google_switch_disable");  
                         }
+        
                     }
                 }
                 else 
                 {
                     await fetch('/desable_auth');
-                    this.enable_auth_btn.classList.replace("disable_auth_btn", "enable_auth_btn");
-                    //this.google_auth.textContent = "Activer Google authentificator";
+                    //this.enable_auth_btn.classList.replace("disable_auth_btn", "enable_auth_btn");
+                    console.log("je desactive !");
+                    this.enable_auth_btn.textContent = this.site.getText("google_switch_enable");
+                    
                 }
             }
 
@@ -379,7 +383,6 @@ export class   ProfileController{
                 this.closePasswordPopup();
                 this.password_form.reset();
             } catch (error) {
-                console.log("AFBHJDKFBJBFGJSDHKYUSJFVSGJDJGSDHFGJHSDKSHJDFBJHKSDBJ");
                 this.passError.textContent = this.site.getText(error);
                 alert(error.message);
             }
@@ -597,7 +600,6 @@ export class   ProfileController{
                 body: JSON.stringify({ username: this.username }) 
             });
             if (res.ok) {
-                console.log("SUFHUFHSDHDSLFHS");
                 const data = await res.json();
                 if (data.success == 1) {
                     document.getElementById("fa_btn_enable").textContent = this.site.getText("2FA_disable");
@@ -613,7 +615,7 @@ export class   ProfileController{
             if (resp.ok) {
                 const data = await resp.json();
                 if(data.success == 1) {
-                    document.getElementById("google_auth_enable").textContent = this.site.getText("google_switch_desable");
+                    document.getElementById("google_auth_enable").textContent = this.site.getText("google_switch_disable");
                     document.getElementById("google_auth_enable").classList.replace("enable_auth_btn", "disable_auth_btn");
                 }
                 else {
@@ -622,7 +624,6 @@ export class   ProfileController{
                 }
             }
         } catch (error) {
-            console.log("SUFHUFHSDHDSLFHS9999999999999999999");
             alert(error.message);
         }
     }
@@ -763,7 +764,6 @@ export class SiteController{
                 const data = await response.json();
                 
                 if (data.success) {
-                    // console.log("OUIII");
                     this.isRegisterMode = false;
                     this.username = data.username;
                     if (url == "/login")
@@ -777,11 +777,9 @@ export class SiteController{
                             body: JSON.stringify({ username : data.username }) 
                         });
                         if (res.ok) {
-                            // console.log("OUIII2");
                             const twofadata = await res.json();
                             if (twofadata.success == 1)
                             {
-                                // console.log("OUIII3");
                                 const res = await fetch('/set-user-cookie', {
                                     method: 'POST',
                                     headers: {
@@ -805,7 +803,6 @@ export class SiteController{
                     error.classList.replace("hidden", "block");
                 }
             } catch (error) {
-                console.log("AAAAAAAAAAAAAAAAAAAAAAAAaa");
                 alert(error.message);
             }
         });

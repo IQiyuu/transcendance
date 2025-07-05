@@ -41,7 +41,7 @@
 
   "google_auth": "Google の認証を取得したコネクタを接続します",
   "google_switch_enable": "Google認証を有効にする",
-  "google_switch_desable": "Google認証を無効にする",
+  "google_switch_disable": "Google認証を無効にする",
   "2FA_enable": "2FA を有効にする",
   "2FA_disable": "2FA を無効にする",
 
