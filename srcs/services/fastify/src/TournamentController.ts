@@ -74,7 +74,7 @@ export class TournamentController {
     private site: SiteController = null;
     private username: string = null;
     private tournament: Tournament = null;
-    private finished_tournament: Tournament = null;
+    public finished_tournament: Tournament = null;
     private game: GameController;
 
     /**VIEW */
@@ -619,8 +619,6 @@ export class TournamentController {
         this.tournament_end_page.appendChild(btn);
 
         this.hide_all()
-        // this.print_tournament();
-        // this.print_tournament();
         this.print_tournament_end_page();
     }
 

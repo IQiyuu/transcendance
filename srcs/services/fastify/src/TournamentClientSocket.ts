@@ -81,7 +81,10 @@ export class TournamentClientSocket{
             this.ctler.clear_tournament_state();
             this.ctler.clear_tournaments();
             this.ctler.hide_all();
-            this.ctler.print_menu();
+            if (this.ctler.finished_tournament !== null)
+                this.ctler.print_tournament_end_page();
+            else
+                this.ctler.print_menu();
             this.ctler.close();
             // if server closed, then parent.err
         }
