@@ -445,7 +445,7 @@ export function matchOver(game, isErr = false){
 
 	let t = getTournament(tournaments, game.t_id);
 	if (t === undefined){
-		console.log("ERROR MATCH NOT FOUND")
+		console.log("ERROR MATCH NOT FOUND");
 		return ;
 	}
 
@@ -690,6 +690,7 @@ function tournamentRoute (fastify, options) {
 				tournaments.splice(tournaments.indexOf(tournament));
 			}
 			if (tournament.isFinished()){
+				console.log("TOurnament is finished server !!");
 				tournament.endTournament();
 				tournaments.splice(tournaments.indexOf(tournament), 1);
 				return ;

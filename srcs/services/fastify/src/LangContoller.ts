@@ -103,7 +103,7 @@ export class LangController{
         document.getElementById('wr_card').textContent = this.file['wr'];
         (document.getElementById('search_player_in') as HTMLInputElement).placeholder = this.file['search'];
 
-        if (document.getElementById('waiting_online') && document.getElementById('cancel_game')) {
+        if (document.getElementById('waiting_online') !== null && document.getElementById('cancel_game') !== null) {
             document.getElementById('waiting_online').textContent = this.file['waiting_online'];
             document.getElementById('cancel_game').innerHTML = this.file['cancel_mm'];
         }

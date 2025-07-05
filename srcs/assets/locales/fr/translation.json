@@ -72,7 +72,7 @@
   "crea_tour_btn": "Creer",
   "tour_win_msg": "Tu as remporté le tournoi 👑",
   "tour_quit_btn": "Quitter",
-  "tour_lose_msg": "Tu as perdu le tournoi 😞🪢",
+  "tour_lose_msg": "Tu as perdu le tournoi 😞",
   "tour_bracket": "Arbre du tournoi",
   "about_content": "🏓 Transcendence — Jeu Pong Multijoueur en Ligne\n\nTranscendence est une version modernisée du célèbre jeu Pong, conçue pour une expérience en ligne fluide, compétitive et sociale. Il inclut des tournois, un système d’amis, et une interface multilingue.\n\n⚙️ Technologies utilisées\n\tFrontend : React, TypeScript, WebSocket, TailwindCSS\n\tBackend : TypeScript, Fastify\n\tWebSocket : pour le jeu en temps réel et le chat\n\tAuthentification : 2FA (Two-Factor Authentication), Google OAuth\n\tDocker : pour le déploiement en container\n\n🧩 Description du jeu\nLe jeu se joue en 1v1 en ligne. Chaque joueur contrôle une raquette et tente de marquer des points.\n\n\tDes parties en ligne\n\tDes tournois à élimination directe\n\tUn classement global\n\n🕹️ Commandes de jeu\nMonter la raquette\t↑ ou W\nDescendre la raquette\t↓ ou S\n\n💡 Fonctionnalités principales\n\t🎮 Jeu multijoueur en temps réel via WebSocket\n\t🧑‍🤝‍🧑 Système d’amis\n\t🏆 Organisation de tournois\n\t🔒 Authentification 2FA, Google OAuth\n\t🌐 Interface multilingue : Français 🇫🇷, Anglais 🇬🇧, Japonais 🇯🇵\n\t👤 Profils personnalisables\n\t📸 Changement d’image de profil\n\t✏️ Changement de pseudo\n\n🔐 Déconnexion sécurisée\n\tLe bouton Logout en haut à droite permet de se déconnecter.\n\n🌍 Sélecteur de langue\n\tPermet de changer dynamiquement la langue de l’interface.\n\n🔐 Connexion via Google\n\tUn pseudo temporaire comme guess_0 est attribué automatiquement.\n\tMot de passe par défaut : \"default\". Personnalisable ensuite."
 

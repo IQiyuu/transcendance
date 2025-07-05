@@ -105,6 +105,10 @@ export class TournamentController {
         this.tournament_create_btn.addEventListener("click", (event) => {
             event.preventDefault();
 
+            if (this.game.isPlaying()){
+                alert("You can't join a tournament while playing or searching for a game !");
+                return ;
+            }
             if (this.tournament !== null) {
                 alert("You're already registered for a tournament");
                 return;
@@ -150,6 +154,10 @@ export class TournamentController {
         this.tournament_join_btn.addEventListener("click", async (event) => {
             event.preventDefault();
             
+            if (this.game.isPlaying()){
+                alert("You can't join a tournament while playing or searching for a game !");
+                return ;
+            }
             if (this.tournament !== null) {
                 alert("You're already registered for a tournament");
                 return;
@@ -173,7 +181,7 @@ export class TournamentController {
                         if (size == 0)
                             this.tournaments_list.append(document.createTextNode(this.site.getText("no_tour")));
                         else {
-                            list.appendChild(document.createTextNode(this.site.getText("no_tour")));
+                            list.appendChild(document.createTextNode(this.site.getText("lst_tour")));
                             while (i < size) {
                                 let el = document.createElement("li");
                                 el.appendChild(document.createTextNode(data.tournaments[i].name));
@@ -246,12 +254,11 @@ export class TournamentController {
     }
 
     endTournament(){
-        // this.ws = null;
-        console.log("EndingTOurnament");
+        console.log("EndingTournament");
         this.clear_tournament_lobby();
         this.hide_tournament_lobby();
-        this.print_tournament_end()
         this.close()
+        this.print_tournament_end()
     }
 
     close(){
@@ -557,7 +564,6 @@ export class TournamentController {
 
 
     print_tournament_end() {
-        console.log("ToURNAMENT END");
 
         const brackets = this.tournament.getBrackets();
         if (!brackets || brackets.length === 0) return;
@@ -604,7 +610,8 @@ export class TournamentController {
         endDiv.appendChild(btn);
 
         // Effacer l'ancien contenu et afficher
-        this.tournament_page.innerHTML = '';
+        // this.tournament_page.innerHTML = ''; NO
+        this.hide_all()
         this.tournament_page.appendChild(endDiv);
         this.print_tournament_page();
     }

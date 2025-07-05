@@ -25,13 +25,13 @@ export class   GameController{
 
     private is_searching : boolean = false;
 	private	is_tournament : boolean = false;
+    private is_local : boolean = false;
 
     private username : string = "undefined";
 
     // Game
     private game_id : number = -1;
     private side : string = "left";
-    private is_local : boolean = false;
     
     private left_player : string = null;
     private right_player : string = null;
@@ -97,6 +97,9 @@ export class   GameController{
         return (this.is_local);
     }
 
+    isPlaying(){
+        return (this.is_local || this.is_searching || this.is_tournament);
+    }
 
     /**
      * Controller
@@ -250,7 +253,6 @@ export class   GameController{
         if (this.is_tournament){
             console.log("Tournament's game is finished ending");
             console.log("Not closing socket for it can be used later");
-            
             this.game_id = -1;
         } else {
             this.print_end_game();
@@ -299,21 +301,18 @@ export class   GameController{
     start_matchmaking_animation(){
         let count = 0;
 
-        document.getElementById("matchmaking").innerHTML = "<span id='waiting_online'>waiting</span>"
+        document.getElementById("matchmaking").innerText = "<span id='waiting_online'>waiting</span>"
             + "<span id='dots'></span>"
             + "<br><span id='cancel_game'>click to cancel ❌</span>";
-        anim_interval_id = window.setInterval(() => {
-            count++;
-            document.getElementById("dots").innerHTML = '.'.repeat(count % 3) + "<br>";
-            //document.getElementById("matchmaking").textContent = "\nclick to cancel";
+        anim_interval_id = setInterval(() => {
+            document.getElementById("dots").innerText = '.'.repeat(count++ % 3) + "<br>";
         }, 500);
         this.site.loadLang();
-
     }
 
     stop_matchmaking_animation(){
-        document.getElementById("matchmaking").innerHTML = "";
-        this.site.loadLang(); // ?
+        // document.getElementById("matchmaking").innerHTML = "";
+        // this.site.loadLang(); // ?
         clearInterval(anim_interval_id);
         this.online_play_btn.textContent = this.site.getText('play_online');
     }

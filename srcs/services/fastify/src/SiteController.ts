@@ -87,11 +87,13 @@ export class   ProfileController{
             this.closePasswordPopup();
         });
 
+        // Renaming the user
         this.profile_username_tag.addEventListener("click", () => {
             if (this.username == this.profile_username)
                 this.editUsername();
         });
 
+        // Changing the user password
         this.jspBtn.addEventListener("click", () => {
             if (this.username == this.profile_username)
                 this.openPasswordPopup();
@@ -179,6 +181,7 @@ export class   ProfileController{
 
         // Connexion with Google authentificator
         });
+
         this.check_btn.addEventListener('click', async (event) => {
             event.preventDefault();
             window.open('/check', '42 AUTH');
@@ -381,9 +384,9 @@ export class   ProfileController{
                 alert(error.message);
             }
         });
-
     }
-        // Ouvrir la popup
+
+    // Ouvrir la popup
     openPasswordPopup() {
         this.passPopUp.classList.remove('hidden');
     }
@@ -438,35 +441,35 @@ export class   ProfileController{
         });
     }
 
-        async saveUsername(newUsername) {
-            document.getElementById('profile_username').innerText = newUsername;
-            console.log("Nouvelle valeur du nom d'utilisateur : " + newUsername);
+    async saveUsername(newUsername) {
+        document.getElementById('profile_username').innerText = newUsername;
+        console.log("Nouvelle valeur du nom d'utilisateur : " + newUsername);
 
-            const body = {
-                username: this.username,
-                newUsername: newUsername
-            };
-            try {
-                const req = await fetch('/db/update/username', {
-                        method: 'POST',
-                        credentials: 'include',
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(body)
-                    });
+        const body = {
+            username: this.username,
+            newUsername: newUsername
+        };
+        try {
+            const req = await fetch('/db/update/username', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(body)
+                });
 
-                const data = await req.json();
+            const data = await req.json();
 
-                if (!data.success)
-                    throw Error(data.error);
-                this.site.send({type:"pseudo_swap", username: this.username, newUsername: newUsername});
-                this.username = newUsername;
-                this.site.setUsernames(this.username);
-                console.log("username updated.");
-            } catch (error) {
-                console.log("sfsdfSUFHUFHfsdfdsfsdfdsfsfdsSDHDSLFHS");
-                alert(error.message);
-            }
+            if (!data.success)
+                throw Error(data.error);
+            this.site.send({type:"pseudo_swap", username: this.username, newUsername: newUsername});
+            this.username = newUsername;
+            this.site.setUsernames(this.username);
+            console.log("username updated.");
+        } catch (error) {
+            console.log("sfsdfSUFHUFHfsdfdsfsdfdsfsfdsSDHDSLFHS");
+            alert(error.message);
         }
+    }
 
     //Search for the player, and store datas
     async searchPlayerHandler(){
@@ -626,11 +629,13 @@ export class   ProfileController{
 
     hide_page(){
         this.profile_page.classList.replace("flex", "hidden");
-
     }
 
     hide_all(){
         this.hide_page();
+        this.closePasswordPopup();
+        this.site.hide_fa_page();
+
     }
 };
 
