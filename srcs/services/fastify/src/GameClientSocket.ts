@@ -74,7 +74,7 @@ export class GameClientSocket{
                     this.ctl.setSide(side);
                     console.log("side = " + this.ctl.getSide());
                     this.ctl.stop_matchmaking_animation();
-                    this.ctl.hide_all();
+                    this.ctl.hide_site();
                     this.ctl.hide_menu();
                     this.ctl.gameInit();
                 }

@@ -44,6 +44,7 @@ export class ClientSocket{
             const data = JSON.parse(message.data);
             if (data === null)
                 return ; 
+            console.log("msg recu: ", data.data);
             if (data.type == "connection") {
                 const div = document.getElementById(`${data.user}_friendlist`);
                 const dot = div.getElementsByTagName("span")[0];
@@ -54,13 +55,18 @@ export class ClientSocket{
                 dot.classList.replace("bg-green-500", "bg-red-500");
             } else if (data.type == "addFriend") {
                 this.friends.addFriend(data.user, data.pp);
-                document.getElementById("friend_btn").textContent = this.view_site.getText("rem_friend");
+                document.getElementById("friend_btn").textContent = this.view_site.getText("send_rem");
             } else if (data.type == "removeFriend") {
                 this.friends.removeFriend(data.user);
-                document.getElementById("friend_btn").textContent = this.view_site.getText("add_friend");
+                document.getElementById("friend_btn").textContent = this.view_site.getText("send_inv");
             } else if (data.type == "pseudo_swap") {
                 document.getElementById(`${data.username}_friendlist`).id = `${data.newUsername}_friendlist`;
-                document.getElementById(`${data.username}_friendlist`).textContent = data.newUsername;
+                document.getElementById(`${data.newUsername}_friendlist`).getElementsByTagName("p")[0].textContent = data.newUsername;
+            } else if (data.type == "pp_swap") {
+                console.log(document.getElementById(`${data.username}_friendlist`));
+                console.log(data.pp)
+                console.log(document.getElementById(`${data.username}_friendlist`).getElementsByTagName("img"));
+                document.getElementById(`${data.username}_friendlist`).getElementsByTagName("img")[0].src = data.pp;
             }
         };
     }

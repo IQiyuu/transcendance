@@ -86,10 +86,7 @@ export class LangController{
         document.getElementById('histo_text').textContent = this.file['historique'];
 
         document.getElementById('google_auth_btn').textContent = this.file['google_auth'];
-        if (document.getElementById('fa_btn_enable') != null)
-            document.getElementById('fa_btn_enable').textContent = this.file['2FA_enable'];
-        else
-            document.getElementById('fa_btn_disable').textContent = this.file['2FA_disable'];
+        document.getElementById('fa_btn_enable').textContent = this.file['2FA_enable'];
 
         document.getElementById('google_auth_enable').textContent = this.file['google_switch_enable'];
 
@@ -129,7 +126,8 @@ export class LangController{
             document.getElementById("role_tour").textContent = this.file["role_tour"];
             document.getElementById("own_tour").textContent = this.file["own_tour"];
             for (let element of document.getElementsByClassName("play_tour")) element.textContent = this.file["play_tour"];
-            document.getElementById("start_tour").textContent = this.file["start_tour"];
+            if (document.getElementById("start_tour") != null)
+                document.getElementById("start_tour").textContent = this.file["start_tour"];
             document.getElementById("leav_tour").textContent = this.file["leav_tour"];
         }
     }
