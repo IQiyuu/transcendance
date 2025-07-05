@@ -74,7 +74,7 @@ export class GameClientSocket{
                     this.ctl.setSide(side);
                     console.log("side = " + this.ctl.getSide());
                     this.ctl.stop_matchmaking_animation();
-                    this.ctl.hide_all();
+                    this.ctl.hide_site();
                     this.ctl.hide_menu();
                     this.ctl.gameInit();
                 }
@@ -92,11 +92,14 @@ export class GameClientSocket{
                 } else{
                     if (message.state === "match_connected"){
                         console.log("   Match should begin");
-
+                        console.log(message.game);
+                        this.ctl.setSide((message.game.players.left == this.ctl.getUsername() ? "left" : "right"));
                         this.ctl.gameInit();
                         this.ctl.updateState(message.game);
                     }
                 }
+            } else if (message.type === "error"){
+                console.log("Socket should close (server asked)");
             }
         };
 

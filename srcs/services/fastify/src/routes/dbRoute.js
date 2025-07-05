@@ -1,19 +1,18 @@
+import fs from 'fs';
 
 async function dbRoute (fastify, options) {
     let db = options.db;
     let secretKey = options.secretKey;
+    let img_path = "dist/assets/imgs/";
 
     const usernameTester = async (request, reply) => {
         var username = null;
         if (request.body)
             username = request.body.username;
-        console.log(username);
         if (username == null && request.params)
             username = request.params.username;
-        console.log(username);
         if (username == null)
             return reply.send({ success: false, error: "username error" });
-        console.log(username);
         const token = request.cookies.auth_token;
 
         if (!token) {
@@ -46,8 +45,8 @@ async function dbRoute (fastify, options) {
             const username = request.params.username;
             // console.log(username);
             // ajouter l'image de profile
-            if (!userExistsInDb(username, options.db))
-                return {success: false, message: "User doesn't exists"};
+            if (!db.prepare(`SELECT username FROM users WHERE username = ?`).get(username))
+                return {success: false, message: "User don't exists"};
             const data = options.db.prepare('SELECT username, created_at, picture_path FROM users WHERE username = ?').get(username);
             // console.log(`Profile fetched from db: `, data);
             if (data === null || data === undefined)
@@ -163,10 +162,11 @@ async function dbRoute (fastify, options) {
     fastify.post('/db/update/username', {
         preHandler: usernameTester,
     }, async (req, rep) => {
-        const { newUsername, username } = req.body;
+        const username = req.body.username;
+        const newUsername = req.body.newUsername;
 
         try {
-            if (newusername == username) 
+            if (newUsername == username) 
                 return { success: false, error: 'errUSame' };
             if (!(await isValidUsername(newUsername))) 
                 return { success: false, error: 'errUname' };
@@ -174,6 +174,18 @@ async function dbRoute (fastify, options) {
             if (db.prepare(`SELECT username FROM users WHERE username = ?`).get(newUsername) != null)
                 return ({ sucess: false, error: "errUTaken" });
             db.prepare(`UPDATE users SET username = ? WHERE username = ?`).run(newUsername, username);
+            const payload = {
+                username: newUsername,
+            };
+            const token = fastify.jwt.sign(payload, { expiresIn: '1d' });
+
+            rep.setCookie('auth_token', token, {
+                path: '/',
+                httpOnly: true,
+                secure: true,
+                SameSite: 'Strict',
+                maxAge: 3600,
+            });
             return ({ success: true });
         } catch (error) {
             return ({ success: false, error: error.message });
@@ -189,6 +201,21 @@ async function dbRoute (fastify, options) {
 
         return minLength && hasUppercase && hasLowercase && hasDigit && hasSpecial;
     }
+
+
+    fastify.get('/db/select/pics/:user1/:user2', async (req) => {
+        const { user1, user2 } = req.params;
+
+        try {
+            const datas = db.prepare(`
+                SELECT username, picture_path FROM users WHERE username IN (?, ?)
+            `).all(user1, user2);
+            return { success: true, datas };
+        } catch (error) {
+            console.error("error: ", error);
+            return { success: false, error: error.message };
+        }
+    });
 
     // modifying password
     fastify.post('/db/update/password', {
@@ -227,7 +254,7 @@ async function dbRoute (fastify, options) {
             db.prepare(`UPDATE users
                 SET lang = ?
                 WHERE username = ?;
-            `).run(body.lang, body.user);
+            `).run(body.lang, body.username);
             reply.send({success: true});
         } catch (error) {
             console.log("error: ", error);
@@ -314,7 +341,7 @@ async function dbRoute (fastify, options) {
         const body = request.body;
         
         try {
-            const userId = getIdFromUsername(body.user);
+            const userId = getIdFromUsername(body.username);
             const friendId = getIdFromUsername(body.friend);
 
             const datas = getFriendRelation(userId, friendId);
@@ -353,7 +380,7 @@ async function dbRoute (fastify, options) {
         const body = request.body;
         
         try {
-            const userId = getIdFromUsername(body.user);
+            const userId = getIdFromUsername(body.username);
             const friendId = getIdFromUsername(body.friend);
 
             const datas = getFriendRelation(userId, friendId);
@@ -415,7 +442,7 @@ async function dbRoute (fastify, options) {
                     reply.send({ success: true, message: message, status: friendship.status, emoji: emoji });
                 } else if (friendship.status == "both_blocking") {
                     const emoji = friendship.user == userId ? "🔓" : "🔒";
-                    reply.send({ success: true, message: "Unblock", status: friendship.status, emoji: emoji });
+                    reply.send({ success: true, message: "unblock", status: friendship.status, emoji: emoji });
                 } else {
                     reply.send({ success: true, message: "send_rem", status: friendship.status, emoji: "🔒" });
                 }
@@ -430,7 +457,7 @@ async function dbRoute (fastify, options) {
     fastify.get('/db/friends/friendlist/:username', {
         preHandler: usernameTester,
     }, async (request, reply) => {
-        console.log("OUIII");
+        // console.log("OUIII");
         try {
             const userId = getIdFromUsername(request.params.username);
             if (!userId)

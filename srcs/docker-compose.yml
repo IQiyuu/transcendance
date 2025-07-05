@@ -20,6 +20,7 @@ services:
     secrets:
       - SSL-certificate
       - SSL-key
+      - API-secrets
     networks:
       - pong
     hostname : "Trong"
@@ -89,4 +90,5 @@ secrets:
     file: ${SECRETS}${SSL_CERTIFICATE}
   SSL-key:
     file: ${SECRETS}${SSL_KEY}
-  # Prom-auth:
+  API-secrets:
+    file: ${SECRETS}${API_SECRET}

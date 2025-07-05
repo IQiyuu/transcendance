@@ -27,6 +27,8 @@ export class   ProfileController{
     private	friend_div = document.getElementById("friend_div");
     private	auth_btn = document.getElementById("auth_btn");
 
+    private	wr = document.getElementById("wr");
+    private wr_card = document.getElementById("wr_card");
 
     private	check_btn = document.getElementById("check_btn");
     private enable_auth_btn = document.getElementById("google_auth_enable");
@@ -54,12 +56,10 @@ export class   ProfileController{
     private	profile_username_tag = document.getElementById("profile_username");
     private	register_date_tag = document.getElementById("profile_creation");
 
-    private cameraIcon = document.getElementById("camera_icon");
     private profileOverlay = document.getElementById("profile_picture_overlay");
     private closeBtn = document.getElementById("profile_cross");
 
     private cancelBtn = document.getElementById("cancel");
-    private usernameJps = document.getElementById("profile_username");
     private jspBtn = document.getElementById("jsp_btn");
 
     private passError = document.getElementById("errorMessageText");
@@ -78,11 +78,6 @@ export class   ProfileController{
     }
 
     addEvents(){
-        // Clique sur l'icône → montre la modale
-        this.cameraIcon.addEventListener("click", () => {
-            this.profileOverlay.classList.remove("hidden");
-        });
-
         // Clique sur la croix ✖ → cache la modale
         this.closeBtn.addEventListener("click", () => {
             this.profileOverlay.classList.add("hidden");
@@ -92,26 +87,14 @@ export class   ProfileController{
             this.closePasswordPopup();
         });
 
-        this.usernameJps.addEventListener("click", () => {
-            this.editUsername();
+        this.profile_username_tag.addEventListener("click", () => {
+            if (this.username == this.profile_username)
+                this.editUsername();
         });
 
         this.jspBtn.addEventListener("click", () => {
-            this.openPasswordPopup();
-        });
-
-        // this.profile_username_tag.addEventListener("mouseover", async (event) => {
-        //     event.preventDefault();
-
-        //     if (this.profile_username == this.username && )
-        //         this.profile_username_tag.textContent = "EMOJI " + this.profile_username_tag.textContent;
-        // });
-
-        this.profile_username_tag.addEventListener("mouseout", async (event) => {
-            event.preventDefault();
-            
-            if (this.profile_username == this.username)
-                this.profile_username_tag.textContent = this.profile_username;
+            if (this.username == this.profile_username)
+                this.openPasswordPopup();
         });
 
         // Player's search
@@ -263,26 +246,24 @@ export class   ProfileController{
                 credentials: 'include'
             });
             if (res.ok) {
-            const data = await res.json();
-            if (data.twofa && this.QRCode !== null && data.twofa_activate) {
-                this.switch_fa_btn.textContent = this.site.getText("2FA_disable");
-                this.QRCode.src = data.twofa.startsWith('data:image') 
-                ? data.twofa 
-                : `data:image/png;base64,${data.twofa}`;
-                this.QRCode.classList.replace("hidden", "block");
-        }
-            else {
-                this.QRCode.classList.replace("block" , "hidden");
-                this.switch_fa_btn.textContent = this.site.getText("2FA_enable");
-                
-        }
+                const data = await res.json();
+                if (data.twofa && this.QRCode !== null && data.twofa_activate) {
+                    document.getElementById("fa_btn_enable").textContent = this.site.getText("2FA_disable");
+                    this.QRCode.src = data.twofa.startsWith('data:image') 
+                    ? data.twofa 
+                    : `data:image/png;base64,${data.twofa}`;
+                    this.QRCode.classList.replace("hidden", "block");
+                }
+                else {
+                    this.QRCode.classList.replace("block" , "hidden");
+                    document.getElementById("fa_btn_enable").textContent = this.site.getText("2FA_enable");
+                }
+            }
 
-    }
-
-    });
+        });
+    
         this.upload_btn.addEventListener('click', async (event) => {
             event.preventDefault();
-
         });
 
         // croix du changement de photo de profile
@@ -336,11 +317,12 @@ export class   ProfileController{
                     if (!response.ok)
                         console.log("error in file upload.");
                     else {
-                        document.getElementById("profile_picture_overlay").classList.replace("flex", "hidden");
+                        document.getElementById("profile_picture_overlay").classList.replace("absolute", "hidden");
                         this.previ_pp.src = "";
                         (document.getElementById("file_input") as HTMLInputElement).value = "";
-                        this.picture_path = "../assets/imgs/" + this.username + ".jpg";
+                        this.picture_path = "assets/imgs/" + this.username + ".jpg";
                         (this.profile_picture as HTMLImageElement).src = this.picture_path + "?" + new Date().getTime();
+                        this.site.send({ type: "pp_swap", username: this.username, pp: this.picture_path });
                     }
                 } catch (error) {
                 console.error("error: ", error);
@@ -394,6 +376,7 @@ export class   ProfileController{
                 this.closePasswordPopup();
                 this.password_form.reset();
             } catch (error) {
+                console.log("AFBHJDKFBJBFGJSDHKYUSJFVSGJDJGSDHFGJHSDKSHJDFBJHKSDBJ");
                 this.passError.textContent = this.site.getText(error);
                 alert(error.message);
             }
@@ -475,11 +458,12 @@ export class   ProfileController{
 
                 if (!data.success)
                     throw Error(data.error);
+                this.site.send({type:"pseudo_swap", username: this.username, newUsername: newUsername});
                 this.username = newUsername;
                 this.site.setUsernames(this.username);
                 console.log("username updated.");
             } catch (error) {
-
+                console.log("sfsdfSUFHUFHfsdfdsfsdfdsfsfdsSDHDSLFHS");
                 alert(error.message);
             }
         }
@@ -503,6 +487,8 @@ export class   ProfileController{
             this.profile_username = data.profile.username;
             this.register_date = data.profile.created_at;
             this.picture_path = data.profile.picture_path;
+            console.log(this.picture_path);
+            console.log(data.profile);
         } catch (error){
             console.log(error);
         }
@@ -531,6 +517,7 @@ export class   ProfileController{
 	//VIEW
 	async printHisto(){
         await this.searchHistoricHandler();
+        this.histo_list.innerHTML = "";
         var cpt = 0;
         var w = 0;
         this.histo.forEach((item) => {
@@ -559,14 +546,21 @@ export class   ProfileController{
             }
             if (item.winner_username == this.profile_username)
                 w++;
-            document.getElementById("wr_card").textContent = `wr : ${(w / cpt * 100).toFixed(0)}%`;
+            
+            this.wr_card.textContent = `wr : ${(w / cpt * 100).toFixed(0)}%`;
+            this.wr.textContent = `${w} / ${cpt}`;
+            document.getElementById("percent").setAttribute("stroke-dasharray", `${(w/cpt)*100}, 100`);
         });
-        if (cpt == 0)
-            document.getElementById("wr_card").textContent = `wr : N/a`;
+
+        if (cpt == 0) {
+            this.wr_card.textContent = `wr : N/a`;
+            this.wr.textContent = "N/a";
+        }
 	}
 
     async	printPage(){
         if (this.profile_username === null){
+            this.resetBtn();
             this.profile_username = this.username;
             await this.searchPlayerHandler();
         }
@@ -574,7 +568,7 @@ export class   ProfileController{
         //profile
         this.profile_page.classList.replace("hidden", "flex");
         this.profile_username_tag.innerText = this.profile_username;
-        (this.profile_picture as HTMLImageElement).src = "../assets/imgs/" + this.picture_path + "?" + new Date().getTime(); // jsp ??
+        (this.profile_picture as HTMLImageElement).src = "assets/imgs/" + this.picture_path + "?" + new Date().getTime(); // jsp ??
         this.register_date_tag.innerText = `${this.site.getText("member_since")}: ${this.register_date}`;
 
 		if (this.profile_username != this.username){
@@ -589,6 +583,45 @@ export class   ProfileController{
         history.pushState({page: "profile", profile: this.profile_username}, "");
         //historic
 		this.printHisto();
+    }
+
+    async resetBtn() {
+        try {
+            const res = await fetch('/check-2fa-status-in', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include', 
+                body: JSON.stringify({ username: this.username }) 
+            });
+            if (res.ok) {
+                console.log("SUFHUFHSDHDSLFHS");
+                const data = await res.json();
+                if (data.success == 1) {
+                    document.getElementById("fa_btn_enable").textContent = this.site.getText("2FA_disable");
+                }
+                else {
+                    document.getElementById("fa_btn_enable").textContent = this.site.getText("2FA_enable");
+                }
+            }
+            const resp = await fetch('/check-email-status', {
+            method: 'GET',
+                credentials: 'include', 
+            });
+            if (resp.ok) {
+                const data = await resp.json();
+                if(data.success == 1) {
+                    document.getElementById("google_auth_enable").textContent = this.site.getText("google_switch_desable");
+                    document.getElementById("google_auth_enable").classList.replace("enable_auth_btn", "disable_auth_btn");
+                }
+                else {
+                    document.getElementById("google_auth_enable").textContent = this.site.getText("google_switch_enable");
+                    document.getElementById("google_auth_enable").classList.replace("disable_auth_btn", "enable_auth_btn");
+                }
+            }
+        } catch (error) {
+            console.log("SUFHUFHSDHDSLFHS9999999999999999999");
+            alert(error.message);
+        }
     }
 
     hide_page(){
@@ -632,7 +665,6 @@ export class SiteController{
     private about_btn = document.getElementById("about_button");
     private logout_btn = document.getElementById("logout_btn");
 
-    private enable_fa_btn = document.getElementById("fa_btn_enable");
     private enable_auth_btn = document.getElementById("google_auth_enable");
 
     constructor(){
@@ -645,14 +677,17 @@ export class SiteController{
         if (await this.is_logged())
             this.connect();
 
-        this.lang = new LangController(this.username);
+        this.lang = await new LangController(this.username);
         if (this.friends)
             this.friends.setLang(this.lang);
         this.print_current_page();
     }
 
+    resetBtn() { this.profile.resetBtn(); }
+
     getText(key: string){
-        return this.lang.getFile()[key];
+        if (this.lang)
+            return this.lang.getFile()[key];
     }
 
     setUsername(key: string){
@@ -667,13 +702,14 @@ export class SiteController{
         this.friends.setUsername(this.username);
     }
 
+    send(data: Object) {
+        this.ws.send(JSON.stringify(data));
+    }
+
     /**
      * CONTROLLER
      */
     add_events(){
-
-        const google_auth = document.getElementById("google_auth");
-        const switch_fa_btn = document.getElementById("switch_fa_btn");
         // Register/login page
         this.register_link.addEventListener("click", (event) => {
             event.preventDefault();
@@ -722,6 +758,7 @@ export class SiteController{
                 const data = await response.json();
                 
                 if (data.success) {
+                    // console.log("OUIII");
                     this.isRegisterMode = false;
                     this.username = data.username;
                     if (url == "/login")
@@ -735,27 +772,27 @@ export class SiteController{
                             body: JSON.stringify({ username : data.username }) 
                         });
                         if (res.ok) {
+                            // console.log("OUIII2");
                             const twofadata = await res.json();
                             if (twofadata.success == 1)
                             {
-                                
+                                // console.log("OUIII3");
                                 const res = await fetch('/set-user-cookie', {
                                     method: 'POST',
                                     headers: {
-                                    'Content-Type': 'application/json'
+                                        'Content-Type': 'application/json'
                                     },
                                     credentials: 'include', 
                                     body: JSON.stringify({ username : this.username }) 
                                 });
                                 this.print_fa_page();
                                 this.hide_register_page();
-                            }
+                            } else 
+                                this.connect();
                         }
                     }
                     else 
-                    {
                         this.connect();
-                    }
                     document.getElementById("errorAuth").classList.replace("block", "hidden");
                 } else {
                     const error = document.getElementById("errorAuth") as HTMLParagraphElement;
@@ -763,6 +800,7 @@ export class SiteController{
                     error.classList.replace("hidden", "block");
                 }
             } catch (error) {
+                console.log("AAAAAAAAAAAAAAAAAAAAAAAAaa");
                 alert(error.message);
             }
         });
@@ -815,9 +853,9 @@ export class SiteController{
             if (res2.ok) {
                 const data = await res2.json();
                 if(data.success == 1)
-                    this.enable_fa_btn.classList.replace("fa_btn_disable", "fa_btn_enable");
+                    document.getElementById("fa_btn_enable").textContent = this.getText("2FA_disable");
                 else
-                    this.enable_fa_btn.classList.replace("fa_btn_enable", "fa_btn_disable");
+                    document.getElementById("fa_btn_enable").textContent = this.getText("2FA_enable");
             }
             this.profile.printPage();
         });
@@ -849,7 +887,8 @@ export class SiteController{
             this.profile.setUsername(null);
             this.profile.setProfileUsername(null);
             this.lang.setUsername(null);
-            this.ws.close();
+            if (this.ws)
+                this.ws.close();
             this.ws = null;
             console.log(this.ws);
         });

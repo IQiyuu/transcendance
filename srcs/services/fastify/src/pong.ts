@@ -67,6 +67,7 @@ export class   GameController{
     private l_paddle = document.getElementById("l_paddle");
     private r_paddle = document.getElementById("r_paddle");
 
+    private end_screen = null;
 
     constructor(site){
         this.site = site;
@@ -184,8 +185,6 @@ export class   GameController{
         }
     }
 
-    // 2 cas de fermeture de socket (local and online ) to check later !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
     startTournamentGame(game_id, game){
 		this.is_tournament = true;
         console.log("Creating a tournament game :");
@@ -225,6 +224,9 @@ export class   GameController{
         document.addEventListener("keyup", key_handler);
         document.addEventListener("keydown", key_handler);
 
+        // if (this.username === game.players.right)
+        //     this.side = "right";
+
         this.print_player_names();
         this.print_scoreboard();
         this.print_game();
@@ -251,7 +253,7 @@ export class   GameController{
             
             this.game_id = -1;
         } else {
-            this.print_match_end();
+            this.print_end_game();
             console.log("closing socket after game ended");
             this.close();
         }
@@ -273,8 +275,8 @@ export class   GameController{
         this.r_paddle_x = game.paddles.right.x;
         this.r_paddle_y = game.paddles.right.y;
 
-        this.left_player = game.players.left;
-        this.right_player = game.players.right;
+        this.left_player = game.players.left; // should be removed
+        this.right_player = game.players.right; // should be removed
     }
 
     /**
@@ -391,13 +393,157 @@ export class   GameController{
         console.log("MATCH END");
     }
 
-    hide_match_end(){
-        console.log("TODO");
+    async print_end_game() {
+        this.hide_scoreboard();
+        this.hide_game();
+
+        // Delete si exite
+        if (this.end_screen) {
+            this.end_screen.remove();
+            this.end_screen = null;
+        }
+
+        // Creer le bloc
+        this.end_screen = document.createElement("div");
+        this.end_screen.id = "end_screen";
+        this.end_screen.className = `
+            fixed top-1/3 left-1/3 right-1/3 bottom-1/3 w-1/4 h-[500px] 
+            bg-black bg-opacity-60 text-white 
+            flex flex-col justify-center items-center 
+            z-50 font-sans text-center p-5 box-border
+        `;
+
+        // Le title
+        const title = document.createElement("h1");
+        title.innerText = "Game Over";
+        title.className = "mb-5 text-4xl";
+        this.end_screen.appendChild(title);
+
+        let leftPic = null;
+        let rightPic = null;
+
+        try {
+            // Recup les pp
+            const res = await fetch(`/db/select/pics/${this.left_player}/${this.right_player}`, {
+                method: 'GET',
+                credentials: 'include'
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+
+                console.log(data);
+
+                const pics = data.datas;
+
+                for (const pic of pics) {
+                    console.log(pic);
+                    if (pic.username === this.left_player) leftPic = pic.picture_path;
+                    else if (pic.username === this.right_player) rightPic = pic.picture_path;
+                }
+
+                if (leftPic == null)
+                    leftPic = rightPic;
+                if (rightPic == null)
+                    rightPic = leftPic;
+            } else {
+                console.warn("Erreur lors de la récupération des images de profil.");
+            }
+        } catch (error) {
+            console.error("Erreur fetch:", error);
+        }
+
+        const playersContainer = document.createElement("div");
+        playersContainer.className = "flex gap-20 items-center mb-6";
+
+        const leftContainer = document.createElement("div");
+        leftContainer.className = "flex flex-col items-center";
+
+        // affiche les pp
+        if (leftPic) {
+            const img = document.createElement("img");
+            img.src = "../assets/imgs/" + leftPic;
+            img.alt = this.left_player;
+            img.className = "w-20 h-20 rounded-full mb-2 object-cover";
+            leftContainer.appendChild(img);
+        }
+
+        const leftName = document.createElement("p");
+        leftName.innerText = this.left_player;
+        leftName.className = "text-lg font-semibold";
+        leftContainer.appendChild(leftName);
+
+        const rightContainer = document.createElement("div");
+        rightContainer.className = "flex flex-col items-center";
+
+        if (rightPic) {
+            const img = document.createElement("img");
+            img.src = "../assets/imgs/" + rightPic;
+            img.alt = this.right_player;
+            img.className = "w-20 h-20 rounded-full mb-2 object-cover";
+            rightContainer.appendChild(img);
+        }
+
+        // affiche les noms
+        const rightName = document.createElement("p");
+        rightName.innerText = this.right_player;
+        rightName.className = "text-lg font-semibold";
+        rightContainer.appendChild(rightName);
+
+        playersContainer.appendChild(leftContainer);
+        playersContainer.appendChild(rightContainer);
+        this.end_screen.appendChild(playersContainer);
+
+        // affiche les scores
+        const scoresText = document.createElement("p");
+        scoresText.innerText = `${this.l_score}  —  ${this.r_score}`;
+        scoresText.className = "mb-8 text-xl";
+        this.end_screen.appendChild(scoresText);
+
+        // texte win
+        let winner = "Match nul";
+        if (this.l_score > this.r_score) winner = `${this.left_player} wins!`;
+        else if (this.r_score > this.l_score) winner = `${this.right_player} wins!`;
+
+        const winnerText = document.createElement("p");
+        winnerText.innerText = winner;
+        winnerText.className = "mb-10 text-2xl font-bold";
+        this.end_screen.appendChild(winnerText);
+
+        // bouton retour menu
+        const btn = document.createElement("button");
+        btn.innerText = "Menu";
+        btn.className = `
+            px-8 py-4 text-lg 
+            rounded-lg bg-green-600 text-white 
+            transition-colors duration-300 cursor-pointer
+            hover:bg-green-700
+            border-none
+        `;
+
+        // ca a change pour le tournoi (bouton qui renvoie au menu principal pour l'instant)
+        btn.onclick = () => {
+            this.end_screen.remove();
+            this.hide_all();
+            this.site.print_menu();
+        };
+
+        // on ajoute l'elem a la page
+        this.end_screen.appendChild(btn);
+        this.game_page.appendChild(this.end_screen);
+    }
+
+    hide_end_game(){
+        console.log("Maybe clearing the text ?");
     }
 
     // Not to be added to hide_all
     hide_menu(){
         this.site.hide_menu();
+    }
+    
+    hide_site() {
+        this.site.hide_all();
     }
 
     hide_all(){

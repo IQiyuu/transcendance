@@ -36,6 +36,9 @@
   "errNA": "権限がありません",
   "about": "このゲームについて",
 
+  "add_friend": "友達に追加",
+  "rem_friend": "友達から削除",
+
   "google_auth": "Google の認証を取得したコネクタを接続します",
   "google_switch_enable": "Google認証を有効にする",
   "google_switch_desable": "Google認証を無効にする",
