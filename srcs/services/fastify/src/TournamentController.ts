@@ -74,6 +74,7 @@ export class TournamentController {
     private site: SiteController = null;
     private username: string = null;
     private tournament: Tournament = null;
+    private finished_tournament: Tournament = null;
     private game: GameController;
 
     /**VIEW */
@@ -257,8 +258,9 @@ export class TournamentController {
         console.log("EndingTournament");
         this.clear_tournament_lobby();
         this.hide_tournament_lobby();
+        this.finished_tournament = this.tournament;
         this.close()
-        this.print_tournament_end()
+        this.print_tournament_end();
     }
 
     close(){
@@ -565,7 +567,9 @@ export class TournamentController {
 
     print_tournament_end() {
 
-        const brackets = this.tournament.getBrackets();
+        if (this.finished_tournament === null)
+            return ;
+        const brackets = this.finished_tournament.getBrackets();
         if (!brackets || brackets.length === 0) return;
 
         // Récupérer le gagnant depuis le dernier match
@@ -605,6 +609,7 @@ export class TournamentController {
         btn.addEventListener("click", async (event) => {
             this.hide_all();
             this.site.print_menu();
+            this.finished_tournament = null;
             endDiv.remove()
         });
         endDiv.appendChild(btn);
@@ -615,9 +620,6 @@ export class TournamentController {
         this.tournament_page.appendChild(endDiv);
         this.print_tournament_page();
     }
-
-
-
 
 
     clear_tournaments() {
