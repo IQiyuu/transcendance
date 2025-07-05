@@ -182,18 +182,6 @@
                         </div>
 
 
-                        <!-- Overlay pour changement de photo
-                        <div id="profile_picture_overlay" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 hidden z-50">
-
-                            <form id="profil_picture_square" class="flex flex-col items-center bg-gray-800 p-6 rounded-lg shadow-lg relative">
-                                <p id="div_title" class="text-lg text-white mb-4">Upload your profile picture</p>
-                                <button id="profile_cross" type="button" class="absolute top-2 right-2 text-white text-lg">✖</button>
-                                <input type="file" id="file_input" class="mb-4 p-2 rounded-md bg-gray-700 text-white" />
-                                <button id="upload_btn" class="w-1/2 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700">Upload</button>
-                                <img id="previsu_picture" src="" width="50" height="50" class="mt-4"/>
-                            </form>
-                        </div> -->
-
                         <!-- Infos utilisateur -->
                         <h5 class="mb-1 text-2xl font-semibold text-center cursor-pointer" id="profile_username">Username</h5>
                         <span id="wr_card" class="text-sm font-medium">Winrate N/A</span>
@@ -257,6 +245,7 @@
                             <label class="block text-sm font-medium text-gray-300 mb-2" id="nam_tour">Tournament's name</label>
                             <input type="text" name="tname" id="tournament_name" class="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-500 focus:outline-none" placeholder="Ex: Evo" />
                             <button type="submit" id="tournament_creation" class="w-full py-3 bg-cyan-500 hover:bg-cyan-600 text-white font-semibold rounded-lg transition duration-200">Create</button>
+                            <p id="errorCreate_tourn" class="text-red-500">Error</p>
                         </form>
                     </div>
                     <!-- 🚀 Launch Tournament [BUTTON]-->
@@ -289,6 +278,7 @@
                     </div>
                 </div>
             </div> 
+    </div>
         <!-- JEU -->
         <div id="game_page" class="hidden inset-0 flex-col items-center justify-center space-y-6">
             <!-- SCOREBOARD au-dessus -->
@@ -316,53 +306,8 @@
             </div>
         </div>
         
-        <div id="about" class="hidden overflow-y-auto h-[500px] whitespace-pre-line text-white font-bold flex-col items-center justify-start px-4 w-3/4 mx-auto bg-gradient-to-br from-green-400 via-cyan-500 to-blue-500 p-6 rounded-xl shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
-
-        🎮 Transcendence - Pong Multijoueur en ligne
-        🧠 À propos du projet
-
-        Transcendence est un projet de l'école 42 qui consiste à développer un jeu Pong moderne et complet en fullstack, avec une interface utilisateur interactive et des fonctionnalités de réseau.
-        Ce projet a pour but de consolider les compétences en développement web en utilisant des technologies modernes côté frontend et backend, tout en intégrant des fonctionnalités temps réel comme des parties en ligne, un chat, et un système d'amis.
-
-        ⚙️ Technologies utilisées :
-
-            Frontend : React, TypeScript, WebSocket, Tailwindcss
-            Backend : TypeScript, Fastify
-            Authentification : 2FA (Two-Factor Authentication)
-            WebSocket : pour le jeu en temps réel et le chat
-            Docker : pour le déploiement
-
-        🏓 Description du jeu
-
-        Le jeu est une version améliorée du classique Pong, avec des parties 1v1 jouables en ligne, des tournois et un classement. Les joueurs peuvent s'inscrire, personnaliser leur profil, discuter entre eux et défier leurs amis.
-
-        🕹️ Commandes pour jouer
-
-        Commandes clavier disponibles :
-        Action                 Touche(s)
-        Monter la raquette     ↑ (Flèche Haut) ou W
-        Descendre la raquette  ↓ (Flèche Bas) ou S
-
-        💡 Fonctionnalités du site
-
-        - 🎮 Jeu multijoueur en temps réel
-        - 💬 Chat en direct avec les autres joueurs
-        - 🧑‍🤝‍🧑 Système d’amis et invitations aux matchs
-        - 🏆 Tournois et classement global
-        - 🔒 Authentification sécurisée avec 2FA
-        - 🌐 Interface multilingue (FR/EN)
-        - 👤 Profils utilisateurs personnalisables
-        - 📱 Interface responsive adaptée à toutes les tailles d’écran
-
-        🔐 Bouton "Logout" (Déconnexion)
-
-        En haut à droite de l’interface, le bouton "Logout" permet à l’utilisateur de se déconnecter en toute sécurité de son compte. Cette action met fin à la session active et redirige vers la page d'accueil ou de connexion.
-
-        🌍 Changement de langue
-
-        En haut à gauche du site, une option permet de changer la langue de l’interface. Cela permet à l'utilisateur de naviguer en français ou en anglais, selon sa préférence. Les textes de l'interface, les boutons et les messages s’adaptent dynamiquement à la langue sélectionnée.
-        </div>
-        
+          <div id="about" class="hidden overflow-y-auto h-[600px] whitespace-pre-wrap text-white font-bold flex-col items-center justify-start px-4 w-3/4 mx-auto bg-gradient-to-br from-green-400 via-cyan-500 to-blue-500 p-6 rounded-xl shadow-lg transform transition-all duration-300">
+          </div>
     </div>
 
     <script type="module" src="app.js"></script>

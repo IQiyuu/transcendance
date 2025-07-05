@@ -57,16 +57,6 @@ export class Tournament {
 
 }
 
-function verifyForm(name){
-    if (name.value.length < 1)
-        return (alert("Tournament's name should have at least 3 characters"), false);
-    if (name.value.length > 20)
-        return (alert("Tournament's name too long"), false);
-    // if (/[alnum]|_*|-*/.test(name.value))
-    //     return (alert("Characters can only be letters, digits, and - or _"), false);
-    return (true);
-}
-
 export class TournamentController {
 
     /**CONTROLLER */
@@ -113,16 +103,11 @@ export class TournamentController {
 
             this.print_tournament_page();
             this.print_tournament_form();
-        })
+        });
 
         this.tournament_form.addEventListener("submit", async (event) => {
             event.preventDefault();
             const name = document.getElementById("tournament_name") as HTMLInputElement;
-            //Verifier que l'input est valide avant de l'envoyer !
-            if (!verifyForm(name)){
-                // Error to print here (or in verifyForm) ?
-                return ;
-            }
             try {
                 const body = {
                     owner: this.username,
@@ -137,13 +122,17 @@ export class TournamentController {
                 if (data.success) {
                     this.tournament = new Tournament(data.tournament);
                     this.ws = new TournamentClientSocket(this.username, this, this.tournament);
+                    document.getElementById("errorCreate_tourn").textContent = "";
                     this.hide_all();
                     this.print_tournament();
                 }
-                else
+                else {
+                    document.getElementById("errorCreate_tourn").textContent = this.site.getText(data.error);
+                    document.getElementById("errorCreate_tourn").classList.replace("hidden", "block");
                     throw (Error(data.error));
+                }
             } catch (error) {
-                console.log("error: ", error);
+                console.log("error: ", error.message);
             }
         });
 
@@ -240,14 +229,17 @@ export class TournamentController {
     }
 
     createMatch(game_id, game){
-        console.log("Telling GameCtrler to create the tournament match :");
-        console.log(game);
+        // console.log("Telling GameCtrler to create the tournament match :");
+        // console.log(game);
         this.game.startTournamentGame(game_id, game);
     }
 
     endTournament(){
         // this.ws = null;
         console.log("EndingTOurnament");
+        this.clear_tournament_lobby();
+        this.hide_tournament_lobby();
+        this.print_tournament_end()
         this.close()
     }
 
@@ -299,59 +291,59 @@ export class TournamentController {
             return ;
         }
 
-let title = document.createElement("h3");
-title.className = "text-2xl font-bold text-white mb-4 text-center";
-title.append(document.createTextNode(this.tournament.getName()));
+        let title = document.createElement("h3");
+        title.className = "text-2xl font-bold text-white mb-4 text-center";
+        title.append(document.createTextNode(this.tournament.getName()));
 
-let table = document.createElement("table");
-table.className = "min-w-full bg-gray-800 rounded-lg overflow-hidden shadow-md";
+        let table = document.createElement("table");
+        table.className = "min-w-full bg-gray-800 rounded-lg overflow-hidden shadow-md";
 
-// First row (thead style)
-let tr = document.createElement("tr");
+        // First row (thead style)
+        let tr = document.createElement("tr");
 
-let th = document.createElement("th");
-th.className = "px-4 py-2 text-left text-sm font-semibold text-gray-300 bg-gray-700";
-th.id="usr_tour";
-th.append(document.createTextNode(this.site.getText("usr_tour")));
-tr.append(th);
+        let th = document.createElement("th");
+        th.className = "px-4 py-2 text-left text-sm font-semibold text-gray-300 bg-gray-700";
+        th.id="usr_tour";
+        th.append(document.createTextNode(this.site.getText("usr_tour")));
+        tr.append(th);
 
-th = document.createElement("th");
-th.className = "px-4 py-2 text-left text-sm font-semibold text-gray-300 bg-gray-700";
-th.id="role_tour";
-th.append(document.createTextNode(this.site.getText("role_tour")));
-tr.append(th);
+        th = document.createElement("th");
+        th.className = "px-4 py-2 text-left text-sm font-semibold text-gray-300 bg-gray-700";
+        th.id="role_tour";
+        th.append(document.createTextNode(this.site.getText("role_tour")));
+        tr.append(th);
 
-table.append(tr);
+        table.append(tr);
 
-// Each player row
-this.tournament.getPlayers().forEach(p => {
-    tr = document.createElement("tr");
+        // Each player row
+        this.tournament.getPlayers().forEach(p => {
+            tr = document.createElement("tr");
 
-    th = document.createElement("td");
-    th.className = "px-4 py-2 text-white border-t border-gray-600";
-    th.append(document.createTextNode(p));
-    tr.append(th);
+            th = document.createElement("td");
+            th.className = "px-4 py-2 text-white border-t border-gray-600";
+            th.append(document.createTextNode(p));
+            tr.append(th);
 
-    th = document.createElement("td");
-    th.className = "px-4 py-2 text-white border-t border-gray-600";
+            th = document.createElement("td");
+            th.className = "px-4 py-2 text-white border-t border-gray-600";
 
-    if (p === this.tournament.getOwner()) {
-        th.id = "own_tour";
-        th.append(document.createTextNode(this.site.getText("own_tour")));
-    } else {
-        th.classList.add("play_tour");
-        th.append(document.createTextNode(this.site.getText("play_tour")));
-    }
+            if (p === this.tournament.getOwner()) {
+                th.id = "own_tour";
+                th.append(document.createTextNode(this.site.getText("own_tour")));
+            } else {
+                th.classList.add("play_tour");
+                th.append(document.createTextNode(this.site.getText("play_tour")));
+            }
 
-    tr.append(th);
-    table.append(tr);
-});
+            tr.append(th);
+            table.append(tr);
+        });
 
         this.tournament_lobby.append(title);
         this.tournament_lobby.append(table);
    
         if (!this.tournament.isStarted()){
-            console.log("   Tournament has not started yet");
+            // console.log("   Tournament has not started yet");
             if (this.username === this.tournament.getOwner()) {
                 let start_button = document.createElement("button");
                 start_button.id = "start_tour";
@@ -437,7 +429,9 @@ this.tournament.getPlayers().forEach(p => {
 
     print_tournament(){
         this.clear_tournament_lobby();
-        this.print_tournament_lobby();
+        this.hide_tournament_lobby();
+        if (!this.tournament.isStarted())
+            this.print_tournament_lobby();
         this.clear_tournament_state();
         this.print_tournament_state();
         this.print_tournament_div();
@@ -466,7 +460,8 @@ this.tournament.getPlayers().forEach(p => {
             if (data.success) {
                 this.tournament = null;
                 this.hide_all();
-                this.ws.close();
+                if (this.ws != null)
+                    this.ws.close();
                 this.ws = null;
                 this.tournament_join_btn.dispatchEvent(new MouseEvent("click"));
             } else {
@@ -498,9 +493,114 @@ this.tournament.getPlayers().forEach(p => {
         this.tournament_rejoin_btn.classList.replace("flex", "hidden");
     }
 
-    print_tournament_end(){
-        console.log("ToURNAMENT END");
+    generateBracketElement(brackets) {
+        const container = document.createElement("div");
+        container.className = "flex justify-center gap-6 my-6";
+
+        const matchHeight = 60;
+
+        for (let i = 0; i < brackets.length; i++) {
+            const round = document.createElement("div");
+            round.className = "flex flex-col items-center";
+            if (i > 0) round.style.paddingTop = `${(matchHeight / 2) * i + 25}px`;
+
+            for (let j = 0; j < brackets[i].length; j++) {
+                const match = document.createElement("div");
+                match.className = "bg-black border border-white rounded-md shadow-lg px-4 py-3 mb-6 text-center w-36";
+
+                const p1 = document.createElement("p");
+                p1.innerText = brackets[i][j].p1;
+                p1.className = "font-semibold mb-1";
+                if (brackets[i][j].winner)
+                    p1.classList.add(
+                        brackets[i][j].winner === brackets[i][j].p1 ? "bg-green-700" : "bg-red-700",
+                        "text-white", "rounded", "px-1"
+                    );
+                match.appendChild(p1);
+
+                if (brackets[i][j].p2 !== null) {
+                    const vs = document.createElement("span");
+                    vs.innerText = " VS ";
+                    vs.className = "text-white font-bold";
+                    match.appendChild(vs);
+
+                    const p2 = document.createElement("p");
+                    p2.innerText = brackets[i][j].p2;
+                    p2.className = "font-semibold";
+                    if (brackets[i][j].winner)
+                        p2.classList.add(
+                            brackets[i][j].winner === brackets[i][j].p2 ? "bg-green-700" : "bg-red-700",
+                            "text-white", "rounded", "px-1"
+                        );
+                    match.appendChild(p2);
+                }
+
+                round.appendChild(match);
+            }
+
+            container.appendChild(round);
+        }
+
+        return container;
     }
+
+
+    print_tournament_end() {
+        console.log("ToURNAMENT END");
+
+        const brackets = this.tournament.getBrackets();
+        if (!brackets || brackets.length === 0) return;
+
+        // Récupérer le gagnant depuis le dernier match
+        const lastRound = brackets[brackets.length - 1];
+        const lastMatch = lastRound[0];
+        const winner = lastMatch.winner;
+        const isWinner = (winner === this.username);
+
+        // Créer l'overlay de fin
+        const endDiv = document.createElement("div");
+        endDiv.className = "fixed inset-0 bg-black bg-opacity-90 flex flex-col items-center justify-center z-50 text-white";
+
+        // Titre principal (Gagné / Perdu)
+        const title = document.createElement("h2");
+        title.id = isWinner ? "tour_win_msg" : "tour_lose_msg";
+        title.className = "text-4xl font-bold mb-6";
+        title.textContent = isWinner
+            ? this.site.getText("tour_win_msg")
+            : this.site.getText("tour_lose_msg");
+        endDiv.appendChild(title);
+
+        // Sous-titre "Bracket"
+        const bracketTitle = document.createElement("h3");
+        bracketTitle.className = "text-2xl font-semibold mb-4";
+        bracketTitle.textContent = this.site.getText("tour_bracket");
+        endDiv.appendChild(bracketTitle);
+
+        // Bracket visuel
+        const bracketTable = this.generateBracketElement(brackets);
+        endDiv.appendChild(bracketTable);
+
+        // Bouton quitter
+        const btn = document.createElement("button");
+        btn.id = "tour_quit_btn";
+        btn.className = "mt-8 px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded";
+        btn.textContent = this.site.getText("tour_quit_btn");
+        btn.addEventListener("click", async (event) => {
+            this.hide_all();
+            this.site.print_menu();
+            endDiv.remove()
+        });
+        endDiv.appendChild(btn);
+
+        // Effacer l'ancien contenu et afficher
+        this.tournament_page.innerHTML = '';
+        this.tournament_page.appendChild(endDiv);
+        this.print_tournament_page();
+    }
+
+
+
+
 
     clear_tournaments() {
         this.tournaments_list.textContent = '';
@@ -515,5 +615,6 @@ this.tournament.getPlayers().forEach(p => {
         this.hide_tournament_state();
         this.hide_tournament_rejoin_btn();
         this.hide_tournament();
+        document.getElementById("errorCreate_tourn").classList.replace("block", "hidden");
     }
 };

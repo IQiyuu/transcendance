@@ -11,9 +11,9 @@ function degToRad(degree){
 // Each position is the center of the object
 
 const	SCORE_GOAL = 5;
-const	STARTING_SPEED = 10;
+const	STARTING_SPEED = 5;
 const	ACCELERATION = 1;
-const	LIMIT_SPEED = 13;
+const	LIMIT_SPEED = 10;
 const	BOARD_W = 700;
 const	BOARD_H = 480;
 
@@ -60,17 +60,16 @@ export function createGame(user, user2, t_id = null) {
             y: STARTING_Y,
             dx: Math.cos(angle) * (neg_x ? -1 : 1),
             dy: Math.sin(angle) * (neg_y ? -1 : 1),
-            dist: -1,
             v: STARTING_SPEED,
             accelerate: function() {
                 if (this.v < LIMIT_SPEED)
                     this.v += ACCELERATION;
             },
             randomizeVector: function() {
-                const angle = degToRad(randomIntFromInterval(0, 45));
-                const neg_x = randomIntFromInterval(0,1), neg_y = randomIntFromInterval(0,1);
+                const angle = degToRad(0);
+                const neg_x = randomIntFromInterval(0,1);
                 this.dx = Math.cos(angle) * (neg_x ? -1 : 1);
-                this.dy = Math.sin(angle) * (neg_y ? -1 : 1);
+                this.dy = Math.sin(angle);
             }
         },
         paddles: {
@@ -177,6 +176,17 @@ function    getMaskedGame(game){
         }
     }
     return (g);
+}
+
+function    getSecondPlayer(clients, p1, game_id){
+    console.log("Trying to get 2nd player");
+    let res = undefined;
+    clients.forEach((socket, g_id) => {
+        if (socket != p1 && g_id == game_id){
+            res = socket;
+        }
+    });
+    return (res);
 }
 export async function gameRoute (fastify, options) {
 
@@ -362,6 +372,8 @@ export async function gameRoute (fastify, options) {
                                 message: "User isnt in a match"
                             }));
                         }else {
+                            console.log("THE GAME");
+                            console.log(getMaskedGame(getGameByID(game_id)));
                             socket.send(JSON.stringify({
                                 type: 'tournament',
                                 success: true,
@@ -376,20 +388,27 @@ export async function gameRoute (fastify, options) {
             })
 
             socket.on('close', (event) => {
-                //If game is active, tell users the game is over
+                //If player is in game
+                console.log("closing game client socket");
 
-                //At least, closing properly and removing from maps
-                console.log("Closing  socket");
-                playing_clients.delete(socket);
+                if (playing_clients.has(socket)){
+                    let game = getGameByID(playing_clients.get(socket));
+                    if (game !== undefined){
+                        game.scores[(username === game.players.left ? "left" : "right")] = -1;
+                        finished_games.push(game);
+                    }
+                }
+        
+                //If player is in the waiting list
+                if (waiting_clients.has(socket)){
+                    console.log("a player is leaving matchmaking");
+                    waiting_clients.delete(socket);
+                }
                 socket.close();
-                waiting_clients.forEach((sck, username) => { // to re understand
-                    if (sck === socket)
-                        waiting_clients.delete(username);
-                });
+                console.log("player socket closed");
             });
         });
     });
-
 
     /**
      * For paddles collisions, we check that the ball center for y touch the paddle
@@ -414,11 +433,11 @@ export async function gameRoute (fastify, options) {
                 let dist = Math.abs(game.ball.y - game.paddles.left.y);
                 let sign = game.ball.dy < 0 ? -1 : 1; // test if vector is neg
                 let angle = 90;
-                if (dist > (3 * 50) / 4)
+                if (dist > (3 * (PADDLE_H / 2)) / 4)
                     angle += 45;
-                else if (dist > (2 * 50) / 4)
+                else if (dist > (2 * (PADDLE_H / 2)) / 4)
                     angle += 65;
-                else if (dist > 50 / 4)
+                else if (dist > (PADDLE_H / 2) / 4)
                     angle += 80;
                 else
                     angle += 90;
@@ -433,11 +452,11 @@ export async function gameRoute (fastify, options) {
                 let dist = Math.abs(game.ball.y - game.paddles.right.y);
                 let sign = game.ball.dy < 0 ? -1 : 1;
                 let angle = 90;
-                if (dist > (3 * 50) / 4)
+                if (dist > (3 * (PADDLE_H / 2)) / 4)
                     angle += 45;
-                else if (dist > (2 * 50) / 4)
+                else if (dist > (2 * (PADDLE_H / 2)) / 4)
                     angle += 65;
-                else if (dist > 50 / 4)
+                else if (dist > (PADDLE_H / 2) / 4)
                     angle += 80;
                 else
                     angle += 90;
@@ -461,30 +480,30 @@ export async function gameRoute (fastify, options) {
         // For every player still playing
         playing_clients.forEach((game_id, sock) => {
             let game = getGameByID(game_id);
-            // console.log(game);
-            
+            if (game === undefined)
+                return ;
+
             // If their game is finished, we end it
             if (finished_games.includes(game)){
+                let p2 = null;
+                playing_clients.forEach((g_id2, sock2) => {
+                    if (g_id2 === game_id && sock2 != sock)
+                        p2 = sock2;
+                });
+                // Game to be closed client side for p2, also, here I have to check game
                 console.log("GAME is finished");
                 console.log(game);
+                if (game.t_id !== null){
+                    matchOver(game, (sock.readyState === sock.CLOSED || sock.readyState === sock.CLOSING)); 
+                }
 
-                // console.log("Sending to");
-                // console.log(socket);
-                sock.send(JSON.stringify({
-                    type: "game_finished",
-                    game: getMaskedGame(game)
-                }));
-                
-                let p2 = null; // can be null as there are local games too
-                // console.log("playing :");
-                // console.log(playing_clients);
-                playing_clients.forEach( (g_id2, sock2) => {
-                    if (sock2 === sock)
-                        return ;
-                    if (g_id2 === game_id)
-                        p2 = sock2;
-                })
-                // console.log(p2);
+                if (sock.readyState === sock.OPEN){
+                    sock.send(JSON.stringify({
+                        type: "game_finished",
+                        game: getMaskedGame(game)
+                    }));
+                }
+
                 playing_clients.delete(sock);
                 if (p2 !== null){
                     // console.log("p2 found !");
@@ -493,17 +512,8 @@ export async function gameRoute (fastify, options) {
                         game: getMaskedGame(game)
                     }));
                     playing_clients.delete(p2);
+                }
 
-                    // p2.close(3005, "Match is finished"); // here
-                }
-                
-                if (game.t_id !== null){
-                    // console.log("We are descending")
-                    matchOver(game); 
-                }
-                // sock = null;
-                // p2 = null;
-                // socket.close(3005, "Match is finished");
                 saveGame(game, options.db);
                 games.splice(games.indexOf(game), 1);
                 finished_games.splice(finished_games.indexOf(game), 1);

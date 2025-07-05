@@ -185,21 +185,19 @@ export class   GameController{
         }
     }
 
-    // 2 cas de fermeture de socket (local and online ) to check later !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
     startTournamentGame(game_id, game){
 		this.is_tournament = true;
-        if (this.username === game.players.right)
-            this.side = "right";
         console.log("Creating a tournament game :");
         if (this.ws === null)
             this.ws = new GameClientSocket(this.username, this, game_id);
         else{
             console.log("Game received , lets continue the tournament");
-            // console.log(game);
+            console.log(game);
             this.ws.setGameId(game_id);
             this.ws.startTournamentGame();
         }
+        if (this.username === game.players.right)
+            this.side = "right";
         this.updateState(game);
         this.gameInit();
     }
@@ -226,6 +224,9 @@ export class   GameController{
         document.addEventListener("keyup", key_handler);
         document.addEventListener("keydown", key_handler);
 
+        // if (this.username === game.players.right)
+        //     this.side = "right";
+
         this.print_player_names();
         this.print_scoreboard();
         this.print_game();
@@ -249,6 +250,7 @@ export class   GameController{
         if (this.is_tournament){
             console.log("Tournament's game is finished ending");
             console.log("Not closing socket for it can be used later");
+            
             this.game_id = -1;
         } else {
             this.print_end_game();
@@ -273,8 +275,8 @@ export class   GameController{
         this.r_paddle_x = game.paddles.right.x;
         this.r_paddle_y = game.paddles.right.y;
 
-        this.left_player = game.players.left;
-        this.right_player = game.players.right;
+        this.left_player = game.players.left; // should be removed
+        this.right_player = game.players.right; // should be removed
     }
 
     /**

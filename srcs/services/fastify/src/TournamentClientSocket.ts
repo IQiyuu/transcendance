@@ -45,9 +45,9 @@ export class TournamentClientSocket{
         }
         
         this.ws.onmessage = (data) => {
-            console.log("Tournament got a msg");
+            // console.log("Tournament got a msg");
             const message = JSON.parse(data.data);
-            console.log(message);
+            // console.log(message);
             if (message === null){
                 console.log("TODO");
                 return ; // ERROR
@@ -60,14 +60,16 @@ export class TournamentClientSocket{
                 console.log("TOUR_S :Tournament will start in a few moments");
                 this.ctler.updateTournament(message.tournament);
                 this.ctler.print_tournament_state();
+                this.ctler.hide_tournament_lobby();
             } else if (message.type === "new_match"){
-                console.log("TOUR_S : Creating a new tournament match");
+                console.log("TOUR_S : Creating a new tournament match"); 
                 this.ctler.createMatch(message.game_id, message.game);
             } else if (message.type === "finished"){
                 console.log("TOUR_S : Tournament is finished !");
                 this.ctler.endTournament();
-            } else if (message.type === "error"){
-                console.log(message.message);
+            } else if (message.type === "close"){
+                console.log(message.reason);
+                // to do;
             }
         };
 

@@ -229,11 +229,8 @@ async function dbRoute (fastify, options) {
             if (user == null)
                 return ({ sucess: false, error: "errorInt" });
             const isMatch = await fastify.bcrypt.compare(body.password, user.password);
-            console.log(isMatch);
-            if (!isMatch) {
-                console.log("mismatch");
+            if (!isMatch)
                 return ({ success: false, error: "errMismatch" });
-            }
             if (await isValidPassword(body.newPassword))
                 var hash_pass = await fastify.bcrypt.hash(body.newPassword);
             else
@@ -457,7 +454,7 @@ async function dbRoute (fastify, options) {
     fastify.get('/db/friends/friendlist/:username', {
         preHandler: usernameTester,
     }, async (request, reply) => {
-        console.log("OUIII");
+        // console.log("OUIII");
         try {
             const userId = getIdFromUsername(request.params.username);
             if (!userId)
