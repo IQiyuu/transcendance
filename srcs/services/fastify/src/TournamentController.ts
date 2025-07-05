@@ -64,6 +64,7 @@ export class TournamentController {
     private site: SiteController = null;
     private username: string = null;
     private tournament: Tournament = null;
+    private finished_tournament: Tournament = null;
     private game: GameController;
 
     /**VIEW */
@@ -77,6 +78,8 @@ export class TournamentController {
     private tournament_create_btn = document.getElementById("tournament_create_button");
     private tournament_join_btn = document.getElementById("tournament_join_button");
     private tournament_rejoin_btn = document.getElementById("tournament_rejoin_button");
+
+    private tournament_end_page = document.getElementById("tournament_end");
 
     constructor(site : SiteController, game : GameController) {
         this.site = site;
@@ -95,6 +98,10 @@ export class TournamentController {
         this.tournament_create_btn.addEventListener("click", (event) => {
             event.preventDefault();
 
+            if (this.game.isPlaying()){
+                alert("You can't join a tournament while playing or searching for a game !");
+                return ;
+            }
             if (this.tournament !== null) {
                 alert("You're already registered for a tournament");
                 return;
@@ -139,6 +146,10 @@ export class TournamentController {
         this.tournament_join_btn.addEventListener("click", async (event) => {
             event.preventDefault();
             
+            if (this.game.isPlaying()){
+                alert("You can't join a tournament while playing or searching for a game !");
+                return ;
+            }
             if (this.tournament !== null) {
                 alert("You're already registered for a tournament");
                 return;
@@ -162,7 +173,7 @@ export class TournamentController {
                         if (size == 0)
                             this.tournaments_list.append(document.createTextNode(this.site.getText("no_tour")));
                         else {
-                            list.appendChild(document.createTextNode(this.site.getText("no_tour")));
+                            list.appendChild(document.createTextNode(this.site.getText("lst_tour")));
                             while (i < size) {
                                 let el = document.createElement("li");
                                 el.appendChild(document.createTextNode(data.tournaments[i].name));
@@ -229,8 +240,6 @@ export class TournamentController {
     }
 
     createMatch(game_id, game){
-        // console.log("Telling GameCtrler to create the tournament match :");
-        // console.log(game);
         this.game.startTournamentGame(game_id, game);
     }
 
@@ -343,7 +352,6 @@ export class TournamentController {
         this.tournament_lobby.append(table);
    
         if (!this.tournament.isStarted()){
-            // console.log("   Tournament has not started yet");
             if (this.username === this.tournament.getOwner()) {
                 let start_button = document.createElement("button");
                 start_button.id = "start_tour";
@@ -608,6 +616,7 @@ export class TournamentController {
 
     hide_all() {
         this.hide_tournament_page();
+        this.hide_tournament_end_page();
         this.hide_tournaments_page();
         this.hide_tournament_div();
         this.hide_tournament_form();

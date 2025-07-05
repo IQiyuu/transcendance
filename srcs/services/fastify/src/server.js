@@ -29,12 +29,13 @@ import { dirname, join } from "node:path";
 
 const secretKey = 'bommerang-fleche-upair'; // pas sur de ce que je fais la
 
-//TEMPO FAUT ETTRE CA DANS DES FICHIER
+const tempo = fs.readFileSync('/run/secrets/API-secrets', 'utf8');
+const lines = tempo.split('\n').filter(line => line.trim() !== '');
+const client = lines[0];
+const secretClient = lines[1];
+const redirectionUri = lines[2];
+const redirectionUri2 = lines[3];
 
-const client = '991272817830-b5g9dhidimfed8nu4d5e9sjcjumr2hnm.apps.googleusercontent.com';
-const secretClient = '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';
-const redirectionUri = 'https://k0r2p5.42mulhouse.fr:3000/callback';
-const redirectionUri2 = 'https://k0r2p5.42mulhouse.fr:3000/callback2';
 
 const rootDir = dirname(dirname(fileURLToPath(import.meta.url))); // Root of the website
 

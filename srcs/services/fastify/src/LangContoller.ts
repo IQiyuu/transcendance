@@ -90,6 +90,8 @@ export class LangController{
         document.getElementById('fa_btn_enable').textContent = this.file['2FA_enable'];
 
         document.getElementById('google_auth_enable').textContent = this.file['google_switch_enable'];
+        document.getElementById('google_auth_disable').textContent = this.file['google_switch_disable'];
+
 
         document.getElementById('pass_change').textContent = this.file['pass_change'];
         document.getElementById('pass_current').textContent = this.file['pass_current'];
@@ -103,7 +105,7 @@ export class LangController{
         document.getElementById('wr_card').textContent = this.file['wr'];
         (document.getElementById('search_player_in') as HTMLInputElement).placeholder = this.file['search'];
 
-        if (document.getElementById('waiting_online') && document.getElementById('cancel_game')) {
+        if (document.getElementById('waiting_online') !== null && document.getElementById('cancel_game') !== null) {
             document.getElementById('waiting_online').textContent = this.file['waiting_online'];
             document.getElementById('cancel_game').innerHTML = this.file['cancel_mm'];
         }

@@ -38,7 +38,7 @@
   "about": "À propos",
   "google_auth": "Se connecter avec l'authentification Google",
   "google_switch_enable": "Activer l'authentification Google",
-  "google_switch_desable": "Desactiver l'authentification Google",
+  "google_switch_disable": "Desactiver l'authentification Google",
   "2FA_enable": "Activer 2FA",
   "2FA_disable": "Desactiver 2FA",
   "add_friend": "Ajouter en amis",

@@ -87,11 +87,13 @@ export class   ProfileController{
             this.closePasswordPopup();
         });
 
+        // Renaming the user
         this.profile_username_tag.addEventListener("click", () => {
             if (this.username == this.profile_username)
                 this.editUsername();
         });
 
+        // Changing the user password
         this.jspBtn.addEventListener("click", () => {
             if (this.username == this.profile_username)
                 this.openPasswordPopup();
@@ -143,7 +145,7 @@ export class   ProfileController{
             if (this.profile_username == this.username)
                 this.camera_icon.classList.replace("opacity-60", "opacity-0");
         });
-        // Activate / Desactivate Google authentificator
+        // Enable / Disable Google authentificator
         this.auth_btn.addEventListener('click', async (event) => {
             event.preventDefault();
             const res = await fetch('/check-email-status', {
@@ -165,20 +167,25 @@ export class   ProfileController{
                         if (data2.success == 1)
                         {
                             this.enable_auth_btn.classList.replace("enable_auth_btn", "disable_auth_btn");
-                           // this.google_auth.textContent = "Desactiver Google authentificator";
+                            console.log("j'active !");
+                            this.enable_auth_btn.textContent = this.site.getText("google_switch_disable");  
                         }
+        
                     }
                 }
                 else 
                 {
                     await fetch('/desable_auth');
-                    this.enable_auth_btn.classList.replace("disable_auth_btn", "enable_auth_btn");
-                    //this.google_auth.textContent = "Activer Google authentificator";
+                    //this.enable_auth_btn.classList.replace("disable_auth_btn", "enable_auth_btn");
+                    console.log("je desactive !");
+                    this.enable_auth_btn.textContent = this.site.getText("google_switch_enable");
+                    
                 }
             }
 
         // Connexion with Google authentificator
         });
+
         this.check_btn.addEventListener('click', async (event) => {
             event.preventDefault();
             window.open('/check', '42 AUTH');
@@ -365,14 +372,13 @@ export class   ProfileController{
                 this.closePasswordPopup();
                 this.password_form.reset();
             } catch (error) {
-                document.getElementById('errorMessages').classList.replace("hidden", "block");
-                this.passError.textContent = this.site.getText(error.message);
-                // alert(this.site.getText(error.message));
+                this.passError.textContent = this.site.getText(error);
+                alert(error.message);
             }
         });
-
     }
-        // Ouvrir la popup
+
+    // Ouvrir la popup
     openPasswordPopup() {
         this.passPopUp.classList.remove('hidden');
     }
@@ -427,36 +433,36 @@ export class   ProfileController{
         });
     }
 
-        async saveUsername(newUsername) {
-            document.getElementById('profile_username').innerText = newUsername;
-            console.log("Nouvelle valeur du nom d'utilisateur : " + newUsername);
+    async saveUsername(newUsername) {
+        document.getElementById('profile_username').innerText = newUsername;
+        console.log("Nouvelle valeur du nom d'utilisateur : " + newUsername);
 
-            const body = {
-                username: this.username,
-                newUsername: newUsername
-            };
-            try {
-                const req = await fetch('/db/update/username', {
-                        method: 'POST',
-                        credentials: 'include',
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(body)
-                    });
+        const body = {
+            username: this.username,
+            newUsername: newUsername
+        };
+        try {
+            const req = await fetch('/db/update/username', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(body)
+                });
 
-                const data = await req.json();
+            const data = await req.json();
 
-                if (!data.success)
-                    throw Error(data.error);
-                this.site.send({type:"pseudo_swap", username: this.username, newUsername: newUsername});
-                this.username = newUsername;
-                this.site.setUsernames(this.username);
-                console.log("username updated.");
-            } catch (error) {
-                console.log(this.site.getText(error.message));
+            if (!data.success)
+                throw Error(data.error);
+            this.site.send({type:"pseudo_swap", username: this.username, newUsername: newUsername});
+            this.username = newUsername;
+            this.site.setUsernames(this.username);
+            console.log("username updated.");
+        } catch (error) {
+            console.log(this.site.getText(error.message));
                 document.getElementById('profile_username').innerText = this.username;
-                alert(this.site.getText(error.message));
-            }
+            alert(this.site.getText(error.message));
         }
+    }
 
     //Search for the player, and store datas
     async searchPlayerHandler(){
@@ -592,7 +598,6 @@ export class   ProfileController{
                 body: JSON.stringify({ username: this.username }) 
             });
             if (res.ok) {
-                console.log("SUFHUFHSDHDSLFHS");
                 const data = await res.json();
                 if (data.success == 1) {
                     document.getElementById("fa_btn_enable").textContent = this.site.getText("2FA_disable");
@@ -608,7 +613,7 @@ export class   ProfileController{
             if (resp.ok) {
                 const data = await resp.json();
                 if(data.success == 1) {
-                    document.getElementById("google_auth_enable").textContent = this.site.getText("google_switch_desable");
+                    document.getElementById("google_auth_enable").textContent = this.site.getText("google_switch_disable");
                     document.getElementById("google_auth_enable").classList.replace("enable_auth_btn", "disable_auth_btn");
                 }
                 else {
@@ -617,18 +622,19 @@ export class   ProfileController{
                 }
             }
         } catch (error) {
-            console.log("SUFHUFHSDHDSLFHS9999999999999999999");
             alert(error.message);
         }
     }
 
     hide_page(){
         this.profile_page.classList.replace("flex", "hidden");
-
     }
 
     hide_all(){
         this.hide_page();
+        this.closePasswordPopup();
+        this.site.hide_fa_page();
+
     }
 };
 
@@ -799,7 +805,6 @@ export class SiteController{
                     error.classList.replace("hidden", "block");
                 }
             } catch (error) {
-                console.log("AAAAAAAAAAAAAAAAAAAAAAAAaa");
                 alert(error.message);
             }
         });
@@ -974,6 +979,7 @@ export class SiteController{
     }
     print_menu(){
         this.print_main_page();
+        this.print_btn_menu();
         this.menu.classList.replace("hidden", "block");
         if (this.tournament !== null && this.tournament.hasTournament())
             this.tournament.print_tournament_rejoin_btn();
