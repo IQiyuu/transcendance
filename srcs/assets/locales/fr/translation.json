@@ -36,7 +36,7 @@
   "errUTaken": "Username deja prit",
   "errExpired": "Veuillez changer le mot de passe",
   "errNA": "Non autorise",
-  "errIsPlaying": "to do",
+  "errIsPlaying": "Le match refuse de vous voir partir",
   "about": "À propos",
   "google_auth": "Se connecter avec l'authentification Google",
   "google_switch_enable": "Activer l'authentification Google",

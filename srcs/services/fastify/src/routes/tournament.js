@@ -559,8 +559,14 @@ function tournamentRoute (fastify, options) {
 		const minLength    = tournament.length >= 1;
     	const maxLength    = tournament.length <= 20;
     	const hasSpecial   = /[!@#$%^&*(),.?":{}|<>]/.test(tournament);
+		const uniq			= true;
 
-		return minLength && maxLength && !hasSpecial;
+		tournaments.forEach(t => {
+			if (t.name === tournament)
+				uniq = false;
+		});
+
+		return minLength && maxLength && !hasSpecial && uniq;
 	}
 	
 	//Create a tournament

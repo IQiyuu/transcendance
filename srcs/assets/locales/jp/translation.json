@@ -37,7 +37,7 @@
   "errUTaken": "ユーザー名は既に使用されています",
   "errNA": "権限がありません",
   "errExpired": "パスワードを変更してください",
-  "errIsPlaying": "to do",
+  "errIsPlaying": "ゲームを続けてください",
   "about": "このゲームについて",
 
   "add_friend": "友達に追加",
