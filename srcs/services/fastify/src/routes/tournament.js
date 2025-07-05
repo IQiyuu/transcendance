@@ -224,31 +224,43 @@ class Tournament{
 		this.brackets[this.current_round].forEach(match => {
 			console.log("		Creating a tournament match !");
 			console.log(match);
-			if (match.players[1] === null){
-				console.log("No opponent easy winnnn");
+			let p1 = match.players[0];
+			let p2 = match.players[1];
+
+			if (p2 === null){
+				match.winner = p1.username;
 				match.state = T_FINISHED;
-				match.winner = match.players[0].username;
-			} else {
-				console.log("Match has 2 players");
-				//Create the match
-				console.log(match.players[0].username + " vs " + match.players[1].username);
-				let g_id = gameRoute.createGame(match.players[0].username, match.players[1].username, this.id);
-				match.game_id = g_id;
-				let game = gameRoute.getGameByID(g_id);
-				console.log("Sending :" + game);
-				match.players[0].socket.send(JSON.stringify({
-					type: "new_match",
-					game_id: g_id,
-					game: game
-				}));
-				
-				match.players[1].socket.send(JSON.stringify({
-					type: "new_match",
-					game_id: g_id,
-					game: game 
-				}));
-				match.state = T_ON_GOING;
+				return ;
 			}
+			if (p1.socket.readyState !== p1.socket.OPEN && p2.socket?.readyState !== p2.socket?.OPEN){
+				match.winner = p1.username; // Not fair, but easier, should be null
+				match.state = T_FINISHED;
+				return ;
+			} else if (p1.socket.readyState !== p1.socket.OPEN){
+				match.winner = p2.username;
+				match.state = T_FINISHED;
+				return ;
+			} else if (p2.socket?.readyState !== p2.socket?.OPEN) {
+				match.winner = p1.username;
+				match.state = T_FINISHED;
+				return ;
+			}
+			console.log("Match has 2 players");
+			console.log(p1.username + " vs " + p2.username);
+			let g_id = gameRoute.createGame(p1.username, p2.username, this.id);
+			match.game_id = g_id;
+			let game = gameRoute.getGameByID(g_id);
+			p1.socket.send(JSON.stringify({
+				type: "new_match",
+				game_id: g_id,
+				game: game
+			}));
+			p2.socket.send(JSON.stringify({
+				type: "new_match",
+				game_id: g_id,
+				game: game 
+			}));
+			match.state = T_ON_GOING;
 		});
 	}
 	
@@ -257,7 +269,7 @@ class Tournament{
 		// Get players (winner), then adding them to the next round
 		console.log("=======================");
 		console.log("Preparing next round");
-		let winners = [];
+		let winners = []; //winners username
 		
 		this.brackets[this.current_round].forEach(match => {
 			winners.push(match.winner);
@@ -341,7 +353,7 @@ function    getTournamentMasked(t){
 				// console.log(match);
 				// console.log(match.players);
 				let p2 = null;
-				if (match.players[1] !== null)
+				if (match.players[1] !== null && match.players[1] !== undefined)
 					p2 = match.players[1].username;
 				round.push({
 					p1 : match.players[0].username,

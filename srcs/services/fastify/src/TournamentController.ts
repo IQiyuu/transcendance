@@ -240,8 +240,8 @@ export class TournamentController {
     }
 
     createMatch(game_id, game){
-        console.log("Telling GameCtrler to create the tournament match :");
-        console.log(game);
+        // console.log("Telling GameCtrler to create the tournament match :");
+        // console.log(game);
         this.game.startTournamentGame(game_id, game);
     }
 
@@ -440,6 +440,7 @@ export class TournamentController {
 
     print_tournament(){
         this.clear_tournament_lobby();
+        this.hide_tournament_lobby();
         if (!this.tournament.isStarted())
             this.print_tournament_lobby();
         this.clear_tournament_state();

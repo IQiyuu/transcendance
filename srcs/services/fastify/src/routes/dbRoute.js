@@ -457,7 +457,7 @@ async function dbRoute (fastify, options) {
     fastify.get('/db/friends/friendlist/:username', {
         preHandler: usernameTester,
     }, async (request, reply) => {
-        console.log("OUIII");
+        // console.log("OUIII");
         try {
             const userId = getIdFromUsername(request.params.username);
             if (!userId)

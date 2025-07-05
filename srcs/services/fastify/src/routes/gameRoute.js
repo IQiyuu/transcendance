@@ -66,10 +66,10 @@ export function createGame(user, user2, t_id = null) {
                     this.v += ACCELERATION;
             },
             randomizeVector: function() {
-                const angle = degToRad(randomIntFromInterval(15, 45));
-                const neg_x = randomIntFromInterval(0,1), neg_y = randomIntFromInterval(0,1);
+                const angle = degToRad(0);
+                const neg_x = randomIntFromInterval(0,1);
                 this.dx = Math.cos(angle) * (neg_x ? -1 : 1);
-                this.dy = Math.sin(angle) * (neg_y ? -1 : 1);
+                this.dy = Math.sin(angle);
             }
         },
         paddles: {

@@ -724,7 +724,7 @@ export class SiteController{
                 const data = await response.json();
                 
                 if (data.success) {
-                    console.log("OUIII");
+                    // console.log("OUIII");
                     this.isRegisterMode = false;
                     this.username = data.username;
                     if (url == "/login")
@@ -738,11 +738,11 @@ export class SiteController{
                             body: JSON.stringify({ username : data.username }) 
                         });
                         if (res.ok) {
-                            console.log("OUIII2");
+                            // console.log("OUIII2");
                             const twofadata = await res.json();
                             if (twofadata.success == 1)
                             {
-                                console.log("OUIII3");
+                                // console.log("OUIII3");
                                 const res = await fetch('/set-user-cookie', {
                                     method: 'POST',
                                     headers: {
