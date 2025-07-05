@@ -121,10 +121,10 @@ export class LangController{
         document.getElementById("curr_tour").textContent = this.file["curr_tour"];
         document.getElementById("join_tour").textContent = this.file["join_tour"];
         document.getElementById("tournament_creation").textContent = this.file["crea_tour_btn"];
-        document.getElementById("tour_win_msg").textContent = this.file["tour_win_msg"];
-        document.getElementById("tour_lose_msg").textContent = this.file["tour_lose_msg"];
-        document.getElementById("tour_quit_btn").textContent = this.file["tour_quit_btn"];
-        document.getElementById("tour_bracket").textContent = this.file["tour_bracket"];
+        // document.getElementById("tour_win_msg").textContent = this.file["tour_win_msg"];
+        // document.getElementById("tour_lose_msg").textContent = this.file["tour_lose_msg"];
+        // document.getElementById("tour_quit_btn").textContent = this.file["tour_quit_btn"];
+        // document.getElementById("tour_bracket").textContent = this.file["tour_bracket"];
         
 
         if (document.getElementById("usr_tour") != null) {

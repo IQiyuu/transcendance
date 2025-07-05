@@ -527,9 +527,9 @@ export class   ProfileController{
                 a2.id="profileDisplay";
 
                 li.appendChild(a);
-                li.innerHTML += ": 11 VS ";
+                li.innerHTML += `: ${item.winner_score} VS `;
                 li.appendChild(a2);
-                li.innerHTML += " : " + item.loser_score + " at " + item.created_at;
+                li.innerHTML += ` : ${item.loser_score} at ${item.created_at}`;
             
                 this.histo_list.appendChild(li);
                 li.style.fontSize = "16px";
