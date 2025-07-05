@@ -69,5 +69,11 @@
   "lst_tour": "List of tournaments",
   "crea_tour": "🎯 Create tournament",
   "nam_tour": "Tournament name",
-  "crea_tour_btn": "Create"
+  "crea_tour_btn": "Create",
+  "tour_win_msg": "You won the tournament 👑",
+  "tour_quit_btn": "Leave",
+  "tour_lose_msg": "You lost the tournament 😞🪢",
+  "tour_bracket": "Bracket",
+  "about_content": "🏓 Transcendence — Online Multiplayer Pong Game\n\nTranscendence is a modernized version of the classic Pong game, designed for a smooth, competitive, and social online experience. It includes tournaments, a friends system, and a multilingual interface.\n\n⚙️ Technologies Used\n\tFrontend: React, TypeScript, WebSocket, TailwindCSS\n\tBackend: TypeScript, Fastify\n\tWebSocket: for real-time gameplay and chat\n\tAuthentication: 2FA (Two-Factor Authentication), Google OAuth\n\tDocker: for container deployment\n\n🧩 Game Description\nThe game is played 1v1 online. Each player controls a paddle and tries to score points.\n\n\tOnline matches\n\tSingle-elimination tournaments\n\tGlobal ranking\n\n🕹️ Game Controls\nMove paddle up\t↑ or W\nMove paddle down\t↓ or S\n\n💡 Main Features\n\t🎮 Real-time multiplayer via WebSocket\n\t🧑‍🤝‍🧑 Friends system\n\t🏆 Tournament organization\n\t🔒 2FA and Google OAuth authentication\n\t🌐 Multilingual interface: French 🇫🇷, English 🇬🇧, Japanese 🇯🇵\n\t👤 Customizable profiles\n\t📸 Profile picture update\n\t✏️ Change username\n\n🔐 Secure Logout\n\tThe Logout button at the top right allows you to safely sign out.\n\n🌍 Language Selector\n\tAllows dynamic switching of interface language.\n\n🔐 Google Login\n\tA temporary username like guess_0 is automatically assigned.\n\tDefault password: \"default\". Can be personalized later."
+
 }

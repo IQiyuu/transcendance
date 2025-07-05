@@ -113,7 +113,7 @@ export class TournamentController {
 
             this.print_tournament_page();
             this.print_tournament_form();
-        })
+        });
 
         this.tournament_form.addEventListener("submit", async (event) => {
             event.preventDefault();
@@ -504,9 +504,114 @@ export class TournamentController {
         this.tournament_rejoin_btn.classList.replace("flex", "hidden");
     }
 
-    print_tournament_end(){
-        console.log("ToURNAMENT END");
+    generateBracketElement(brackets) {
+        const container = document.createElement("div");
+        container.className = "flex justify-center gap-6 my-6";
+
+        const matchHeight = 60;
+
+        for (let i = 0; i < brackets.length; i++) {
+            const round = document.createElement("div");
+            round.className = "flex flex-col items-center";
+            if (i > 0) round.style.paddingTop = `${(matchHeight / 2) * i + 25}px`;
+
+            for (let j = 0; j < brackets[i].length; j++) {
+                const match = document.createElement("div");
+                match.className = "bg-black border border-white rounded-md shadow-lg px-4 py-3 mb-6 text-center w-36";
+
+                const p1 = document.createElement("p");
+                p1.innerText = brackets[i][j].p1;
+                p1.className = "font-semibold mb-1";
+                if (brackets[i][j].winner)
+                    p1.classList.add(
+                        brackets[i][j].winner === brackets[i][j].p1 ? "bg-green-700" : "bg-red-700",
+                        "text-white", "rounded", "px-1"
+                    );
+                match.appendChild(p1);
+
+                if (brackets[i][j].p2 !== null) {
+                    const vs = document.createElement("span");
+                    vs.innerText = " VS ";
+                    vs.className = "text-white font-bold";
+                    match.appendChild(vs);
+
+                    const p2 = document.createElement("p");
+                    p2.innerText = brackets[i][j].p2;
+                    p2.className = "font-semibold";
+                    if (brackets[i][j].winner)
+                        p2.classList.add(
+                            brackets[i][j].winner === brackets[i][j].p2 ? "bg-green-700" : "bg-red-700",
+                            "text-white", "rounded", "px-1"
+                        );
+                    match.appendChild(p2);
+                }
+
+                round.appendChild(match);
+            }
+
+            container.appendChild(round);
+        }
+
+        return container;
     }
+
+
+    print_tournament_end() {
+        console.log("ToURNAMENT END");
+
+        const brackets = this.tournament.getBrackets();
+        if (!brackets || brackets.length === 0) return;
+
+        // Récupérer le gagnant depuis le dernier match
+        const lastRound = brackets[brackets.length - 1];
+        const lastMatch = lastRound[0];
+        const winner = lastMatch.winner;
+        const isWinner = (winner === this.username);
+
+        // Créer l'overlay de fin
+        const endDiv = document.createElement("div");
+        endDiv.className = "fixed inset-0 bg-black bg-opacity-90 flex flex-col items-center justify-center z-50 text-white";
+
+        // Titre principal (Gagné / Perdu)
+        const title = document.createElement("h2");
+        title.id = isWinner ? "tour_win_msg" : "tour_lose_msg";
+        title.className = "text-4xl font-bold mb-6";
+        title.textContent = isWinner
+            ? this.site.getText("tour_win_msg")
+            : this.site.getText("tour_lose_msg");
+        endDiv.appendChild(title);
+
+        // Sous-titre "Bracket"
+        const bracketTitle = document.createElement("h3");
+        bracketTitle.className = "text-2xl font-semibold mb-4";
+        bracketTitle.textContent = this.site.getText("tour_bracket");
+        endDiv.appendChild(bracketTitle);
+
+        // Bracket visuel
+        const bracketTable = this.generateBracketElement(brackets);
+        endDiv.appendChild(bracketTable);
+
+        // Bouton quitter
+        const btn = document.createElement("button");
+        btn.id = "tour_quit_btn";
+        btn.className = "mt-8 px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded";
+        btn.textContent = this.site.getText("tour_quit_btn");
+        btn.addEventListener("click", async (event) => {
+            this.hide_all();
+            this.site.print_menu();
+            endDiv.remove()
+        });
+        endDiv.appendChild(btn);
+
+        // Effacer l'ancien contenu et afficher
+        this.tournament_page.innerHTML = '';
+        this.tournament_page.appendChild(endDiv);
+        this.print_tournament_page();
+    }
+
+
+
+
 
     clear_tournaments() {
         this.tournaments_list.textContent = '';
