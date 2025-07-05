@@ -526,6 +526,7 @@ export class   GameController{
             this.end_screen.remove();
             this.hide_all();
             this.site.print_menu();
+            this.site.print_btn_menu();
         };
 
         // on ajoute l'elem a la page
