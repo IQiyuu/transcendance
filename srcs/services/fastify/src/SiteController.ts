@@ -425,9 +425,9 @@ export class   ProfileController{
             this.saveUsername(inputField.value);
         });
 
-        inputField.addEventListener('keydown', (e) => {
+        inputField.addEventListener('keydown', async (e) => {
             if (e.key === 'Enter') {
-                this.saveUsername(inputField.value);
+                await this.saveUsername(inputField.value);
             }
         });
     }
@@ -484,7 +484,16 @@ export class   ProfileController{
             this.picture_path = data.profile.picture_path;
 
             //front remove friend to fix
-            
+            const req2 = await fetch(`/db/friends/${this.username}/${this.profile_username}`, {
+                method: 'GET',
+                credentials: 'include',
+                headers: { "Content-Type": "application/json" },
+            });
+            const data2 = await req2.json();
+            if (data2.success){
+               document.getElementById("friend_btn").textContent = this.site.getText(data2.message);
+			}else
+                document.getElementById("friend_btn").textContent = data2.error; // TO DO
 
             console.log(this.picture_path);
             console.log(data.profile);
@@ -706,6 +715,7 @@ export class SiteController{
     setUsernames(username: string) {
         this.username = username;
         this.game.setUsername(this.username);
+        this.lang.setUsername(this.username);
         this.profile.setUsername(this.username);
         this.tournament.setUsername(this.username);
         this.friends.setUsername(this.username);
@@ -715,6 +725,9 @@ export class SiteController{
         this.ws.send(JSON.stringify(data));
     }
 
+    isInTournament(){
+        return (this.tournament.hasTournament());
+    }
     /**
      * CONTROLLER
      */

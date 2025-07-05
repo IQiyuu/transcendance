@@ -114,6 +114,10 @@ export class   GameController{
                 alert("ALready in a game");
                 return ;
             }
+            if (this.site.isInTournament()){
+                alert("Already in a tournament");
+                return ;
+            }
 
             if (this.is_searching){
                 this.stopMatchmaking();
@@ -129,6 +133,10 @@ export class   GameController{
 
             if (this.ws !== null){
                 alert("ALready in a game");
+                return ;
+            }
+            if (this.site.isInTournament()){
+                alert("Already in a tournament");
                 return ;
             }
 

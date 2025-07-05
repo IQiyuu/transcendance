@@ -13,8 +13,7 @@ async function GoogleAuthRoute(fastify, options) {
   const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=openid%20email%20profile`;
   const authUrl2 = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri2}&response_type=code&scope=openid%20email%20profile`;
   
-  // route principale pour ajouter google auth au client
-
+  // Route used for google sign in
   fastify.get('/google-auth', async (req, reply) => {
 
     const token = req.cookies.auth_token;
@@ -66,7 +65,6 @@ async function GoogleAuthRoute(fastify, options) {
 
 
   // route principale pour se connecter avec google authentificator 
-
   fastify.get('/check', async (req, reply) => {
     const token = req.cookies.auth_token;
     const googleEmail = req.cookies.google_email;

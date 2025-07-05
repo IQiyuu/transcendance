@@ -37,7 +37,7 @@ let playing_clients = new Map(); // socket, game_id as we may have 2 socket for 
 
 // Creer un objet game cote server
 export function createGame(user, user2, t_id = null) {
-    const angle = degToRad(randomIntFromInterval(0, 45));
+    const angle = degToRad(0);
     if (randomIntFromInterval(0,1) === 0){
         let tmp = user;
         user = user2;
@@ -300,7 +300,6 @@ export async function gameRoute (fastify, options) {
                 if (message.type === "create_game_offline"){
                     let new_game_id = createGame(message.username, message.username + "-2");
                     // console.log(games);
-                    // console.log("Ceating a solos game");
 
                     // NE PAS OUBLIER DE MASKER AVEC UN HOOK
                     // console.log(getMaskedGame(getGameByID(new_game_id)));
@@ -315,6 +314,10 @@ export async function gameRoute (fastify, options) {
                     let game = getGameByID(message.game_id);
                     if (game === undefined){
                         console.log("error, game dosnt exists");
+                        /*socket.send(JSON.stringify({
+                            type: "",
+                            state: closed
+                        }))*/
                         return ;
                     }
                     movePaddle(game, message.side, message.move_up);
