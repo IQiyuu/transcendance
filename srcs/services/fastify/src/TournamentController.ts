@@ -618,14 +618,14 @@ export class TournamentController {
         });
         this.tournament_end_page.appendChild(btn);
 
-        this.hide_all()
-        // this.print_tournament();
-        // this.print_tournament();
+        this.hide_all();
         this.print_tournament_end_page();
     }
 
     print_tournament_end_page(){
         this.tournament_end_page.classList.replace("hidden", "block");
+        this.print_tournament_page();
+        this.print_tournament_div();
     }
 
     hide_tournament_end_page(){
