@@ -253,6 +253,7 @@ export class   GameController{
         if (this.is_tournament){
             console.log("Tournament's game is finished ending");
             console.log("Not closing socket for it can be used later");
+            
             this.game_id = -1;
         } else {
             this.print_end_game();
@@ -522,6 +523,7 @@ export class   GameController{
             this.end_screen.remove();
             this.hide_all();
             this.site.print_menu();
+            this.site.print_btn_menu();
         };
 
         // on ajoute l'elem a la page

@@ -554,13 +554,23 @@ function tournamentRoute (fastify, options) {
 			updateTournamentPlayers(t);
 		});
 	});
+
+	function isValidTname(tournament) {
+		const minLength    = tournament.length >= 1;
+    	const maxLength    = tournament.length <= 20;
+    	const hasSpecial   = /[!@#$%^&*(),.?":{}|<>]/.test(tournament);
+
+		return minLength && maxLength && !hasSpecial;
+	}
 	
 	//Create a tournament
 	fastify.post('/tournament/create', async (request, reply) => {
 		let player = request.body.owner;
 		let t_name = request.body.tournament_name;
 		if (inTournament(tournaments, player))
-			return {success: false, message: "Player can't create a tournament as he's already in one"};
+			return {success: false, error: "errAlrTour"};
+		if (!isValidTname(t_name))
+			return { success: false, error: "errBadTname" };
 		try {
 			let new_t = addTournament(tournaments, max_t_id++, player, t_name);
 			return {success: true, tournament : new_t};

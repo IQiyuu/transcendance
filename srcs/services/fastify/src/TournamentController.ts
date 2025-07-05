@@ -57,16 +57,6 @@ export class Tournament {
 
 }
 
-function verifyForm(name){
-    if (name.value.length < 1)
-        return (alert("Tournament's name should have at least 3 characters"), false);
-    if (name.value.length > 20)
-        return (alert("Tournament's name too long"), false);
-    // if (/[alnum]|_*|-*/.test(name.value))
-    //     return (alert("Characters can only be letters, digits, and - or _"), false);
-    return (true);
-}
-
 export class TournamentController {
 
     /**CONTROLLER */
@@ -125,11 +115,6 @@ export class TournamentController {
         this.tournament_form.addEventListener("submit", async (event) => {
             event.preventDefault();
             const name = document.getElementById("tournament_name") as HTMLInputElement;
-            //Verifier que l'input est valide avant de l'envoyer !
-            if (!verifyForm(name)){
-                // Error to print here (or in verifyForm) ?
-                return ;
-            }
             try {
                 const body = {
                     owner: this.username,
@@ -144,13 +129,17 @@ export class TournamentController {
                 if (data.success) {
                     this.tournament = new Tournament(data.tournament);
                     this.ws = new TournamentClientSocket(this.username, this, this.tournament);
+                    document.getElementById("errorCreate_tourn").textContent = "";
                     this.hide_all();
                     this.print_tournament();
                 }
-                else
+                else {
+                    document.getElementById("errorCreate_tourn").textContent = this.site.getText(data.error);
+                    document.getElementById("errorCreate_tourn").classList.replace("hidden", "block");
                     throw (Error(data.error));
+                }
             } catch (error) {
-                console.log("error: ", error);
+                console.log("error: ", error.message);
             }
         });
 
@@ -251,18 +240,16 @@ export class TournamentController {
     }
 
     createMatch(game_id, game){
-        // console.log("Telling GameCtrler to create the tournament match :");
-        // console.log(game);
         this.game.startTournamentGame(game_id, game);
     }
 
     endTournament(){
-        console.log("EndingTournament");
+        // this.ws = null;
+        console.log("EndingTOurnament");
         this.clear_tournament_lobby();
         this.hide_tournament_lobby();
-        this.finished_tournament = this.tournament;
+        this.print_tournament_end()
         this.close()
-        this.print_tournament_end();
     }
 
     close(){
@@ -365,7 +352,6 @@ export class TournamentController {
         this.tournament_lobby.append(table);
    
         if (!this.tournament.isStarted()){
-            // console.log("   Tournament has not started yet");
             if (this.username === this.tournament.getOwner()) {
                 let start_button = document.createElement("button");
                 start_button.id = "start_tour";
@@ -568,12 +554,9 @@ export class TournamentController {
 
 
     print_tournament_end() {
+        console.log("ToURNAMENT END");
 
-        if (this.finished_tournament === null){
-            console.log("A tournament is finished, here it s NULL ????");
-            return ;
-        }
-        const brackets = this.finished_tournament.getBrackets();
+        const brackets = this.tournament.getBrackets();
         if (!brackets || brackets.length === 0) return;
 
         // Récupérer le gagnant depuis le dernier match
@@ -583,8 +566,8 @@ export class TournamentController {
         const isWinner = (winner === this.username);
 
         // Créer l'overlay de fin
-         
-        this.tournament_end_page.className = "hidden fixed inset-0 bg-black bg-opacity-90 flex flex-col items-center justify-center z-50 text-white";
+        const endDiv = document.createElement("div");
+        endDiv.className = "fixed inset-0 bg-black bg-opacity-90 flex flex-col items-center justify-center z-50 text-white";
 
         // Titre principal (Gagné / Perdu)
         const title = document.createElement("h2");
@@ -593,17 +576,17 @@ export class TournamentController {
         title.textContent = isWinner
             ? this.site.getText("tour_win_msg")
             : this.site.getText("tour_lose_msg");
-        this.tournament_end_page.appendChild(title);
+        endDiv.appendChild(title);
 
         // Sous-titre "Bracket"
         const bracketTitle = document.createElement("h3");
         bracketTitle.className = "text-2xl font-semibold mb-4";
         bracketTitle.textContent = this.site.getText("tour_bracket");
-        this.tournament_end_page.appendChild(bracketTitle);
+        endDiv.appendChild(bracketTitle);
 
         // Bracket visuel
         const bracketTable = this.generateBracketElement(brackets);
-        this.tournament_end_page.appendChild(bracketTable);
+        endDiv.appendChild(bracketTable);
 
         // Bouton quitter
         const btn = document.createElement("button");
@@ -613,24 +596,19 @@ export class TournamentController {
         btn.addEventListener("click", async (event) => {
             this.hide_all();
             this.site.print_menu();
-            this.finished_tournament = null;
-            this.tournament_end_page.textContent = '';
+            endDiv.remove()
         });
-        this.tournament_end_page.appendChild(btn);
+        endDiv.appendChild(btn);
 
-        this.hide_all();
-        this.print_tournament_end_page();
-    }
-
-    print_tournament_end_page(){
-        this.tournament_end_page.classList.replace("hidden", "block");
+        // Effacer l'ancien contenu et afficher
+        this.tournament_page.innerHTML = '';
+        this.tournament_page.appendChild(endDiv);
         this.print_tournament_page();
-        this.print_tournament_div();
     }
 
-    hide_tournament_end_page(){
-        this.tournament_end_page.classList.replace("block", "hidden");
-    }
+
+
+
 
     clear_tournaments() {
         this.tournaments_list.textContent = '';
@@ -646,5 +624,6 @@ export class TournamentController {
         this.hide_tournament_state();
         this.hide_tournament_rejoin_btn();
         this.hide_tournament();
+        document.getElementById("errorCreate_tourn").classList.replace("block", "hidden");
     }
 };

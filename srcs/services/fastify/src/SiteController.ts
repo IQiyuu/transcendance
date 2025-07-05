@@ -347,26 +347,14 @@ export class   ProfileController{
             const currentPassword = (document.getElementById('currentPassword') as HTMLInputElement).value;
             const newPassword = (document.getElementById('newPassword') as HTMLInputElement).value;
             const confirmPassword = (document.getElementById('confirmPassword') as HTMLInputElement).value;
-            console.log("ERROR1");
-            // Vérification que les mots de passe correspondent
-            if (newPassword !== confirmPassword) {
-                this.showError("Les nouveaux mots de passe ne correspondent pas.");
-                console.log("ERROR1 MISMATCH");
-                return;
-            }
-
-            if (currentPassword == newPassword) {
-                this.showError("Les nouveaux mots de passe ne doivent pas etre identiques");
-                console.log("ERROR1 MISMATCH");
-                return;
-            }
-
             const body = {
                 username: this.username,
                 password: currentPassword,
                 newPassword: newPassword
             };
             try {
+                if (newPassword != confirmPassword) 
+                    throw(Error("errorPSame"));
                 console.log(body);
                 const req = await fetch('/db/update/password', {
                         method: 'POST',
@@ -380,6 +368,7 @@ export class   ProfileController{
 
                 console.log("password updated.");
                 this.passError.textContent = "";
+                document.getElementById('errorMessages').classList.replace("block", "hidden");
                 this.closePasswordPopup();
                 this.password_form.reset();
             } catch (error) {
@@ -469,8 +458,9 @@ export class   ProfileController{
             this.site.setUsernames(this.username);
             console.log("username updated.");
         } catch (error) {
-            console.log("sfsdfSUFHUFHfsdfdsfsdfdsfsfdsSDHDSLFHS");
-            alert(error.message);
+            console.log(this.site.getText(error.message));
+                document.getElementById('profile_username').innerText = this.username;
+            alert(this.site.getText(error.message));
         }
     }
 
@@ -543,9 +533,9 @@ export class   ProfileController{
                 a2.id="profileDisplay";
 
                 li.appendChild(a);
-                li.innerHTML += ": 11 VS ";
+                li.innerHTML += `: ${item.winner_score} VS `;
                 li.appendChild(a2);
-                li.innerHTML += " : " + item.loser_score + " at " + item.created_at;
+                li.innerHTML += ` : ${item.loser_score} at ${item.created_at}`;
             
                 this.histo_list.appendChild(li);
                 li.style.fontSize = "16px";
@@ -586,9 +576,17 @@ export class   ProfileController{
 			this.fa_btn.classList.replace("hidden", "flex");
 		}
 
-        history.pushState({page: "profile", profile: this.profile_username}, "");
         //historic
 		this.printHisto();
+
+        const currentState = history.state;
+        if (
+            !currentState ||
+            currentState.page !== "profile" ||
+            currentState.data?.username !== this.profile_username
+        ) {
+            this.site.navigate({ page: "profile", data: { username: this.profile_username } });
+        }
     }
 
     async resetBtn() {
@@ -680,8 +678,10 @@ export class SiteController{
     }
 
     async initLang() {
-        if (await this.is_logged())
+        if (await this.is_logged()) {
             this.connect();
+            this.navigate({ page: "menu" });
+        }
 
         this.lang = await new LangController(this.username);
         if (this.friends)
@@ -738,9 +738,8 @@ export class SiteController{
             }
         });
 
-        window.addEventListener("popstate", async (event) => {
-            event.preventDefault();
-            this.loadState(history.state);
+        window.addEventListener("popstate", (event) => {
+            this.renderView(event.state);
         });
 
         // Register/login form validation
@@ -764,6 +763,7 @@ export class SiteController{
                 const data = await response.json();
                 
                 if (data.success) {
+                    // console.log("OUIII");
                     this.isRegisterMode = false;
                     this.username = data.username;
                     if (url == "/login")
@@ -777,9 +777,11 @@ export class SiteController{
                             body: JSON.stringify({ username : data.username }) 
                         });
                         if (res.ok) {
+                            // console.log("OUIII2");
                             const twofadata = await res.json();
                             if (twofadata.success == 1)
                             {
+                                // console.log("OUIII3");
                                 const res = await fetch('/set-user-cookie', {
                                     method: 'POST',
                                     headers: {
@@ -817,6 +819,7 @@ export class SiteController{
             this.print_btn_menu();
             if (this.tournament.hasTournament())
                 this.tournament.print_tournament_rejoin_btn();
+            this.navigate({ page: "menu" });
         });
 
         // Show about page
@@ -825,6 +828,7 @@ export class SiteController{
 
             this.hide_menu();
             this.print_about_page();
+            this.navigate({ page: "about" });
         });
 
         // Profile display
@@ -866,7 +870,7 @@ export class SiteController{
         this.tournament_btn.addEventListener("click", async(event) => {
             event.preventDefault();
             this.hide_btn_menu();
-            this.print_tournament_btns();
+            this.navigate({ page: "tournament" });
         });
 
 
@@ -941,6 +945,7 @@ export class SiteController{
         this.hide_all();
         document.body.classList.remove("justify-center", "align-center", "flex");
         this.print_menu();
+        this.print_btn_menu();
         this.friends = new FriendController(this.username, this.lang, this.ws);
         this.ws.setFriend(this.friends, this, this.profile);
     }
@@ -959,7 +964,6 @@ export class SiteController{
 
     print_main_page(){
         this.main_page.classList.replace("hidden", "block");
-        history.pushState({page: "main"}, "");
     }
 
     hide_main_page(){
@@ -987,7 +991,6 @@ export class SiteController{
 
     print_about_page(){
         this.about.classList.replace("hidden", "flex");
-        history.pushState({page: "about"}, "");
     }
     
     hide_about_page(){
@@ -997,7 +1000,6 @@ export class SiteController{
     print_tournament_btns(){
         this.tournament_create_btn.classList.replace("hidden", "flex");
         this.tournament_join_btn.classList.replace("hidden", "flex");
-        history.pushState({page: "tournament_menu"}, "");
     }
 
     hide_tournament_btns(){
@@ -1013,6 +1015,7 @@ export class SiteController{
         this.hide_register_page();
         this.hide_main_page();
         this.hide_menu();
+        this.hide_btn_menu();
         this.hide_about_page();
         this.hide_tournament_btns();
         this.game.hide_all();
@@ -1038,32 +1041,46 @@ export class SiteController{
     }
 
     print_current_page(){
-        if (this.ws != null)
+        if (this.ws != null) {
             this.print_menu();
+            this.print_btn_menu();
+        }
         else
             this.print_register_page();
     }
 
-    async loadState(obj) {
+    navigate(state, replace = false) {
+        if (replace)
+            history.replaceState(state, "", "");
+        else
+            history.pushState(state, "", "");
+        this.renderView(state);
+    }
+
+    renderView(state) {
         this.hide_all();
 
-        switch (obj.page) {
-            case "main":
-                this.print_menu();
-                break ;
-            case "profile":
-                if (obj && obj.profile) {
-                    this.profile.setProfileUsername(obj.profile);
-                    await this.profile.searchPlayerHandler();
-                }
-                this.profile.printPage();
-                break ;
-            case "about":
-                this.print_about_page();
-                break ;
-            case "tournament_menu":
-                this.print_tournament_btns();
-                break ;
+        if (!state || !state.page) {
+            this.print_menu();
+            this.print_btn_menu();
+            return;
+        }
+        console.log(state);
+        if (state.page === "menu") {
+            this.print_menu();
+            this.print_btn_menu();
+        } else if (state.page === "profile") {
+            console.log(state.data.username);
+            this.profile.setProfileUsername(state.data?.username || null);
+            this.profile.printPage();
+        } else if (state.page === "about") {
+            this.print_about_page();
+        } else if (state.page === "tournament") {
+            this.print_menu();
+            this.print_tournament_btns();
+        } else {
+            this.print_menu();
+            this.print_btn_menu();
         }
     }
 };

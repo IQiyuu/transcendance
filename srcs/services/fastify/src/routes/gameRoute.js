@@ -58,8 +58,9 @@ export function createGame(user, user2, t_id = null) {
         ball: {
             x: STARTING_X,
             y: STARTING_Y,
-            dx: Math.cos(degToRad(0)) * (neg_x ? -1 : 1),
-            dy: Math.sin(0),
+            dx: Math.cos(angle) * (neg_x ? -1 : 1),
+            dy: Math.sin(angle) * (neg_y ? -1 : 1),
+            dist: -1,
             v: STARTING_SPEED,
             accelerate: function() {
                 if (this.v < LIMIT_SPEED)
@@ -112,18 +113,20 @@ function    saveGame(game, db){
     const winner = (game.scores.left < game.scores.right) ? game.players.right : game.players.left;
     const loser = (winner === game.players.left) ? game.players.right : game.players.left;
     const loser_score = game.scores.left > game.scores.right ? game.scores.right : game.scores.left;
+    const winner_score = game.scores.left < game.scores.right ? game.scores.right : game.scores.left;
 
     try {
         const insert = db.prepare(`
-            INSERT INTO games (winner_id, loser_id, loser_score) 
+            INSERT INTO games (winner_id, loser_id, loser_score, winner_score) 
                 SELECT
                     u1.user_id AS winner_id,
                     u2.user_id AS loser_id, 
-                    ? AS loser_score 
+                    ? AS loser_score,
+                    ? AS winner_score
                 FROM users u1, users u2 
                 WHERE u1.username = ? AND u2.username = ?`
         );
-        insert.run(loser_score, winner, loser);
+        insert.run(loser_score, winner_score, winner, loser);
         return true;
     } catch (error) {
         console.error('Error insert data in db.', error);

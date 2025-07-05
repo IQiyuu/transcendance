@@ -57,6 +57,7 @@ db.exec(`
     winner_id INTEGER NOT NULL,
     loser_id INTEGER NOT NULL,
     loser_score INTEGER NOT NULL,
+    winner_score INTEGER NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   );
   
