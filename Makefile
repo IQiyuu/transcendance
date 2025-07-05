@@ -196,3 +196,9 @@ restart :
 # SRCS_MONITORING_VIS_CONFIG=${SRCS}monitoring/grafana.ini
 # SRCS_FASTIFY_CONFIG=${SRCS}fastify/package.json
 # SRCS_FASTIFY_TSCONFIG=${SRCS}fastify/tsconfig.json
+
+
+# 991272817830-b5g9dhidimfed8nu4d5e9sjcjumr2hnm.apps.googleusercontent.com
+# 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
+# https://k0r3p13.42mulhouse.fr:3000/callback
+# https://k0r3p13.42mulhouse.fr:3000/callback2

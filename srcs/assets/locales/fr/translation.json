@@ -34,6 +34,7 @@
   "errorPSame": "Les deux mots de passe doivent etre identiques",
   "errUSame": "Meme username entre",
   "errUTaken": "Username deja prit",
+  "errExpired": "Veuillez changer le mot de passe",
   "errNA": "Non autorise",
   "errIsPlaying": "to do",
   "about": "À propos",

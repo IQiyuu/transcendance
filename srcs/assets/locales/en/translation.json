@@ -37,6 +37,7 @@
   "errUTaken": "Username already taken",
   "errIsPlaying": "to do",
   "errNA": "Not authorized",
+  "errExpired": "Please change your password",
   "about": "About",
   "google_auth": "Connecting with Google authentificator",
   "google_switch_enable": "Enable Google authentificator",

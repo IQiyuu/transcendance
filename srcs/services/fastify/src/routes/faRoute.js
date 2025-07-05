@@ -4,7 +4,7 @@ async function faRoute (fastify, options) {
   const secret = options.secretKey;
 
   // Verifie avec l API si le code est bon 
-    fastify.post('/2fa', async (req, reply) => {
+    fastify.post('/fa/2fa', async (req, reply) => {
       try {
         const token = req.cookies.tempo_token;
         const decoded = fastify.jwt.verify(token, secret);
@@ -45,7 +45,7 @@ async function faRoute (fastify, options) {
     });
 
     // On regarde si l utilisateur a active la 2fa via le cookie 
-    fastify.get('/check-2fa-status', async (req, reply) => {
+    fastify.get('/fa/check-2fa-status', async (req, reply) => {
         const token = req.cookies.auth_token;
         const decoded = fastify.jwt.verify(token, secret);
         const username = decoded.username;
@@ -57,7 +57,7 @@ async function faRoute (fastify, options) {
     });
 
     // On regarde si l utilisateur a active la 2fa via le parametre mis en entree 
-    fastify.post('/check-2fa-status-in', async (req, reply) => {
+    fastify.post('/fa/check-2fa-status-in', async (req, reply) => {
       try {
             const username = req.body.username;
             const value = options.db.prepare('SELECT * FROM users WHERE username = ?').get(username);
@@ -74,7 +74,7 @@ async function faRoute (fastify, options) {
     });
 
     // Active ou desactive la 2FA en changeans la valuer dans la db
-    fastify.get('/enable-2fa', async (req, reply) => {
+    fastify.get('/fa/enable-2fa', async (req, reply) => {
     try {
         const token = req.cookies.auth_token;
         const decoded = fastify.jwt.verify(token, secret);
@@ -101,7 +101,7 @@ async function faRoute (fastify, options) {
     });
 
     // cree un cookie temporaire  pour garder le username 
-    fastify.post('/set-user-cookie', async (req, reply) => {
+    fastify.post('/fa/set-user-cookie', async (req, reply) => {
         const { username } = req.body;
         const payload = {
               username: username,
