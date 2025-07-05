@@ -58,8 +58,8 @@ export function createGame(user, user2, t_id = null) {
         ball: {
             x: STARTING_X,
             y: STARTING_Y,
-            dx: Math.cos(angle) * (neg_x ? -1 : 1),
-            dy: Math.sin(angle) * (neg_y ? -1 : 1),
+            dx: Math.cos(degToRad(0)) * (neg_x ? -1 : 1),
+            dy: Math.sin(0),
             v: STARTING_SPEED,
             accelerate: function() {
                 if (this.v < LIMIT_SPEED)

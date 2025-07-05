@@ -89,6 +89,8 @@ export class TournamentController {
     private tournament_join_btn = document.getElementById("tournament_join_button");
     private tournament_rejoin_btn = document.getElementById("tournament_rejoin_button");
 
+    private tournament_end_page = document.getElementById("tournament_end");
+
     constructor(site : SiteController, game : GameController) {
         this.site = site;
         this.game = game;
@@ -567,8 +569,10 @@ export class TournamentController {
 
     print_tournament_end() {
 
-        if (this.finished_tournament === null)
+        if (this.finished_tournament === null){
+            console.log("A tournament is finished, here it s NULL ????");
             return ;
+        }
         const brackets = this.finished_tournament.getBrackets();
         if (!brackets || brackets.length === 0) return;
 
@@ -579,8 +583,8 @@ export class TournamentController {
         const isWinner = (winner === this.username);
 
         // Créer l'overlay de fin
-        const endDiv = document.createElement("div");
-        endDiv.className = "fixed inset-0 bg-black bg-opacity-90 flex flex-col items-center justify-center z-50 text-white";
+         
+        this.tournament_end_page.className = "hidden fixed inset-0 bg-black bg-opacity-90 flex flex-col items-center justify-center z-50 text-white";
 
         // Titre principal (Gagné / Perdu)
         const title = document.createElement("h2");
@@ -589,17 +593,17 @@ export class TournamentController {
         title.textContent = isWinner
             ? this.site.getText("tour_win_msg")
             : this.site.getText("tour_lose_msg");
-        endDiv.appendChild(title);
+        this.tournament_end_page.appendChild(title);
 
         // Sous-titre "Bracket"
         const bracketTitle = document.createElement("h3");
         bracketTitle.className = "text-2xl font-semibold mb-4";
         bracketTitle.textContent = this.site.getText("tour_bracket");
-        endDiv.appendChild(bracketTitle);
+        this.tournament_end_page.appendChild(bracketTitle);
 
         // Bracket visuel
         const bracketTable = this.generateBracketElement(brackets);
-        endDiv.appendChild(bracketTable);
+        this.tournament_end_page.appendChild(bracketTable);
 
         // Bouton quitter
         const btn = document.createElement("button");
@@ -610,17 +614,23 @@ export class TournamentController {
             this.hide_all();
             this.site.print_menu();
             this.finished_tournament = null;
-            endDiv.remove()
+            this.tournament_end_page.textContent = '';
         });
-        endDiv.appendChild(btn);
+        this.tournament_end_page.appendChild(btn);
 
-        // Effacer l'ancien contenu et afficher
-        // this.tournament_page.innerHTML = ''; NO
         this.hide_all()
-        this.tournament_page.appendChild(endDiv);
-        this.print_tournament_page();
+        // this.print_tournament();
+        // this.print_tournament();
+        this.print_tournament_end_page();
     }
 
+    print_tournament_end_page(){
+        this.tournament_end_page.classList.replace("hidden", "block");
+    }
+
+    hide_tournament_end_page(){
+        this.tournament_end_page.classList.replace("block", "hidden");
+    }
 
     clear_tournaments() {
         this.tournaments_list.textContent = '';
@@ -628,6 +638,7 @@ export class TournamentController {
 
     hide_all() {
         this.hide_tournament_page();
+        this.hide_tournament_end_page();
         this.hide_tournaments_page();
         this.hide_tournament_div();
         this.hide_tournament_form();

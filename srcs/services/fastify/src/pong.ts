@@ -301,13 +301,10 @@ export class   GameController{
     start_matchmaking_animation(){
         let count = 0;
 
-        document.getElementById("matchmaking").innerText = "<span id='waiting_online'>waiting</span>"
-            + "<span id='dots'></span>"
-            + "<br><span id='cancel_game'>click to cancel ❌</span>";
         anim_interval_id = setInterval(() => {
-            document.getElementById("dots").innerText = '.'.repeat(count++ % 3) + "<br>";
+            this.online_play_btn.textContent = this.site.getText("search") + '.'.repeat(count % 3);
         }, 500);
-        this.site.loadLang();
+        // this.site.loadLang();
     }
 
     stop_matchmaking_animation(){
