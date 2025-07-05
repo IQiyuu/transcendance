@@ -37,6 +37,7 @@
   "errUTaken": "Username already taken",
   "errIsPlaying": "You can't leave a match like that !",
   "errNA": "Not authorized",
+  "errExpired": "Please change your password",
   "about": "About",
   "google_auth": "Connecting with Google authentificator",
   "google_switch_enable": "Enable Google authentificator",

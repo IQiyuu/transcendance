@@ -148,7 +148,7 @@ export class   ProfileController{
         // Enable / Disable Google authentificator
         this.auth_btn.addEventListener('click', async (event) => {
             event.preventDefault();
-            const res = await fetch('/check-email-status', {
+            const res = await fetch('/google/check-email-status', {
             method: 'GET',
                 credentials: 'include', 
             });
@@ -156,8 +156,8 @@ export class   ProfileController{
                 const data = await res.json();
                 if(data.success == 0)
                 {
-                    window.open('/google-auth', '42 AUTH');
-                    const res2 = await fetch('/check-email-status', {
+                    window.open('/google/google-auth', '42 AUTH');
+                    const res2 = await fetch('/google/check-email-status', {
                     method: 'GET',
                         credentials: 'include', 
                     });
@@ -167,7 +167,6 @@ export class   ProfileController{
                         if (data2.success == 1)
                         {
                             this.enable_auth_btn.classList.replace("enable_auth_btn", "disable_auth_btn");
-                            console.log("j'active !");
                             this.enable_auth_btn.textContent = this.site.getText("google_switch_disable");  
                         }
         
@@ -175,9 +174,8 @@ export class   ProfileController{
                 }
                 else 
                 {
-                    await fetch('/desable_auth');
+                    await fetch('/google/desable_auth');
                     //this.enable_auth_btn.classList.replace("disable_auth_btn", "enable_auth_btn");
-                    console.log("je desactive !");
                     this.enable_auth_btn.textContent = this.site.getText("google_switch_enable");
                 }
             }
@@ -187,12 +185,12 @@ export class   ProfileController{
 
         this.check_btn.addEventListener('click', async (event) => {
             event.preventDefault();
-            window.open('/check', '42 AUTH');
+            window.open('/google/check', '42 AUTH');
             window.addEventListener("message", async (event) => {
                 if (event.origin !== window.location.origin) 
                     return; 
                 const { username, success } = event.data;
-                const res = await fetch('/check-2fa-status-in', {
+                const res = await fetch('/fa/check-2fa-status-in', {
                     method: 'POST',
                     headers: {
                     'Content-Type': 'application/json'
@@ -208,7 +206,7 @@ export class   ProfileController{
                     }
                     if (success && data.success == 1)
                     {
-                        const res = await fetch('/set-user-cookie', {
+                        const res = await fetch('/fa/set-user-cookie', {
                             method: 'POST',
                             headers: {
                             'Content-Type': 'application/json'
@@ -226,7 +224,7 @@ export class   ProfileController{
         });
 
         this.fa_btn.addEventListener('click', async (event) => {
-            const res = await fetch('/2fa', {
+            const res = await fetch('/fa/2fa', {
                 method: 'POST',
                 headers: {
                 'Content-Type': 'application/json'
@@ -247,7 +245,7 @@ export class   ProfileController{
 
         this.switch_fa_btn.addEventListener('click', async (event) => {
             event.preventDefault();
-            const res = await fetch('/enable-2fa', {
+            const res = await fetch('/fa/enable-2fa', {
                 method: 'GET',
                 credentials: 'include'
             });
@@ -603,7 +601,7 @@ export class   ProfileController{
 
     async resetBtn() {
         try {
-            const res = await fetch('/check-2fa-status-in', {
+            const res = await fetch('/fa/check-2fa-status-in', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include', 
@@ -618,7 +616,7 @@ export class   ProfileController{
                     document.getElementById("fa_btn_enable").textContent = this.site.getText("2FA_enable");
                 }
             }
-            const resp = await fetch('/check-email-status', {
+            const resp = await fetch('/google/check-email-status', {
             method: 'GET',
                 credentials: 'include', 
             });
@@ -680,7 +678,7 @@ export class SiteController{
     private tournament_join_btn = document.getElementById("tournament_join_button");
     private about_btn = document.getElementById("about_button");
     private logout_btn = document.getElementById("logout_btn");
-
+    private QRCode = document.getElementById("QRCode") as HTMLInputElement;
     private enable_auth_btn = document.getElementById("google_auth_enable");
 
     constructor(){
@@ -784,7 +782,7 @@ export class SiteController{
                     this.username = data.username;
                     if (url == "/login")
                     {
-                        const res = await fetch('/check-2fa-status-in', {
+                        const res = await fetch('/fa/check-2fa-status-in', {
                             method: 'POST',
                             headers: {
                             'Content-Type': 'application/json'
@@ -793,12 +791,10 @@ export class SiteController{
                             body: JSON.stringify({ username : data.username }) 
                         });
                         if (res.ok) {
-                            // console.log("OUIII2");
                             const twofadata = await res.json();
                             if (twofadata.success == 1)
                             {
-                                // console.log("OUIII3");
-                                const res = await fetch('/set-user-cookie', {
+                                const res = await fetch('/fa/set-user-cookie', {
                                     method: 'POST',
                                     headers: {
                                         'Content-Type': 'application/json'
@@ -855,7 +851,7 @@ export class SiteController{
         this.profile_btn.addEventListener("click", async (event) => {
             this.hide_menu();
             event.preventDefault();
-            const res = await fetch('/check-email-status', {
+            const res = await fetch('/google/check-email-status', {
             method: 'GET',
                 credentials: 'include', 
             });
@@ -872,7 +868,7 @@ export class SiteController{
                    // google_auth.textContent = "Activer Google authentificator";
                 }
             }
-            const res2 = await fetch('/check-2fa-status', {
+            const res2 = await fetch('/fa/check-2fa-status', {
             method: 'GET',
                 credentials: 'include', 
             });
@@ -912,12 +908,15 @@ export class SiteController{
             document.getElementById("fa-form").classList.replace("block", "hidden");
             document.body.classList.add("justify-center", "align-center", "flex");
             this.username = null;
+
             this.friends.removeEvents();
             this.game.setUsername(null);
             this.tournament.setUsername(null);
             this.profile.setUsername(null);
             this.profile.setProfileUsername(null);
             this.lang.setUsername(null);
+            this.QRCode.src = null;
+            this.QRCode.classList.replace("block" , "hidden");
             if (this.ws)
                 this.ws.close();
             this.ws = null;

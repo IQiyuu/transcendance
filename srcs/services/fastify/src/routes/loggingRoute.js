@@ -93,6 +93,11 @@ async function logginRoute (fastify, options) {
         if (!isMatch) {
             return reply.send({ success: false, message: 'errAuth' });
         }
+
+        if (!(await isValidPassword(user.password)))
+        {
+          return reply.send({ success: false, message: 'errExpired' });
+        }
         const value = options.db.prepare('SELECT * FROM users WHERE username = ?').get(username);
         if (value.twofa_activate == 0)
         {

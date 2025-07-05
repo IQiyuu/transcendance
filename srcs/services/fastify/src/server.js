@@ -25,7 +25,6 @@ import fastifyBcrypt from 'fastify-bcrypt';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from "node:path";
 
-// Removing mongodb, to remove view 
 
 const secretKey = 'bommerang-fleche-upair'; // pas sur de ce que je fais la
 
@@ -35,7 +34,6 @@ const client = lines[0];
 const secretClient = lines[1];
 const redirectionUri = lines[2];
 const redirectionUri2 = lines[3];
-
 
 const rootDir = dirname(dirname(fileURLToPath(import.meta.url))); // Root of the website
 

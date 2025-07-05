@@ -14,8 +14,7 @@ async function GoogleAuthRoute(fastify, options) {
   const authUrl2 = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri2}&response_type=code&scope=openid%20email%20profile`;
   
   // Route used for google sign in
-  fastify.get('/google-auth', async (req, reply) => {
-
+  fastify.get('/google/google-auth', async (req, reply) => {
     const token = req.cookies.auth_token;
     const googleEmail = req.cookies.google_email;
     try {
@@ -49,7 +48,7 @@ async function GoogleAuthRoute(fastify, options) {
 
   // route principale pour enlever google auth
 
-  fastify.get('/desable_auth', async (req, reply) => {
+  fastify.get('/google/desable_auth', async (req, reply) => {
   try {
     const token = req.cookies.auth_token;
     const decoded = fastify.jwt.verify(token, secret);
@@ -63,9 +62,8 @@ async function GoogleAuthRoute(fastify, options) {
   }
   });
 
-
   // route principale pour se connecter avec google authentificator 
-  fastify.get('/check', async (req, reply) => {
+  fastify.get('/google/check', async (req, reply) => {
     const token = req.cookies.auth_token;
     const googleEmail = req.cookies.google_email;
 
@@ -154,7 +152,7 @@ async function GoogleAuthRoute(fastify, options) {
  
 // callback de google auth pour ajouter l email a la db et pouvoir se connecter avec google auth 
 
-fastify.get('/callback', async (req, reply) => {
+fastify.get('/google/callback', async (req, reply) => {
     const code = req.query.code;
     if (!code) 
       return reply.status(400).send("Code manquant");
@@ -192,7 +190,7 @@ fastify.get('/callback', async (req, reply) => {
       secure: true,
       path: '/'
     });
-    return reply.redirect('/google-auth');
+    return reply.redirect('/google/google-auth');
   } catch (error) {
     console.error("Erreur Google OAuth :", error);
     return reply.status(500).send("Erreur lors de l'authentification.");
@@ -201,7 +199,7 @@ fastify.get('/callback', async (req, reply) => {
 
 // callback de google auth pour ajouter l email a la db et pouvoir se connecter avec google auth 
 
-fastify.get('/callback2', async (req, reply) => {
+fastify.get('/google/callback2', async (req, reply) => {
   const code = req.query.code;
   if (!code) 
     return reply.status(400).send("Code manquant");
@@ -240,7 +238,7 @@ fastify.get('/callback2', async (req, reply) => {
   path: '/'
 });
 
-return reply.redirect('/check');
+return reply.redirect('/google/check');
 
   } catch (error) {
     console.error("Erreur Google OAuth :", error);
@@ -248,7 +246,7 @@ return reply.redirect('/check');
   }
 });
 // Fomction pour voir si le username via le cookie a un mail dans la db
-fastify.get('/check-email-status', async (req, reply) => {
+fastify.get('/google/check-email-status', async (req, reply) => {
         const token = req.cookies.auth_token;
         const decoded = fastify.jwt.verify(token, secret);
         const username = decoded.username;
