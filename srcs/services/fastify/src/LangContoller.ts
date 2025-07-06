@@ -36,8 +36,9 @@ export class LangController{
                 credentials: 'include'
             });
             const data = await response.json();
-            if (data.success)
+            if (data.success){
                 lang = data.lang;
+            }
         } catch (error) {
             alert(error + " setting lang to english");
         }
@@ -150,7 +151,7 @@ export class LangController{
 
             if (!this.username)
                 return ;
-
+            
             const body = {
                 username: this.username,
                 lang: val

@@ -10,9 +10,10 @@ async function dbRoute (fastify, options) {
         if (request.body)
             username = request.body.username;
         if (username == null && request.params)
-            username = request.params.username;
-        if (username == null)
+            username = (request.params.username === undefined ? request.params.user : request.params.username);
+        if (username == null){
             return reply.send({ success: false, error: "username error" });
+        }
         const token = request.cookies.auth_token;
 
         if (!token) {
