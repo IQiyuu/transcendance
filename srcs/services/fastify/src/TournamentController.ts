@@ -566,7 +566,6 @@ export class TournamentController {
         return container;
     }
 
-
     print_tournament_end() {
 
         if (this.finished_tournament === null){
@@ -623,6 +622,8 @@ export class TournamentController {
     }
 
     print_tournament_end_page(){
+        this.tournament_page.classList.replace("hidden", "block");
+        this.tournament_div.classList.replace("hidden", "block");
         this.tournament_end_page.classList.replace("hidden", "block");
     }
 

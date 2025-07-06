@@ -6,7 +6,7 @@
 #    By: ggiboury <ggiboury@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/22 15:00:40 by ggiboury          #+#    #+#              #
-#    Updated: 2025/07/04 18:39:49 by ggiboury         ###   ########.fr        #
+#    Updated: 2025/07/06 10:22:41 by ggiboury         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,7 +17,7 @@
 #
 NAME	= trong
 
-REQ	= $(VOLUME_WEBSITE_FILES) $(VOLUME_DATABASE_FILES) $(SSL_CERTIFICATE)
+REQ	= $(VOLUME_WEBSITE_FILES) $(VOLUME_DATABASE_FILES) $(SSL_CERTIFICATE) $(API_SECRET) $(SECRET_KEY)
 
 COMPOSE_FILE	= ./srcs/docker-compose.yml
 
@@ -26,15 +26,6 @@ SCRIPTS	= $(shell cd srcs/services/fastify/src && find | cut -c2- )
 ASSETS	= $(shell cd srcs/assets && find | cut -c2- )
 
 SRCS			= $(SRCS_FASTIFY) $(SRCS_ASSETS) $(SRCS_DB)
-
-#https://coolors.co/331832-694d75-1b5299
-#https://coolors.co/a0ddff-053225-e34a6f
-#https://coolors.co/0d0106-3626a7-657ed4
-
-# Something to help
-#https://github.com/microsoft/TypeScript-Node-Starter
-
-# We should have done like this ... https://github.com/fastify/demo/
 
 #Full path scripts and assets
 SRCS_DIR		= ./srcs/
@@ -65,16 +56,12 @@ VOLUME_DATABASE_FILES	:= $(VOLUME_DATABASE)/transcendence.db
 
 SECRETS	= ./srcs/secrets
 
-SSL_CERTIFICATE	= ${SECRETS}ssl.crt $(SECRETS)ssl.key
+SSL_CERTIFICATE	= ${SECRETS}/ssl.crt $(SECRETS)/ssl.key
+API_SECRET = ${SECRETS}/api.txt
+SECRET_KEY = ${SECRETS}/secret-key
 
 # Rules
 #
-
-# test:
-# 	@echo $(VOLUME_WEBSITE_CONFIG)
-#	@echo $(SRCS_FASTIFY)
-#	@echo $(SRCS_ASSETS)
-#	@echo $(SRCS)
 
 $(NAME): $(REQ)
 	docker compose -f $(COMPOSE_FILE) up -d
@@ -85,7 +72,6 @@ check: $(SRCS)
 
 $(SECRETS):
 	mkdir -p $(SECRETS)
-	touch $(SECRETS)/api.txt
 
 $(SSL_CERTIFICATE) &: | $(SECRETS)
 	@if [ -e ${SECRETS}/ssl.crt -a -e ${SECRETS}/ssl.key ] ; then \
@@ -126,7 +112,6 @@ fclean : clean
 
 down :
 	docker compose -f $(COMPOSE_FILE) down -v
-
 
 # DEV
 

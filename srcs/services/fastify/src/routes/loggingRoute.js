@@ -1,13 +1,15 @@
 import qrcode from 'qrcode';
 import speakeasy from 'speakeasy';
 
+import {isClientAlreadyConnected} from './webSocketRoute.js'
+
 async function logginRoute (fastify, options) {
   const secretKey = options.secretKey;
   fastify.get('/', async (request, reply) => {
     return reply.view("src/index.ejs");
   })
 
-  async function isValidPassword(password) {
+  function isValidPassword(password) {
     const minLength    = password.length >= 8;
     const maxLength    = password.length <= 42;
     const hasUppercase = /[A-Z]/.test(password);
@@ -31,7 +33,7 @@ async function logginRoute (fastify, options) {
   fastify.post('/register', async (request, reply) => {
     const { username, password } = request.body;
     try {
-      if (!(await isValidPassword(password)))
+      if (!isValidPassword(password))
         throw Error("errMdp");
       if (!(await isValidUsername(username)))
         throw Error("errUname");
@@ -94,10 +96,15 @@ async function logginRoute (fastify, options) {
             return reply.send({ success: false, message: 'errAuth' });
         }
 
-        if (!(await isValidPassword(user.password)))
+        if (!isValidPassword(password))
         {
           return reply.send({ success: false, message: 'errExpired' });
         }
+
+        if (isClientAlreadyConnected(username)){
+          return reply.send({success : false, message: 'errAlreadyLogged'})
+        }
+        
         const value = options.db.prepare('SELECT * FROM users WHERE username = ?').get(username);
         if (value.twofa_activate == 0)
         {

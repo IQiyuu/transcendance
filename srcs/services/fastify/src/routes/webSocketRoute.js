@@ -1,11 +1,16 @@
 
 import * as gameRoute from "./gameRoute.js"; // relative to this file
 
+let connectedClients = new Map();
+
+export function isClientAlreadyConnected(username){
+    return (connectedClients.has(username));
+}
+
 async function websocketRoute(fastify, options) {
     const db = options.db;
     let waiting_list = null;
     let w_uname = null;
-    let connectedClients = new Map();
 
     fastify.addHook('preValidation', async (request, reply) => {
         if (request.routerPath === '/ws' && !request.query.username) {

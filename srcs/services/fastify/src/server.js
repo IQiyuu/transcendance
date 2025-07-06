@@ -25,11 +25,13 @@ import fastifyBcrypt from 'fastify-bcrypt';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from "node:path";
 
+let secret_file = fs.readFileSync('/run/secrets/key', 'utf8');
+let lines = secret_file.split('\n').filter(line => line.trim() !== '');
 
-const secretKey = 'bommerang-fleche-upair'; // pas sur de ce que je fais la
+const secretKey = lines[0];
 
-const tempo = fs.readFileSync('/run/secrets/API-secrets', 'utf8');
-const lines = tempo.split('\n').filter(line => line.trim() !== '');
+const tempo = fs.readFileSync('/run/secrets/API-secret', 'utf8');
+lines = tempo.split('\n').filter(line => line.trim() !== '');
 const client = lines[0];
 const secretClient = lines[1];
 const redirectionUri = lines[2];

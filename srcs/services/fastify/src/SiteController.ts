@@ -896,6 +896,9 @@ export class SiteController{
             if (this.game.isPlaying()){
                 alert(this.getText("errIsPlaying"));
                 return ;
+            } else if (this.tournament.hasTournament()){
+                alert(this.getText("errIsInTournament"));
+                return ;
             }
 
             const response = await fetch("/logout", {

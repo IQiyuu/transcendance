@@ -20,37 +20,11 @@ services:
     secrets:
       - SSL-certificate
       - SSL-key
-      - API-secrets
+      - API-secret
+      - key
     networks:
       - pong
     hostname : "Trong"
-  
-  # monitoring:
-  #   image: ${MONITORING_SERVICE_IMAGE}
-  #   container_name: pong-${MONITORING_SERVICE}
-  #   ports:
-  #     - "9090:9090"
-  #   volumes:
-  #     - monitoring-logs:/prometheus
-  #   configs:
-  #     - source: prometheus-config
-  #       target: /etc/prometheus/prometheus.yml
-  #   secrets:
-  #     - SSL-certificate
-  #     - SSL-key
-  
-  # monitoring-visualiser:
-  #   image: ${MONITORING_VISUALISER_SERVICE_IMAGE}
-  #   container_name: pong-${MONITORING_VISUALISER_SERVICE}
-  #   ports:
-  #     - "3001:3000"
-  #   configs:
-  #     - source: grafana-config
-  #       target: /etc/grafana/grafana.ini
-  #   secrets:
-  #     - SSL-certificate
-  #     - SSL-key
-
 
 networks:
   pong:
@@ -90,5 +64,7 @@ secrets:
     file: ${SECRETS}${SSL_CERTIFICATE}
   SSL-key:
     file: ${SECRETS}${SSL_KEY}
-  API-secrets:
+  API-secret:
     file: ${SECRETS}${API_SECRET}
+  key:
+    file: ${SECRETS}${SECRET_KEY}
