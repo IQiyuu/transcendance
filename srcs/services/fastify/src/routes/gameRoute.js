@@ -60,7 +60,6 @@ export function createGame(user, user2, t_id = null) {
             y: STARTING_Y,
             dx: Math.cos(angle) * (neg_x ? -1 : 1),
             dy: Math.sin(angle) * (neg_y ? -1 : 1),
-            dist: -1,
             v: STARTING_SPEED,
             accelerate: function() {
                 if (this.v < LIMIT_SPEED)
@@ -422,7 +421,7 @@ export async function gameRoute (fastify, options) {
      */
     setInterval(() => {
     
-        Object.values(games).forEach(game => {
+        Object.values(games).forEach(async game => {
 
             if (game.scores.left >= SCORE_GOAL || game.scores.right >= SCORE_GOAL){
                 finished_games.push(game);
@@ -437,7 +436,7 @@ export async function gameRoute (fastify, options) {
                 && game.ball.y <= game.paddles.left.y + (PADDLE_H / 2)) {
                 // There are 8 zone considered for the bouncing, so we round to the closest quarter
                 let dist = Math.abs(game.ball.y - game.paddles.left.y);
-                let sign = game.ball.dy < 0 ? -1 : 1; // test if vector is neg
+                let sign = game.ball.y < game.paddles.left.y ? -1 : 1; // test if vector is neg
                 let angle = 90;
                 if (dist > (3 * (PADDLE_H / 2)) / 4)
                     angle += 45;
@@ -456,7 +455,7 @@ export async function gameRoute (fastify, options) {
                 && game.ball.y <= game.paddles.right.y + (PADDLE_H / 2)) {
                 // There are 8 zone considered for the bouncing, so we round to the closest quarter
                 let dist = Math.abs(game.ball.y - game.paddles.right.y);
-                let sign = game.ball.dy < 0 ? -1 : 1;
+                let sign = game.ball.y < game.paddles.right.y ? -1 : 1;
                 let angle = 90;
                 if (dist > (3 * (PADDLE_H / 2)) / 4)
                     angle += 45;
@@ -472,8 +471,8 @@ export async function gameRoute (fastify, options) {
                 game.ball.accelerate();
             }
             // checking with centers of objects
-            if (game.ball.x < game.paddles.left.x || game.ball.x > game.paddles.right.x) {
-                game.scores[game.ball.x < game.paddles.left.x ? "right" : "left"]++;
+            if (game.ball.x - (BALL_W / 2) < 0 || game.ball.x + (BALL_W / 2) > BOARD_W) {
+                game.scores[game.ball.x - (BALL_W / 2) < (BOARD_W / 2) ? "right" : "left"]++;
                 game.ball.v = STARTING_SPEED;
                 game.ball.x = STARTING_X;
                 game.ball.y = STARTING_Y;
