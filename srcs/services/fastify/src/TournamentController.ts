@@ -393,53 +393,70 @@ export class TournamentController {
         this.tournament_lobby.textContent = ''
     }
 
-    print_tournament_state(){
-        // this.tournament_state.style.height="80";
-        // this.tournament_state.style.width="60";
-        let brackets = this.tournament.getBrackets();
-        if (brackets === undefined || brackets === null){
-            // console.log("TOurnament not started")
-            return ;
-        }
+    print_tournament_state() {
+    let brackets = this.tournament.getBrackets();
+    if (!brackets) return;
 
-        // console.log("Printing state :");
-        let nb_round = brackets.length;
-        let table = document.createElement("table");
-        for (let i = 0; i < nb_round ; i++){
-            console.log(brackets[i]);
-            let nb_match = brackets[i].length;
-            let round = document.createElement("tr");
-            round.style.margin = "10 px";
-            for (let j = 0 ; j < nb_match ; j++){
-                let match = document.createElement("td");
-                let winner = brackets[i][j].winner;
+    // Nettoie l'affichage précédent
+    this.tournament_state.innerHTML = "";
 
-                console.log(brackets[i][j]);
+    // Container principal en flex
+    const container = document.createElement("div");
+    container.className = "flex justify-center gap-6 my-6";
 
-                let p1 = document.createElement("p");
-                p1.innerText = brackets[i][j].p1;
-                if (winner !== null)
-                    p1.style.backgroundColor = (winner === brackets[i][j].p1 ? "green" : "red");
-                match.appendChild(p1);
-                match.style.padding = "1em";
-                match.style.border = "solid";
-                if (brackets[i][j].p2 !== null){
-                    let p2 = document.createElement("p");
-                    match.append(document.createTextNode(" VS "))
-                    p2.append(document.createTextNode(brackets[i][j].p2));
-                    if (winner !== null)
-                        p2.style.backgroundColor = (winner === brackets[i][j].p2 ? "green" : "red");
-                    match.appendChild(p2);
-                }
-                // match.innerText = "M";
-                round.append(match);
+    const matchHeight = 60;
+
+    for (let i = 0; i < brackets.length; i++) {
+        const round = document.createElement("div");
+        round.className = "flex flex-col items-center";
+
+        // Décale les tours suivants pour un effet d'échelle
+        if (i > 0)
+            round.style.paddingTop = `${(matchHeight / 2) * i + 25}px`;
+
+        for (let j = 0; j < brackets[i].length; j++) {
+            const match = document.createElement("div");
+            match.className = "bg-black border border-white rounded-md shadow-lg px-4 py-3 mb-6 text-center w-36";
+
+            const { p1, p2, winner } = brackets[i][j];
+
+            const p1Elem = document.createElement("p");
+            p1Elem.innerText = p1;
+            p1Elem.className = "font-semibold mb-1";
+            if (winner)
+                p1Elem.classList.add(
+                    winner === p1 ? "bg-green-700" : "bg-red-700",
+                    "text-white", "rounded", "px-1"
+                );
+            match.appendChild(p1Elem);
+
+            if (p2 !== null) {
+                const vs = document.createElement("span");
+                vs.innerText = " VS ";
+                vs.className = "text-white font-bold";
+                match.appendChild(vs);
+
+                const p2Elem = document.createElement("p");
+                p2Elem.innerText = p2;
+                p2Elem.className = "font-semibold";
+                if (winner)
+                    p2Elem.classList.add(
+                        winner === p2 ? "bg-green-700" : "bg-red-700",
+                        "text-white", "rounded", "px-1"
+                    );
+                match.appendChild(p2Elem);
             }
-            table.append(round);
-        }
-        this.tournament_state.append(table);
 
-        this.tournament_state.classList.replace("hidden", "block");
+            round.appendChild(match);
+        }
+
+        container.appendChild(round);
     }
+
+    this.tournament_state.appendChild(container);
+    this.tournament_state.classList.replace("hidden", "block");
+}
+
 
     hide_tournament_state(){
         this.tournament_state.classList.replace("block", "hidden");
