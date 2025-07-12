@@ -17,6 +17,8 @@ async function GoogleAuthRoute(fastify, options) {
   fastify.get('/google/google-auth', async (req, reply) => {
     const token = req.cookies.auth_token;
     const googleEmail = req.cookies.google_email;
+    if (googleEmail === undefined)
+			    return (reply.code(403).send("Body incomplete"));
     try {
       const decoded = fastify.jwt.verify(token, secret);
       username = decoded.username;
@@ -53,6 +55,8 @@ async function GoogleAuthRoute(fastify, options) {
     const token = req.cookies.auth_token;
     const decoded = fastify.jwt.verify(token, secret);
     const username = decoded.username;
+    if(username === undefined)
+      return (reply.code(403).send("Body incomplete"));
     options.db.prepare('UPDATE users SET email = ? WHERE username = ?').run(null, username);
 
     return reply.send({ success: true, message: "2FA désactivé" });
@@ -66,6 +70,8 @@ async function GoogleAuthRoute(fastify, options) {
   fastify.get('/google/check', async (req, reply) => {
     const token = req.cookies.auth_token;
     const googleEmail = req.cookies.google_email;
+    if (googleEmail === undefined)
+      return (reply.code(403).send("Body incomplete"));
 
     try 
     {
@@ -250,6 +256,7 @@ fastify.get('/google/check-email-status', async (req, reply) => {
         const token = req.cookies.auth_token;
         const decoded = fastify.jwt.verify(token, secret);
         const username = decoded.username;
+        if (username === undefined);
         const value = options.db.prepare('SELECT * FROM users WHERE username = ?').get(username);
         if (value.email === null)
           return reply.send({success: 0});
