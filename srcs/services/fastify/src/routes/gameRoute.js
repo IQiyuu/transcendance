@@ -1,4 +1,5 @@
 import {matchOver} from './tournament.js';
+import {isAuthenticated} from "../server.js";
 
 function randomIntFromInterval(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
@@ -101,8 +102,6 @@ export function userExistsInDb(username, db){
 }
 
 export function addPlayingClients(p1, p2, id){
-    // console.log(p1);
-    // console.log(p2);
     playing_clients.set(p1.socket, id);
     playing_clients.set(p2.socket, id);
 }
@@ -182,16 +181,6 @@ function    getMaskedGame(game){
     return (g);
 }
 
-// function    getSecondPlayer(clients, p1, game_id){
-//     console.log("Trying to get 2nd player");
-//     let res = undefined;
-//     clients.forEach((socket, g_id) => {
-//         if (socket != p1 && g_id == game_id){
-//             res = socket;
-//         }
-//     });
-//     return (res);
-// }
 
 export async function gameRoute (fastify, options) {
 
@@ -204,7 +193,6 @@ export async function gameRoute (fastify, options) {
 
     const amIInGame = async (request, reply) => {
         const { id } = request?.body?.id;
-
         if (id === null || id === undefined)
             id = request?.params?.id;
 
@@ -239,13 +227,13 @@ export async function gameRoute (fastify, options) {
         }
     };
 
-    fastify.get('/game/local/create', async (req, reply) => {
+    fastify.post('/game/local/create', async (req, reply) => {
         const id = createGame(req.body.username, req.body.username+"-2");
         return ({success: true, id: id});
     });
 
     // Route qui renvoie les infos de la game
-    fastify.get('/game/:id', {
+    fastify.post('/game/:id', {
         preHandler: amIInGame
     }, async (request, reply) => {
         const game = getGameByID(request_params.id);
@@ -287,8 +275,6 @@ export async function gameRoute (fastify, options) {
         fastify.get('/game/ws', { websocket: true }, (socket, req) => {
             let username = req.query.username;
             socket.on('open', (event) => {
-                console.log(" IF PRINTED, YOU NEED TO SEE WHY socket game connection for");
-                console.log(username);
                 // waiting_clients.set(username, socket);
             });
             
@@ -323,16 +309,14 @@ export async function gameRoute (fastify, options) {
 
                 } else if (message.type === "matchmaking"){
                     if (message.state === "join"){
-                        console.log("A player is joining matchmaking");
                         if (waiting_clients.size > 0){
-                            console.log("Match found");
                             //We take the 1st player that joined the queue
                             let second_player_name = waiting_clients.keys().next().value;
                             let second_player_socket = waiting_clients.get(second_player_name);
                             let new_game_id = createGame(message.username, second_player_name);
                             let game = getMaskedGame(getGameByID(new_game_id));
-                            console.log(game);
-                            console.log(second_player_name);
+                            // console.log(game);
+                            // console.log(second_player_name);
 
                             socket.send(JSON.stringify({
                                 type: 'matchmaking',
@@ -356,7 +340,6 @@ export async function gameRoute (fastify, options) {
                             waiting_clients.set(message.username, socket);
                         }
                     } else if (message.state === "leave"){
-                        console.log("A player is leaving matchmaking");
                         waiting_clients.forEach((sck, username) => {
                             if (sck === socket)
                                 waiting_clients.delete(username);
@@ -364,9 +347,7 @@ export async function gameRoute (fastify, options) {
                         socket.close();
                     }
                 } else if (message.type === "tournament"){
-                    console.log("tournament msg");
                     if (message.state === "connecting_match"){
-                        console.log("Client is connecting");
                         let game_id = getGameByUsername(games, username);
                         if (game_id === -1){
                             console.log("Error");
@@ -376,8 +357,7 @@ export async function gameRoute (fastify, options) {
                                 message: "User isnt in a match"
                             }));
                         }else {
-                            console.log("THE GAME");
-                            console.log(getMaskedGame(getGameByID(game_id)));
+                            // console.log(getMaskedGame(getGameByID(game_id)));
                             socket.send(JSON.stringify({
                                 type: 'tournament',
                                 success: true,
@@ -393,7 +373,6 @@ export async function gameRoute (fastify, options) {
 
             socket.on('close', (event) => {
                 //If player is in game
-                console.log("closing game client socket");
 
                 if (playing_clients.has(socket)){
                     let game = getGameByID(playing_clients.get(socket));
@@ -405,11 +384,11 @@ export async function gameRoute (fastify, options) {
         
                 //If player is in the waiting list
                 if (waiting_clients.has(socket)){
-                    console.log("a player is leaving matchmaking");
+                    // console.log("a player is leaving matchmaking");
                     waiting_clients.delete(username);
                 }
                 socket.close();
-                console.log("player socket closed");
+                // console.log("player socket closed");
             });
         });
     });

@@ -64,6 +64,7 @@ export class TournamentClientSocket{
                 this.ctler.createMatch(message.game_id, message.game);
             } else if (message.type === "finished"){
                 console.log("TOUR_S : Tournament is finished !");
+                this.ctler.updateTournament(message.tournament);
                 this.ctler.endTournament();
             } else if (message.type === "error"){
                 alert(message.message);
