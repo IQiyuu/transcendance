@@ -134,7 +134,7 @@ async function logginRoute (fastify, options) {
 	const isAuthenticated = async (request, reply) => {
 		const token = request.cookies.auth_token;
 
-		if (!token)
+		if (token === undefined || token === null)
 				return reply.send({ success: false, error: "" });
 		try {
 				const decoded = fastify.jwt.verify(token, secretKey);
