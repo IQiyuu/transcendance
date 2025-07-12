@@ -1,4 +1,5 @@
 
+import { isAuthenticated } from "../server.js";
 import * as gameRoute from "./gameRoute.js"; // relative to this file
 
 let connectedClients = new Map();
@@ -13,8 +14,11 @@ async function websocketRoute(fastify, options) {
     let w_uname = null;
 
     fastify.addHook('preValidation', async (request, reply) => {
-        if (request.routerPath === '/ws' && !request.query.username) {
-            reply.code(403).send('Connection rejected: missing username');
+        if (request.url.startsWith('/ws')){
+            if (! await isAuthenticated(request, reply))
+				return (reply.code(401).send({success: false, message: 'You need to be authenticated'}));
+            if (request?.query?.username === undefined)
+                reply.code(403).send('Connection rejected: missing username');
         }
     });
 
