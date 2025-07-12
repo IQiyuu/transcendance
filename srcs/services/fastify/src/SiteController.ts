@@ -321,6 +321,11 @@ export class   ProfileController{
                     if (!response.ok)
                         console.log("error in file upload.");
                     else {
+                        const data = await response.json();
+                        if (data.success === false){
+                            alert("Une erreur est survenue lors de l'upload de la photo de profil.");
+                            return;
+                        }
                         document.getElementById("profile_picture_overlay").classList.replace("absolute", "hidden");
                         this.previ_pp.src = "";
                         (document.getElementById("file_input") as HTMLInputElement).value = "";

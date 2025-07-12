@@ -68,7 +68,7 @@ async function dbRoute (fastify, options) {
         const username = request.params.username;
         for await (const part of data) {
             if (part.file) {
-                if (part.mimetype !== 'image/jpeg' && part.mimetype !== 'image/png' && part.mimetype !== 'image/gif') {
+                if (part.mimetype !== 'image/jpeg' && part.mimetype !== 'image/jpg' && part.mimetype !== 'image/png' && part.mimetype !== 'image/gif') {
                     return { success: false, message: 'Error : Wrong extension for upload image' };
                 }
                     uploadedFile = part;
@@ -92,6 +92,7 @@ async function dbRoute (fastify, options) {
                     }
                     
                 });
+                return { success: true, message: 'File uploaded' };
             }
         }
     });
