@@ -612,17 +612,19 @@ export class TournamentController {
         btn.addEventListener("click", async (event) => {
             this.hide_all();
             this.site.print_menu();
+            this.site.print_btn_menu();
             this.finished_tournament = null;
             this.tournament_end_page.textContent = '';
         });
         this.tournament_end_page.appendChild(btn);
 
         this.hide_all()
+        this.site.print_menu();
         this.print_tournament_end_page();
     }
 
     print_tournament_end_page(){
-        this.tournament_page.classList.replace("hidden", "block");
+        this.tournament_page.classList.replace("hidden", "flex");
         this.tournament_div.classList.replace("hidden", "block");
         this.tournament_end_page.classList.replace("hidden", "block");
     }

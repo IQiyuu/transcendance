@@ -52,7 +52,7 @@
 
 
     <div class="fixed top-4 right-4 z-50">
-        <button id="logout_btn" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded shadow-md transition duration-300 ease-in-out cursor-pointer">
+        <button id="logout_btn" class="hidden bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded shadow-md transition duration-300 ease-in-out cursor-pointer">
             Logout
         </button>
     </div>
@@ -171,7 +171,7 @@
                             <img src="assets/imgs/hoverPicture.png" id="camera_icon" class="absolute inset-0 top-1/4 mx-auto w-1/2 h-1/2 opacity-0 cursor-pointer transition-all duration-200 hover:opacity-80" />
                         </div>
                         
-                        <div id="profile_picture_overlay" class="absolute hidden z-50 left-1/2 top-1/2 transform -translate-y-1/2">
+                        <div id="profile_picture_overlay" class="absolute hidden z-50 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
                         <form id="profil_picture_square" class="flex flex-col items-center bg-gray-800 p-6 rounded-lg shadow-lg relative">
                             <p id="div_title" class="text-lg text-white mb-4">Upload your profile picture</p>
                             <button id="profile_cross" type="button" class="absolute top-2 right-2 text-white text-lg">✖</button>
@@ -290,7 +290,7 @@
                 <span id="player-right" class="w-[85%] transition-all duration-500 ease-in-out cursor-pointer p-10 text-5xl font-extrabold text-white bg-gradient-to-r from-emerald-400 via-teal-400 to-lime-400 rounded-xl border-4 border-white shadow-lg text-center tracking-wide select-none">Player 2</span>
             </div>
             <!-- Game -->
-            <div id="game" class="hidden relative w-[700px] h-[480px] bg-red-500 mx-auto my-10">
+            <div id="game" class="hidden relative w-[700px] h-[480px] bg-gray-400 mx-auto my-10">
                 <div id="l_paddle" class="absolute bg-black w-[10px] h-[80px]"></div>
                 <div id="ball" class="absolute bg-black w-[10px] h-[10px]"></div>
                 <div id="r_paddle" class="absolute bg-black w-[10px] h-[80px]"></div>

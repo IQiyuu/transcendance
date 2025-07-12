@@ -122,14 +122,14 @@ export class   ProfileController{
         this.profile_picture.addEventListener("click", () => {
             if (this.username == this.profile_username) {
                 this.camera_icon.classList.replace("opacity-60", "opacity-0");
-                this.profile_picture_overlay.classList.replace("hidden", "flex");
+                this.profile_picture_overlay.classList.replace("hidden", "absolute");
             }
         });
 
         this.camera_icon.addEventListener("click", async (event) => {
             if (this.profile_username == this.username){
                 this.camera_icon.classList.replace("opacity-60", "opacity-0");
-                this.profile_picture_overlay.classList.replace("hidden", "flex");
+                this.profile_picture_overlay.classList.replace("hidden", "absolute");
             }
         });
 
@@ -273,7 +273,7 @@ export class   ProfileController{
         // croix du changement de photo de profile
         this.profile_cross.addEventListener("click", async (event) => {
             event.preventDefault();
-            document.getElementById("profile_picture_overlay").classList.replace("flex", "hidden");
+            document.getElementById("profile_picture_overlay").classList.replace("absolute", "hidden");
             this.previ_pp.src = "";
             (document.getElementById("file_input") as HTMLInputElement).value = "";
         });
@@ -283,7 +283,7 @@ export class   ProfileController{
             if (!document.getElementById("profile_picture_overlay").classList.contains("hidden")) {
                 event.preventDefault();
                 if (event.key === "Escape") {
-                    document.getElementById("profile_picture_overlay").classList.replace("flex", "hidden");
+                    document.getElementById("profile_picture_overlay").classList.replace("absolute", "hidden");
                     this.previ_pp.src = "";
                     (document.getElementById("file_input") as HTMLInputElement).value = "";
                 }
@@ -533,14 +533,14 @@ export class   ProfileController{
                 let a = document.createElement("a");
                 a.innerText = item.winner_username;
                 a.classList.add("text-green-500", "underline");
-                a.href="#";
-                a.id="profileDisplay";
+                // a.href="#";
+                // a.id="profileDisplay";
 
                 let a2 = document.createElement("a");
                 a2.innerText = item.loser_username;
                 a2.classList.add("text-green-500", "underline");
-                 a2.href="#";
-                a2.id="profileDisplay";
+                // a2.href="#";
+                // a2.id="profileDisplay";
 
                 li.appendChild(a);
                 li.innerHTML += `: ${item.winner_score} VS `;
@@ -907,6 +907,7 @@ export class SiteController{
             sessionStorage.clear();
             
             document.getElementById("site").classList.replace("block", "hidden");
+            document.getElementById("logout_btn").classList.replace("flex", "hidden");
             document.getElementById("login-form").classList.replace("hidden", "flex");
             document.getElementById("fa-form").classList.replace("block", "hidden");
             document.body.classList.add("justify-center", "align-center", "flex");
@@ -991,6 +992,7 @@ export class SiteController{
 
     print_main_page(){
         this.main_page.classList.replace("hidden", "block");
+        this.logout_btn.classList.replace("hidden", "flex");
     }
 
     hide_main_page(){
@@ -1004,6 +1006,7 @@ export class SiteController{
     hide_fa_page(){
         document.getElementById("fa-form").classList.replace("block", "hidden");
     }
+
     print_menu(){
         this.print_main_page();
         this.menu.classList.replace("hidden", "block");
