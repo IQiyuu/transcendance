@@ -304,8 +304,7 @@ class Tournament{
 			while (j < this.brackets[i].length){
 				if (this.brackets[i][j].winner !== null){
 					let winner = this.brackets[i][j].winner;
-					// console.log(winner);
-					if (this.getPlayer(winner) !== undefined)
+					if (this.getPlayer(winner)?.username !== undefined)
 						return (winner);
 				}
 				j++;
@@ -319,6 +318,7 @@ class Tournament{
 		//Telling each client the end
 		this.state = T_FINISHED;
 		this.winner = this.getWinner();
+		// console.log("Winner is :" + this.winner);
 		this.players.forEach( pl => {
 			pl.socket.send(JSON.stringify({
 				type : "finished",

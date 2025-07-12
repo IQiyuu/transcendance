@@ -13,7 +13,7 @@ export class Tournament {
     private owner : string;
     private players; // image, win rate{}
     private brackets; // ordered array of ordered array of {username, username, state, winner}
-    private winner : string;
+    public winner : string;
 
 
     constructor(tournament) {
@@ -54,6 +54,7 @@ export class Tournament {
         this.players = tournament.players;
         if (tournament.brackets !== null )
             this.brackets = tournament.brackets;
+        this.winner = tournament.winner;
         // console.log(tournament.brackets);
     }
 
@@ -577,8 +578,7 @@ export class TournamentController {
         if (!brackets || brackets.length === 0) return;
 
         // Récupérer le gagnant depuis le dernier match
-        const lastRound = brackets[brackets.length - 1];
-        const lastMatch = lastRound[0];
+        // const lastRound = brackets[brackets.length - 1];
         const winner = this.finished_tournament.winner;
         const isWinner = (winner === this.username);
 
