@@ -13,6 +13,7 @@ export class Tournament {
     private owner : string;
     private players; // image, win rate{}
     private brackets; // ordered array of ordered array of {username, username, state, winner}
+    private winner : string;
 
 
     constructor(tournament) {
@@ -20,6 +21,7 @@ export class Tournament {
         this.name = tournament.name;
         this.owner = tournament.owner;
         this.players = tournament.players;
+        this.winner = tournament.winner;
         this.brackets = null;
     }
 

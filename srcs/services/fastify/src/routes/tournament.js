@@ -87,9 +87,6 @@ class Tournament{
 		if (this.brackets[this.current_round] === undefined)
 			return (undefined);
 		for (let i = 0 ; i < this.brackets[this.current_round].length ; i++){
-			// console.log("--------");
-			// console.log(this.brackets[this.current_round]);
-			// console.log(this.brackets[this.current_round][i]);
 			if (this.brackets[this.current_round][i]?.game_id === game_id)
 				return (this.brackets[this.current_round][i]);
 		}
@@ -143,9 +140,6 @@ class Tournament{
 	
 	// Remove a player from the tournament. Also close the socket if it exists
 	removePlayer(username){
-		// console.log("Trying to remove ");
-		// console.log(username);
-		// console.log(this.players);
 		let pos = -1;
 		this.players.forEach(player => {
 			if (player.username == username){
@@ -153,7 +147,6 @@ class Tournament{
 			}
 		});
 		if (pos === -1){
-			// console.log("Error");
 			return ;
 		}
 		if (this.players[pos].socket !== null){
@@ -266,7 +259,6 @@ class Tournament{
 		});
 	}
 	
-	//
 	initNextRound(){
 		// Get players (winner), then adding them to the next round
 		let winners = []; //winners username
@@ -310,8 +302,11 @@ class Tournament{
 		while (i >= 0){
 			j = 0;
 			while (j < this.brackets[i].length){
-				if (this.brackets[i][j].winner != null){
-					return (this.brackets[i][j].winner);
+				if (this.brackets[i][j].winner !== null){
+					let winner = this.brackets[i][j].winner;
+					// console.log(winner);
+					if (this.getPlayer(winner) !== undefined)
+						return (winner);
 				}
 				j++;
 			}
