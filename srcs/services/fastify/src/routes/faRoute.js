@@ -10,6 +10,8 @@ async function faRoute (fastify, options) {
         const decoded = fastify.jwt.verify(token, secret);
         const username = decoded.username;
         const { userToken } = req.body;
+        if (userToken === undefined)
+			    return (reply.code(403).send("Body incomplete"));
         const value = options.db.prepare('SELECT * FROM users WHERE username = ?').get(username);
          const verified = speakeasy.totp.verify({
             secret: value.secret,
@@ -49,6 +51,8 @@ async function faRoute (fastify, options) {
         const token = req.cookies.auth_token;
         const decoded = fastify.jwt.verify(token, secret);
         const username = decoded.username;
+        if (username === undefined)
+			    return (reply.code(403).send("Body incomplete"));
         const value = options.db.prepare('SELECT * FROM users WHERE username = ?').get(username);
         if (value.twofa_activate === 0)
           return reply.send({success: 0});
@@ -60,6 +64,8 @@ async function faRoute (fastify, options) {
     fastify.post('/fa/check-2fa-status-in', async (req, reply) => {
       try {
             const username = req.body.username;
+            if (username === undefined)
+			        return (reply.code(403).send("Body incomplete"));
             const value = options.db.prepare('SELECT * FROM users WHERE username = ?').get(username);
             if (value.twofa_activate === 0)
               return reply.send({success: 0});
@@ -80,6 +86,8 @@ async function faRoute (fastify, options) {
         const decoded = fastify.jwt.verify(token, secret);
         const username = decoded.username;
 
+        if (username === undefined)
+			    return (reply.code(403).send("Body incomplete"));
         const value = options.db.prepare('SELECT * FROM users WHERE username = ?').get(username);
         if (!value) return reply.status(404).send({ error: 'Utilisateur introuvable' });
 
@@ -103,6 +111,8 @@ async function faRoute (fastify, options) {
     // cree un cookie temporaire  pour garder le username 
     fastify.post('/fa/set-user-cookie', async (req, reply) => {
         const { username } = req.body;
+        if (username === undefined)
+			    return (reply.code(403).send("Body incomplete"));
         const payload = {
               username: username,
             };

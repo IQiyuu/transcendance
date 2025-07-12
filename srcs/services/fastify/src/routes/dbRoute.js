@@ -68,7 +68,9 @@ async function dbRoute (fastify, options) {
         const username = request.params.username;
         for await (const part of data) {
             if (part.file) {
-                // console.log(username);
+                if (part.mimetype !== 'image/jpeg' && part.mimetype !== 'image/png' && part.mimetype !== 'image/gif') {
+                    return { success: false, message: 'Error : Wrong extension for upload image' };
+                }
                     uploadedFile = part;
         
                 const filename = username + ".jpg";
