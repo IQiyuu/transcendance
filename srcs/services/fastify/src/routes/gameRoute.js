@@ -142,6 +142,8 @@ function    getGameByUsername(gs, username){
 }
 
 export function    getGameByID(id){
+    if (id === null || id === undefined)
+        return (undefined);
     let game = games.find(x => x.id === id);
     return game;
 }
@@ -180,34 +182,42 @@ function    getMaskedGame(game){
     return (g);
 }
 
-function    getSecondPlayer(clients, p1, game_id){
-    console.log("Trying to get 2nd player");
-    let res = undefined;
-    clients.forEach((socket, g_id) => {
-        if (socket != p1 && g_id == game_id){
-            res = socket;
-        }
-    });
-    return (res);
-}
+// function    getSecondPlayer(clients, p1, game_id){
+//     console.log("Trying to get 2nd player");
+//     let res = undefined;
+//     clients.forEach((socket, g_id) => {
+//         if (socket != p1 && g_id == game_id){
+//             res = socket;
+//         }
+//     });
+//     return (res);
+// }
+
 export async function gameRoute (fastify, options) {
 
+	fastify.addHook('preValidation', async (request, reply) => {
+        if (request.url.startsWith("/game")){
+            if (! (await isAuthenticated(request, reply)))
+                return (reply.code(401).send({success: false, message: 'You need to be authenticated'}));
+        }
+    });
+
     const amIInGame = async (request, reply) => {
-        const { id } = request.body.id;
+        const { id } = request?.body?.id;
 
-        if (id == null)
-            id = request.params.id;
+        if (id === null || id === undefined)
+            id = request?.params?.id;
 
-        if (id == null)
+        if (id === null || id === undefined)
             return reply.send({ success: false, error: "id error" });
 
-        const game = games[id];
-        if (!game)
+        const game = getGameByID(id);
+        if (game === undefined || game === null)
             return reply.send({ success: false, error: "id error" });
 
-        const token = request.cookies.auth_token;
+        const token = request?.cookies?.auth_token;
 
-        if (!token) {
+        if (token === undefined || token === null) {
             return reply.send({ success: false });
         }
 
@@ -229,12 +239,7 @@ export async function gameRoute (fastify, options) {
         }
     };
 
-    //Stop a game, to update
-    fastify.post('/game/stopGame', async (req, reply) => {
-        delete getGameByID(req.body.gameId); // to change
-    });
-
-    fastify.post('/game/local/create', async (req, reply) => {
+    fastify.get('/game/local/create', async (req, reply) => {
         const id = createGame(req.body.username, req.body.username+"-2");
         return ({success: true, id: id});
     });
@@ -276,9 +281,8 @@ export async function gameRoute (fastify, options) {
 
     // Sub plugin for ws games;
     fastify.register(async function (fastify) {
-        fastify.addHook("preValidation", async (request, reply) => {
-            //Verification of the request
-        });
+        // fastify.addHook("preValidation", async (request, reply) => {
+        // });
 
         fastify.get('/game/ws', { websocket: true }, (socket, req) => {
             let username = req.query.username;
@@ -305,7 +309,7 @@ export async function gameRoute (fastify, options) {
                     socket.send(JSON.stringify({
                         type: "offline_game_created",
                         game: getMaskedGame(getGameByID(new_game_id)),
-                        game_id: new_game_id // useless
+                        game_id: new_game_id
                     }));
                     playing_clients.set(socket, new_game_id);
                     waiting_clients.delete(username);
@@ -313,10 +317,6 @@ export async function gameRoute (fastify, options) {
                     let game = getGameByID(message.game_id);
                     if (game === undefined){
                         console.log("error, game dosnt exists");
-                        /*socket.send(JSON.stringify({
-                            type: "",
-                            state: closed
-                        }))*/
                         return ;
                     }
                     movePaddle(game, message.side, message.move_up);
@@ -357,7 +357,6 @@ export async function gameRoute (fastify, options) {
                         }
                     } else if (message.state === "leave"){
                         console.log("A player is leaving matchmaking");
-                        // if (isValid)
                         waiting_clients.forEach((sck, username) => {
                             if (sck === socket)
                                 waiting_clients.delete(username);
@@ -495,9 +494,6 @@ export async function gameRoute (fastify, options) {
                     if (g_id2 === game_id && sock2 != sock)
                         p2 = sock2;
                 });
-                // Game to be closed client side for p2, also, here I have to check game
-                console.log("GAME is finished");
-                console.log(game);
                 if (game.t_id !== null){
                     matchOver(game, (sock.readyState === sock.CLOSED || sock.readyState === sock.CLOSING)); 
                 }
