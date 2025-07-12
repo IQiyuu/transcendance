@@ -51,6 +51,7 @@ class Tournament{
 		this.players = []; // Objects : {username, socket}
 		this.brackets = []; // Ordered array of ordered array of Objects : {game_id, players(p1, p2), state(STARTING || ON GOING || FINISHED), winner}
 		this.state = T_STARTING;
+		this.winner = null;
 	}
 	
 	getId(){
@@ -152,7 +153,7 @@ class Tournament{
 			}
 		});
 		if (pos === -1){
-			console.log("Error");
+			// console.log("Error");
 			return ;
 		}
 		if (this.players[pos].socket !== null){
@@ -219,7 +220,7 @@ class Tournament{
 	async startRound(){
 		// Create games for each user in a match
 		if (this.brackets === undefined || this.brackets[this.current_round] === undefined){
-			console.log("error : the round we want to start is null or undefined");
+			this.state = T_FINISHED;
 			return ;
 		}
 		this.brackets[this.current_round].forEach(match => {
@@ -303,9 +304,26 @@ class Tournament{
 			this.state = T_FINISHED;
 	}
 
+	getWinner(){
+		let i = this.current_round;
+		let j;
+		while (i >= 0){
+			j = 0;
+			while (j < this.brackets[i].length){
+				if (this.brackets[i][j].winner != null){
+					return (this.brackets[i][j].winner);
+				}
+				j++;
+			}
+			i--;
+		}
+		return (null);
+	}
+
 	endTournament(){
 		//Telling each client the end
 		this.state = T_FINISHED;
+		this.winner = this.getWinner();
 		this.players.forEach( pl => {
 			pl.socket.send(JSON.stringify({
 				type : "finished",
@@ -335,12 +353,10 @@ function    getTournamentMasked(t){
 	});
 	
 	let b;
-	// console.log(" Masking brackets:");
-	// console.log(t.brackets);
-	// console.log(t);
+
 	if (t.brackets === null || t.brackets.length === 0){
 		b = null;
-	}else {
+	} else {
 		b = [];
 		t.brackets.forEach(arr => {
 			let round = [];
@@ -365,7 +381,8 @@ function    getTournamentMasked(t){
 		name : t.name,
 		owner : t.owner,
 		players : players,
-		brackets : b
+		brackets : b,
+		winner : t.winner
 	};
 	// console.log(masked_tournament);
 	return (masked_tournament);
@@ -432,7 +449,6 @@ export function matchOver(game, isErr = false){
 
 	let t = getTournament(tournaments, game.t_id);
 	if (t === undefined){
-		console.log("ERROR MATCH NOT FOUND");
 		return ;
 	}
 

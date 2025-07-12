@@ -258,6 +258,7 @@ export class TournamentController {
 
     endTournament(){
         console.log("EndingTournament");
+        console.log(this.tournament);
         this.clear_tournament_lobby();
         this.hide_tournament_lobby();
         this.finished_tournament = this.tournament;
@@ -576,7 +577,7 @@ export class TournamentController {
         // Récupérer le gagnant depuis le dernier match
         const lastRound = brackets[brackets.length - 1];
         const lastMatch = lastRound[0];
-        const winner = lastMatch.winner;
+        const winner = this.finished_tournament.winner;
         const isWinner = (winner === this.username);
 
         // Créer l'overlay de fin
