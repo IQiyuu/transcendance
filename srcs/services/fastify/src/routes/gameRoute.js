@@ -407,7 +407,7 @@ export async function gameRoute (fastify, options) {
                 //If player is in the waiting list
                 if (waiting_clients.has(socket)){
                     console.log("a player is leaving matchmaking");
-                    waiting_clients.delete(socket);
+                    waiting_clients.delete(username);
                 }
                 socket.close();
                 console.log("player socket closed");
