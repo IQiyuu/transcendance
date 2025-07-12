@@ -327,9 +327,23 @@ function    inTournament(tournaments, username){
 }
 
 function    needAuthRoute(route){ // to recheck
+	return (route === '/tournament/list'|| route ==='/tournament/create' || route === '/tournament/leave'
+		|| route === '/tournament/kick' || route === '/tournament/join' || route === '/tournament/start'
+	);
+}
+
+function	needUsername(route){
 	return (route === '/tournament/list'|| route === '/tournament/leave' || route === '/tournament/kick'
 		|| route === '/tournament/join' || route === '/tournament/start'
 	);
+}
+
+function	needUsername2(route){
+	return (route === "/tournament/kick");
+}
+
+function	needBody(route){
+	return (route === '/tournament/create');
 }
 
 // Returns a view of the tournament without sensible info
@@ -410,8 +424,10 @@ function    addTournament(tournaments, t_id, owner, t_name){
 };
 
 function    getTournament(ts, id){
+	if (ts === undefined || ts === null)
+		return (undefined);
 	let t = ts.find((el) => el.getId() == id);
-	if (t === undefined)
+	if (t === null)
 		console.log("Tournament not found");
 	return (t);
 }
@@ -461,15 +477,21 @@ function tournamentRoute (fastify, options) {
 	
 	//Securising all private tournaments routes :
 	fastify.addHook('preValidation', async (request, reply) => {
-		if (needAuthRoute(request.url) && (request.query.username === null || request.query.username === undefined)) {
-			reply.code(403).send('Tournament op rejected: missing username');
-		}
-		
-		if (request.url === "/tournament/kick" && (request.query.username2 === null || request.query.username2 === undefined))
-			reply.code(403).send('Tournament op rejected: missing username');
 		/**
-		if (!isAuthentificated())
+		if (needAuthRoute(request.url) && !isAuthentificated(request)) {
+			reply.code(401).send('You need to be authenticated');
+		}
 		*/
+		if (needBody(request.url) && (request?.body === null || request?.body === undefined)){
+			return (reply.code(403).send('No data sent'));
+		}
+
+		if (needUsername(request.url) && (request?.query?.username === null || request?.query?.username === undefined)) {
+			return (reply.code(403).send('Tournament op rejected: missing username'));
+		}
+
+		if (needUsername2(request.url) && (request?.query?.username2 === null || request?.query?.username2 === undefined))
+			return (reply.code(403).send('Tournament op rejected: missing username'));
 	});
 	
 	//Masking data we send
@@ -571,12 +593,12 @@ function tournamentRoute (fastify, options) {
 	
 	//Create a tournament
 	fastify.post('/tournament/create', async (request, reply) => {
-		let player = request.body.owner;
-		let t_name = request.body.tournament_name;
+		let player = request.body?.owner;
+		let t_name = request.body?.tournament_name;
 		if (inTournament(tournaments, player))
 			return {success: false, error: "errAlrTour"};
 		if (!isValidTname(t_name))
-			return { success: false, error: "errBadTname" };
+			return {success: false, error: "errBadTname" };
 		try {
 			let new_t = addTournament(tournaments, max_t_id++, player, t_name);
 			return {success: true, tournament : new_t};
@@ -602,19 +624,13 @@ function tournamentRoute (fastify, options) {
 	
 	//Tournament's info
 	fastify.get('/tournament/:id', async (request, reply) => {
-		// const tournament = tournaments[request.params.id];
-		const tournament = getTournament(tournaments, request.params.id);
+		const tournament = getTournament(tournaments, request?.params?.id);
 		if (tournament === undefined || tournament === null)
 			return reply.status(404).send({ error: 'Tournament not found' });
 		return {success: true, tournament: tournament};
 	});
 	
-	// Declaring a match is over url to check. Not used for now, it is websocket that handles it
-	fastify.get('/tournament/:id/match_over', async (request, reply) => {
-		return {success: false};
-	});
 	const T_DSNT_EXISTS = 999;
-
 	//Join a tournament
 	fastify.get('/tournament/join/:id', async (request, reply) => {
 		let t_id = request.params.id;
@@ -655,7 +671,7 @@ function tournamentRoute (fastify, options) {
 		return {success: true};
 	});
 	
-	//disband ? kick every player then leave
+	//kick a player if user is owner
 	fastify.get('/tournament/kick/:id', async(request, reply) => {
 		let t_id = request.params.id;
 		let owner = request.query.username;
@@ -695,7 +711,6 @@ function tournamentRoute (fastify, options) {
 		return ({success: true});
 	})
 	
-	// For optimizition, the interval can be set only when at least a tournament exists
 	setInterval(() => {
 		tournaments.forEach(tournament => {
 			if (tournament === null){
@@ -717,7 +732,7 @@ function tournamentRoute (fastify, options) {
 			} else if (tournament.currentRoundIsFinished())
 				tournament.initNextRound();
 		});
-	}, 100); // We can wait more
+	}, 100);
 }
 
 export default tournamentRoute;

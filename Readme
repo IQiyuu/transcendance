@@ -28,3 +28,8 @@ transcendance modules:
     - server-side pong, API endpoint (1)
 
     Donc 8
+
+
+Exemple de cmd curl :
+
+curl -H 'Content-Type: application/json' -kd '{ "title":"foo","body":"bar", "id": 1}' https://k2r2p1.42mulhouse.fr:3000/tournament/create
