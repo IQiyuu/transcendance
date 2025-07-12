@@ -173,7 +173,8 @@ export async function isAuthenticated(request, reply){
 		request.user = decoded.username;
 	} catch (error){
 		console.log(error);
-		reply.clearCookie('auth_token');
+		if (reply !== null)
+			reply.clearCookie('auth_token');
 		return (false);
 	}
 	return (true);

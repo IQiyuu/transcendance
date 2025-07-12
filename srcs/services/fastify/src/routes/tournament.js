@@ -494,13 +494,18 @@ function tournamentRoute (fastify, options) {
 	* Websocket routes need to be registered before any other to handle events on socket
 	* Connecting a client to the tournament
 	*/
-	fastify.get('/tournament/:id/ws', { websocket: true }, (socket, req) => {
-		let username = req.query.username;
-		let t_id = req.params.id;
+	fastify.get('/tournament/:id/ws', { websocket: true }, async (socket, req) => {
+		let username = req?.query?.username;
+		let t_id = req?.params?.id;
 		
 		const   CONNECTING_STATE = 0;
 		const   OPEN_STATE = 1;
-		
+
+		if (! await isAuthenticated(req, null)){
+			socket.close();
+			return {success : false, error: "Not authenticated"};
+		}
+
 		//Checking if user 
 		if (username === null || username === undefined || t_id === null || t_id === undefined)
 			return {success: false, error: "Need username and id"};
