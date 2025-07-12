@@ -1,7 +1,7 @@
 import Fastify from 'fastify';
 
 import * as gameRoute from "./gameRoute.js";
-
+import {isAuthenticated} from "../server.js";
 const TOURNAMENT_SIZE = 8;
 
 //To put in utils.js
@@ -427,15 +427,6 @@ function    existsTournament(tournaments, id){
 let tournaments = [];
 let max_t_id = tournaments.length;
 
-// Not used for now
-export function	gameInTournament(game_id){
-	for (let i = 0 ; i < tournaments.length; i++){
-		if (tournaments[i]?.getMatch(game_id) !== undefined)
-			return (true);
-	}
-	return (false);
-}
-
 export function matchOver(game, isErr = false){
 	console.log("A Match is over");
 
@@ -457,41 +448,37 @@ function tournamentRoute (fastify, options) {
 	
 	//Securising all private tournaments routes :
 	fastify.addHook('preValidation', async (request, reply) => {
-		/**
-		if (needAuthRoute(request.url) && !isAuthentificated(request)) {
-			reply.code(401).send('You need to be authenticated');
-		}
-		*/
-		// if (request === undefined)
-		if (request.url === "/tournament/create"){
-			// if (!isAuthentificated(request))
-				// return (reply.code(401).send('You need to be authenticated'));
+		if (request === undefined || request.url === undefined)
+			return (reply.code(404).send("Error"));
+		if (request.url.startsWith("/tournament/create")){
+			if (! (await isAuthenticated(request, reply)))
+				return (reply.code(401).send({success: false, message: 'You need to be authenticated'}));
 			if (request?.body === undefined || request?.body === null)
-				return (reply.code(403).send('No data sent'));
-		} else if (request.url === "/tournament/list"){
-			// if (!isAuthentificated(request))
-				// return (reply.code(401).send('You need to be authenticated'));
+				return (reply.code(403).send({success: false, message: 'No data sent'}));
+		} else if (request.url.startsWith("/tournament/list")){
+			if (! await isAuthenticated(request, reply))
+				return (reply.code(401).send('You need to be authenticated'));
 			if (request?.query?.username === undefined || request?.query?.username === null)
 				return (reply.code(403).send("Missing username"));
-		} else if (request.url === "/tournament"){
-			// if (!isAuthentificated(request))
-				// return (reply.code(401).send('You need to be authenticated'));
-			if (request?.params?.id === undefined || request?.params?.id === null)
-				return (reply.code(403).send('Missing tournament id'));
-		} else if (request.url === "/tournament/join"){
-			// if (!isAuthentificated(request))
-				// return (reply.code(401).send('You need to be authenticated'));
+		} else if (request.url.startsWith("/tournament/join")){
+			if (! await isAuthenticated(request, reply))
+				return (reply.code(401).send('You need to be authenticated'));
 			if (request?.params?.id === undefined || request?.params?.id === null)
 				return (reply.code(403).send('Missing tournament id'));
 			if (request?.query?.username === undefined || request?.query?.username === null)
 				return (reply.code(403).send("Missing username"));
-		} else if (request.url === "/tournament/leave"){
-			// if (!isAuthentificated(request))
-				// return (reply.code(401).send('You need to be authenticated'));
+		} else if (request.url.startsWith("/tournament/leave")){
+			if (! await isAuthenticated(request, reply))
+				return (reply.code(401).send('You need to be authenticated'));
 			if (request?.params?.id === undefined || request?.params?.id === null)
 				return (reply.code(403).send('Missing tournament id'));
 			if (request?.query?.username === undefined || request?.query?.username === null)
 				return (reply.code(403).send("Missing username"));
+		} else if (request.url.startsWith("/tournament")){
+			if (! await isAuthenticated(request, reply))
+				return (reply.code(401).send('You need to be authenticated'));
+			if (request?.params?.id === undefined || request?.params?.id === null)
+				return (reply.code(403).send('Missing tournament id'));
 		}
 	});
 	
@@ -527,8 +514,6 @@ function tournamentRoute (fastify, options) {
 		if (!t.contains(username))
 			return {success: false, error: "Player not in this tournament"};
 		
-		// console.log("Trying new socket connection !");
-		// Could be improved ...
 		if (socket.readyState === OPEN_STATE){
 			console.log("Player connected " + username.toString());
 			t.connectPlayer(username, socket);
@@ -537,13 +522,7 @@ function tournamentRoute (fastify, options) {
 			socket.close();
 			return ;
 		}
-		// socket.on("open", event => {
-			//     console.log("Opening socket");
-		//     console.log("Player connected " + username.toString());
-		//     t.connectPlayer(username, socket);
-		//     updateTournamentPlayers(t);
-		// });
-		
+
 		socket.on('message', (data) => {
 			let message;
 			try {
@@ -744,9 +723,9 @@ function tournamentRoute (fastify, options) {
 			// Tournament garbage collector x)
 			if (tournament.getSize() === 0){
 				tournaments.splice(tournaments.indexOf(tournament));
+				return ;
 			}
 			if (tournament.isFinished()){
-				console.log("TOurnament is finished server !!");
 				tournament.endTournament();
 				tournaments.splice(tournaments.indexOf(tournament), 1);
 				return ;

@@ -45,12 +45,10 @@ export class TournamentClientSocket{
         }
         
         this.ws.onmessage = (data) => {
-            // console.log("Tournament got a msg");
             const message = JSON.parse(data.data);
-            // console.log(message);
             if (message === null){
                 console.log("TODO");
-                return ; // ERROR
+                return ;
             }
             if (message.type === "update") {
                 console.log("TOUR_S : Tournament has been updated,");
@@ -67,9 +65,10 @@ export class TournamentClientSocket{
             } else if (message.type === "finished"){
                 console.log("TOUR_S : Tournament is finished !");
                 this.ctler.endTournament();
+            } else if (message.type === "error"){
+                alert(message.message);
             } else if (message.type === "close"){
                 console.log(message.reason);
-                // to do;
             }
         };
 

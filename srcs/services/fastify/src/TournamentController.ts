@@ -470,7 +470,6 @@ export class TournamentController {
         try {
             let query = new URLSearchParams();
             query.append("username", this.username);
-            console.log("Trying to leave ");
             console.log(this.tournament);
             let url = '/tournament/leave/' + this.tournament.getId() + `?${query}`;
 
@@ -569,7 +568,6 @@ export class TournamentController {
     print_tournament_end() {
 
         if (this.finished_tournament === null){
-            console.log("A tournament is finished, here it s NULL ????");
             return ;
         }
         const brackets = this.finished_tournament.getBrackets();
