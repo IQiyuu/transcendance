@@ -111,11 +111,11 @@ export class   GameController{
             event.preventDefault();
 
             if (this.ws !== null && !this.is_searching){
-                alert("ALready in a game");
+                alert("Can't access this while looking for a game");
                 return ;
             }
             if (this.site.isInTournament()){
-                alert("Already in a tournament");
+                alert("You are already in a tournament");
                 return ;
             }
 
@@ -132,11 +132,11 @@ export class   GameController{
             event.preventDefault();
 
             if (this.ws !== null){
-                alert("ALready in a game");
+                alert("Can't access this while looking for a game");
                 return ;
             }
             if (this.site.isInTournament()){
-                alert("Already in a tournament");
+                alert("You are already in a tournament");
                 return ;
             }
 
@@ -178,7 +178,7 @@ export class   GameController{
         this.start_matchmaking_animation();
         this.is_local = false;
         if (this.ws !== null){ // maybe deprecated
-            console.error("You cant start a matchmaking while having a match");
+            console.error("You can't start matchmaking while in a match");
             return ;
         }
         this.ws = new GameClientSocket(this.username, this);
