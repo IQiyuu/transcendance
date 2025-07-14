@@ -274,7 +274,10 @@ export async function gameRoute (fastify, options) {
 
         fastify.get('/game/ws', { websocket: true }, (socket, req) => {
             let username = req.query.username;
+            // console.log("Socket oppened");
+
             socket.on('open', (event) => {
+                console.log("Socket oppened");
                 // waiting_clients.set(username, socket);
             });
             
@@ -373,7 +376,7 @@ export async function gameRoute (fastify, options) {
 
             socket.on('close', (event) => {
                 //If player is in game
-
+                // console.log("Closing a socket");
                 if (playing_clients.has(socket)){
                     let game = getGameByID(playing_clients.get(socket));
                     if (game !== undefined){
@@ -383,7 +386,7 @@ export async function gameRoute (fastify, options) {
                 }
         
                 //If player is in the waiting list
-                if (waiting_clients.has(socket)){
+                if (waiting_clients.has(username)){
                     // console.log("a player is leaving matchmaking");
                     waiting_clients.delete(username);
                 }
