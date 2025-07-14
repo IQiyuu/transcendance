@@ -90,5 +90,6 @@
   "errNSameP": "The passwords are not the same.",
   "errIsInGame": "You can't do this while in a game.",
   "errPP": "An error occurred while uploading the profile picture",
-  "errNoFile": "No file selected for upload"
+  "errNoFile": "No file selected for upload",
+  "errNoTourn": "This tournament does not exist"
 }

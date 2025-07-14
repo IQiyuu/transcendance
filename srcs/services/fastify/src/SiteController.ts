@@ -375,7 +375,7 @@ export class   ProfileController{
                 this.password_form.reset();
             } catch (error) {
                 this.passError.textContent = this.site.getText(error);
-                alert(error.message);
+                alert(this.site.getText(error.message));
             }
         });
     }
