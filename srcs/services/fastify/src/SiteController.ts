@@ -826,7 +826,7 @@ export class SiteController{
             event.preventDefault();
 
             if (this.game.isPlaying()){
-                alert(this.getText("errIsPlaying"));
+                alert("Can't access this while waiting for a game");
                 return ;
             }
             this.profile.setProfileUsername(null);
@@ -841,6 +841,10 @@ export class SiteController{
         // Show about page
         this.about_btn.addEventListener("click", async (event) => {
             event.preventDefault();
+            if (this.game.isPlaying()){
+                alert("Can't access this while waiting for a game");
+                return ;
+            }
 
             this.hide_menu();
             this.print_about_page();
@@ -849,8 +853,12 @@ export class SiteController{
 
         // Profile display
         this.profile_btn.addEventListener("click", async (event) => {
-            this.hide_menu();
             event.preventDefault();
+            if (this.game.isPlaying()){
+                alert("Can't access this while waiting for a game");
+                return ;
+            }
+            this.hide_menu();
             const res = await fetch('/google/check-email-status', {
             method: 'GET',
                 credentials: 'include', 
@@ -885,6 +893,10 @@ export class SiteController{
         // Tournament menu
         this.tournament_btn.addEventListener("click", async(event) => {
             event.preventDefault();
+            if (this.game.isPlaying()){
+                alert("Can't access this while waiting for a game");
+                return ;
+            }
             // this.hide_btn_menu();
             this.navigate({page: "tournament"});
         });
@@ -894,7 +906,7 @@ export class SiteController{
             event.preventDefault();
 
             if (this.game.isPlaying()){
-                alert(this.getText("errIsPlaying"));
+                alert("Can't access this while waiting for a game");
                 return ;
             } else if (this.tournament.hasTournament()){
                 alert(this.getText("errIsInTournament"));
