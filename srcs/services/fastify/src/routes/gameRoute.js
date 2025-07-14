@@ -192,7 +192,7 @@ export async function gameRoute (fastify, options) {
     });
 
     const amIInGame = async (request, reply) => {
-        const { id } = request?.body?.id;
+        let id = request?.body?.id;
         if (id === null || id === undefined)
             id = request?.params?.id;
 
@@ -228,7 +228,14 @@ export async function gameRoute (fastify, options) {
     };
 
     fastify.post('/game/local/create', async (req, reply) => {
-        const id = createGame(req.body.username, req.body.username+"-2");
+        if (req?.body?.username === undefined){
+            return ({succes: false, error: "Undefined username"});
+        }
+
+        if (getGameByUsername(games, req?.body?.username) !== -1){
+            return ({success: false, error: "Already in game"});
+        }
+        const id = createGame(req.body?.username, req.body?.username+"-2");
         return ({success: true, id: id});
     });
 

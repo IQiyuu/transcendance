@@ -6,8 +6,7 @@
   "scripts": {
     "buildcss": "npx @tailwindcss/cli -i ./src/input.css -o ./dist/style.css --watch ",
     "compile": "npx tsc",
-    "start": "node --watch dist/server.js",
-    "run": "node --watch dist/server.js"
+    "start": "node --watch dist/server.js"
   },
   "keywords": [],
   "author": "",
@@ -28,9 +27,6 @@
     "ejs": "^3.1.10",
     "fastify": "^5.3.2",
     "fastify-bcrypt": "^1.0.1",
-    "fastify-cookie": "^5.6.1",
-    "fastify-metrics": "^10.x",
-    "fastify-multipart": "^5.3.1",
     "fastify-plugin": "^5.0.1",
     "passport-google-oauth20": "^2.0.0",
     "qrcode": "^1.5.4",
