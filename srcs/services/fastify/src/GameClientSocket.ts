@@ -99,12 +99,17 @@ export class GameClientSocket{
                     }
                 }
             } else if (message.type === "error"){
-                console.log("Socket should close (server asked)");
+                // console.log("Socket should close (server asked)");
+                if (this.ctl.isPlaying())
+                    this.ctl.finishGame();
+                this.ctl.close();
             }
         };
 
         this.ws.onclose = (event) => {
-            console.log("closing game socket");
+            // console.log("closing game socket");
+            if (this.ctl.isPlaying())
+                this.ctl.finishGame();
             this.ctl.close();
         }
 

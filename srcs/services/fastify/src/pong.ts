@@ -232,6 +232,8 @@ export class   GameController{
         key_state["KeyS"] = false;
 
         // this.key_handler = this.key_handler.bind(this); //to unbind ??
+        // document.removeEventListener("keyup", key_handler);
+        // document.removeEventListener("keydown", key_handler);
         document.addEventListener("keyup", key_handler);
         document.addEventListener("keydown", key_handler);
 

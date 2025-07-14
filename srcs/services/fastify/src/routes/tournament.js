@@ -324,7 +324,9 @@ class Tournament{
 				type : "finished",
 				tournament : getTournamentMasked(this),
 			}));
-			this.players.splice(this.players.indexOf(pl), 1);
+			// let pos = this.players.indexOf(pl);
+			// if (pos !== -1)
+			// 	this.players.splice(pos, 1);
 		});
 	}
 };
