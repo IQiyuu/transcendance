@@ -55,17 +55,16 @@ export class Tournament {
         if (tournament.brackets !== null )
             this.brackets = tournament.brackets;
         this.winner = tournament.winner;
-        // console.log(tournament.brackets);
     }
 
 }
 
 function verifyForm(name){
-    if (name.value.length < 1)
-        return (alert("Tournament's name should have at least 3 characters"), false);
+    if (name.value.length < 3)
+        return (alert("Tournament's name should have more than 2 characters"), false);
     if (name.value.length > 20)
-        return (alert("Tournament's name too long"), false);
-    // if (/[alnum]|_*|-*/.test(name.value))
+        return (alert("Tournament's name too long (20 max)"), false);
+    // if (/[alnum]|_*|-*/.test(name.value))// char : digit, alphabet, _, -
     //     return (alert("Characters can only be letters, digits, and - or _"), false);
     return (true);
 }
@@ -128,7 +127,6 @@ export class TournamentController {
         this.tournament_form.addEventListener("submit", async (event) => {
             event.preventDefault();
             const name = document.getElementById("tournament_name") as HTMLInputElement;
-            //Verifier que l'input est valide avant de l'envoyer !
             if (!verifyForm(name)){
                 // Error to print here (or in verifyForm) ?
                 return ;
