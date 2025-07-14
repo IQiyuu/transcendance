@@ -87,5 +87,8 @@
   "errBadTname": "The tournament name must be between 3 and 20 characters long, without special characters.",
   "errAlrTour": "You are already in a tournament.",
   "errSameP": "The new password must not be the same as the old one.",
-  "errNSameP": "The passwords are not the same."
+  "errNSameP": "The passwords are not the same.",
+  "errIsInGame": "You can't do this while in a game.",
+  "errPP": "An error occurred while uploading the profile picture",
+  "errNoFile": "No file selected for upload"
 }
