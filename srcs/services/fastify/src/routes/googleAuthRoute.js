@@ -15,10 +15,12 @@ async function GoogleAuthRoute(fastify, options) {
   
   // Route used for google sign in
   fastify.get('/google/google-auth', async (req, reply) => {
-    const token = req.cookies.auth_token;
-    const googleEmail = req.cookies.google_email;
-    if (googleEmail === undefined)
-			    return (reply.code(403).send("Body incomplete"));
+    const token = req?.cookies?.auth_token;
+    if (token === undefined)
+      return (reply.code(403).send("Body incomplete"));
+    const googleEmail = req?.cookies.google_email;
+    if (googleEmail === undefined || token === undefined)
+			return (reply.code(403).send("Body incomplete"));
     try {
       const decoded = fastify.jwt.verify(token, secret);
       username = decoded.username;
@@ -52,8 +54,12 @@ async function GoogleAuthRoute(fastify, options) {
 
   fastify.get('/google/desable_auth', async (req, reply) => {
   try {
-    const token = req.cookies.auth_token;
+    const token = req?.cookies?.auth_token;
+    if (token === undefined)
+      return (reply.code(403).send("Body incomplete"));
     const decoded = fastify.jwt.verify(token, secret);
+    if (decoded === null)
+      return (reply.code(403).send("Body incomplete"));
     const username = decoded.username;
     if(username === undefined)
       return (reply.code(403).send("Body incomplete"));
@@ -68,9 +74,11 @@ async function GoogleAuthRoute(fastify, options) {
 
   // route principale pour se connecter avec google authentificator 
   fastify.get('/google/check', async (req, reply) => {
-    const token = req.cookies.auth_token;
-    const googleEmail = req.cookies.google_email;
-    if (googleEmail === undefined)
+    const token = req?.cookies?.auth_token;
+    if (token === undefined)
+      return (reply.code(403).send("Body incomplete"));
+    const googleEmail = req?.cookies?.google_email;
+    if (googleEmail === undefined || token === undefined)
       return (reply.code(403).send("Body incomplete"));
 
     try 
@@ -159,13 +167,13 @@ async function GoogleAuthRoute(fastify, options) {
 // callback de google auth pour ajouter l email a la db et pouvoir se connecter avec google auth 
 
 fastify.get('/google/callback', async (req, reply) => {
-    const code = req.query.code;
+    const code = req?.query.code;
     if (!code) 
       return reply.status(400).send("Code manquant");
 
       try {
         const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
-          method: 'POST',
+      method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: new URLSearchParams({
             code,
@@ -176,7 +184,9 @@ fastify.get('/google/callback', async (req, reply) => {
           })
         });
         const tokenData = await tokenResponse.json();
-        const accessToken = tokenData.access_token;
+        if (token === undefined)
+      return (reply.code(403).send("Body incomplete"));
+    const accessToken = tokenData.access_token;
         const idToken = tokenData.id_token;
 
         const userResponse = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
@@ -206,7 +216,7 @@ fastify.get('/google/callback', async (req, reply) => {
 // callback de google auth pour ajouter l email a la db et pouvoir se connecter avec google auth 
 
 fastify.get('/google/callback2', async (req, reply) => {
-  const code = req.query.code;
+  const code = req?.query.code;
   if (!code) 
     return reply.status(400).send("Code manquant");
   try {
@@ -253,8 +263,13 @@ return reply.redirect('/google/check');
 });
 // Fomction pour voir si le username via le cookie a un mail dans la db
 fastify.get('/google/check-email-status', async (req, reply) => {
-        const token = req.cookies.auth_token;
+        const token = req?.cookies?.auth_toke
+        if (token === undefined)
+          return (reply.code(403).send("Body incomplete"));
+        
         const decoded = fastify.jwt.verify(token, secret);
+        if (decoded === null)
+          return (reply.code(403).send("Body incomplete"));
         const username = decoded.username;
         if (username === undefined);
         const value = options.db.prepare('SELECT * FROM users WHERE username = ?').get(username);

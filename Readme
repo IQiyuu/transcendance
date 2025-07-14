@@ -1,4 +1,3 @@
-
 table des parties:
 game_id INTEGER PRIMARY KEY AUTOINCREMENT,
 winner_id INTEGER NOT NULL,

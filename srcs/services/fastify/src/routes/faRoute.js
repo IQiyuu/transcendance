@@ -6,10 +6,14 @@ async function faRoute (fastify, options) {
   // Verifie avec l API si le code est bon 
     fastify.post('/fa/2fa', async (req, reply) => {
       try {
-        const token = req.cookies.tempo_token;
+        const token = req?.cookies?.tempo_token;
+        if (token === undefined)
+          return (reply.code(403).send("Body incomplete"));
         const decoded = fastify.jwt.verify(token, secret);
+        if (decoded === null)
+          return (reply.code(403).send("Body incomplete"));
         const username = decoded.username;
-        const { userToken } = req.body;
+        const { userToken } = req?.body;
         if (userToken === undefined)
 			    return (reply.code(403).send("Body incomplete"));
         const value = options.db.prepare('SELECT * FROM users WHERE username = ?').get(username);
@@ -48,7 +52,9 @@ async function faRoute (fastify, options) {
 
     // On regarde si l utilisateur a active la 2fa via le cookie 
     fastify.get('/fa/check-2fa-status', async (req, reply) => {
-        const token = req.cookies.auth_token;
+        const token = req?.cookies?.auth_token;
+        if (token === undefined)
+          return (reply.code(403).send("Body incomplete"));
         const decoded = fastify.jwt.verify(token, secret);
         const username = decoded.username;
         if (username === undefined)
@@ -63,7 +69,7 @@ async function faRoute (fastify, options) {
     // On regarde si l utilisateur a active la 2fa via le parametre mis en entree 
     fastify.post('/fa/check-2fa-status-in', async (req, reply) => {
       try {
-            const username = req.body.username;
+            const username = req?.body?.username;
             if (username === undefined)
 			        return (reply.code(403).send("Body incomplete"));
             const value = options.db.prepare('SELECT * FROM users WHERE username = ?').get(username);
@@ -82,8 +88,12 @@ async function faRoute (fastify, options) {
     // Active ou desactive la 2FA en changeans la valuer dans la db
     fastify.get('/fa/enable-2fa', async (req, reply) => {
     try {
-        const token = req.cookies.auth_token;
+        const token = req?.cookies?.auth_token;
+        if (token === undefined)
+          return (reply.code(403).send("Body incomplete"));
         const decoded = fastify.jwt.verify(token, secret);
+        if (decoded === null)
+          return (reply.code(403).send("Body incomplete"));
         const username = decoded.username;
 
         if (username === undefined)
@@ -110,7 +120,7 @@ async function faRoute (fastify, options) {
 
     // cree un cookie temporaire  pour garder le username 
     fastify.post('/fa/set-user-cookie', async (req, reply) => {
-        const { username } = req.body;
+        const { username } = req?.body;
         if (username === undefined)
 			    return (reply.code(403).send("Body incomplete"));
         const payload = {

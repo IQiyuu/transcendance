@@ -1,8 +1,10 @@
 import fs from 'fs';
 
 async function dbRoute (fastify, options) {
-    let db = options.db;
-    let secretKey = options.secretKey;
+    let db = options?.db;
+    let secretKey = options?.secretKey;
+    if (db === undefined || secretKey === undefined)
+          return (reply.code(403).send("Body incomplete"));
     let img_path = "dist/assets/imgs/";
 
     const usernameTester = async (request, reply) => {
@@ -43,7 +45,9 @@ async function dbRoute (fastify, options) {
     // Route qui recupere les infos du user :username dans la db et les renvoie
     fastify.get('/db/profile/:username', async (request, reply) => {
         try {
-            const username = request.params.username;
+            const username = request?.params?.username;
+            if (!username) 
+                return (reply.code(403).send("Body incomplete"));
             // console.log(username);
             // ajouter l'image de profile
             if (!db.prepare(`SELECT username FROM users WHERE username = ?`).get(username))
@@ -65,10 +69,12 @@ async function dbRoute (fastify, options) {
     }, async (request, reply) => {
         const data = await request.parts();
         let uploadedFile;
-        const username = request.params.username;
+        const username = request?.params?.username;
+        if (username === undefined)
+          return (reply.code(403).send("Body incomplete"));
         for await (const part of data) {
             if (part.file) {
-                if (part.mimetype !== 'image/jpeg' && part.mimetype !== 'image/png' && part.mimetype !== 'image/gif') {
+                if (part.mimetype !== 'image/jpeg' && part.mimetype !== 'image/jpg' && part.mimetype !== 'image/png' && part.mimetype !== 'image/gif') {
                     return { success: false, message: 'Error : Wrong extension for upload image' };
                 }
                     uploadedFile = part;
@@ -92,6 +98,7 @@ async function dbRoute (fastify, options) {
                     }
                     
                 });
+                return { success: true, message: 'File uploaded' };
             }
         }
     });
@@ -99,7 +106,9 @@ async function dbRoute (fastify, options) {
     // Pareil que au dessus avec les games
     fastify.get('/db/historic/:username', async (request, reply) => {
         try {
-            const username = request.params.username;
+            const username = request?.params?.username;
+            if (username === undefined)
+                return (reply.code(403).send("Body incomplete"));
             // console.log(username);
             const data = options.db.prepare('SELECT g.game_id, uw.username AS winner_username, ul.username AS loser_username, g.loser_score, g.winner_score, g.created_at FROM games g JOIN users uw ON g.winner_id = uw.user_id JOIN users ul ON g.loser_id = ul.user_id WHERE uw.username = ? OR ul.username = ? ORDER BY g.created_at DESC;').all(username,username);
     
@@ -165,9 +174,10 @@ async function dbRoute (fastify, options) {
     fastify.post('/db/update/username', {
         preHandler: usernameTester,
     }, async (req, rep) => {
-        const username = req.body.username;
-        const newUsername = req.body.newUsername;
-
+        const username = req?.body?.username;
+        const newUsername = req?.body?.newUsername;
+        if (username === undefined || newUsername === undefined)
+          return (reply.code(403).send("Body incomplete"));
         try {
             if (newUsername == username) 
                 return { success: false, error: 'errUSame' };
@@ -224,8 +234,9 @@ async function dbRoute (fastify, options) {
     fastify.post('/db/update/password', {
         preHandler: usernameTester,
     }, async (req, rep) => {
-        const body = req.body;
-
+        const body = req?.body;
+        if (body?.username === undefined || body?.password === undefined || body?.newPassword === undefined)
+          return (rep.code(403).send("Body incomplete"));
         try {
             console.log(body);
             const user = db.prepare(`SELECT password FROM users WHERE username = ?`).get(body.username);
@@ -338,8 +349,9 @@ async function dbRoute (fastify, options) {
     fastify.post('/db/friends/update',  {
         preHandler: usernameTester,
     }, async (request, reply) => {
-        const body = request.body;
-        
+        const body = request?.body;
+        if (body?.username === undefined || body?.friend === undefined)
+            return (reply.code(403).send("Body incomplete"));
         try {
             const userId = getIdFromUsername(body.username);
             const friendId = getIdFromUsername(body.friend);
@@ -377,7 +389,9 @@ async function dbRoute (fastify, options) {
     fastify.post('/db/friends/block', {
         preHandler: usernameTester,
     }, async (request, reply) => {
-        const body = request.body;
+        const body = request?.body;
+        if (body?.username === undefined || body?.friend === undefined)
+            return (reply.code(403).send("Body incomplete"));
         
         try {
             const userId = getIdFromUsername(body.username);
@@ -428,8 +442,10 @@ async function dbRoute (fastify, options) {
         preHandler: usernameTester,
     }, async (request, reply) => {
         try {
-            const userId = getIdFromUsername(request.params.user);
-            const friendId = getIdFromUsername(request.params.friend);
+            const userId = getIdFromUsername(request?.params?.user);
+            const friendId = getIdFromUsername(request?.params?.friend);
+            if (!userId || !friendId)
+                return (reply.code(403).send("Body incomplete"));
     
             const friendship = getFriendRelation(userId, friendId);
             if (friendship) {
@@ -458,6 +474,8 @@ async function dbRoute (fastify, options) {
         preHandler: usernameTester,
     }, async (request, reply) => {
         // console.log("OUIII");
+        if (!request?.params?.username)
+            return (reply.code(403).send("Body incomplete"));
         try {
             const userId = getIdFromUsername(request.params.username);
             if (!userId)
