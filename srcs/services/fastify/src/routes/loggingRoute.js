@@ -16,7 +16,7 @@ async function logginRoute (fastify, options) {
 		const hasUppercase = /[A-Z]/.test(password);
 		const hasLowercase = /[a-z]/.test(password);
 		const hasDigit     = /[0-9]/.test(password);
-		const hasSpecial   = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+		const hasSpecial   = /[!@#$%^&*(),.?:{}|<>]/.test(password);
 
 		return minLength && maxLength && hasUppercase && hasLowercase && hasDigit && hasSpecial;
 	}
@@ -24,7 +24,7 @@ async function logginRoute (fastify, options) {
 	async function isValidUsername(username) {
 			const minLength    = username.length >= 3;
 			const maxLength    = username.length <= 15;
-			const hasSpecial   = /[!@#$%^&*(),.?":{}|<>]/.test(username);
+			const hasSpecial   = /[!@#$%^&*(),.?":{}|<>]\//.test(username);
 
 			return minLength && maxLength && !hasSpecial;
 	}
