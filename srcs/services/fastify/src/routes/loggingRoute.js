@@ -13,29 +13,34 @@ async function logginRoute (fastify, options) {
 	function isValidPassword(password) {
 		const minLength    = password.length >= 8;
 		const maxLength    = password.length <= 42;
-		const hasUppercase = /[A-Z]/.test(password);
-		const hasLowercase = /[a-z]/.test(password);
-		const hasDigit     = /[0-9]/.test(password);
-		const hasSpecial   = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+	
+		const regex			= /[^a-zA-Z0-9!@#$%&]/g;
+		const invalidChar	= regex.test(password);
 
-		return minLength && maxLength && hasUppercase && hasLowercase && hasDigit && hasSpecial;
+		return minLength && maxLength && !invalidChar;
 	}
 
-	async function isValidUsername(username) {
-			const minLength    = username.length >= 3;
-			const maxLength    = username.length <= 15;
-			const hasSpecial   = /[!@#$%^&*(),.?":{}|<>]/.test(username);
+	function isValidUsername(username) {
+		const minLength		= username.length >= 3;
+		const maxLength		= username.length <= 15;
 
-			return minLength && maxLength && !hasSpecial;
+		const regex			= /[^a-zA-Z0-9]/g;
+		const hasSpecial	= regex.test(username);
+
+		return minLength && maxLength && !hasSpecial;
 	}
 
 	// Route pour s'inscrire, verifie que le username n'existe pas
 	fastify.post('/register', async (request, reply) => {
-		const { username, password } = request.body;
+		let username = request?.body?.username;
+		let password = request?.body?.password;
+		if (username === undefined || password === undefined){
+			throw (Error("errAuth"));
+		}
 		try {
 			if (!isValidPassword(password))
 				throw Error("errMdp");
-			if (!(await isValidUsername(username)))
+			if (!isValidUsername(username))
 				throw Error("errUname");
 		} catch (error) {
 			// console.error("Erreur : ", error);
