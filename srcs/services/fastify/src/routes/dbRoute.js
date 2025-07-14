@@ -1,4 +1,5 @@
 import fs from 'fs';
+import {isAuthenticated} from "../server.js";
 
 async function dbRoute (fastify, options) {
     let db = options?.db;
@@ -7,18 +8,23 @@ async function dbRoute (fastify, options) {
           return (reply.code(403).send("Body incomplete"));
     let img_path = "dist/assets/imgs/";
 
+    fastify.addHook('preValidation', async (request, reply) => {
+        if (! (await isAuthenticated(request, reply)))
+            return (reply.code(401).send({success: false, message: 'You need to be authenticated'}));
+    });
+
     const usernameTester = async (request, reply) => {
         var username = null;
         if (request.body)
-            username = request.body.username;
-        if (username == null && request.params)
+            username = request?.body?.username;
+        if ((username === null || username === undefined) && request.params)
             username = (request.params.username === undefined ? request.params.user : request.params.username);
-        if (username == null){
+        if (username === null || username === undefined){
             return reply.send({ success: false, error: "username error" });
         }
-        const token = request.cookies.auth_token;
+        const token = request?.cookies?.auth_token;
 
-        if (!token) {
+        if (token === undefined || token === null) {
             return reply.send({ success: false });
         }
 
@@ -27,8 +33,8 @@ async function dbRoute (fastify, options) {
             if (decoded == null)
                 throw Error("Not authorized");
             try {
-            const user = db.prepare('SELECT username FROM users WHERE username = ?').get(decoded.username);
-            if (!user)
+            const user = db.prepare('SELECT username FROM users WHERE username = ?').get(decoded?.username);
+            if (user === null || user === undefined)
                 throw Error("Not authorized2");
             if (decoded.username == username)
                 request.user = decoded.username;
@@ -67,7 +73,7 @@ async function dbRoute (fastify, options) {
     fastify.post('/db/update/picture/:username', {
         preHandler: usernameTester,
     }, async (request, reply) => {
-        const data = await request.parts();
+        const data = await request?.parts();
         let uploadedFile;
         const username = request?.params?.username;
         if (username === undefined)
@@ -473,7 +479,6 @@ async function dbRoute (fastify, options) {
     fastify.get('/db/friends/friendlist/:username', {
         preHandler: usernameTester,
     }, async (request, reply) => {
-        // console.log("OUIII");
         if (!request?.params?.username)
             return (reply.code(403).send("Body incomplete"));
         try {

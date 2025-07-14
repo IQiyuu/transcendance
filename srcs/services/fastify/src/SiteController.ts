@@ -329,11 +329,11 @@ export class   ProfileController{
                         body: formData,
                     });
                     if (!response.ok)
-                        console.log("error in file upload.");
+                        alert(this.site.getText("errPP"));
                     else {
                         const data = await response.json();
                         if (data.success === false){
-                            alert("Une erreur est survenue lors de l'upload de la photo de profil.");
+                            alert(this.site.getText("errPP"));
                             return;
                         }
                         document.getElementById("profile_picture_overlay").classList.replace("absolute", "hidden");
@@ -347,8 +347,7 @@ export class   ProfileController{
                     console.error("error: ", error);
                 }
             } else {
-                console.log("No file selected.");
-                alert("No file selected.");
+                alert(this.site.getText("errNoFile"));
             }
         });
 
@@ -386,7 +385,7 @@ export class   ProfileController{
                 this.password_form.reset();
             } catch (error) {
                 this.passError.textContent = this.site.getText(error);
-                alert(error.message);
+                alert(this.site.getText(error.message));
             }
         });
     }
@@ -840,7 +839,7 @@ export class SiteController{
             event.preventDefault();
 
             if (this.game.isPlaying()){
-                alert("Can't access this while waiting for a game");
+                alert(this.getText("errIsInGame"));
                 return ;
             }
             this.profile.setProfileUsername(null);
@@ -856,7 +855,7 @@ export class SiteController{
         this.about_btn.addEventListener("click", async (event) => {
             event.preventDefault();
             if (this.game.isPlaying()){
-                alert("Can't access this while waiting for a game");
+                alert(this.getText("errIsInGame"));
                 return ;
             }
 
@@ -870,7 +869,7 @@ export class SiteController{
             event.preventDefault();
             try {
                 if (this.game.isPlaying()){
-                    alert("Can't access this while waiting for a game");
+                    alert(this.getText("errIsInGame"));
                     return ;
                 }
                 this.hide_menu();
@@ -880,13 +879,11 @@ export class SiteController{
                 });
                 if (res.ok) {
                     const data = await res.json();
-                    if(data.success == 1)
-                    {
+                    if(data.success == 1){
                         this.enable_auth_btn.classList.replace("enable_auth_btn", "disable_auth_btn");
                         //google_auth.textContent = "Desactiver Google authentificator";
                     }
-                    else 
-                    {
+                    else {
                         this.enable_auth_btn.classList.replace("disable_auth_btn", "enable_auth_btn");
                     // google_auth.textContent = "Activer Google authentificator";
                     }
@@ -914,7 +911,7 @@ export class SiteController{
         this.tournament_btn.addEventListener("click", async(event) => {
             event.preventDefault();
             if (this.game.isPlaying()){
-                alert("Can't access this while waiting for a game");
+                alert(this.getText("errIsInGame"));
                 return ;
             }
             // this.hide_btn_menu();
@@ -926,7 +923,7 @@ export class SiteController{
             event.preventDefault();
 
             if (this.game.isPlaying()){
-                alert("Can't access this while waiting for a game");
+                alert(this.getText("errIsInGame"));
                 return ;
             } else if (this.tournament.hasTournament()){
                 alert(this.getText("errIsInTournament"));
@@ -974,13 +971,13 @@ export class SiteController{
             const data = await response.json();
             if (!data.success) {
                 if (data.error)
-                    alert(data.error);
+                    throw Error(data.error);
                 return false;
             }
             this.username = data.username
             return (response.ok === true && data.success === true);
         } catch (error) {
-            alert (error.message);
+            //console.log("Not Authenticated");
         }
     }
     

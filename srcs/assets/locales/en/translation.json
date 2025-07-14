@@ -22,6 +22,8 @@
   "unblock": "Unblock",
   "send_rem": "Remove Friend",
   "send_canc": "Remove Friend",
+  "rem_friend": "Remove Friend",
+  "add_friend": "Add Friend",
   "send_acc": "Accept Invitation",
   "send_block": "You are blocked",
   "send_yblock": "You have blocked this user",
@@ -47,7 +49,6 @@
   "google_switch_disable": "Disable Google authentificator",
   "2FA_enable": "Enable 2FA",
   "2FA_disable": "Disable 2FA",
-
   "pass_change": "Change password",
   "pass_current": "Current password",
   "pass_new": "New password",
@@ -60,7 +61,6 @@
   "logout_btn": "Logout",
   "waiting_online": "waiting",
   "cancel_mm": "click to cancel ❌\ntrois\n",
-
   "create_tour": "Create a tournament",
   "join_tour": "Join a tournament",
   "curr_tour": "Return to tournament",
@@ -87,5 +87,11 @@
   "errBadTname": "The tournament name must be between 3 and 20 characters long, without special characters.",
   "errAlrTour": "You are already in a tournament.",
   "errSameP": "The new password must not be the same as the old one.",
-  "errNSameP": "The passwords are not the same."
+  "errNSameP": "The passwords are not the same.",
+  "errIsInGame": "You can't do this while in a game.",
+  "errPP": "An error occurred while uploading the profile picture",
+  "errNoFile": "No file selected for upload",
+  "errNoTourn": "This tournament does not exist",
+  "errNotPars": "Not parsed, setting a default file",
+  "errNoLang": "Lang file wasnt fetched, setting a default file"
 }

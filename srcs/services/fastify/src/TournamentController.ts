@@ -55,17 +55,16 @@ export class Tournament {
         if (tournament.brackets !== null )
             this.brackets = tournament.brackets;
         this.winner = tournament.winner;
-        // console.log(tournament.brackets);
     }
 
 }
 
 function verifyForm(name){
-    if (name.value.length < 1)
-        return (alert("Tournament's name should have at least 3 characters"), false);
+    if (name.value.length < 3)
+        return (alert(this.site.getText("errBadTname")), false);
     if (name.value.length > 20)
-        return (alert("Tournament's name too long"), false);
-    // if (/[alnum]|_*|-*/.test(name.value))
+        return (alert(this.site.getText("errBadTname")), false);
+    // if (/[alnum]|_*|-*/.test(name.value))// char : digit, alphabet, _, -
     //     return (alert("Characters can only be letters, digits, and - or _"), false);
     return (true);
 }
@@ -112,11 +111,11 @@ export class TournamentController {
             event.preventDefault();
 
             if (this.game.isPlaying()){
-                alert("You can't join a tournament while playing or searching for a game !");
+                alert(this.site.getText("errIsInGame"));
                 return ;
             }
             if (this.tournament !== null) {
-                alert("You're already registered for a tournament");
+                alert(this.site.getText("errAlrTour"));
                 return;
             }
             this.site.hide_all();
@@ -128,7 +127,6 @@ export class TournamentController {
         this.tournament_form.addEventListener("submit", async (event) => {
             event.preventDefault();
             const name = document.getElementById("tournament_name") as HTMLInputElement;
-            //Verifier que l'input est valide avant de l'envoyer !
             if (!verifyForm(name)){
                 // Error to print here (or in verifyForm) ?
                 return ;
@@ -153,7 +151,7 @@ export class TournamentController {
                 else
                     throw (Error(data.error));
             } catch (error) {
-                console.log("error: ", error);
+                alert(this.site.getText("errAlrTour"));
             }
         });
 
@@ -161,11 +159,11 @@ export class TournamentController {
             event.preventDefault();
             
             if (this.game.isPlaying()){
-                alert("You can't join a tournament while playing or searching for a game !");
+                alert(this.site.getText("errIsInGame"));
                 return ;
             }
             if (this.tournament !== null) {
-                alert("You're already registered for a tournament");
+                alert(this.site.getText("errAlrTour"));
                 return;
             }
 
@@ -213,7 +211,7 @@ export class TournamentController {
                                         } else{
                                             const T_DSNT_EXISTS = 999;
                                             if (data.code === T_DSNT_EXISTS){
-                                                alert("This tournament doesnt exists");
+                                                alert(this.site.getText("errNoTourn"));
                                             }
                                             throw Error(data.error);
                                         }
@@ -309,7 +307,7 @@ export class TournamentController {
 
     print_tournament_lobby(){
         if (this.tournament === null){
-            alert("Not implemented yet (print tournament but tournament is null)");
+            alert(this.site.getText("errNoTourn"));
             return ;
         }
 

@@ -29,10 +29,11 @@
   "errReg": "Ce nom d'utilisateur est déjà utilisé",
   "errUname": "La taille du nom d'utilisateur doit être comprise entre 3 et 15 caractères, sans caractère spécial",
   "errMismatch": "Mot de passe actuel ne correspond pas",
-  "errMdp": "Le mot de passe doit contenir au moins une majuscule, une minuscule, un caractère special et entre 8 et 42 caractères/",
+  "errMdp": "Le mot de passe doit contenir au moins une majuscule, une minuscule, un caractère special et entre 8 et 42 caractères",
   "errorInt": "Erreur interne",
   "errorPSame": "Les deux mots de passe doivent etre identiques",
   "errUSame": "Meme username entre",
+  "errUSmall": "Nom d'utilisateur trop court",
   "errUTaken": "Username deja prit",
   "errExpired": "Veuillez changer le mot de passe",
   "errNA": "Non autorise",
@@ -48,7 +49,6 @@
   "2FA_disable": "Desactiver 2FA",
   "add_friend": "Ajouter en amis",
   "rem_friend": "Retirer des amis",
-
   "pass_change": "Changer le mot de pass",
   "pass_current": "Mot de passe actuel",
   "pass_new": "Nouveau mot de passe",
@@ -87,5 +87,11 @@
   "errBadTname": "La taille du nom du tournois doit être comprise entre 3 et 20 characteres, sans caractère spécial",
   "errAlrTour": "Vous etes deja dans un tournois",
   "errSameP": "Le nouveau mot de passe ne doit pas etre identique a l'ancien",
-  "errNSameP": "Les mots de passe ne sont pas identiques"
+  "errNSameP": "Les mots de passe ne sont pas identiques",
+  "errIsInGame": "Vous ne pouvez pas faire ça tout en etant dans une partie",
+  "errPP": "Une erreur est survenue lors de l'upload de la photo de profil",
+  "errNoFile": "Aucun fichier selectionné pour l'upload",
+  "errNoTourn": "Ce tournoi n'existe pas",
+  "errNotPars": "Non analysé, définition d'un fichier par défaut",
+  "errNoLang": "Le fichier de langue n'a pas été récupéré, définition d'un fichier par défaut"
 }

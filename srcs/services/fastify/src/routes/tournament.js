@@ -576,9 +576,9 @@ function tournamentRoute (fastify, options) {
 	});
 
 	function isValidTname(tournament) {
-		const minLength    = tournament.length >= 1;
+		const minLength    = tournament.length >= 3;
     	const maxLength    = tournament.length <= 20;
-    	const hasSpecial   = /[!@#$%^&*(),.?":{}|<>]/.test(tournament);
+    	const hasSpecial   = /[!'@#$%^&*(),.?":{}|<>]/.test(tournament);
 		const uniq			= true;
 
 		tournaments.forEach(t => {
@@ -599,6 +599,8 @@ function tournamentRoute (fastify, options) {
 		let t_name = request.body?.tournament_name;
 		if (player === undefined || t_name === undefined)
 			return (reply.code(403).send("Body incomplete"));
+		if (player !== request.user)
+			return (reply.code(403).send("Don't lie on your username"))
 		if (inTournament(tournaments, player))
 			return {success: false, error: "errAlrTour"};
 		if (!isValidTname(t_name))
@@ -621,6 +623,9 @@ function tournamentRoute (fastify, options) {
 
 		if (request?.query?.username === undefined || request?.query?.username === null)
 			return (reply.code(403).send("No username provided"));
+
+		if (request?.query?.username !== request.user)
+			return (reply.code(403).send("Don't lie on your username"))
 
 		try {
 			let res = getAvailableTournaments(tournaments, request.query.username);
@@ -652,8 +657,11 @@ function tournamentRoute (fastify, options) {
 	 */
 	fastify.get('/tournament/join/:id', async (request, reply) => {
 		let t_id = request.params.id;
-		let player_username = request.query.username;
+		let player_username = request?.query?.username;
 		
+		if (player_username !== request.user)
+			return (reply.code(403).send("Don't lie on your username"))
+
 		if (!existsTournament(tournaments, t_id))
 			return {success: false, code: T_DSNT_EXISTS,  error: "Tournament doesnt exists"};
 		
@@ -680,6 +688,10 @@ function tournamentRoute (fastify, options) {
 	fastify.get('/tournament/leave/:id', async (request, reply) => {
 		let t_id = request.params.id;
 		let user = request.query.username;
+		
+		if (user !== request.user)
+			return (reply.code(403).send("Don't lie on your username"));
+
 		if (!existsTournament(tournaments, t_id))
 			return {success: false, error: "Tournament doesnt exists"};
 		let t = getTournament(tournaments, t_id);
@@ -689,6 +701,7 @@ function tournamentRoute (fastify, options) {
 			return {success: false, error: "Owner can't leave the room while other players are present"};
 		
 		t.disconnectPlayer(user);
+		t.removePlayer(user);
 		
 		return {success: true};
 	});
