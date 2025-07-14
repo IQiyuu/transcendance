@@ -148,36 +148,46 @@ export class   ProfileController{
         // Enable / Disable Google authentificator
         this.auth_btn.addEventListener('click', async (event) => {
             event.preventDefault();
-            const res = await fetch('/google/check-email-status', {
-            method: 'GET',
-                credentials: 'include', 
-            });
-            if (res.ok) {
-                const data = await res.json();
-                if(data.success == 0)
-                {
-                    window.open('/google/google-auth', '42 AUTH');
-                    const res2 = await fetch('/google/check-email-status', {
-                    method: 'GET',
-                        credentials: 'include', 
-                    });
-                    if (res2.ok)
-                    {
-                        const data2 = await res2.json();
-                        if (data2.success == 1)
-                        {
-                            this.enable_auth_btn.classList.replace("enable_auth_btn", "disable_auth_btn");
-                            this.enable_auth_btn.textContent = this.site.getText("google_switch_disable");  
+            try {
+                const res = await fetch('/google/check-email-status', {
+                method: 'GET',
+                    credentials: 'include', 
+                });
+                if (res.ok) {
+                    // const data = await res.json();
+                    if (this.enable_auth_btn.classList.contains("enable_auth_btn")) {
+                        window.open('/google/google-auth', '42 AUTH');
+                        const res2 = await fetch('/google/check-email-status', {
+                        method: 'GET',
+                            credentials: 'include', 
+                        });
+                        if (res2.ok){
+                            const data2 = await res2.json();
+                            if (data2.success){
+                                this.enable_auth_btn.classList.replace("enable_auth_btn", "disable_auth_btn");
+                                this.enable_auth_btn.textContent = this.site.getText("google_switch_disable");  
+                            } else {
+                                throw (Error(data2.error));
+                            }
+                        }else {
+                            throw (Error("Google email not checked"));
                         }
-        
                     }
+                    else 
+                    {
+                        const res2 = await fetch('/google/desable_auth');
+                        if (res2.ok){
+                            this.enable_auth_btn.classList.replace("disable_auth_btn", "enable_auth_btn");
+                            this.enable_auth_btn.textContent = this.site.getText("google_switch_enable");
+                        } else {
+                            throw (Error("Google auth not checked"));
+                        }
+                    }
+                } else {
+                    console.log("Error while fetching google/check-email-status");
                 }
-                else 
-                {
-                    await fetch('/google/desable_auth');
-                    //this.enable_auth_btn.classList.replace("disable_auth_btn", "enable_auth_btn");
-                    this.enable_auth_btn.textContent = this.site.getText("google_switch_enable");
-                }
+            } catch (error) {
+                alert(error.message);
             }
 
         // Connexion with Google authentificator
@@ -858,40 +868,46 @@ export class SiteController{
         // Profile display
         this.profile_btn.addEventListener("click", async (event) => {
             event.preventDefault();
-            if (this.game.isPlaying()){
-                alert("Can't access this while waiting for a game");
-                return ;
-            }
-            this.hide_menu();
-            const res = await fetch('/google/check-email-status', {
-            method: 'GET',
-                credentials: 'include', 
-            });
-            if (res.ok) {
-                const data = await res.json();
-                if(data.success == 1)
-                {
-                    this.enable_auth_btn.classList.replace("enable_auth_btn", "disable_auth_btn");
-                    //google_auth.textContent = "Desactiver Google authentificator";
+            try {
+                if (this.game.isPlaying()){
+                    alert("Can't access this while waiting for a game");
+                    return ;
                 }
-                else 
-                {
-                    this.enable_auth_btn.classList.replace("disable_auth_btn", "enable_auth_btn");
-                   // google_auth.textContent = "Activer Google authentificator";
+                this.hide_menu();
+                const res = await fetch('/google/check-email-status', {
+                method: 'GET',
+                    credentials: 'include', 
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    if(data.success == 1)
+                    {
+                        this.enable_auth_btn.classList.replace("enable_auth_btn", "disable_auth_btn");
+                        //google_auth.textContent = "Desactiver Google authentificator";
+                    }
+                    else 
+                    {
+                        this.enable_auth_btn.classList.replace("disable_auth_btn", "enable_auth_btn");
+                    // google_auth.textContent = "Activer Google authentificator";
+                    }
                 }
+                const res2 = await fetch('/fa/check-2fa-status', {
+                method: 'GET',
+                    credentials: 'include', 
+                });
+                if (res2.ok) {
+                    const data = await res2.json();
+                    if(data.success == 1)
+                        document.getElementById("fa_btn_enable").textContent = this.getText("2FA_disable");
+                    else
+                        document.getElementById("fa_btn_enable").textContent = this.getText("2FA_enable");
+                }
+                this.profile.printPage();
             }
-            const res2 = await fetch('/fa/check-2fa-status', {
-            method: 'GET',
-                credentials: 'include', 
-            });
-            if (res2.ok) {
-                const data = await res2.json();
-                if(data.success == 1)
-                    document.getElementById("fa_btn_enable").textContent = this.getText("2FA_disable");
-                else
-                    document.getElementById("fa_btn_enable").textContent = this.getText("2FA_enable");
+            catch (error) {
+    
+                console.error(error);
             }
-            this.profile.printPage();
         });
 
         // Tournament menu

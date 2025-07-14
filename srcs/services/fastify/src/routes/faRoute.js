@@ -8,14 +8,14 @@ async function faRoute (fastify, options) {
       try {
         const token = req?.cookies?.tempo_token;
         if (token === undefined)
-          return (reply.code(403).send("Body incomplete"));
+          return reply.send({success: false, error : "Token not found"});
         const decoded = fastify.jwt.verify(token, secret);
         if (decoded === null)
-          return (reply.code(403).send("Body incomplete"));
+          return reply.send({success: false, error : "Decoded token not found"});
         const username = decoded.username;
-        const { userToken } = req?.body;
+        let userToken  = req?.body;
         if (userToken === undefined)
-			    return (reply.code(403).send("Body incomplete"));
+			    return reply.send({success: false, error : "User token not found"});
         const value = options.db.prepare('SELECT * FROM users WHERE username = ?').get(username);
          const verified = speakeasy.totp.verify({
             secret: value.secret,
@@ -54,13 +54,15 @@ async function faRoute (fastify, options) {
     fastify.get('/fa/check-2fa-status', async (req, reply) => {
         const token = req?.cookies?.auth_token;
         if (token === undefined)
-          return (reply.code(403).send("Body incomplete"));
+          return reply.send({success: false, error : "Token not found"});
         const decoded = fastify.jwt.verify(token, secret);
+        if (decoded === undefined) 
+          return reply.send({success: false, error : "Decoded token not found"});
         const username = decoded.username;
         if (username === undefined)
-			    return (reply.code(403).send("Body incomplete"));
+			    return reply.send({success: false, error : "Username not found"});
         const value = options.db.prepare('SELECT * FROM users WHERE username = ?').get(username);
-        if (value.twofa_activate === 0)
+        if (value?.twofa_activate === 0)
           return reply.send({success: 0});
         else 
           return reply.send({success: 1});
@@ -71,7 +73,7 @@ async function faRoute (fastify, options) {
       try {
             const username = req?.body?.username;
             if (username === undefined)
-			        return (reply.code(403).send("Body incomplete"));
+			        return reply.send({success: false, error : "Username not found"});
             const value = options.db.prepare('SELECT * FROM users WHERE username = ?').get(username);
             if (value.twofa_activate === 0)
               return reply.send({success: 0});
@@ -90,14 +92,13 @@ async function faRoute (fastify, options) {
     try {
         const token = req?.cookies?.auth_token;
         if (token === undefined)
-          return (reply.code(403).send("Body incomplete"));
+          return reply.send({success: false, error : "Token not found"});
         const decoded = fastify.jwt.verify(token, secret);
         if (decoded === null)
-          return (reply.code(403).send("Body incomplete"));
+          return reply.send({success: false, error : "Decoded token not found"});
         const username = decoded.username;
-
         if (username === undefined)
-			    return (reply.code(403).send("Body incomplete"));
+			    return reply.send({success: false, error : "Username not found"});
         const value = options.db.prepare('SELECT * FROM users WHERE username = ?').get(username);
         if (!value) return reply.status(404).send({ error: 'Utilisateur introuvable' });
 
@@ -120,9 +121,9 @@ async function faRoute (fastify, options) {
 
     // cree un cookie temporaire  pour garder le username 
     fastify.post('/fa/set-user-cookie', async (req, reply) => {
-        const { username } = req?.body;
+        let username = req?.body;
         if (username === undefined)
-			    return (reply.code(403).send("Body incomplete"));
+			    return reply.send({success: false, error : "Username not found"});
         const payload = {
               username: username,
             };
