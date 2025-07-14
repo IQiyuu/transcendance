@@ -17,7 +17,12 @@ async function logginRoute (fastify, options) {
 		const regex			= /[^a-zA-Z0-9!@#$%&]/g;
 		const invalidChar	= regex.test(password);
 
-		return minLength && maxLength && !invalidChar;
+		const	hasLow = /[a-z]/.test(password);
+		const	hasUpp = /[A-Z]/.test(password);
+		const	hasDig = /[0-9]/.test(password);
+		const	hasSpecial = /[!@#$%&]/.test(password);;
+
+		return minLength && maxLength && !invalidChar && hasLow && hasUpp && hasDig && hasSpecial;
 	}
 
 	function isValidUsername(username) {

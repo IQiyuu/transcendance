@@ -636,7 +636,7 @@ export class   ProfileController{
             });
             if (resp.ok) {
                 const data = await resp.json();
-                if(data.success == 1) {
+                if (data.success) {
                     document.getElementById("google_auth_enable").textContent = this.site.getText("google_switch_disable");
                     document.getElementById("google_auth_enable").classList.replace("enable_auth_btn", "disable_auth_btn");
                 }

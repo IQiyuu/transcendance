@@ -168,13 +168,30 @@ async function dbRoute (fastify, options) {
         }
     });
 
-    async function isValidUsername(username) {
-        const minLength    = username.length >= 3;
-        const maxLength    = username.length <= 15;
-        const hasSpecial   = /[!@#$%^&*(),.?":{}|<>]/.test(username);
+	function isValidPassword(password) {
+		const minLength    = password.length >= 8;
+		const maxLength    = password.length <= 42;
+	
+		const regex			= /[^a-zA-Z0-9!@#$%&]/g;
+		const invalidChar	= regex.test(password);
 
-        return minLength && maxLength && !hasSpecial;
-    }
+		const	hasLow = /[a-z]/.test(password);
+		const	hasUpp = /[A-Z]/.test(password);
+		const	hasDig = /[0-9]/.test(password);
+		const	hasSpecial = /[!@#$%&]/.test(password);;
+
+		return minLength && maxLength && !invalidChar && hasLow && hasUpp && hasDig && hasSpecial;
+	}
+
+	function isValidUsername(username) {
+		const minLength		= username.length >= 3;
+		const maxLength		= username.length <= 15;
+
+		const regex			= /[^a-zA-Z0-9]/g;
+		const hasSpecial	= regex.test(username);
+
+		return minLength && maxLength && !hasSpecial;
+	}
 
     // modifying username
     fastify.post('/db/update/username', {
@@ -183,11 +200,11 @@ async function dbRoute (fastify, options) {
         const username = req?.body?.username;
         const newUsername = req?.body?.newUsername;
         if (username === undefined || newUsername === undefined)
-          return (reply.code(403).send("Body incomplete"));
+          return (rep.code(403).send("Body incomplete"));
         try {
             if (newUsername == username) 
                 return { success: false, error: 'errUSame' };
-            if (!(await isValidUsername(newUsername))) 
+            if (!isValidUsername(newUsername)) 
                 return { success: false, error: 'errUname' };
 
             if (db.prepare(`SELECT username FROM users WHERE username = ?`).get(newUsername) != null)
@@ -210,16 +227,6 @@ async function dbRoute (fastify, options) {
             return ({ success: false, error: error.message });
         }
     });
-
-    async function isValidPassword(password) {
-        const minLength    = password.length >= 8;
-        const hasUppercase = /[A-Z]/.test(password);
-        const hasLowercase = /[a-z]/.test(password);
-        const hasDigit     = /[0-9]/.test(password);
-        const hasSpecial   = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-
-        return minLength && hasUppercase && hasLowercase && hasDigit && hasSpecial;
-    }
 
 
     fastify.get('/db/select/pics/:user1/:user2', async (req) => {
@@ -251,7 +258,7 @@ async function dbRoute (fastify, options) {
             const isMatch = await fastify.bcrypt.compare(body.password, user.password);
             if (!isMatch)
                 return ({ success: false, error: "errMismatch" });
-            if (await isValidPassword(body.newPassword))
+            if (isValidPassword(body.newPassword))
                 var hash_pass = await fastify.bcrypt.hash(body.newPassword);
             else
                 return ({ success: false, error: "errMdp" });
