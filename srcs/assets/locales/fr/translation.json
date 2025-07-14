@@ -87,5 +87,8 @@
   "errBadTname": "La taille du nom du tournois doit être comprise entre 3 et 20 characteres, sans caractère spécial",
   "errAlrTour": "Vous etes deja dans un tournois",
   "errSameP": "Le nouveau mot de passe ne doit pas etre identique a l'ancien",
-  "errNSameP": "Les mots de passe ne sont pas identiques"
+  "errNSameP": "Les mots de passe ne sont pas identiques",
+  "errIsInGame": "Vous ne pouvez pas faire ça tout en etant dans une partie",
+  "errPP": "Une erreur est survenue lors de l'upload de la photo de profil",
+  "errNoFile": "Aucun fichier selectionné pour l'upload"
 }

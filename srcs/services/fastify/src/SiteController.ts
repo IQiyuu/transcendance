@@ -319,11 +319,11 @@ export class   ProfileController{
                         body: formData,
                     });
                     if (!response.ok)
-                        console.log("error in file upload.");
+                        alert(this.site.getText("errPP"));
                     else {
                         const data = await response.json();
                         if (data.success === false){
-                            alert("Une erreur est survenue lors de l'upload de la photo de profil.");
+                            alert(this.site.getText("errPP"));
                             return;
                         }
                         document.getElementById("profile_picture_overlay").classList.replace("absolute", "hidden");
@@ -337,8 +337,7 @@ export class   ProfileController{
                     console.error("error: ", error);
                 }
             } else {
-                console.log("No file selected.");
-                alert("No file selected.");
+                alert(this.site.getText("errNoFile"));
             }
         });
 
@@ -830,7 +829,7 @@ export class SiteController{
             event.preventDefault();
 
             if (this.game.isPlaying()){
-                alert("Can't access this while waiting for a game");
+                alert(this.getText("errIsInGame"));
                 return ;
             }
             this.profile.setProfileUsername(null);
@@ -846,7 +845,7 @@ export class SiteController{
         this.about_btn.addEventListener("click", async (event) => {
             event.preventDefault();
             if (this.game.isPlaying()){
-                alert("Can't access this while waiting for a game");
+                alert(this.getText("errIsInGame"));
                 return ;
             }
 
@@ -859,7 +858,7 @@ export class SiteController{
         this.profile_btn.addEventListener("click", async (event) => {
             event.preventDefault();
             if (this.game.isPlaying()){
-                alert("Can't access this while waiting for a game");
+                alert(this.getText("errIsInGame"));
                 return ;
             }
             this.hide_menu();
@@ -898,7 +897,7 @@ export class SiteController{
         this.tournament_btn.addEventListener("click", async(event) => {
             event.preventDefault();
             if (this.game.isPlaying()){
-                alert("Can't access this while waiting for a game");
+                alert(this.getText("errIsInGame"));
                 return ;
             }
             // this.hide_btn_menu();
@@ -910,7 +909,7 @@ export class SiteController{
             event.preventDefault();
 
             if (this.game.isPlaying()){
-                alert("Can't access this while waiting for a game");
+                alert(this.getText("errIsInGame"));
                 return ;
             } else if (this.tournament.hasTournament()){
                 alert(this.getText("errIsInTournament"));
@@ -958,7 +957,7 @@ export class SiteController{
             const data = await response.json();
             if (!data.success) {
                 if (data.error)
-                    alert(data.error);
+                    alert("Wrong cookie");
                 return false;
             }
             this.username = data.username
