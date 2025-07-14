@@ -17,12 +17,12 @@ async function GoogleAuthRoute(fastify, options) {
   fastify.get('/google/google-auth', async (req, reply) => {
     const token = req?.cookies?.auth_token;
     if (token === undefined)
-      return (reply.code(403).send("Body incomplete"));
+      return reply.send ({sucess: 0});
     const googleEmail = req?.cookies.google_email;
-    if (googleEmail === undefined || token === undefined)
-			return (reply.code(403).send("Body incomplete"));
     try {
       const decoded = fastify.jwt.verify(token, secret);
+      if (decoded === undefined)
+        return reply.send ({sucess: 0});
       username = decoded.username;
       if (!googleEmail)
         return reply.redirect(authUrl);
@@ -56,13 +56,13 @@ async function GoogleAuthRoute(fastify, options) {
   try {
     const token = req?.cookies?.auth_token;
     if (token === undefined)
-      return (reply.code(403).send("Body incomplete"));
+      return reply.send ({sucess: 0});
     const decoded = fastify.jwt.verify(token, secret);
     if (decoded === null)
-      return (reply.code(403).send("Body incomplete"));
+      return reply.send ({sucess: 0});
     const username = decoded.username;
     if(username === undefined)
-      return (reply.code(403).send("Body incomplete"));
+      return reply.send ({sucess: 0});
     options.db.prepare('UPDATE users SET email = ? WHERE username = ?').run(null, username);
 
     return reply.send({ success: true, message: "2FA désactivé" });
@@ -75,11 +75,7 @@ async function GoogleAuthRoute(fastify, options) {
   // route principale pour se connecter avec google authentificator 
   fastify.get('/google/check', async (req, reply) => {
     const token = req?.cookies?.auth_token;
-    if (token === undefined)
-      return (reply.code(403).send("Body incomplete"));
     const googleEmail = req?.cookies?.google_email;
-    if (googleEmail === undefined || token === undefined)
-      return (reply.code(403).send("Body incomplete"));
 
     try 
     {
@@ -100,6 +96,7 @@ async function GoogleAuthRoute(fastify, options) {
             path: '/',
             httpOnly: true,
             secure: true,
+            
             SameSite: 'Strict',
             maxAge: 3600,
           });
@@ -185,7 +182,7 @@ fastify.get('/google/callback', async (req, reply) => {
         });
         const tokenData = await tokenResponse.json();
         if (token === undefined)
-      return (reply.code(403).send("Body incomplete"));
+      return reply.send ({sucess: 0});
     const accessToken = tokenData.access_token;
         const idToken = tokenData.id_token;
 
@@ -261,22 +258,22 @@ return reply.redirect('/google/check');
     return reply.status(500).send("Erreur lors de l'authentification.");
   }
 });
-// Fomction pour voir si le username via le cookie a un mail dans la db
+// Fonction pour voir si le username via le cookie a un mail dans la db
 fastify.get('/google/check-email-status', async (req, reply) => {
-        const token = req?.cookies?.auth_toke
+        const token = req?.cookies?.auth_token;
         if (token === undefined)
-          return (reply.code(403).send("Body incomplete"));
-        
+          return reply.send({success: false, error : "Token not found"});
         const decoded = fastify.jwt.verify(token, secret);
-        if (decoded === null)
-          return (reply.code(403).send("Body incomplete"));
+        if (decoded === undefined) 
+          return reply.send({success: false, error : "Decoded token not found"});
         const username = decoded.username;
-        if (username === undefined);
+        if (username === undefined)
+          return reply.send({success: false, error : "Username not found"});
         const value = options.db.prepare('SELECT * FROM users WHERE username = ?').get(username);
-        if (value.email === null)
-          return reply.send({success: 0});
+        if (value.email === undefined)
+          return reply.send({success: false});
         else 
-          return reply.send({success: 1});
+          return reply.send({success: true});
 });
 
 
