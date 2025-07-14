@@ -51,10 +51,10 @@ export class LangController{
         try {
             const file = await fetch(`/assets/locales/${lang}/translation.json`);
             if (!file.ok)
-                throw (Error("Lang file wasnt fetched, setting a default file"));
+                throw (Error("errNoLang"));
             this.file = await file.json();
             if (this.file == null)
-                throw (Error("Not parsed, setting a default file"));
+                throw (Error("errNotPars"));
         } catch (error) {     
             alert(error);
             this.file = {

@@ -42,16 +42,13 @@
   "errAlreadyLogged": "すでに他の場所に接続されています",
   "errIsInTournament": "トーナメントに登録している間はこれを行うことはできません",
   "about": "このゲームについて",
-
   "add_friend": "友達に追加",
   "rem_friend": "友達から削除",
-
   "google_auth": "Google の認証を取得したコネクタを接続します",
   "google_switch_enable": "Google認証を有効にする",
   "google_switch_disable": "Google認証を無効にする",
   "2FA_enable": "2FA を有効にする",
   "2FA_disable": "2FA を無効にする",
-
   "pass_change": "パスワードを変更する",
   "pass_current": "現在のパスワード",
   "pass_new": "新しいパスワード",
@@ -64,7 +61,6 @@
   "logout_btn": "ログアウト",
   "waiting_online": "待っている",
   "cancel_mm": "キャンセルするにはクリックしてください❌",
-
   "create_tour": "トーナメントを作成する",
   "join_tour": "トーナメントに参加する",
   "curr_tour": "トーナメントに戻る",
@@ -93,7 +89,9 @@
   "errSameP": "新しいパスワードは古いパスワードと同じであってはなりません。",
   "errNSameP": "パスワードが異なります。",
   "errIsInGame": "ゲーム中はこの操作を行うことはできません",
-  "erPP": "プロフィール写真のアップロード中にエラーが発生しました",
+  "errPP": "プロフィール写真のアップロード中にエラーが発生しました",
   "errNoFile": "アップロードするファイルが選択されていません",
-  "errNoTourn": "このトーナメントは存在しません"
+  "errNoTourn": "このトーナメントは存在しません",
+  "errNotPars": "解析されていません。デフォルトファイルを設定します",
+  "errNoLang": "言語ファイルが取得されていません。デ"
 }

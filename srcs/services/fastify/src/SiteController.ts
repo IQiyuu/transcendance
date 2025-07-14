@@ -957,13 +957,13 @@ export class SiteController{
             const data = await response.json();
             if (!data.success) {
                 if (data.error)
-                    alert("Wrong cookie");
+                    throw Error(data.error);
                 return false;
             }
             this.username = data.username
             return (response.ok === true && data.success === true);
         } catch (error) {
-            alert (error.message);
+            //console.log("Not Authenticated");
         }
     }
     

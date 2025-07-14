@@ -111,11 +111,11 @@ export class   GameController{
             event.preventDefault();
 
             if (this.ws !== null && !this.is_searching){
-                alert("Can't access this while looking for a game");
+                alert(this.site.getText("errIsMatchmaking"));
                 return ;
             }
             if (this.site.isInTournament()){
-                alert("You are already in a tournament");
+                alert(this.site.getText("errAlrTour"));
                 return ;
             }
 
@@ -132,11 +132,11 @@ export class   GameController{
             event.preventDefault();
 
             if (this.ws !== null){
-                alert("Can't access this while looking for a game");
+                alert(this.site.getText("errIsMatchmaking"));
                 return ;
             }
             if (this.site.isInTournament()){
-                alert("You are already in a tournament");
+                alert(this.site.getText("errAlrTour"));
                 return ;
             }
 
