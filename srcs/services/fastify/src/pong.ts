@@ -183,7 +183,6 @@ export class   GameController{
         }
         this.ws = new GameClientSocket(this.username, this);
         this.ws.startMatchmaking();
-        console.log("Matchmaking started");
     }
 
     stopMatchmaking(){
@@ -192,18 +191,14 @@ export class   GameController{
             this.ws.stopMatchmaking();
             this.ws.close();
             this.ws = null;
-            console.log("Matchmaking left");
         }
     }
 
     startTournamentGame(game_id, game){
 		this.is_tournament = true;
-        console.log("Creating a tournament game :");
         if (this.ws === null)
             this.ws = new GameClientSocket(this.username, this, game_id);
         else{
-            console.log("Game received , lets continue the tournament");
-            console.log(game);
             this.ws.setGameId(game_id);
             this.ws.startTournamentGame();
         }
@@ -261,13 +256,12 @@ export class   GameController{
         this.hide_game();
         
         if (this.is_tournament){
-            console.log("Tournament's game is finished ending");
-            console.log("Not closing socket for it can be used later");
-            
+            // console.log("Tournament's game is finished ending");
+            // console.log("Not closing socket for it can be used later");
             this.game_id = -1;
         } else {
             this.print_end_game();
-            console.log("closing socket after game ended");
+            // console.log("closing socket after game ended");
             this.close();
         }
     }
@@ -396,10 +390,6 @@ export class   GameController{
         this.game.classList.replace("flex", "hidden");
     }
 
-    print_match_end(){
-        console.log("MATCH END");
-    }
-
     async print_end_game() {
         this.hide_scoreboard();
         this.hide_game();
@@ -439,12 +429,10 @@ export class   GameController{
             if (res.ok) {
                 const data = await res.json();
 
-                console.log(data);
-
                 const pics = data.datas;
 
                 for (const pic of pics) {
-                    console.log(pic);
+                    // console.log(pic);
                     if (pic.username === this.left_player) leftPic = pic.picture_path;
                     else if (pic.username === this.right_player) rightPic = pic.picture_path;
                 }
@@ -543,10 +531,6 @@ export class   GameController{
         // on ajoute l'elem a la page
         this.end_screen.appendChild(btn);
         this.game_page.appendChild(this.end_screen);
-    }
-
-    hide_end_game(){
-        console.log("Maybe clearing the text ?");
     }
 
     // Not to be added to hide_all

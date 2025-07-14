@@ -57,7 +57,6 @@ export class LangController{
                 throw (Error("Not parsed, setting a default file"));
         } catch (error) {     
             alert(error);
-            console.log("loadFile");
             this.file = {
                 "title" : "Trong the game",
                 "username": "Username",

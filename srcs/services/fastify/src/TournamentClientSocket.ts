@@ -40,30 +40,23 @@ export class TournamentClientSocket{
 
     setSocket(){
         this.ws.onopen = (event) => {
-            console.log("Connected to the tournament");
             this.ctler.print_tournament_rejoin_btn();
         }
         
         this.ws.onmessage = (data) => {
             const message = JSON.parse(data.data);
             if (message === null){
-                console.log("TODO");
                 return ;
             }
             if (message.type === "update") {
-                console.log("TOUR_S : Tournament has been updated,");
-                console.log(message.tournament);
                 this.ctler.updateTournament(message.tournament);
             } else if (message.type === "started") {
-                console.log("TOUR_S :Tournament will start in a few moments");
                 this.ctler.updateTournament(message.tournament);
                 this.ctler.print_tournament_state();
                 this.ctler.hide_tournament_lobby();
             } else if (message.type === "new_match"){
-                console.log("TOUR_S : Creating a new tournament match"); 
                 this.ctler.createMatch(message.game_id, message.game);
             } else if (message.type === "finished"){
-                console.log("TOUR_S : Tournament is finished !");
                 this.ctler.updateTournament(message.tournament);
                 this.ctler.endTournament();
             } else if (message.type === "error"){
@@ -75,8 +68,6 @@ export class TournamentClientSocket{
 
 
         this.ws.onclose = (event) => {
-            console.log("Closing " + this.username);
-            console.log(event);
             this.ctler.clear_tournament_lobby();
             this.ctler.clear_tournament_state();
             this.ctler.clear_tournaments();

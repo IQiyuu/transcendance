@@ -34,13 +34,11 @@ export class FriendController {
             });
 
             const data = await response.json();
-            console.log(data);
-            console.log(response);
             if (!data.success) {
                 throw(Error(data.error));
             } else {
                 for (let user of data.friends) {
-                    console.log(user);
+                    // console.log(user);
                     this.addFriend(user.username, user.pp);
                     this.ws.send(JSON.stringify({
                         type: "connection",
@@ -63,7 +61,6 @@ export class FriendController {
 
         divs.forEach((div) => {
             if (div.id == `${username}_friendlist`) {
-                console.log('elem removed');
                 this.friendlist.removeChild(div);
                 return ;
             }
@@ -96,14 +93,14 @@ export class FriendController {
 
     async handleFriendClick(event: Event) {
         const friend_uname = document.getElementById("profile_username").textContent;
-        console.log(this.username);
-        console.log(friend_uname);
+        // console.log(this.username);
+        // console.log(friend_uname);
         const body = {
             username: this.username,
             friend: friend_uname,
         }
 
-        console.log("body: ", body);
+        // console.log("body: ", body);
         try {
             const friend_req = await fetch(`/db/friends/update`, {
                 method: 'POST',
@@ -112,7 +109,6 @@ export class FriendController {
             });
 
             const data = await friend_req.json();
-            console.log("reponse du server: ", data);
             if (data.success) {
                 document.getElementById("friend_btn").textContent = this.lang.getFile()[data.message];
                 if (data.status == "accepted") {

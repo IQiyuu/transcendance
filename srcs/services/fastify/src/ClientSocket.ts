@@ -35,16 +35,13 @@ export class ClientSocket{
 
     async set_socket(){
         this.ws.onopen = (event) => {
-            console.log("Auth connected");
             this.friends.initFriendlist();
         }
         
         this.ws.onmessage = (message) => {
-            console.log("msg recu: ", message);
             const data = JSON.parse(message.data);
             if (data === null)
                 return ; 
-            console.log("msg recu: ", data.data);
             if (data.type == "connection") {
                 const div = document.getElementById(`${data.user}_friendlist`);
                 const dot = div.getElementsByTagName("span")[0];
@@ -63,9 +60,9 @@ export class ClientSocket{
                 document.getElementById(`${data.username}_friendlist`).id = `${data.newUsername}_friendlist`;
                 document.getElementById(`${data.newUsername}_friendlist`).getElementsByTagName("p")[0].textContent = data.newUsername;
             } else if (data.type == "pp_swap") {
-                console.log(document.getElementById(`${data.username}_friendlist`));
-                console.log(data.pp)
-                console.log(document.getElementById(`${data.username}_friendlist`).getElementsByTagName("img"));
+                // console.log(document.getElementById(`${data.username}_friendlist`));
+                // console.log(data.pp)
+                // console.log(document.getElementById(`${data.username}_friendlist`).getElementsByTagName("img"));
                 document.getElementById(`${data.username}_friendlist`).getElementsByTagName("img")[0].src = data.pp;
             }
         };
@@ -90,10 +87,6 @@ export class ClientSocket{
         this.ws.send(JSON.stringify({
             type : "game_start"
         }));
-    }
-
-    print_info(){
-        console.log("Websocket for : " + this.username);
     }
 
     close(){

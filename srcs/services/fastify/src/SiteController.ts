@@ -334,10 +334,11 @@ export class   ProfileController{
                         this.site.send({ type: "pp_swap", username: this.username, pp: this.picture_path });
                     }
                 } catch (error) {
-                console.error("error: ", error);
+                    console.error("error: ", error);
                 }
             } else {
                 console.log("No file selected.");
+                alert("No file selected.");
             }
         });
 
@@ -357,7 +358,7 @@ export class   ProfileController{
             try {
                 if (newPassword != confirmPassword) 
                     throw(Error("errorPSame"));
-                console.log(body);
+                // console.log(body);
                 const req = await fetch('/db/update/password', {
                         method: 'POST',
                         credentials: 'include',
@@ -368,7 +369,7 @@ export class   ProfileController{
                 if (!data.success)
                     throw(Error(data.error));
 
-                console.log("password updated.");
+                // console.log("password updated.");
                 this.passError.textContent = "";
                 document.getElementById('errorMessages').classList.replace("block", "hidden");
                 this.closePasswordPopup();
@@ -437,7 +438,7 @@ export class   ProfileController{
 
     async saveUsername(newUsername) {
         document.getElementById('profile_username').innerText = newUsername;
-        console.log("Nouvelle valeur du nom d'utilisateur : " + newUsername);
+        // console.log("Nouvelle valeur du nom d'utilisateur : " + newUsername);
 
         const body = {
             username: this.username,
@@ -458,9 +459,8 @@ export class   ProfileController{
             this.site.send({type:"pseudo_swap", username: this.username, newUsername: newUsername});
             this.username = newUsername;
             this.site.setUsernames(this.username);
-            console.log("username updated.");
         } catch (error) {
-            console.log(this.site.getText(error.message));
+            // console.log(this.site.getText(error.message));
                 document.getElementById('profile_username').innerText = this.username;
             alert(this.site.getText(error.message));
         }
@@ -498,8 +498,8 @@ export class   ProfileController{
 			}else
                 document.getElementById("friend_btn").textContent = data2.error; // TO DO
 
-            console.log(this.picture_path);
-            console.log(data.profile);
+            // console.log(this.picture_path);
+            // console.log(data.profile);
         } catch (error){
             console.log(error);
         }
@@ -782,7 +782,6 @@ export class SiteController{
                 const data = await response.json();
                 
                 if (data.success) {
-                    // console.log("OUIII");
                     this.isRegisterMode = false;
                     this.username = data.username;
                     if (url == "/login")
@@ -941,7 +940,6 @@ export class SiteController{
             if (this.ws)
                 this.ws.close();
             this.ws = null;
-            console.log(this.ws);
         });
 
 		//Registering children events
@@ -1111,12 +1109,12 @@ export class SiteController{
             this.print_btn_menu();
             return;
         }
-        console.log(state);
+        // console.log(state);
         if (state.page === "menu") {
             this.print_menu();
             this.print_btn_menu();
         } else if (state.page === "profile") {
-            console.log(state.data.username);
+            // console.log(state.data.username);
             this.profile.setProfileUsername(state.data?.username || null);
             this.profile.printPage();
         } else if (state.page === "about") {

@@ -21,10 +21,10 @@ export class GameClientSocket{
         }
         this.ctl = ctl;
         if (match_id !== undefined){
-            console.log("game creation socket for tournament");
+            // console.log("game creation socket for tournament");
             this.match_id = match_id;
         }
-        this.updatePos.bind(this); // maybe ??
+        this.updatePos.bind(this);
         this.setSocket();
     }
 
@@ -65,14 +65,13 @@ export class GameClientSocket{
             if (message.type === "game_info"){
                 this.ctl.updateState(message.game);
             } else if (message.type === "matchmaking") {
-                console.log("Match found");
+                // console.log("Match found");
                 if (message.state === "found") {
                     this.ctl.updateState(message.game);
-                    console.log(message.game);
-                    console.log("this username = " + this.ctl.getUsername());
+                    // console.log(message.game);
                     let side = (message.game.players.left == this.ctl.getUsername() ? "left" : "right")
                     this.ctl.setSide(side);
-                    console.log("side = " + this.ctl.getSide());
+                    // console.log("side = " + this.ctl.getSide());
                     this.ctl.stop_matchmaking_animation();
                     this.ctl.hide_site();
                     this.ctl.hide_menu();
@@ -84,15 +83,15 @@ export class GameClientSocket{
                 this.ctl.hide_menu();
                 this.ctl.gameInit();
             } else if (message.type === "game_finished"){
-                console.log("Game is finished");
+                // console.log("Game is finished");
                 this.ctl.finishGame();
             } else if (message.type === "tournament"){
                 if (!message.success){
                     alert("erroererer");
                 } else{
                     if (message.state === "match_connected"){
-                        console.log("   Match should begin");
-                        console.log(message.game);
+                        // console.log("   Match should begin");
+                        // console.log(message.game);
                         this.ctl.setSide((message.game.players.left == this.ctl.getUsername() ? "left" : "right"));
                         this.ctl.gameInit();
                         this.ctl.updateState(message.game);
@@ -114,9 +113,9 @@ export class GameClientSocket{
         }
 
         this.ws.onerror = (event) => {
-            console.log("Error");
-            console.log(event);
-            alert("EOROROROROROR");
+            // console.log("Error");
+            // console.log(event);
+            alert("Socket error");
         }
     }
     
@@ -154,7 +153,7 @@ export class GameClientSocket{
     }
 
     startTournamentGame(){
-        console.log("Continuing tournament with " + this.match_id);
+        // console.log("Continuing tournament with " + this.match_id);
         this.ws.send(JSON.stringify({
             type : "tournament",
             state : "connecting_match",

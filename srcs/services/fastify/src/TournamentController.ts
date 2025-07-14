@@ -260,8 +260,7 @@ export class TournamentController {
     }
 
     endTournament(){
-        console.log("EndingTournament");
-        console.log(this.tournament);
+        // console.log(this.tournament);
         this.clear_tournament_lobby();
         this.hide_tournament_lobby();
         this.finished_tournament = this.tournament;
@@ -309,9 +308,6 @@ export class TournamentController {
     }
 
     print_tournament_lobby(){
-        // To recheck 
-        // console.log("Printing tournament lobby ( I have this :");
-        // console.log(this.tournament);
         if (this.tournament === null){
             alert("Not implemented yet (print tournament but tournament is null)");
             return ;
@@ -369,7 +365,6 @@ export class TournamentController {
         this.tournament_lobby.append(table);
    
         if (!this.tournament.isStarted()){
-            // console.log("   Tournament has not started yet");
             if (this.username === this.tournament.getOwner()) {
                 let start_button = document.createElement("button");
                 start_button.id = "start_tour";
@@ -491,7 +486,6 @@ export class TournamentController {
         try {
             let query = new URLSearchParams();
             query.append("username", this.username);
-            console.log(this.tournament);
             let url = '/tournament/leave/' + this.tournament.getId() + `?${query}`;
 
             const resp = await fetch(url, {
@@ -507,7 +501,6 @@ export class TournamentController {
                 this.ws = null;
                 this.tournament_join_btn.dispatchEvent(new MouseEvent("click"));
             } else {
-                console.log("Didnt leave");
                 throw (Error(data.error));
             }
         } catch (error) {
