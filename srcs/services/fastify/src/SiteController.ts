@@ -509,7 +509,6 @@ export class   ProfileController{
             this.register_date = data.profile.created_at;
             this.picture_path = data.profile.picture_path;
 
-            //front remove friend to fix
             const req2 = await fetch(`/db/friends/${this.username}/${this.profile_username}`, {
                 method: 'GET',
                 credentials: 'include',
@@ -519,7 +518,7 @@ export class   ProfileController{
             if (data2.success){
                document.getElementById("friend_btn").textContent = this.site.getText(data2.message);
 			}else
-                document.getElementById("friend_btn").textContent = data2.error; // TO DO
+                document.getElementById("friend_btn").textContent = data2.error;
 
             // console.log(this.picture_path);
             // console.log(data.profile);
@@ -603,7 +602,10 @@ export class   ProfileController{
         //profile
         this.profile_page.classList.replace("hidden", "flex");
         this.profile_username_tag.innerText = this.profile_username;
-        (this.profile_picture as HTMLImageElement).src = "assets/imgs/" + this.picture_path + "?" + new Date().getTime(); // jsp ??
+        if (!this.picture_path.startsWith("assets/imgs/"))
+            (this.profile_picture as HTMLImageElement).src = "assets/imgs/" + this.picture_path + "?" + new Date().getTime();
+        else
+            (this.profile_picture as HTMLImageElement).src = this.picture_path + "?" + new Date().getTime();
         this.register_date_tag.innerText = `${this.site.getText("member_since")}: ${this.register_date}`;
 
 		if (this.profile_username != this.username){

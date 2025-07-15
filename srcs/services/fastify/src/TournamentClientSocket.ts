@@ -52,8 +52,8 @@ export class TournamentClientSocket{
                 this.ctler.updateTournament(message.tournament);
             } else if (message.type === "started") {
                 this.ctler.updateTournament(message.tournament);
-                this.ctler.print_tournament_state();
-                this.ctler.hide_tournament_lobby();
+                // this.ctler.hide_all();
+                this.ctler.print_tournament();
             } else if (message.type === "new_match"){
                 this.ctler.createMatch(message.game_id, message.game);
             } else if (message.type === "finished"){
