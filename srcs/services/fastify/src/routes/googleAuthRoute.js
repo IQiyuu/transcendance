@@ -270,7 +270,8 @@ fastify.get('/google/check-email-status', async (req, reply) => {
         if (username === undefined)
           return reply.send({success: false, error : "errNoUser"});
         const value = options.db.prepare('SELECT * FROM users WHERE username = ?').get(username);
-        if (value.email === undefined)
+        console.log(value);
+        if (value.email === undefined || value.email === null)
           return reply.send({success: false});
         else 
           return reply.send({success: true});

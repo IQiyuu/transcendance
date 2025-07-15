@@ -897,7 +897,7 @@ export class SiteController{
                 });
                 if (res.ok) {
                     const data = await res.json();
-                    if(data.success == 1){
+                    if(data.success){
                         this.enable_auth_btn.classList.replace("enable_auth_btn", "disable_auth_btn");
                         //google_auth.textContent = "Desactiver Google authentificator";
                     }

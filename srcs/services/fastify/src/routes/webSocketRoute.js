@@ -125,46 +125,46 @@ async function websocketRoute(fastify, options) {
                         username: data.username,
                         pp: data.pp
                     }, data.username);
-                } else if (data.type === 'matchmaking') {
-                    if (data.state == 'enter' && waiting_list == null) {
-                        waiting_list = socket;
-                        w_uname = data.uname;
-                    }
-                    if (data.state == 'left') {
-                        waiting_list = null;
-                        w_uname = null;
-                    }
-                    if (waiting_list && w_uname !== data.uname) {
-                        const gameId = gameRoute.createGame(w_uname, data.uname);
-                        console.log(`Game created: ${gameId}`);
-                        waiting_list.send(JSON.stringify({
-                            type: 'matchmaking',
-                            state: 'found',
-                            gameId: gameId,
-                            role: 'left',
-                            opponent: data.uname
-                        }));
+                // } else if (data.type === 'matchmaking') {
+                    // if (data.state == 'enter' && waiting_list == null) {
+                    //     waiting_list = socket;
+                    //     w_uname = data.uname;
+                    // }
+                    // if (data.state == 'left') {
+                    //     waiting_list = null;
+                    //     w_uname = null;
+                    // }
+                    // if (waiting_list && w_uname !== data.uname) {
+                    //     const gameId = gameRoute.createGame(w_uname, data.uname);
+                    //     // console.log(`Game created: ${gameId}`);
+                    //     waiting_list.send(JSON.stringify({
+                    //         type: 'matchmaking',
+                    //         state: 'found',
+                    //         gameId: gameId,
+                    //         role: 'left',
+                    //         opponent: data.uname
+                    //     }));
                         
-                        socket.send(JSON.stringify({
-                            type: 'matchmaking',
-                            state: 'found',
-                            gameId: gameId,
-                            role: 'right',
-                            opponent: w_uname
-                        }));
+                    //     socket.send(JSON.stringify({
+                    //         type: 'matchmaking',
+                    //         state: 'found',
+                    //         gameId: gameId,
+                    //         role: 'right',
+                    //         opponent: w_uname
+                    //     }));
 
-                        // Sur deconnexion
-                        socket.on('close', () => {
-                            gameRoute.games[gameId].scores["left"] = 11;
-                        });
-                        waiting_list.on('close', () => {
-                            gameRoute.games[gameId].scores["right"] = 11;
-                        });
-                    } 
-                } else if (data.type === "disconnection") {
-                    if (gameId != -1) {
-                        delete gameRoute.games[gameId];
-                    }
+                        // // Sur deconnexion
+                        // socket.on('close', () => {
+                        //     gameRoute.games[gameId].scores["left"] = 11;
+                        // });
+                        // waiting_list.on('close', () => {
+                        //     gameRoute.games[gameId].scores["right"] = 11;
+                        // });
+                    // } 
+                // } else if (data.type === "disconnection") {
+                //     if (gameId != -1) {
+                //         delete gameRoute.games[gameId];
+                //     }
                 } else if (data.type == "initialized") {
                     sendInfosFriends(socket, username, "connection");
                 }

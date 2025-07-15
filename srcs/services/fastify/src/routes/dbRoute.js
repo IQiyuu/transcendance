@@ -251,7 +251,7 @@ async function dbRoute (fastify, options) {
         if (body?.username === undefined || body?.password === undefined || body?.newPassword === undefined)
           return (rep.code(403).send("Body incomplete"));
         try {
-            console.log(body);
+            // console.log(body);
             const user = db.prepare(`SELECT password FROM users WHERE username = ?`).get(body.username);
             if (user == null)
                 return ({ success: false, error: "errorInt" });
