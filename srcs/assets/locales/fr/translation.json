@@ -32,7 +32,7 @@
   "errMdp": "Le mot de passe doit contenir au moins une majuscule, une minuscule, un caractère special et entre 8 et 42 caractères",
   "errorInt": "Erreur interne",
   "errorPSame": "Les deux mots de passe doivent etre identiques",
-  "errUSame": "Meme username entre",
+  "errUSame": "même nom d'utilisateur saisi",
   "errUSmall": "Nom d'utilisateur trop court",
   "errUTaken": "Username deja prit",
   "errExpired": "Veuillez changer le mot de passe",

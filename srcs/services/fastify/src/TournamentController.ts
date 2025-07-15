@@ -60,12 +60,14 @@ export class Tournament {
 }
 
 function verifyForm(name){
-    if (name.value.length < 3)
-        return (alert(this.site.getText("errBadTname")), false);
-    if (name.value.length > 20)
-        return (alert(this.site.getText("errBadTname")), false);
-    // if (/[alnum]|_*|-*/.test(name.value))// char : digit, alphabet, _, -
-    //     return (alert("Characters can only be letters, digits, and - or _"), false);
+    // if (name.value.length < 3)
+    //     return (alert(this.site.getText("errBadTname")), false);
+    // if (name.value.length > 20)
+    //     return (alert(this.site.getText("errBadTname")), false);
+    // // if (/[alnum]|_*|-*/.test(name.value))// char : digit, alphabet, _, -
+    // //     return (alert("Characters can only be letters, digits, and - or _"), false);
+    // if (/[!@#$%^&*()_+=\-,.<>\/?\\|:;"']/.test(name.value))
+    //     return (alert(this.site.getText("errBadTname")), false);
     return (true);
 }
 
@@ -151,7 +153,7 @@ export class TournamentController {
                 else
                     throw (Error(data.error));
             } catch (error) {
-                alert(this.site.getText("errAlrTour"));
+                alert(this.site.getText("errBadTname"));
             }
         });
 

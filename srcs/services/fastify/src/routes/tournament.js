@@ -578,7 +578,7 @@ function tournamentRoute (fastify, options) {
 	function isValidTname(tournament) {
 		const minLength    = tournament.length >= 3;
     	const maxLength    = tournament.length <= 20;
-    	const hasSpecial   = /[!'@#$%^&*(),.?":{}|<>]/.test(tournament);
+    	const hasSpecial   = /[!'@#$%^&*(),.?":{}|<>/\\|+`~=_\-]/.test(tournament);
 		const uniq			= true;
 
 		tournaments.forEach(t => {
