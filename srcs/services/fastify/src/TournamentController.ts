@@ -134,7 +134,6 @@ export class TournamentController {
             event.preventDefault();
             const name = document.getElementById("tournament_name") as HTMLInputElement;
             if (!verifyForm(name)){
-                // Error to print here (or in verifyForm) ?
                 return ;
             }
             try {
@@ -151,7 +150,7 @@ export class TournamentController {
                 if (data.success) {
                     this.tournament = new Tournament(data.tournament);
                     this.ws = new TournamentClientSocket(this.username, this, this.tournament);
-                    this.hide_all();
+                    // this.hide_all();
                     this.print_tournament();
                 }
                 else
@@ -212,7 +211,7 @@ export class TournamentController {
                                         if (data.success) {
                                             this.tournament = new Tournament(data.tournament);
                                             this.ws = new TournamentClientSocket(this.username, this, this.tournament);
-                                            this.site.hide_all();
+                                            // this.site.hide_all();
                                             this.print_tournament();
                                         } else{
                                             const T_DSNT_EXISTS = 999;
@@ -397,8 +396,8 @@ export class TournamentController {
     }
 
     print_tournament_state() {
-    let brackets = this.tournament.getBrackets();
-    if (!brackets) return;
+        let brackets = this.tournament.getBrackets();
+        if (!brackets) return;
 
     // Nettoie l'affichage précédent
     this.tournament_state.innerHTML = "";
@@ -470,8 +469,9 @@ export class TournamentController {
     }
 
     print_tournament(){
+        this.site.hide_all()
         this.clear_tournament_lobby();
-        this.hide_tournament_lobby();
+        // this.hide_tournament_lobby();
         if (!this.tournament.isStarted())
             this.print_tournament_lobby();
         this.clear_tournament_state();

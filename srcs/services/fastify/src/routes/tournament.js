@@ -227,6 +227,11 @@ class Tournament{
 				match.state = T_FINISHED;
 				return ;
 			}
+			if (p1 === undefined){
+				match.winner = p2;
+				match.state = T_FINISHED;
+			}
+
 			if (p1?.socket?.readyState !== p1?.socket.OPEN && p2?.socket?.readyState !== p2?.socket?.OPEN){
 				match.winner = p1?.username; // Not fair, but easier, should be null
 				match.state = T_FINISHED;
@@ -242,7 +247,7 @@ class Tournament{
 			}
 			// console.log("Match has 2 players");
 			// console.log(p1.username + " vs " + p2.username);
-			let g_id = gameRoute.createGame(p1.username, p2.username, this.id);
+			let g_id = gameRoute.createGame(p1?.username, p2?.username, this.id);
 			match.game_id = g_id;
 			let game = gameRoute.getGameByID(g_id);
 			p1.socket.send(JSON.stringify({
@@ -362,9 +367,9 @@ function    getTournamentMasked(t){
 				// console.log(match.players);
 				let p2 = null;
 				if (match.players[1] !== null && match.players[1] !== undefined)
-					p2 = match.players[1].username;
+					p2 = match.players[1]?.username;
 				round.push({
-					p1 : match.players[0].username,
+					p1 : match.players[0]?.username,
 					p2 : p2,
 					state : match.state,
 					winner : match.winner
@@ -747,26 +752,30 @@ function tournamentRoute (fastify, options) {
 	})*/
 	
 	setInterval(() => {
-		tournaments.forEach(tournament => {
-			if (tournament === null){
-				return ;
-			}
-			// Tournament garbage collector x)
-			if (tournament.getSize() === 0){
-				tournaments.splice(tournaments.indexOf(tournament));
-				return ;
-			}
-			if (tournament.isFinished()){
-				tournament.endTournament();
-				tournaments.splice(tournaments.indexOf(tournament), 1);
-				return ;
-			}
-			else if (tournament.isRoundReadyToStart()){
-				updateTournamentPlayers(tournament);
-				tournament.startRound();
-			} else if (tournament.currentRoundIsFinished())
-				tournament.initNextRound();
-		});
+		try{
+			tournaments.forEach(tournament => {
+				if (tournament === null){
+					return ;
+				}
+				// Tournament garbage collector x)
+				if (tournament.getSize() === 0){
+					tournaments.splice(tournaments.indexOf(tournament));
+					return ;
+				}
+				if (tournament.isFinished()){
+					tournament.endTournament();
+					tournaments.splice(tournaments.indexOf(tournament), 1);
+					return ;
+				}
+				else if (tournament.isRoundReadyToStart()){
+					updateTournamentPlayers(tournament);
+					tournament.startRound();
+				} else if (tournament.currentRoundIsFinished())
+					tournament.initNextRound();
+			});
+		}catch (err){
+			console.log(err);
+		}
 	}, 100);
 }
 

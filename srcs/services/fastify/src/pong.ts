@@ -394,10 +394,6 @@ export class   GameController{
         this.game.classList.replace("flex", "hidden");
     }
 
-    print_match_end(){
-        console.log("MATCH END");
-    }
-
     async print_end_game() {
         this.hide_scoreboard();
         this.hide_game();
@@ -560,6 +556,8 @@ export class   GameController{
         this.hide_play_page();
         this.hide_game();
         this.hide_scoreboard();
+        if (this.end_screen)
+            this.end_screen.remove();
     }
 };
 

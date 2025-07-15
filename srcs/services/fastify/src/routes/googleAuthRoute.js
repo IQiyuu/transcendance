@@ -17,12 +17,12 @@ async function GoogleAuthRoute(fastify, options) {
   fastify.get('/google/google-auth', async (req, reply) => {
     const token = req?.cookies?.auth_token;
     if (token === undefined)
-      return reply.send ({sucess: 0});
+      return reply.send ({success: 0});
     const googleEmail = req?.cookies.google_email;
     try {
       const decoded = fastify.jwt.verify(token, secret);
       if (decoded === undefined)
-        return reply.send ({sucess: 0});
+        return reply.send ({success: 0});
       username = decoded.username;
       if (!googleEmail)
         return reply.redirect(authUrl);
@@ -56,13 +56,13 @@ async function GoogleAuthRoute(fastify, options) {
   try {
     const token = req?.cookies?.auth_token;
     if (token === undefined)
-      return reply.send ({sucess: 0});
+      return reply.send ({success: 0});
     const decoded = fastify.jwt.verify(token, secret);
     if (decoded === null)
-      return reply.send ({sucess: 0});
+      return reply.send ({success: 0});
     const username = decoded.username;
     if(username === undefined)
-      return reply.send ({sucess: 0});
+      return reply.send ({success: 0});
     options.db.prepare('UPDATE users SET email = ? WHERE username = ?').run(null, username);
 
     return reply.send({ success: true, message: "2FA désactivé" });
@@ -182,7 +182,7 @@ fastify.get('/google/callback', async (req, reply) => {
         });
         const tokenData = await tokenResponse.json();
         if (token === undefined)
-      return reply.send ({sucess: 0});
+      return reply.send ({success: 0});
     const accessToken = tokenData.access_token;
         const idToken = tokenData.id_token;
 
