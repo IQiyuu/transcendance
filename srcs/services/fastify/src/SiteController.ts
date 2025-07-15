@@ -14,7 +14,7 @@ export class   ProfileController{
     private	profile_username : string = null;
 
     private	picture_path : string = null;
-    private	register_date : string = "placeholder";
+    public	register_date : string = "placeholder";
 
     private	histo = null;
 
@@ -722,7 +722,7 @@ export class SiteController{
             this.navigate({ page: "menu" });
         }
 
-        this.lang = await new LangController(this.username);
+        this.lang = await new LangController(this.username, this.profile);
         if (this.friends)
             this.friends.setLang(this.lang);
         this.print_current_page();

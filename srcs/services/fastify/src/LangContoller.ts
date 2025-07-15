@@ -1,13 +1,14 @@
 export class LangController{
 
     private file: Object = null;
-
+    private profile;
     private username: string = null;
 
     private lang_select = (document.getElementById("lang_select") as HTMLSelectElement);
 
-    constructor(username){
+    constructor(username, profile){
         this.initLang(username);
+        this.profile = profile;
     }
 
     setUsername(username: string) {
@@ -113,7 +114,7 @@ export class LangController{
             document.getElementById('matchmaking').textContent = this.file['play_online'];
     
         document.getElementById("profile_creation").textContent
-            = this.file["member_since"] + " " + (document.getElementById("profile_creation").textContent).split(":")[1];
+            = this.file["member_since"] + " " + this.profile.register_date;
     
         // tournament
         document.getElementById("create_tournament").textContent = this.file["create_tour"];
