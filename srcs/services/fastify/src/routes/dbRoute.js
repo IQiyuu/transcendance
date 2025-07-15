@@ -208,7 +208,7 @@ async function dbRoute (fastify, options) {
                 return { success: false, error: 'errUname' };
 
             if (db.prepare(`SELECT username FROM users WHERE username = ?`).get(newUsername) != null)
-                return ({ sucess: false, error: "errUTaken" });
+                return ({ success: false, error: "errUTaken" });
             db.prepare(`UPDATE users SET username = ? WHERE username = ?`).run(newUsername, username);
             const payload = {
                 username: newUsername,
@@ -254,7 +254,7 @@ async function dbRoute (fastify, options) {
             console.log(body);
             const user = db.prepare(`SELECT password FROM users WHERE username = ?`).get(body.username);
             if (user == null)
-                return ({ sucess: false, error: "errorInt" });
+                return ({ success: false, error: "errorInt" });
             const isMatch = await fastify.bcrypt.compare(body.password, user.password);
             if (!isMatch)
                 return ({ success: false, error: "errMismatch" });

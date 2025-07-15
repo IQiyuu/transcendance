@@ -12,7 +12,7 @@ async function faRoute (fastify, options) {
         const decoded = fastify.jwt.verify(token, secret);
         if (decoded === null)
           return reply.send({success: false, error : "Decoded token not found"});
-        const username = decoded.username;
+        const username = decoded.username.username;
         let userToken  = req?.body;
         if (userToken === undefined)
 			    return reply.send({success: false, error : "User token not found"});
@@ -20,7 +20,7 @@ async function faRoute (fastify, options) {
          const verified = speakeasy.totp.verify({
             secret: value.secret,
             encoding: 'base32',
-            token: userToken,
+            token: userToken.userToken,
             window: 1,
           });
           if (verified) {
