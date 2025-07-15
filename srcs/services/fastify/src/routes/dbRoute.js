@@ -52,7 +52,7 @@ async function dbRoute (fastify, options) {
     fastify.get('/db/profile/:username', async (request, reply) => {
         try {
             const username = request?.params?.username;
-            if (!username) 
+            if (username === undefined || username === null) 
                 return (reply.code(403).send("Body incomplete"));
             // console.log(username);
             // ajouter l'image de profile
@@ -327,7 +327,7 @@ async function dbRoute (fastify, options) {
         const data = db.prepare('SELECT user_id FROM users WHERE username = ?').get(username);
         if (data)
             return data.user_id;
-        return "";
+        return undefined;
     }
 
     function getFriendList(user) {
@@ -368,7 +368,8 @@ async function dbRoute (fastify, options) {
         try {
             const userId = getIdFromUsername(body.username);
             const friendId = getIdFromUsername(body.friend);
-
+            if (userId === undefined || friendId === undefined)
+                return ({success: false, error: "User doesnt exists"});
             const datas = getFriendRelation(userId, friendId);
             if (datas) {
                 if (datas.status === "blocked") {
@@ -409,6 +410,9 @@ async function dbRoute (fastify, options) {
         try {
             const userId = getIdFromUsername(body.username);
             const friendId = getIdFromUsername(body.friend);
+
+            if (userId === undefined || friendId === undefined)
+                return ({success: false, error: "User doesnt exists"});
 
             const datas = getFriendRelation(userId, friendId);
 
@@ -457,6 +461,10 @@ async function dbRoute (fastify, options) {
         try {
             const userId = getIdFromUsername(request?.params?.user);
             const friendId = getIdFromUsername(request?.params?.friend);
+
+            if (userId === undefined || friendId === undefined)
+                return ({success: false, error: "User doesnt exists"});
+
             if (!userId || !friendId)
                 return (reply.code(403).send("Body incomplete"));
     
@@ -490,6 +498,8 @@ async function dbRoute (fastify, options) {
             return (reply.code(403).send("Body incomplete"));
         try {
             const userId = getIdFromUsername(request.params.username);
+            if (userId === undefined)
+                return ({success: false, error: "User doesnt exists"});
             if (!userId)
                 reply.send({ succes: false, error: "user not found" });
             const friendlist = getFriendList(userId);

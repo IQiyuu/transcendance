@@ -660,7 +660,7 @@ function tournamentRoute (fastify, options) {
 		let player_username = request?.query?.username;
 		
 		if (player_username !== request.user)
-			return (reply.code(403).send("Don't lie on your username"))
+			return (reply.code(403).send("Don't lie on your username"));
 
 		if (!existsTournament(tournaments, t_id))
 			return {success: false, code: T_DSNT_EXISTS,  error: "Tournament doesnt exists"};

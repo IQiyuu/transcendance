@@ -475,9 +475,23 @@ export class   ProfileController{
         }
     }
 
+    isValidUsername(username : string) {
+        if (username === null || username === undefined)
+            return (false);
+		const minLength		= username.length >= 3;
+		const maxLength		= username.length <= 15;
+
+		const regex			= /[^a-zA-Z0-9]/g;
+		const hasSpecial	= regex.test(username);
+
+		return minLength && maxLength && !hasSpecial;
+	}
+
     //Search for the player, and store datas
     async searchPlayerHandler(){
         try {
+            if (!this.isValidUsername(this.profile_username))
+                throw (Error("Invalid username"));
             const req = await fetch(`/db/profile/${this.profile_username}`, {
                 method: 'GET',
                 credentials: 'include',
@@ -510,7 +524,8 @@ export class   ProfileController{
             // console.log(this.picture_path);
             // console.log(data.profile);
         } catch (error){
-            console.log(error);
+            this.profile_username = this.username;
+            alert(error);
         }
     }
 

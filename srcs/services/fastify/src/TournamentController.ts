@@ -499,7 +499,7 @@ export class TournamentController {
                 this.ws = null;
                 this.tournament_join_btn.dispatchEvent(new MouseEvent("click"));
             } else {
-                throw (Error(data.error));
+                alert(data.error);
             }
         } catch (error) {
             console.log(error);
