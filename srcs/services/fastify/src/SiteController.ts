@@ -524,7 +524,7 @@ export class   ProfileController{
             // console.log(data.profile);
         } catch (error){
             this.profile_username = this.username;
-            console.log(error);
+            // console.log(error);
             alert(this.site.getText(error.message));
         }
     }

@@ -58,7 +58,6 @@ export class GameClientSocket{
         this.ws.onmessage = (data) => {
             const message = JSON.parse(data.data);
             if (message === null){
-                console.log("message is null");
                 return ;
             }
             // console.log("game message : " + message.type);

@@ -93,8 +93,6 @@ export class FriendController {
 
     async handleFriendClick(event: Event) {
         const friend_uname = document.getElementById("profile_username").textContent;
-        // console.log(this.username);
-        // console.log(friend_uname);
         const body = {
             username: this.username,
             friend: friend_uname,
