@@ -93,5 +93,11 @@
   "errNoFile": "Aucun fichier selectionné pour l'upload",
   "errNoTourn": "Ce tournoi n'existe pas",
   "errNotPars": "Non analysé, définition d'un fichier par défaut",
-  "errNoLang": "Le fichier de langue n'a pas été récupéré, définition d'un fichier par défaut"
+  "errNoLang": "Le fichier de langue n'a pas été récupéré, définition d'un fichier par défaut",
+  "errNoToken": "Jeton non trouvé",
+  "errNoUser": "Utilisateur non trouvé",
+  "errDecToken": "Jeton décodé non trouvé",
+  "errUnexpected": "Une erreur inattendue s'est produite, veuillez réessayer plus tard",
+  "errServ": "Une erreur s'est produite sur le serveur, veuillez réessayer plus tard",
+  "errTour": "Une erreur s'est produite avec le tournoi, veuillez réessayer plus tard"
 }

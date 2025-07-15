@@ -60,7 +60,7 @@ export class TournamentClientSocket{
                 this.ctler.updateTournament(message.tournament);
                 this.ctler.endTournament();
             } else if (message.type === "error"){
-                alert(message.message);
+                alert(this.ctler.getSite().getText("errTour"));
             } else if (message.type === "close"){
                 console.log(message.reason);
             }

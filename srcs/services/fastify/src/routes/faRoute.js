@@ -54,13 +54,13 @@ async function faRoute (fastify, options) {
     fastify.get('/fa/check-2fa-status', async (req, reply) => {
         const token = req?.cookies?.auth_token;
         if (token === undefined)
-          return reply.send({success: false, error : "Token not found"});
+          return reply.send({success: false, error : "errNoToken"});
         const decoded = fastify.jwt.verify(token, secret);
         if (decoded === undefined) 
-          return reply.send({success: false, error : "Decoded token not found"});
+          return reply.send({success: false, error : "errDecToken"});
         const username = decoded.username;
         if (username === undefined)
-			    return reply.send({success: false, error : "Username not found"});
+			    return reply.send({success: false, error : "errNoUser"});
         const value = options.db.prepare('SELECT * FROM users WHERE username = ?').get(username);
         if (value?.twofa_activate === 0)
           return reply.send({success: 0});
@@ -83,7 +83,7 @@ async function faRoute (fastify, options) {
           catch(err)
           {
             console.error(err);
-            return reply.send({ error: 'Erreur serveur' });
+            return reply.send({ error: "errServ" });
           }
     });
 
@@ -92,15 +92,15 @@ async function faRoute (fastify, options) {
     try {
         const token = req?.cookies?.auth_token;
         if (token === undefined)
-          return reply.send({success: false, error : "Token not found"});
+          return reply.send({success: false, error : "errNoToken"});
         const decoded = fastify.jwt.verify(token, secret);
         if (decoded === null)
-          return reply.send({success: false, error : "Decoded token not found"});
+          return reply.send({success: false, error : "errDecToken"});
         const username = decoded.username;
         if (username === undefined)
-			    return reply.send({success: false, error : "Username not found"});
+			    return reply.send({success: false, error : "errNoUser"});
         const value = options.db.prepare('SELECT * FROM users WHERE username = ?').get(username);
-        if (!value) return reply.status(404).send({ error: 'Utilisateur introuvable' });
+        if (!value) return reply.status(404).send({ error: "errNoUser" });
 
         let newStatus;
         if (value.twofa_activate === 0) {
@@ -115,7 +115,7 @@ async function faRoute (fastify, options) {
         return reply.send({ twofa: updatedUser.twofa, twofa_activate: newStatus });
     } catch (err) {
         console.error(err);
-        return reply.send({ error: 'Erreur serveur' });
+        return reply.send({ error: "errServ" });
     }
     });
 
