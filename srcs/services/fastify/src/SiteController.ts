@@ -45,7 +45,7 @@ export class   ProfileController{
     private file_input = document.getElementById("file_input");
     private previ_pp = (document.getElementById("previsu_picture") as HTMLImageElement);
 	
-    private searchError = document.getElementById("searchError");
+    //private searchError = document.getElementById("searchError");
 
     private	histo_list = document.getElementById("histo_list");
 
@@ -102,7 +102,7 @@ export class   ProfileController{
         // Player's search
         this.search_inp.addEventListener("keydown", async (event) => {
             if (event.key == 'Enter') {
-                this.searchError.classList.replace("flex", "hidden");
+                //this.searchError.classList.replace("flex", "hidden");
                 this.profile_username = this.search_inp.value;
                 await this.searchPlayerHandler();
                 this.printPage();
@@ -112,7 +112,7 @@ export class   ProfileController{
         this.search_btn.addEventListener("click", async (event) => {
             event.preventDefault();
 
-            this.searchError.classList.replace("flex", "hidden");
+            //this.searchError.classList.replace("flex", "hidden");
             this.profile_username = this.search_inp.value;
             await this.searchPlayerHandler();
             this.printPage();
@@ -187,7 +187,7 @@ export class   ProfileController{
                     console.log("Error while fetching google/check-email-status");
                 }
             } catch (error) {
-                alert(error.message);
+                alert(this.site.getText(error.message));
             }
 
         // Connexion with Google authentificator
@@ -491,7 +491,7 @@ export class   ProfileController{
     async searchPlayerHandler(){
         try {
             if (!this.isValidUsername(this.profile_username))
-                throw (Error("Invalid username"));
+                throw (Error("errNoUser"));
             const req = await fetch(`/db/profile/${this.profile_username}`, {
                 method: 'GET',
                 credentials: 'include',
@@ -502,7 +502,7 @@ export class   ProfileController{
 
             if (!data.success){
 				this.profile_username = this.username;
-                this.searchError.classList.replace("hidden", "flex");
+                //this.searchError.classList.replace("hidden", "flex");
                 throw (Error(data.message));
 			}
             this.profile_username = data.profile.username;
@@ -524,7 +524,8 @@ export class   ProfileController{
             // console.log(data.profile);
         } catch (error){
             this.profile_username = this.username;
-            alert(error);
+            console.log(error);
+            alert(this.site.getText(error.message));
         }
     }
 
@@ -586,10 +587,10 @@ export class   ProfileController{
             document.getElementById("percent").setAttribute("stroke-dasharray", `${(w/cpt)*100}, 100`);
         });
 
-        if (cpt == 0) {
-            this.wr_card.textContent = `wr : N/a`;
-            this.wr.textContent = "N/a";
-        }
+        // if (cpt == 0) {
+        //     this.wr_card.textContent = `wr : N/a`;
+        //     this.wr.textContent = "N/a";
+        // }
 	}
 
     async	printPage(){
@@ -663,7 +664,7 @@ export class   ProfileController{
                 }
             }
         } catch (error) {
-            alert(error.message);
+            alert(this.site.getText(error.message));
         }
     }
 
@@ -847,7 +848,7 @@ export class SiteController{
                     error.classList.replace("hidden", "block");
                 }
             } catch (error) {
-                alert(error.message);
+                alert(this.getText(error.message));
             }
         });
 

@@ -93,5 +93,11 @@
   "errNoFile": "No file selected for upload",
   "errNoTourn": "This tournament does not exist",
   "errNotPars": "Not parsed, setting a default file",
-  "errNoLang": "Lang file wasnt fetched, setting a default file"
+  "errNoLang": "Lang file wasnt fetched, setting a default file",
+  "errNoToken": "Token not found",
+  "errNoUser": "User not found",
+  "errDecToken": "Decoded token not found",
+  "errUnexpected": "An unexpected error occurred, please try again later",
+  "errServ": "An error occurred on the server, please try again later",
+  "errTour": "An error occurred with the tournament, please try again later"
 }

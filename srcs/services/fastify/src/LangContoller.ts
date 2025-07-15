@@ -1,3 +1,5 @@
+import { SiteController } from "./SiteController.js";
+
 export class LangController{
 
     private file: Object = null;
@@ -5,6 +7,7 @@ export class LangController{
     private username: string = null;
 
     private lang_select = (document.getElementById("lang_select") as HTMLSelectElement);
+    private site: SiteController;
 
     constructor(username, profile){
         this.initLang(username);
@@ -41,7 +44,7 @@ export class LangController{
                 lang = data.lang;
             }
         } catch (error) {
-            alert(error + " setting lang to english");
+            alert(this.site.getText(error.message));
         }
         this.lang_select.value = lang;
         return lang;

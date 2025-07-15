@@ -262,13 +262,13 @@ return reply.redirect('/google/check');
 fastify.get('/google/check-email-status', async (req, reply) => {
         const token = req?.cookies?.auth_token;
         if (token === undefined)
-          return reply.send({success: false, error : "Token not found"});
+          return reply.send({success: false, error : "errNoToken"});
         const decoded = fastify.jwt.verify(token, secret);
         if (decoded === undefined) 
-          return reply.send({success: false, error : "Decoded token not found"});
+          return reply.send({success: false, error : "errDecToken"});
         const username = decoded.username;
         if (username === undefined)
-          return reply.send({success: false, error : "Username not found"});
+          return reply.send({success: false, error : "errNoUser"});
         const value = options.db.prepare('SELECT * FROM users WHERE username = ?').get(username);
         if (value.email === undefined)
           return reply.send({success: false});

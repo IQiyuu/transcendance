@@ -57,7 +57,7 @@ async function dbRoute (fastify, options) {
             // console.log(username);
             // ajouter l'image de profile
             if (!db.prepare(`SELECT username FROM users WHERE username = ?`).get(username))
-                return {success: false, message: "User don't exists"};
+                return {success: false, message: "errNoUser"};
             const data = options.db.prepare('SELECT username, created_at, picture_path FROM users WHERE username = ?').get(username);
             // console.log(`Profile fetched from db: `, data);
             if (data === null || data === undefined)
@@ -65,7 +65,7 @@ async function dbRoute (fastify, options) {
             return { success: true, message: `Profile fetched`, profile: data };
         } catch (error) {
             console.log("error: ", error);
-            return { success: false, message: 'Error data db.' };
+            return { success: false, message: "errUnexpected" };
         }
     });
 
@@ -161,7 +161,7 @@ async function dbRoute (fastify, options) {
             if (datas)
                 reply.send({success:true, lang: datas.lang});
             else
-                reply.send({success:false, error: "user not found"});
+                reply.send({success:false, error: "errNoUser"});
         } catch (error) {
             console.log("error: ", error);
             return { success: false, error: error.message };

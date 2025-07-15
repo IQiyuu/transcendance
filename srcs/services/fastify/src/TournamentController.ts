@@ -104,6 +104,10 @@ export class TournamentController {
         this.username = username;
     }
 
+    public getSite() {
+        return this.site;
+    }
+
     hasTournament(){
         return (this.tournament !== null);
     }
