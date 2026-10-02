@@ -1,74 +1,98 @@
-modules to install:
-    fastify
-    @fastify/view
-    @fastify/cookie
-    @fastify/static
-    @fastify/websocket
-    @fastify/multipart
-    better-sqlite3
-    fastify-bcrypt
-    @fastify/jwt
-    ejs ?
-    fs ?
+# ft_transcendence
 
-table des parties:
-game_id INTEGER PRIMARY KEY AUTOINCREMENT,
-winner_id INTEGER NOT NULL,
-loser_id INTEGER NOT NULL,
-loser_score INTEGER NOT NULL,
-created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+Site web de Pong multijoueur en ligne, avec gestion des utilisateurs, parties à distance et historique des matchs. Projet final du tronc commun de 42.
 
+## Fonctionnalités
 
-tables des utilisateur:
-	user_id INTEGER PRIMARY KEY AUTOINCREMENT,
-	username TEXT NOT NULL,
-	password TEXT NOT NULL,
+- Pong jouable à distance (deux joueurs sur deux machines)
+- Logique de jeu entièrement côté serveur (server-side Pong)
+- Inscription / connexion, avatar personnalisé (upload d'image)
+- Authentification par JWT stocké dans un cookie `secure`
+- Profil utilisateur et historique des 5 dernières parties
+- Mots de passe hachés avec bcrypt
+
+## Stack technique
+
+| Rôle | Outil |
+|---|---|
+| Backend | Fastify |
+| Base de données | SQLite (`better-sqlite3`) |
+| Temps réel | `@fastify/websocket` |
+| Auth | `@fastify/jwt`, `@fastify/cookie`, `fastify-bcrypt` |
+| Upload d'avatars | `@fastify/multipart` |
+| Templates / fichiers statiques | `@fastify/view` (EJS), `@fastify/static` |
+
+> `fs` est un module natif de Node.js : il n'y a rien à installer.
+
+## Modules
+
+Le projet demande 7 points de modules. État actuel :
+
+| Module | Points | État |
+|---|---|---|
+| Backend avec Fastify | 1 | Fait |
+| Base de données backend | 0.5 | Fait |
+| Joueurs à distance | 1 | Fait |
+| Pong côté serveur | 1 | Fait |
+| Gestion standard des utilisateurs | 1 | Fait (quelques bugs restants) |
+| 2FA | 1 | À faire |
+| Chat en direct (DMs, invitations à jouer, chat de tournoi) | 1 | À faire |
+
+**Total validé : 4.5 points.**
+
+## Base de données
+
+```sql
+CREATE TABLE users (
+    user_id      INTEGER PRIMARY KEY AUTOINCREMENT,
+    username     TEXT NOT NULL,
+    password     TEXT NOT NULL,
     picture_path TEXT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
+CREATE TABLE games (
+    game_id      INTEGER PRIMARY KEY AUTOINCREMENT,
+    winner_id    INTEGER NOT NULL,
+    loser_id     INTEGER NOT NULL,
+    loser_score  INTEGER NOT NULL,
+    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
 
-SELECT g.game_id, uw.username AS winner_username, ul.username AS loser_username, g.loser_score, g.created_at FROM games g JOIN users uw ON g.winner_id = uw.user_id JOIN users ul ON g.loser_id = ul.user_id WHERE uw.username = ? OR ul.username = ? ORDER BY g.created_at DESC LIMIT 5;
+Historique d'un joueur (5 dernières parties) :
 
-INSERT INTO games (winner_id, loser_id, loser_score) SELECT u1.user_id AS winner_id, u2.user_id AS loser_id, ? AS loser_score FROM users u1, users u2  WHERE u1.username = ? AND u2.username = ?
+```sql
+SELECT g.game_id, uw.username AS winner_username, ul.username AS loser_username,
+       g.loser_score, g.created_at
+FROM games g
+JOIN users uw ON g.winner_id = uw.user_id
+JOIN users ul ON g.loser_id  = ul.user_id
+WHERE uw.username = ? OR ul.username = ?
+ORDER BY g.created_at DESC
+LIMIT 5;
+```
 
+## Installation
 
-SOIT:
-    - les games on un type dans la db et ce type est affiche dans lhistorique et les liens des profils ne sont pas cliquables.
-    - les games local ne sont pas compte dans la base de donnees.
+```bash
+git clone <url-du-repo>
+cd <repo>
+npm install fastify @fastify/view @fastify/cookie @fastify/static \
+  @fastify/websocket @fastify/multipart better-sqlite3 \
+  fastify-bcrypt @fastify/jwt ejs
+```
 
-multiplayer_module:
-    faire un plateau qui a autant de cote que de nombre de joueurs (3 joueurs un triangle, 4 un carre, 5 hexagone...)
+*(À adapter : commande de lancement, variables d'environnement, Docker si utilisé.)*
 
-user_management:
-    - avoir un nickname en plus de username
+## Pistes d'amélioration
 
+- Tournois et Pong local
+- 2FA et chat en direct
+- Ajout d'un `nickname` distinct du `username`
+- Type de partie en base (local / distant / tournoi) affiché dans l'historique
+- Mode multijoueur : plateau à N côtés (triangle pour 3, carré pour 4, hexagone pour 5…)
 
-normalement le cookie est secure
+## Auteur
 
-transcendance modules:
-    - backend fastify (1)
-    - db backend (0.5)
-    - standart user management (1)
-    - remote players (1)
-    - live chat (1)
-    - server-side pong (1)
-    - 2FA (1)
-
-on a:
-    - backend fastify (1)
-    - db backend (0.5)
-    - remote players (1)
-    - server-side pong (1)
-    - standart user management (1) => marche mais qqs bugs
-    
-4.5
-
-on a pas:
-    - tournois
-    - local pong
-    - 2FA (1)
-    - live chat (1) -> envoyer des dms -> invitations a jouer -> chat de tournois
-    
-    
-
-2
+Réalisé dans le cadre du cursus 42.
