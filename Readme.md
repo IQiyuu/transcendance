@@ -116,11 +116,6 @@ npm start
 
 ## Pistes d'amélioration
 
-* 🏆 Ajouter les tournois
-* 🎮 Ajouter un mode Pong local
-* 🔐 Ajouter la 2FA
-* 💬 Ajouter le chat en direct
-* 👤 Ajouter un `nickname` distinct du `username`
 * 🗄️ Ajouter le type de partie en base de données (`local`, `distant`, `tournoi`)
 * 📊 Afficher le type de partie dans l'historique
 * 🌐 Ajouter un mode multijoueur avec des plateaux à plusieurs côtés :
@@ -130,5 +125,9 @@ npm start
   * Hexagone pour 5 joueurs
 
 ## Auteur
+IQiyu
+Shadwogg
+Robin258
+Kiwifarcit
 
 Réalisé dans le cadre du **cursus 42**.
