@@ -34,13 +34,13 @@ Le projet demande **7 points de modules**.
 
 | Module                                                     | Points | État                             |
 | ---------------------------------------------------------- | -----: | -------------------------------- |
-| Backend avec Fastify                                       |      1 | ✅ Fait                           |
-| Base de données backend                                    |    0.5 | ✅ Fait                           |
-| Joueurs à distance                                         |      1 | ✅ Fait                           |
-| Pong côté serveur                                          |      1 | ✅ Fait                           |
-| Gestion standard des utilisateurs                          |      1 | 🟡 Fait — quelques bugs restants |
-| 2FA                                                        |      1 | ⬜ À faire                        |
-| Chat en direct (DMs, invitations à jouer, chat de tournoi) |      1 | ⬜ À faire                        |
+| Backend avec Fastify                                       |      1 | ✅ Fait                          |
+| Base de données backend                                    |    0.5 | ✅ Fait                          |
+| Joueurs à distance                                         |      1 | ✅ Fait                          |
+| Pong côté serveur                                          |      1 | ✅ Fait                          |
+| Gestion standard des utilisateurs                          |      1 | ✅ Fait                          |
+| 2FA                                                        |      1 | ✅ Fait                          |
+| Chat en direct (DMs, invitations à jouer, chat de tournoi) |      1 | ✅ Fait                          |
 
 **Total validé : 4.5 points**
 
