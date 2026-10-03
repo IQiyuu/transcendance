@@ -1,5 +1,5 @@
-let _username = sessionStorage.username;
-let lang_file = null;
+let _username: string | undefined = undefined;
+let lang_file = {};
 
 document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById("form");
@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const registerLink = document.getElementById("register-view");
     const logginBtn = document.getElementById("login_btn");
     let isRegisterMode = false;
+    initLang();
 
     // swap entre connexion et inscription
     registerLink.addEventListener("click", (event) => {
@@ -84,24 +85,23 @@ async function checkIfLoggedIn() {
             method: 'GET',
             credentials: 'include',
         });
-
         const data = await response.json();
 
         if (response.ok && data.success) {
             sessionStorage.setItem('username', data.username);
             sessionStorage.setItem('userId', data.id);
             _username = data.username;
-            console.log('Utilisateur connecté:', data.username);
             initSocket();
             return true;
-        } else {
-            console.log('Utilisateur non connecté');
-            return false;
         }
     } catch (error) {
         console.error('Erreur lors de la vérification de la connexion:', error);
-        return false;
     }
+    // pas connecté (ou erreur) : on oublie l'état local périmé
+    _username = undefined;
+    sessionStorage.removeItem('username');
+    sessionStorage.removeItem('userId');
+    return false;
 }
 
 function removeFriend(username) {
@@ -663,6 +663,14 @@ async function swapLang(lang="en") {
   lang_file = await file.json();
 }
 
+async function initLang() {
+    const lang = sessionStorage.getItem("lang") || "en";
+    await swapLang(lang);
+    updateContent();
+    const select = document.getElementById("lang_select") as HTMLSelectElement;
+    if (select) select.value = lang;
+}
+
 function    hide_menu(){
     let menu = document.getElementById("menu");
     if (menu != null)
@@ -774,9 +782,12 @@ document.getElementById("tournament_form").addEventListener("submit", async(even
 document.getElementById("lang_select").addEventListener("change", async (event) => {
     event.preventDefault();
     var val = (event.target as HTMLSelectElement).value;
+    sessionStorage.setItem("lang", val);
     await swapLang(val);
     updateContent();
-
+    console.log(_username);
+    if (!_username)
+        return;
     const body = {
         user: _username,
         lang: val
@@ -797,6 +808,7 @@ document.getElementById("logout_btn").addEventListener("click", async (event) =>
     const response = await fetch("/logout", {
         method: "POST",
     });
+    _username = undefined;
     sessionStorage.clear();
     
     document.getElementById("site").classList.replace("block", "hidden");

@@ -22,9 +22,9 @@ import fastifyBcrypt from 'fastify-bcrypt';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from "node:path";
 
-// Removing mongodb, to remove view 
+// Removing mongodb, to remove view
 
-const secretKey = 'bommerang-fleche-upair'; // pas sur de ce que je fais la
+const secretKey = fs.readFileSync('/run/secrets/JWT-secret', 'utf8').trim();
 
 const rootDir = dirname(dirname(fileURLToPath(import.meta.url))); // Root of the website
 
@@ -112,9 +112,8 @@ fastify.register(FastifyStatic, {
 })
 
 fastify.register(FastifyView, {
-  engine: {
-    ejs
-  },
+  engine: { ejs },
+  root: join(rootDir, 'dist', 'views'),
 })
 
 fastify.listen({ port: 3000, host: "0.0.0.0" }, function (err, address) {

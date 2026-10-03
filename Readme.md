@@ -28,65 +28,11 @@ Projet final du **tronc commun de 42**.
 
 > `fs` est un module natif de Node.js : aucune installation supplémentaire n'est nécessaire.
 
-## Modules
-
-Le projet demande **7 points de modules**.
-
-| Module                                                     | Points | État                             |
-| ---------------------------------------------------------- | -----: | -------------------------------- |
-| Backend avec Fastify                                       |      1 | ✅ Fait                          |
-| Base de données backend                                    |    0.5 | ✅ Fait                          |
-| Joueurs à distance                                         |      1 | ✅ Fait                          |
-| Pong côté serveur                                          |      1 | ✅ Fait                          |
-| Gestion standard des utilisateurs                          |      1 | ✅ Fait                          |
-| 2FA                                                        |      1 | ✅ Fait                          |
-| Chat en direct (DMs, invitations à jouer, chat de tournoi) |      1 | ✅ Fait                          |
-
-**Total validé : 4.5 points**
-
 ## Base de données
-
-### Table `users`
-
-```sql
-CREATE TABLE users (
-    user_id      INTEGER PRIMARY KEY AUTOINCREMENT,
-    username     TEXT NOT NULL,
-    password     TEXT NOT NULL,
-    picture_path TEXT NOT NULL,
-    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-```
-
-### Table `games`
-
-```sql
-CREATE TABLE games (
-    game_id      INTEGER PRIMARY KEY AUTOINCREMENT,
-    winner_id    INTEGER NOT NULL,
-    loser_id     INTEGER NOT NULL,
-    loser_score  INTEGER NOT NULL,
-    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-```
 
 ### Historique des parties
 
-Les **5 dernières parties** d'un joueur sont récupérées avec la requête suivante :
-
-```sql
-SELECT g.game_id,
-       uw.username AS winner_username,
-       ul.username AS loser_username,
-       g.loser_score,
-       g.created_at
-FROM games g
-JOIN users uw ON g.winner_id = uw.user_id
-JOIN users ul ON g.loser_id = ul.user_id
-WHERE uw.username = ? OR ul.username = ?
-ORDER BY g.created_at DESC
-LIMIT 5;
-```
+Les **5 dernières parties** d'un joueur sont récupérées et affichés dans le profil
 
 ## Installation
 

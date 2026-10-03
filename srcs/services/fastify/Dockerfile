@@ -1,13 +1,30 @@
+ARG NODE_VERSION=22
 
-ARG NODE_VERSION=latest
+# --- Stage 1 : build ---
+FROM node:${NODE_VERSION}-slim AS build
+WORKDIR /app
 
-FROM node:${NODE_VERSION}
+COPY services/fastify/package*.json ./
+RUN npm ci
 
-ARG PORT=3000
-EXPOSE ${PORT}
+COPY services/fastify/tsconfig.json ./
+COPY services/fastify/src ./src
+COPY assets ./dist/assets
 
-COPY --chmod=775 ./start.sh /home/start.sh
+RUN npm run build \
+ && cp dist/assets/favicon.ico dist/favicon.ico
 
-# WORKDIR /home/fastify
+# --- Stage 2 : image finale ---
+FROM node:${NODE_VERSION}-slim
+ENV NODE_ENV=production
+WORKDIR /home/fastify
 
-ENTRYPOINT ["bash", "/home/start.sh"]
+COPY --from=build /app/package*.json ./
+RUN npm ci --omit=dev
+COPY --from=build /app/dist ./dist
+
+RUN mkdir -p /home/db && chown node:node /home/db
+USER node
+
+EXPOSE 3000
+CMD ["node", "dist/server.js"]
