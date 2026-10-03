@@ -255,7 +255,7 @@ async function display_profile(username) {
             console.log("player not found.");
             return ;
         }
-        (document.getElementById("profile_picture") as HTMLImageElement).src = "assets/imgs/" + profile.datas.picture_path + "?" + new Date().getTime();
+        (document.getElementById("profile_picture") as HTMLImageElement).src = "imgs/" + profile.datas.picture_path + "?" + new Date().getTime();
         document.getElementById("profile_username").innerText = profile.datas.username;
         document.getElementById("profile_creation").innerText = `${lang_file["member_since"]}: ${profile.datas.created_at}`;
         const friendDiv = document.getElementById("friend_div");
@@ -479,7 +479,7 @@ document.getElementById("upload_btn").addEventListener("click", async (event) =>
                 document.getElementById("profile_picture_overlay").classList.replace("flex", "hidden");
                 (document.getElementById("previsu_picture") as HTMLImageElement).src = "";
                 (document.getElementById("file_input") as HTMLInputElement).value = "";
-                pp.src = "assets/imgs/" + _username + ".jpg?" + new Date().getTime();
+                pp.src = "imgs/" + _username + ".jpg?" + new Date().getTime();
             }
         } catch (error) {
           console.error("error: ", error);
