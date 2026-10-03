@@ -1,1 +1,7 @@
 @import "tailwindcss";
+
+@layer components {
+  .menu-btn {
+    @apply relative flex w-full items-center justify-center rounded-xl p-4 text-xl font-semibold text-white shadow-lg transition duration-200 cursor-pointer hover:scale-[1.02] hover:shadow-xl md:text-2xl;
+  }
+}

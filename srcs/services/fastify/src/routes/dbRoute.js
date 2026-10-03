@@ -23,17 +23,16 @@ async function dbRoute (fastify, options) {
         }
     });
 
-    fastify.post('/db/update/lang' , async (request, reply) => {
-        const body = request.body;
+    fastify.post('/db/update/lang', async (request, reply) => {
+        const { user, lang } = request.body ?? {};
+        if (typeof user !== "string" || !["en", "fr", "jp"].includes(lang))
+            return reply.code(400).send({ success: false, error: "invalid input" });
         try {
-            db.prepare(`UPDATE users
-                SET lang = ?
-                WHERE username = ?;
-            `).run(body.lang, body.user);
-            reply.send({success: true});
+            db.prepare(`UPDATE users SET lang = ? WHERE username = ?;`).run(lang, user);
+            return reply.send({ success: true });
         } catch (error) {
-            console.log("error: ", error);
-            return { success: false, error: error };
+            request.log.error(error);
+            return reply.code(500).send({ success: false, error: "database error" });
         }
     });
 

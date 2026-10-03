@@ -1,7 +1,7 @@
 async function logginRoute (fastify, options) {
   const secretKey = options.secretKey;
   fastify.get('/', async (request, reply) => {
-    return reply.view("src/index.ejs");
+    return reply.view("index.ejs");
   })
 
   // Route pour s'inscrire, verifie que le username n'existe pas
@@ -12,33 +12,32 @@ async function logginRoute (fastify, options) {
     try {
       const userExists = options.db.prepare('SELECT * FROM users WHERE username = ?').get(username);
 
-      if (userExists) {
-        return { success: false, message: 'errReg' };
-      }
+      if (userExists)
+          return reply.code(409).send({ success: false, message: 'errReg' });
+      
       const hash_pass = await fastify.bcrypt.hash(password);
       const insert = options.db.prepare('INSERT INTO users (username, password) VALUES (?, ?)');
-      insert.run(username, hash_pass);
+      const result = insert.run(username, hash_pass);
 
-      // console.log(`User '${username}' added to db`);
-
-      const payload = {
-        username: username,
-      };
-
-      const token = fastify.jwt.sign(payload, secretKey, { expiresIn: '1d' });
+      const token = fastify.jwt.sign({ username }, { expiresIn: '1d' });
 
       reply.setCookie('auth_token', token, {
         path: '/',
         httpOnly: true,
         secure: true,
         SameSite: 'Strict',
-        maxAge: 86400000,
+        maxAge: 86400,
       });
       
-      return reply.code(205).send({ success: true, message: `Welcome ${username}` });
+      return reply.code(201).send({
+        success: true,
+        message: `Welcome ${username}`,
+        username: username,
+        id: result.lastInsertRowid,
+      });
     } catch (error) {
-      console.error('Error insert data in db.', error);
-      return { success: false, message: 'Error insert data in db.' };
+      console.log(error);
+      return reply.code(500).send({ success: false, message: 'Error insert data in db.' });
     }
   });
 
@@ -49,31 +48,26 @@ async function logginRoute (fastify, options) {
 
     try {
         const user = options.db.prepare('SELECT * FROM users WHERE username = ?').get(username);
-        if (!user) {
-            return reply.send({ success: false, message: 'errAuth' });
-        }
+        if (!user)
+            return reply.code(401).send({ success: false, message: 'errAuth' });
 
         const isMatch = await fastify.bcrypt.compare(password, user.password);
 
-        if (!isMatch) {
-            return reply.send({ success: false, message: 'errAuth' });
-        }
+        if (!isMatch)
+          return reply.code(401).send({ success: false, message: 'errAuth' });
 
-        const payload = {
-          username: username,
-        };
-        const token = fastify.jwt.sign(payload, { expiresIn: '1d' });
+        const token = fastify.jwt.sign({ username }, { expiresIn: '1d' });
 
         reply.setCookie('auth_token', token, {
           path: '/',
           httpOnly: true,
           secure: true,
           SameSite: 'Strict',
-          maxAge: 3600,
+          maxAge: 86400,
         });
 
 
-        return { success: true, message: `Welcome ${username}`, username: username };
+        return reply.code(200).send({ success: true, message: `Welcome ${username}`, username: username, id: user.user_id });
 
     } catch (error) {
       console.log("error: ", error);

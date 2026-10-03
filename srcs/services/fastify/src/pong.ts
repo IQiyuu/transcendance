@@ -196,7 +196,8 @@ function startGame(oponnent, ws, local) {
     keyState["ArrowDown"] = false;
     document.getElementById("menu").classList.replace("block", "hidden");
     document.getElementById("game_box").classList.replace("hidden", "flex");
-    canvas.tabIndex = 1000;
+    canvas.tabIndex = 0;
+    canvas.focus();
     console.log("moves available, playing against: ", oponnent);
     console.log(local);
     draw(ws, local);
