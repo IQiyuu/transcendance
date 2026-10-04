@@ -10,7 +10,7 @@
     "start": "node dist/server.js",
     "dev": "node --watch dist/server.js",
     "dev:css": "tailwindcss -i ./src/input.css -o ./dist/style.css --watch",
-    "test": "node --test"
+    "test": "node --test --test-reporter=spec \"test/**/*.test.js\""
   },
   "keywords": [],
   "author": "",
