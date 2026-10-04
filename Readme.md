@@ -59,6 +59,7 @@ npm install fastify \
 ```bash
 npm start
 ```
+npm test -- --test-name-pattern="SEC-02"
 
 ## Pistes d'amélioration
 
@@ -76,4 +77,4 @@ Shadwogg
 Robin258
 Kiwifarcit
 
-Réalisé dans le cadre du **cursus 42**.
+Réalisé dans le cadre du **cursus 42** + ajout d'une partie DevSecOps
