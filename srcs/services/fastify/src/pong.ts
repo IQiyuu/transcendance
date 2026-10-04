@@ -3,6 +3,8 @@ const matchmaking_btn = document.getElementById("matchmaking");
 const ctx = canvas.getContext("2d");
 let _userId = sessionStorage.userId;
 let _role = null;
+let _state: any = null;
+let _local = false;
 
 const paddleWidth = 10, paddleHeight = 100;
 const ballRadius = 5;
@@ -50,139 +52,86 @@ async function saveGame(game) {
     }
 }
 
-// Affiche le canvas
-async function draw(ws, local) {
-    try {
-        const response = await fetch(`/game/${_gameId}`, {
-            method: "GET",
-            headers: { "Content-Type": "application/json" },
-        });
-
-        if (!response.ok) {
-            console.log("error fetching game data");
-            return;
-        }
-
-        const game = await response.json();
-
+function draw(ws, local) {
+    if (_gameId === -1) return;
+    const game = _state;
+    if (game) {
         document.getElementById("player-left").textContent = game.players.left || "Player 1";
         document.getElementById("player-right").textContent = game.players.right || "Player 2";
         document.getElementById("score-left").textContent = game.scores.left;
         document.getElementById("score-right").textContent = game.scores.right;
 
-        if (game.scores.left == _winningScore || game.scores.right == _winningScore) {
-            const winner = game.scores.left == 11 ? "left" : "right";
+        if (game.scores.left >= _winningScore || game.scores.right >= _winningScore) {
+            const winner = game.scores.left >= _winningScore ? "left" : "right";
             if (ws && _role == winner)
-                await saveGame(game);
+                saveGame(game);
             endGame(ws);
-            return ;
+            return;
         }
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = "rgb(160, 94, 204)";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        // Dimensions du rectangle
+
         const rectWidth = 700;
         const rectHeight = 500;
-        // Calcul pour centrer
         const x = (canvas.width - rectWidth) / 2;
         const y = (canvas.height - rectHeight) / 2;
 
-        console.log(game.ball);
-
         ctx.fillStyle = "black";
-        // Paddles
-        ctx.fillRect(
-            x + game.paddles.left.x,
-            y + game.paddles.left.y,
-            paddleWidth,
-            paddleHeight
-        );
-        ctx.fillRect(
-            x + game.paddles.right.x,
-            y + game.paddles.right.y,
-            paddleWidth,
-            paddleHeight
-        );
+        ctx.fillRect(x + game.paddles.left.x, y + game.paddles.left.y, paddleWidth, paddleHeight);
+        ctx.fillRect(x + game.paddles.right.x, y + game.paddles.right.y, paddleWidth, paddleHeight);
 
-        // Balle
         ctx.beginPath();
         ctx.arc(x + game.ball.x, y + game.ball.y, ballRadius, 0, Math.PI * 2);
-
         ctx.fill();
         ctx.closePath();
 
-
-        // Dessin du rectangle centré
         ctx.beginPath();
         ctx.moveTo(x, y);
         ctx.lineTo(x + rectWidth, y);
         ctx.lineTo(x + rectWidth, y + rectHeight);
         ctx.lineTo(x, y + rectHeight);
         ctx.closePath();
-
         ctx.stroke();
-
-    } catch (error) {
-        console.log("error: ", error);
     }
-
-    moves(local);
     requestAnimationFrame(() => draw(ws, local));
 }
 
-// Recupere les touches enfoncees
-function keyHandler(e){
-    keyState[e.code] = (e.type === "keydown");
+function keyHandler(e: KeyboardEvent) {
+    const down = e.type === "keydown";
+    if (!!keyState[e.code] === down) return;   // ignore la répétition automatique
+    keyState[e.code] = down;
+    sendInput();
 }
- 
 
-// Fait une requete qui va bouger les paddles (raquettes)
-async function moves(local) {
-    if (!local) {
-        if (keyState["ArrowUp"] || keyState["ArrowDown"]) {
-            const body = { 
-                gameId: _gameId, 
-                role: _role,
-                moveUp: keyState["ArrowUp"],
-            };
-            try {
-                const response = await fetch(`/game/${_gameId}/move`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(body),
-                });
-
-                if (!response.ok)
-                    console.log("error in movement request");
-            } catch (error) {
-                console.log("error: ", error);
-            }
-        }
+function sendInput() {
+    if (!(_ws instanceof WebSocket) || _ws.readyState !== 1 || _gameId === -1) return;
+    if (_local) {
+        _ws.send(JSON.stringify({
+            type: "localInput", gameId: _gameId,
+            left:  { up: !!keyState["KeyW"],    down: !!keyState["KeyS"] },
+            right: { up: !!keyState["ArrowUp"], down: !!keyState["ArrowDown"] },
+        }));
+    } else {
+        _ws.send(JSON.stringify({
+            type: "input", gameId: _gameId,
+            up: !!keyState["ArrowUp"], down: !!keyState["ArrowDown"],
+        }));
     }
-    else {
-        // console.log(keyState);
-        if (keyState["KeyW"] || keyState["KeyS"] || keyState["ArrowUp"] || keyState["ArrowDown"]) {
-            const body = { 
-                gameId: _gameId, 
-                moveRight: (keyState["ArrowUp"] || keyState["ArrowDown"]) ? keyState["ArrowUp"] : null,
-                moveLeft: (keyState["KeyW"] || keyState["KeyS"]) ? keyState["KeyW"] : null,
-            };
-            try {
-                const response = await fetch(`/game/local/${_gameId}/move`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(body),
-                });
+}
 
-                if (!response.ok)
-                    console.log("error in movement request");
-            } catch (error) {
-                console.log("error: ", error);
-            }
-        }
-    }
-};
+function releaseKeys() {
+    for (const k in keyState) keyState[k] = false;
+    sendInput();
+}
+
+function onState(e: MessageEvent) {
+    try {
+        const d = JSON.parse(e.data);
+        if (d.type === "state" && d.gameId == _gameId) _state = d;
+    } catch {}
+}
 
 // Lance la partie
 function startGame(oponnent, ws, local) {
@@ -198,8 +147,13 @@ function startGame(oponnent, ws, local) {
     document.getElementById("game_box").classList.replace("hidden", "flex");
     canvas.tabIndex = 0;
     canvas.focus();
-    console.log("moves available, playing against: ", oponnent);
-    console.log(local);
+    // console.log("moves available, playing against: ", oponnent);
+    // console.log(local);
+    _local = local;
+    _state = null;
+    ws.addEventListener("message", onState);
+    canvas.addEventListener("blur", releaseKeys);
+    sendInput();   // ← enregistre la socket côté serveur, même sans touche appuyée
     draw(ws, local);
 }
 
@@ -219,6 +173,8 @@ async function endGame(ws) {
     }
     document.getElementById("menu").classList.replace("hidden", "block");
     document.getElementById("game_box").classList.replace("flex", "hidden");
+    if (ws instanceof WebSocket) ws.removeEventListener("message", onState);
+        _state = null;
     _gameId = -1;
     console.log("moves unavaible");
     if (ws instanceof WebSocket)

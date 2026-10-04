@@ -6,11 +6,11 @@
   "scripts": {
     "build:ts": "tsc",
     "build:css": "tailwindcss -i ./src/input.css -o ./dist/style.css --minify",
-    "build": "npm run build:ts && npm run build:css && cp src/server.js dist/ && cp -r src/routes dist/ && mkdir -p dist/views && cp src/index.ejs dist/views/",
+    "build": "npm run build:ts && npm run build:css && cp src/server.js src/buildApp.js dist/ && cp -r src/routes dist/ && mkdir -p dist/views && cp src/index.ejs dist/views/",
     "start": "node dist/server.js",
     "dev": "node --watch dist/server.js",
     "dev:css": "tailwindcss -i ./src/input.css -o ./dist/style.css --watch",
-    "test": "echo \"no tests yet\" && exit 0"
+    "test": "node --test --test-reporter=spec \"test/**/*.test.js\""
   },
   "keywords": [],
   "author": "",
@@ -18,28 +18,28 @@
   "type": "module",
   "dependencies": {
     "@fastify/cookie": "^11.0.2",
-    "@fastify/jwt": "^9.1.0",
+    "@fastify/jwt": "^10.2.2",
     "@fastify/multipart": "^9.0.3",
-    "@fastify/static": "^8.1.1",
+    "@fastify/static": "^10.1.5",
     "@fastify/view": "^10.0.2",
     "@fastify/websocket": "^11.0.2",
-    "bcrypt": "^5.1.1",
+    "bcrypt": "^6.0.0",
     "better-sqlite3": "^11.10.0",
     "ejs": "^3.1.10",
-    "fastify": "^5.3.2", 
+    "fastify": "^5.3.2",
     "fastify-bcrypt": "^1.0.1",
     "fastify-cookie": "^5.6.1",
+    "fastify-metrics": "^10.x",
     "fastify-multipart": "^5.3.1",
     "fastify-plugin": "^5.0.1",
     "jsonwebtoken": "^9.0.2",
-    "socket.io": "^4.8.1",
-    "fastify-metrics": "^10.x"
+    "socket.io": "^4.8.1"
   },
   "devDependencies": {
-    "@types/node": "^22.13.4",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.7.3",
     "@tailwindcss/cli": "^4.1.4",
-    "tailwindcss": "^4.1.4"
+    "@types/node": "^22.13.4",
+    "tailwindcss": "^4.1.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3"
   }
 }

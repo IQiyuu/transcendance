@@ -17,11 +17,12 @@ $(SECRETS):
 $(SSL_CRT) $(SSL_KEY) &: | $(SECRETS)
 	openssl req -x509 -newkey rsa:4096 -keyout $(SSL_KEY) -out $(SSL_CRT) \
 		-sha256 -days 30 -nodes -subj "/C=FR/ST=France/L=Mulhouse/O=pong/CN=none"
-	chmod 644 $(SSL_CRT) $(SSL_KEY)
+	chmod 644 $(SSL_CRT)
+	chmod 600 $(SSL_KEY)
 
 $(JWT): | $(SECRETS)
 	openssl rand -hex 32 > $@
-	chmod 644 $@
+	chmod 600 $@
 
 tunnel:
 	cloudflared tunnel --url https://localhost:3000 --no-tls-verify
