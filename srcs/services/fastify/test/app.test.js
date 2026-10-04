@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert'
-import { buildApp } from '../src/app.js'
+import { buildApp } from '../src/buildApp.js'
 
 const options = { secretKey: 'secret-de-test', dbPath: ':memory:', logger: false }
 

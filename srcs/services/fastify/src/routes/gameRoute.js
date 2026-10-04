@@ -1,26 +1,12 @@
 import fs from 'fs';
 import fastifyPlugin from 'fastify-plugin';
 
-function randomIntFromInterval(min, max) {
-    return Math.floor(Math.random() * (max - min + 1) + min);
-}
-
-function degToRad(degree){
-    return ((degree * Math.PI) / 180)
-}
+import { games, createGame, degToRad, STARTING_SPEED, STARTING_X, STARTING_Y, gameSockets, broadcastState } from './gameState.js';
 
 async function gameRoute (fastify, options) {
-    let games = {};
     let waiting_list = null;
     let w_uname = null;
     let img_path = "dist/assets/imgs/";
-
-    const STARTING_SPEED = 5;
-    const ACCELERATION = 1;
-    const LIMIT_SPEED = 15;
-
-    const STARTING_X = 400;
-    const STARTING_Y = 200;
 
     // function addGame(game){
     //     games[Object.keys(games).length] = game;
@@ -31,51 +17,7 @@ async function gameRoute (fastify, options) {
     const paddleWidth = 10, paddleHeight = 100;
      */
     // Creer un objet game cote server
-    function createGame(l_name, r_name) {
-        const gameId = Object.keys(games).length;
-        const angle = degToRad(randomIntFromInterval(0, 45));
-        const neg_x = randomIntFromInterval(0,1), neg_y = randomIntFromInterval(0,1);
-        games[gameId] = {
-            id: gameId,
-            players: {  
-                left: l_name,
-                right: r_name
-            },
-            scores: {
-                left: 0,
-                right: 0
-            },
-            ball: {
-                x: STARTING_X,
-                y: STARTING_Y,
-                dx: Math.cos(angle) * (neg_x ? -1 : 1),
-                dy: Math.sin(angle) * (neg_y ? -1 : 1),
-                dist: -1,
-                v: STARTING_SPEED,
-                accelerate: function() {
-                    if (this.v < LIMIT_SPEED)
-                        this.v += ACCELERATION;
-                },
-                randomizeVector: function() {
-                    const angle = degToRad(randomIntFromInterval(0, 45));
-                    const neg_x = randomIntFromInterval(0,1), neg_y = randomIntFromInterval(0,1);
-                    this.dx = Math.cos(angle) * (neg_x ? -1 : 1);
-                    this.dy = Math.sin(angle) * (neg_y ? -1 : 1);
-                }
-            },
-            paddles: {
-                left: {
-                    x: 10,
-                    y: 300
-                },
-                right: {
-                    x: 680,
-                    y: 300
-                }
-            }
-        }
-        return gameId;
-    };
+
 
     // Stocke la game dans la db
     fastify.post('/game/storeGame', async (request, reply) => {
@@ -93,6 +35,7 @@ async function gameRoute (fastify, options) {
 
     fastify.post('/game/stopGame', async (req, reply) => {
         delete games[req.body.gameId];
+        gameSockets.delete(Number(req.body.gameId));
     });
 
     // Route qui recupere les infos du user :username dans la db et les renvoie
@@ -207,11 +150,13 @@ async function gameRoute (fastify, options) {
 
     // Route qui change les coordonnees du joueur qui bouge
     fastify.post('/game/:id/move', async (request, reply) => {
-        var game = games[request.params.id];
-        var newY = game.paddles[request.body.role].y + (request.body.moveUp ? -4 : 4);
-        if (newY > 120 && newY < 580)
-            game.paddles[request.body.role].y = newY;
-    })
+        const game = games[request.params.id];
+        if (!game) return reply.status(404).send({ error: 'Game not found' });
+            const paddle = game.paddles[request.body.role];
+        if (!paddle) return reply.status(400).send({ error: 'Bad role' });
+            paddle.y = Math.max(0, Math.min(400, paddle.y + (request.body.moveUp ? -4 : 4)));
+        return { success: true };
+    });
 
     // Route qui change les coordonnees du joueur qui bouge
     fastify.post('/game/local/:id/move', async (request, reply) => {
@@ -264,6 +209,13 @@ async function gameRoute (fastify, options) {
 
     const interval =setInterval(() => {
         Object.values(games).forEach(game => {
+            for (const side of ['left', 'right']) {
+                const inp = game.inputs?.[side];
+                if (inp) {
+                    const p = game.paddles[side];
+                    p.y = Math.max(0, Math.min(400, p.y + (inp.down ? 6 : 0) - (inp.up ? 6 : 0)));
+                }
+            }
 
             game.ball.x += game.ball.dx * game.ball.v;
             game.ball.y += game.ball.dy * game.ball.v;
@@ -318,6 +270,7 @@ async function gameRoute (fastify, options) {
                 game.ball.y = STARTING_Y;
                 game.ball.randomizeVector();
             }
+            broadcastState(game);
         });
     }, 30);
     fastify.addHook('onClose', () => clearInterval(interval))

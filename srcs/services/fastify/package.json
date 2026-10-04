@@ -6,7 +6,7 @@
   "scripts": {
     "build:ts": "tsc",
     "build:css": "tailwindcss -i ./src/input.css -o ./dist/style.css --minify",
-    "build": "npm run build:ts && npm run build:css && cp src/server.js dist/ && cp -r src/routes dist/ && mkdir -p dist/views && cp src/index.ejs dist/views/",
+    "build": "npm run build:ts && npm run build:css && cp src/server.js src/buildApp.js dist/ && cp -r src/routes dist/ && mkdir -p dist/views && cp src/index.ejs dist/views/",
     "start": "node dist/server.js",
     "dev": "node --watch dist/server.js",
     "dev:css": "tailwindcss -i ./src/input.css -o ./dist/style.css --watch",

@@ -1,5 +1,5 @@
 import fs from 'fs'
-import { buildApp } from './app.js'
+import { buildApp } from './buildApp.js'
 
 const secretKey = fs.readFileSync('/run/secrets/JWT-secret', 'utf8').trim()
 
