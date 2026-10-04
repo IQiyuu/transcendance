@@ -262,7 +262,7 @@ async function gameRoute (fastify, options) {
         });
     });
 
-    setInterval(() => {
+    const interval =setInterval(() => {
         Object.values(games).forEach(game => {
 
             game.ball.x += game.ball.dx * game.ball.v;
@@ -320,6 +320,7 @@ async function gameRoute (fastify, options) {
             }
         });
     }, 30);
+    fastify.addHook('onClose', () => clearInterval(interval))
 }
 
 
