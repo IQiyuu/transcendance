@@ -1,18 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert'
-import { makeApp } from './helpers.js'
-
-async function appWithPlayers(t) {
-  const app = await makeApp()
-  t.after(() => app.close())
-  for (const username of ['tester', 'tested']) {
-    await app.inject({
-      method: 'POST', url: '/register',
-      payload: { username, password: 'Passw0rd!' },
-    })
-  }
-  return app
-}
+import { makeApp, appWithPlayers } from './helpers.js'
 
 test('fetch unexistant user', async () => {
     const app = await makeApp();
