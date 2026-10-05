@@ -23,13 +23,14 @@ async function gameRoute (fastify, options) {
     fastify.post('/game/storeGame', async (request, reply) => {
         const { winner_username, loser_username, loser_score } = request.body;
         try {
+            // console.log(winner_username, loser_username, loser_score);
             const insert = options.db.prepare('INSERT INTO games (winner_id, loser_id, loser_score) SELECT u1.user_id AS winner_id, u2.user_id AS loser_id, ? AS loser_score FROM users u1, users u2 WHERE u1.username = ? AND u2.username = ?');
             insert.run(loser_score, winner_username, loser_username);
 
-            return { success: true, message: `Game registered` };
+            return reply.status(200).send({ success: true, message: `Game registered` });
         } catch (error) {
             console.error('Error insert data in db.', error);
-            return { success: false, message: 'Error insert data in db.' };
+            return reply.status(400).send({ success: false, message: 'Error insert data in db.' });
         }
     });
 
@@ -42,30 +43,61 @@ async function gameRoute (fastify, options) {
     fastify.get('/profile/:username', async (request, reply) => {
         try {
             const username = request.params.username;
+            
             // console.log(username);
             // ajouter l'image de profile
             const datas = options.db.prepare('SELECT username, created_at, picture_path FROM users WHERE username = ?').get(username);
-            // console.log(`Profile fetched from db: `, datas);
-            return { success: true, message: `Profile fetched`, datas: datas };
+            if (!datas) return reply.status(404).send({ success: false, message: 'User not found' })
+            
+            return reply.status(200).send({ success: true, message: `Profile fetched`, datas: datas });
         } catch (error) {
             console.log("error: ", error);
-            return { success: false, message: 'Error data db.' };
+            return reply.status(400).send({ success: false, message: 'Error data db.' });
         }
     });
 
     // Pareil que au dessus avec les games
     fastify.get('/historic/:username', async (request, reply) => {
-
         try {
             const username = request.params.username;
-            // console.log(username);
-            const datas = options.db.prepare('SELECT g.game_id, uw.username AS winner_username, ul.username AS loser_username, g.loser_score, g.created_at FROM games g JOIN users uw ON g.winner_id = uw.user_id JOIN users ul ON g.loser_id = ul.user_id WHERE uw.username = ? OR ul.username = ? ORDER BY g.created_at DESC;').all(username,username);
 
-            // console.log(`historic fetched from db: `, datas);
-            return { success: true, message: `Game fetched`, datas: datas };
+            const user = options.db
+                .prepare('SELECT user_id FROM users WHERE username = ?')
+                .get(username);
+
+            if (!user) {
+                return reply.status(404).send({
+                    success: false,
+                    message: 'User not found'
+                });
+            }
+
+            const datas = options.db.prepare(`
+                SELECT
+                    g.game_id,
+                    uw.username AS winner_username,
+                    ul.username AS loser_username,
+                    g.loser_score,
+                    g.created_at
+                FROM games g
+                JOIN users uw ON g.winner_id = uw.user_id
+                JOIN users ul ON g.loser_id = ul.user_id
+                WHERE uw.username = ? OR ul.username = ?
+                ORDER BY g.created_at DESC
+            `).all(username, username);
+
+            return reply.status(200).send({
+                success: true,
+                message: 'Game fetched',
+                datas: datas
+            });
+
         } catch (error) {
-            console.error('Error data db.', error);
-            return { success: false, message: 'Error data db.' };
+            console.log('Error data db.', error);
+            return reply.status(400).send({
+                success: false,
+                message: 'Error data db.'
+            });
         }
     });
 
@@ -91,10 +123,10 @@ async function gameRoute (fastify, options) {
                         options.db.prepare('UPDATE users SET picture_path = ? WHERE username = ?').run(filename, username);
                     
                         // console.log('Picture uploaded in db for: ', username);
-                        return { success: true, message: 'File uploaded' };
+                        return reply.status(200).send({ success: true, message: 'File uploaded' });
                     } catch (error) {
                         console.error('Error updating data in db.', error);
-                        return { success: false, message: 'Error updating data in db' };
+                        return reply.status(400).send({ success: false, message: 'Error updating data in db' });
                     }
                     
                 });
@@ -108,37 +140,37 @@ async function gameRoute (fastify, options) {
         // console.log(username);
         
         if (newusername == username) {
-            return { success: false, message: 'Same username' };
+            return reply.status(400).send({ success: false, message: 'Same username' });
         }
         if (newusername.length <= 3) {
-            return { success: false, message: 'Username too small' };
+            return reply.status(400).send({ success: false, message: 'Username too small' });
         }
 
         if (newusername.length >= 15) {
-            return { success: false, message: 'Username too long' };
+            return reply.status(400).send({ success: false, message: 'Username too long' });
         }
         try {
             const datas = options.db.prepare('SELECT username FROM users WHERE username = ?').get(newusername);
             if (datas != undefined)
-                return { success: false, message: 'Username already taken' };
+                return reply.status(400).send({ success: false, message: 'Username already taken' });
         } catch (error) {
             console.error('Error db.', error);
-            return { success: false, message: 'Error db' };
+            return reply.status(400).send({ success: false, message: 'Error db' });
         }
         try {
             options.db.prepare('UPDATE users SET username = ? WHERE username = ?').run(newusername, username);
                 
             // console.log('Username modified in db for: ', newusername);
-            return { success: true, message: 'Username uploaded' };
+            return reply.status(200).send({ success: true, message: 'Username uploaded' });
         } catch (error) {
             console.error('Error updating data in db.', error);
-            return { success: false, message: 'Error updating data in db' };
+            return reply.status(400).send({ success: false, message: 'Error updating data in db' });
         }
     });
 
     fastify.post('/game/local/create', async (req, reply) => {
         const id = createGame(req.body.username, req.body.username+"-2");
-        return ({success: true, id: id});
+        return reply.status(é00).send({success: true, id: id});
     });
 
     // Route qui renvoie les infos de la game
@@ -155,7 +187,7 @@ async function gameRoute (fastify, options) {
             const paddle = game.paddles[request.body.role];
         if (!paddle) return reply.status(400).send({ error: 'Bad role' });
             paddle.y = Math.max(0, Math.min(400, paddle.y + (request.body.moveUp ? -4 : 4)));
-        return { success: true };
+        return reply.status(é00).send({ success: true });
     });
 
     // Route qui change les coordonnees du joueur qui bouge
