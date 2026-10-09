@@ -6,7 +6,7 @@ import assert from 'node:assert';
 import { makeApp, makeAppWithPlayers, uploadImage } from './helpers.js';
 
 test('fetch unexistant user', async (t) => {
-    const app = await makeApp();
+    const app = await makeApp(t);
 
     const res = await app.inject({ method: 'GET', url: '/profile/tester' });
     assert.equal(res.statusCode, 404);
@@ -25,7 +25,7 @@ test('fetch register user', async (t) => {
 });
 
 test('fetch histo of unknow user', async (t) => {
-    const app = await makeApp();
+    const app = await makeApp(t);
 
     const res = await app.inject({ method: 'GET', url: '/historic/unknow' });
     assert.equal(res.statusCode, 404);
@@ -44,7 +44,7 @@ test('fetch profile of registed player without games', async (t) => {
 });
 
 test('store game with unknow user', async (t) => {
-    const app = await makeApp();
+    const app = await makeApp(t);
 
     const res = await app.inject({
         method: 'POST',
@@ -95,7 +95,7 @@ test('upload pic without file', async (t) => {
 });
 
 test('upload pic of unknow user', async (t) => {
-    const app = await makeApp();
+    const app = await makeApp(t);
 
     const image = await readFile(
         new URL('../../../assets/imgs/IQiyu.jpg', import.meta.url)

@@ -20,10 +20,11 @@ export async function makeAppWithPlayers(t) {
     dbPath: ':memory:', 
     logger: false 
   });
-  t.after(() => app.close())
+  t?.after(() => app.close())
   for (const username of ['tester', 'tested', 'IQiyu']) {
     await app.inject({
-      method: 'POST', url: '/register',
+      method: 'POST', 
+      url: '/register',
       payload: { 
         username,
         password: 'Passw0rd!'
