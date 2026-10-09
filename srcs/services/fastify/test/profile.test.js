@@ -5,15 +5,13 @@ import { readFile } from 'node:fs/promises';
 import assert from 'node:assert';
 import { makeApp, makeAppWithPlayers, uploadImage } from './helpers.js';
 
-test('fetch unexistant user', async () => {
+test('fetch unexistant user', async (t) => {
     const app = await makeApp();
 
     const res = await app.inject({ method: 'GET', url: '/profile/tester' });
     assert.equal(res.statusCode, 404);
     assert.equal(res.json().success, false);
     assert.equal(res.json().datas, undefined);
-
-    await app.close();
 });
 
 
@@ -26,14 +24,12 @@ test('fetch register user', async (t) => {
     assert.equal(res.json().success, true);
 });
 
-test('fetch histo of unknow user', async () => {
+test('fetch histo of unknow user', async (t) => {
     const app = await makeApp();
 
     const res = await app.inject({ method: 'GET', url: '/historic/unknow' });
     assert.equal(res.statusCode, 404);
     assert.equal(res.json().success, false);
-
-    await app.close();
 });
 
 test('fetch profile of registed player without games', async (t) => {
@@ -98,7 +94,7 @@ test('upload pic without file', async (t) => {
     assert.equal(body.success, false);
 });
 
-test('upload pic of unknow user', async () => {
+test('upload pic of unknow user', async (t) => {
     const app = await makeApp();
 
     const image = await readFile(
@@ -111,9 +107,7 @@ test('upload pic of unknow user', async () => {
     const body = res.json();
     assert.equal(res.statusCode, 404);
     assert.equal(body.success, false);
-    
-    await app.close();
-});
+    });
 
 test('upload pic of known user', async (t) => {
     const app = await makeAppWithPlayers(t);

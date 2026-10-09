@@ -5,7 +5,7 @@ import { makeApp, makeAppWithPlayers } from './helpers.js';
 
 // friendlist
 
-test('fetch friendship with unknow user', async () => {
+test('fetch friendship with unknow user', async (t) => {
     const app = await makeApp();
 
     const res = await app.inject({
@@ -15,10 +15,7 @@ test('fetch friendship with unknow user', async () => {
 
     const body = res.json();
     assert.equal(res.statusCode, 404    );
-    assert.equal(body.success, false);
-
-    await app.close();
-});
+    assert.equal(body.success, false);});
 
 test('fetch friendship with myself', async (t) => {
     const app = await makeAppWithPlayers(t);
@@ -48,7 +45,7 @@ test('fetch friendship between two user', async (t) => {
 });
 
 // inviting friends
-test('add friend with unknow users', async () => {
+test('add friend with unknow users', async (t) => {
     const app = await makeApp();
 
     const res = await app.inject({
@@ -63,8 +60,6 @@ test('add friend with unknow users', async () => {
     const body = res.json();
     assert.equal(res.statusCode, 404);
     assert.equal(body.success, false);
-    
-    await app.close();
 });
 
 test('add myself friend', async (t) => {
@@ -130,7 +125,7 @@ test('add friend with known users', async (t) => {
 });
 
 // test block friends
-test('block unknow user', async () => {
+test('block unknow user', async (t) => {
     const app = await makeApp();
 
     const res = await app.inject({
@@ -144,10 +139,7 @@ test('block unknow user', async () => {
 
     const body = res.json();
     assert.equal(res.statusCode, 404);
-    assert.equal(body.success, false);
-
-    await app.close();
-});
+    assert.equal(body.success, false);});
 
 test('block myself', async (t) => {
     const app = await makeAppWithPlayers(t);
