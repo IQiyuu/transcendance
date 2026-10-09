@@ -48,7 +48,7 @@ test('fetch friendship between two user', async (t) => {
 });
 
 // inviting friends
-test('add friend with unknow users', async (t) => {
+test('add friend with unknow users', async () => {
     const app = await makeApp();
 
     const res = await app.inject({
@@ -162,8 +162,6 @@ test('block myself', async (t) => {
     const body = res.json();
     assert.equal(res.statusCode, 400);
     assert.equal(body.success, false);
-
-    await app.close();
 });
 
 test('block user', async (t) => {
