@@ -2,27 +2,6 @@
 async function dbRoute (fastify, options) {
     let db = options.db;
 
-    // retourne les lignes de la tables
-    fastify.get('/db/select/:table' , async (request, reply) => {
-        try {
-            const datas = db.prepare(`SELECT * FROM ${request.params.table}`).all();
-            reply.send(datas);
-        } catch (error) {
-            console.log("error: ", error);
-            return { success: false, error: error };
-        }
-    });
-
-    fastify.get('/db/select/lang/:user' , async (request, reply) => {
-        try {
-            const datas = db.prepare(`SELECT lang FROM users WHERE username=?`).get(request.params.user);
-            reply.send({success:true, lang: datas.lang});
-        } catch (error) {
-            console.log("error: ", error);
-            return { success: false, error: error };
-        }
-    });
-
     fastify.post('/db/update/lang', async (request, reply) => {
         const { user, lang } = request.body ?? {};
         if (typeof user !== "string" || !["en", "fr", "jp"].includes(lang))
@@ -33,54 +12,6 @@ async function dbRoute (fastify, options) {
         } catch (error) {
             request.log.error(error);
             return reply.code(500).send({ success: false, error: "database error" });
-        }
-    });
-
-    // retourne les infos du user demande
-    fastify.get('/db/select/users/:username' , async (request, reply) => {
-        try {
-            const datas = db.prepare(`
-                SELECT username, profile_path as pp, 
-                 FROM users`).all();
-            reply.send(datas);
-        } catch (error) {
-            console.log("error: ", error);
-            return { success: false, error: error };
-        }
-    });
-
-    // retourne les tables de la db
-    fastify.get('/db/tables' , async (request, reply) => {
-        try {
-            const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table';").all();
-            reply.send(tables);
-        } catch (error) {
-            console.log("error: ", error);
-            return { success: false, error: error };
-        }
-    });
-
-    // retourne comment sont faites les tables
-    fastify.get('/db/pragma/:table' , async (request, reply) => {
-        try {
-            const tableInfo = db.prepare(`PRAGMA table_info(${request.params.table});`).all();
-            reply.send(tableInfo);
-        } catch (error) {
-            console.log("error: ", error);
-            return { success: false, error: error };
-        }
-    });
-
-    // update une ligne de la table
-    fastify.get('/db/update/:table' , async (request, reply) => {
-        const body = request.body;
-        try {
-            const insert = db.prepare('UPDATE ? SET ? = ? WHERE ? = ?')
-            insert.run(request.params.table, body.colum, body.val, body.column2, body.val2);
-            return { success: true };
-        } catch (error) {
-            console.log("error: ", error);
-            return { success: false, error: error };
         }
     });
 
@@ -122,7 +53,10 @@ async function dbRoute (fastify, options) {
     }
 
     function getIdFromUsername(username) {
-        return db.prepare('SELECT user_id FROM users WHERE username = ?').get(username).user_id;
+        const user = db.prepare(
+            'SELECT user_id FROM users WHERE username = ?'
+        ).get(username);
+        return user?.user_id;
     }
 
     function getFriendList(user) {
@@ -157,33 +91,65 @@ async function dbRoute (fastify, options) {
             const userId = getIdFromUsername(body.user);
             const friendId = getIdFromUsername(body.friend);
 
+            if (!userId || !friendId) {
+                return reply.status(404).send({
+                    success: false,
+                    error: 'User not found'
+                });
+            } if (userId == friendId) {
+                return reply.status(400).send({
+                    success: false,
+                    error: 'Cannot check friendship with yourself'
+                });
+            }
+
             const datas = getFriendRelation(userId, friendId);
             if (datas) {
                 if (datas.status === "blocked") {
                     const message = datas.user == userId ? "send_yblock" : "send_block";
-                    return { success: true,  message: message };
+                    return reply.status(200).send({ success: true,  message: message });
                 } else if (datas.status === "pending") {
                     if (datas.user == userId) {
                         deleteRelation(userId, friendId);
-                        return { success: true, message: "send_inv", status: null };
+                        return reply.status(200).send({ 
+                            success: true, 
+                            message: "send_inv", 
+                            status: null 
+                        });
                     } else {
                         updateStatus(userId, friendId, "accepted");
-                        return { success: true, message: "send_rem", status: "accepted", user: getUserInfo(userId), friend: getUserInfo(friendId) };
+                        return reply.status(200).send({ 
+                            success: true,
+                            message: "send_rem",
+                            status: "accepted", 
+                            user: getUserInfo(userId),
+                            friend: getUserInfo(friendId)
+                        });
                     }
                 } else {
                     deleteRelation(userId, friendId);
-                    return { success: true, message: "send_inv", status: null };
+                    return reply.status(200).send({ 
+                        success: true,
+                        message: "send_inv",
+                        status: null 
+                    });
                 }
         
             } else {
                 // on creer la relation
                 createRelation(userId, friendId, 'pending');
-                return { success: true, message: "send_canc", status: 'pending' };
+                return reply.status(200).send({ 
+                    success: true,
+                    message: "send_canc",
+                    status: 'pending' });
             }
         } catch (error) {
 
             console.log("error: ", error);
-            return { success: false, error: error.message };
+            return reply.status(500).send({ 
+                success: false,
+                error: error.message
+            });
         }
     });
 
@@ -194,8 +160,19 @@ async function dbRoute (fastify, options) {
             const userId = getIdFromUsername(body.user);
             const friendId = getIdFromUsername(body.friend);
 
-            const datas = getFriendRelation(userId, friendId);
+            if (!userId || !friendId) {
+                return reply.status(404).send({
+                    success: false,
+                    error: 'User not found'
+                });
+            } if (userId == friendId) {
+                return reply.status(400).send({
+                    success: false,
+                    error: 'Cannot check friendship with yourself'
+                });
+            }
 
+            const datas = getFriendRelation(userId, friendId);
             if (datas) {
                 // Si uniquement 1 a bloque l'autre
                 if (datas.status === "blocked") {
@@ -203,7 +180,7 @@ async function dbRoute (fastify, options) {
                         deleteRelation(userId, friendId);
                     else 
                         updateStatus(userId, friendId, friendId, userId, "both_blocking");
-                    return { success: true, blocking: false };
+                    return reply.status(200).send({ success: true, blocking: false });
                 }
                 // Si les deux sont bloques
                 else if (datas.status === "both_blocking") {
@@ -211,7 +188,7 @@ async function dbRoute (fastify, options) {
                         updateRStatus(userId, friendId, "blocked");
                     else
                         updateStatus(userId, friendId, "blocked");
-                    return { success: true, blocking: false };
+                    return reply.status(200).send({ success: true, blocking: false });
                 }
                 // Si autre (pending, amis)
                 else {
@@ -220,16 +197,16 @@ async function dbRoute (fastify, options) {
                     }
                     else
                         updateRStatus(userId, friendId, "blocked");
-                    return { success: true, blocking: true };
+                    return reply.status(200).send({ success: true, blocking: true });
                 }
             }
             // Sinon creer un blocage
             else {
                 createRelation(userId, friendId, 'blocked');
-                return { success: true, blocking: true };
+                return reply.status(200).send({ success: true, blocking: true });
             }
         } catch (error) {
-            reply.send({ success: false, error: error });
+            return reply.status(500).send({ success: false, error: error });
         }
     });
 
@@ -237,29 +214,86 @@ async function dbRoute (fastify, options) {
     // Verifie si il y a un lien d amitie
     fastify.get('/db/friends/:user/:friend', async (request, reply) => {
         try {
-            const userId = getIdFromUsername(request.params.user);
-            const friendId = getIdFromUsername(request.params.friend);
-    
-            const friendship = getFriendRelation(userId, friendId);
-            if (friendship) {
-                if (friendship.status == "pending") {
-                    const message = friendship.user == userId ? "send_canc" : "send_acc";
-                    reply.send({ success: true, message: message, status: friendship.status, emoji: "🔒" });
-                } else if (friendship.status == "blocked") {
-                    const message = friendship.user == userId ? "unblock" : "send_inv";
-                    const emoji = friendship.user == userId ? "🔓" : "🔒";
-                    reply.send({ success: true, message: message, status: friendship.status, emoji: emoji });
-                } else if (friendship.status == "both_blocking") {
-                    const emoji = friendship.user == userId ? "🔓" : "🔒";
-                    reply.send({ success: true, message: "Unblock", status: friendship.status, emoji: emoji });
-                } else {
-                    reply.send({ success: true, message: "send_rem", status: friendship.status, emoji: "🔒" });
-                }
-            } else {
-                reply.send({ success: true, message: "send_inv", status: null, emoji: "🔒" });
+            const user = options.db
+                .prepare('SELECT user_id FROM users WHERE username = ?')
+                .get(request.params.user);
+
+            const friend = options.db
+                .prepare('SELECT user_id FROM users WHERE username = ?')
+                .get(request.params.friend);
+
+            if (!user || !friend) {
+                return reply.status(404).send({
+                    success: false,
+                    error: 'User not found'
+                });
+            } if (user == friend) {
+                return reply.status(400).send({
+                    success: false,
+                    error: 'Cannot check friendship with yourself'
+                });
             }
+
+            const userId = user.user_id;
+            const friendId = friend.user_id;
+
+            const friendship = getFriendRelation(userId, friendId);
+
+            if (friendship) {
+                if (friendship.status === 'pending') {
+                    const message = friendship.user === userId
+                        ? 'send_canc'
+                        : 'send_acc';
+
+                    return reply.status(200).send({
+                        success: true,
+                        message,
+                        status: friendship.status,
+                        emoji: '🔒'
+                    });
+                }
+
+                if (friendship.status === 'blocked') {
+                    const isBlocker = friendship.user === userId;
+
+                    return reply.status(200).send({
+                        success: true,
+                        message: isBlocker ? 'unblock' : 'send_inv',
+                        status: friendship.status,
+                        emoji: isBlocker ? '🔓' : '🔒'
+                    });
+                }
+
+                if (friendship.status === 'both_blocking') {
+                    return reply.status(200).send({
+                        success: true,
+                        message: 'Unblock',
+                        status: friendship.status,
+                        emoji: friendship.user === userId ? '🔓' : '🔒'
+                    });
+                }
+
+                return reply.status(200).send({
+                    success: true,
+                    message: 'send_rem',
+                    status: friendship.status,
+                    emoji: '🔒'
+                });
+            }
+
+            return reply.status(200).send({
+                success: true,
+                message: 'send_inv',
+                status: null,
+                emoji: '🔒'
+            });
         } catch (error) {
-            reply.send({ success: false, error: error.message });
+            request.log.error(error);
+
+            return reply.status(500).send({
+                success: false,
+                error: 'Database error'
+            });
         }
     });
 
@@ -268,10 +302,16 @@ async function dbRoute (fastify, options) {
             const userId = getIdFromUsername(request.params.username);
 
             const friendlist = getFriendList(userId);
-            reply.send({ success: true, friends: friendlist });
+            reply.status(200).send({ 
+                success: true, 
+                friends: friendlist 
+            });
         } catch (error) {
             console.log(error);
-            reply.send({ succes: false, error: error });
+            reply.status(500).send({ 
+                succes: false, 
+                error: error 
+            });
         }
     });
 

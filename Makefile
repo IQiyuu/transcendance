@@ -5,6 +5,7 @@ SECRETS = ./srcs/secrets
 SSL_CRT = $(SECRETS)/ssl.crt
 SSL_KEY = $(SECRETS)/ssl.key
 JWT     = $(SECRETS)/JWT-secret
+TEST	= ./srcs/services/fastify/test
 
 all: $(NAME)
 
@@ -46,5 +47,8 @@ logs:
 status:
 	docker container ls -a
 	docker image ls -a
+
+test_profile:
+	node --test $(TEST)/profile.test.js
 
 .PHONY: all down clean fclean re logs status
