@@ -1,15 +1,19 @@
 import fs from 'fs';
 import fastifyPlugin from 'fastify-plugin';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { games, createGame, degToRad, STARTING_SPEED, STARTING_X, STARTING_Y, gameSockets, broadcastState } from './gameState.js';
 
 async function gameRoute (fastify, options) {
     let waiting_list = null;
     let w_uname = null;
+
+    const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
     const img_path = process.env.UPLOAD_DIR
-    ? path.resolve(process.env.UPLOAD_DIR)
-    : path.resolve(process.cwd(), 'srcs/assets/imgs');
+        ? path.resolve(process.env.UPLOAD_DIR)
+        : path.resolve(__dirname, '../../../../assets/imgs');
 
     // function addGame(game){
     //     games[Object.keys(games).length] = game;
@@ -178,7 +182,6 @@ async function gameRoute (fastify, options) {
                         message: 'Empty file'
                     });
                 }
-                console.log(res.statusCode, res.json());
                 await fs.promises.writeFile(filepath, image);
         
                 options.db

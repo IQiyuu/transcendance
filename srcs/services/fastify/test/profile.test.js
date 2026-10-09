@@ -108,6 +108,7 @@ test('upload pic of unknow user', async () => {
     );
 
     const res = await uploadImage(image, app);
+    console.log(res.statusCode, res.json());
 
     const body = res.json();
     assert.equal(res.statusCode, 404);
