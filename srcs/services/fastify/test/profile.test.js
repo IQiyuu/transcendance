@@ -5,15 +5,13 @@ import { readFile } from 'node:fs/promises';
 import assert from 'node:assert';
 import { makeApp, makeAppWithPlayers, uploadImage } from './helpers.js';
 
-test('fetch unexistant user', async () => {
-    const app = await makeApp();
+test('fetch unexistant user', async (t) => {
+    const app = await makeApp(t);
 
     const res = await app.inject({ method: 'GET', url: '/profile/tester' });
     assert.equal(res.statusCode, 404);
     assert.equal(res.json().success, false);
     assert.equal(res.json().datas, undefined);
-
-    await app.close();
 });
 
 
@@ -26,14 +24,12 @@ test('fetch register user', async (t) => {
     assert.equal(res.json().success, true);
 });
 
-test('fetch histo of unknow user', async () => {
-    const app = await makeApp();
+test('fetch histo of unknow user', async (t) => {
+    const app = await makeApp(t);
 
     const res = await app.inject({ method: 'GET', url: '/historic/unknow' });
     assert.equal(res.statusCode, 404);
     assert.equal(res.json().success, false);
-
-    await app.close();
 });
 
 test('fetch profile of registed player without games', async (t) => {
@@ -48,7 +44,7 @@ test('fetch profile of registed player without games', async (t) => {
 });
 
 test('store game with unknow user', async (t) => {
-    const app = await makeApp();
+    const app = await makeApp(t);
 
     const res = await app.inject({
         method: 'POST',
@@ -62,8 +58,6 @@ test('store game with unknow user', async (t) => {
 
     assert.equal(res.statusCode, 404);
     assert.equal(res.json().success, false);
-
-    await app.close();
 });
 
 test('store game to historic', async (t) => {
@@ -100,8 +94,8 @@ test('upload pic without file', async (t) => {
     assert.equal(body.success, false);
 });
 
-test('upload pic of unknow user', async () => {
-    const app = await makeApp();
+test('upload pic of unknow user', async (t) => {
+    const app = await makeApp(t);
 
     const image = await readFile(
         new URL('../../../assets/imgs/IQiyu.jpg', import.meta.url)
@@ -113,9 +107,7 @@ test('upload pic of unknow user', async () => {
     const body = res.json();
     assert.equal(res.statusCode, 404);
     assert.equal(body.success, false);
-    
-    await app.close();
-});
+    });
 
 test('upload pic of known user', async (t) => {
     const app = await makeAppWithPlayers(t);

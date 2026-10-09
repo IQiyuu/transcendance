@@ -2,17 +2,33 @@ import { buildApp } from '../src/buildApp.js'
 import { randomUUID } from 'node:crypto';
 
 
-export function makeApp() {
-  return buildApp({ secretKey: 'secret-de-test', dbPath: ':memory:', logger: false })
+export async function makeApp(t) {
+    const app = await buildApp({
+        secretKey: 'secret-de-test',
+        dbPath: ':memory:',
+        logger: false
+    });
+
+    t?.after(() => app.close());
+
+    return app;
 }
 
 export async function makeAppWithPlayers(t) {
-  const app = await buildApp({ secretKey: 'secret-de-test', dbPath: ':memory:', logger: false });
-  t.after(() => app.close())
+  const app = await buildApp({ 
+    secretKey: 'secret-de-test', 
+    dbPath: ':memory:', 
+    logger: false 
+  });
+  t?.after(() => app.close())
   for (const username of ['tester', 'tested', 'IQiyu']) {
     await app.inject({
-      method: 'POST', url: '/register',
-      payload: { username, password: 'Passw0rd!' },
+      method: 'POST', 
+      url: '/register',
+      payload: { 
+        username,
+        password: 'Passw0rd!'
+      },
     })
   }
   return app
