@@ -61,13 +61,18 @@ async function dbRoute (fastify, options) {
 
     function getFriendList(user) {
         return db.prepare(`
-            SELECT users.username as username, users.picture_path as pp
-            FROM users
-            JOIN friends 
-              ON users.user_id = friends.user_id OR users.user_id = friends.friend_id
-            WHERE users.user_id != ?
-              AND friends.status = 'accepted'
-        `).all(user);
+            SELECT DISTINCT users.username AS username,
+                            users.picture_path AS pp
+            FROM friends
+            JOIN users
+            ON users.user_id = CASE
+                WHEN friends.user_id = ?
+                THEN friends.friend_id
+                ELSE friends.user_id
+            END
+            WHERE (friends.user_id = ? OR friends.friend_id = ?)
+            AND friends.status = 'accepted'
+        `).all(user, user, user);
     }
 
     function getFriendRelation(user1, user2) {
@@ -126,6 +131,12 @@ async function dbRoute (fastify, options) {
                             friend: getUserInfo(friendId)
                         });
                     }
+                } else if (datas.status === "both_blocking") {
+                    return reply.status(200).send({
+                        success: true,
+                        message: "send_yblock",
+                        status: datas.status
+                    });
                 } else {
                     deleteRelation(userId, friendId);
                     return reply.status(200).send({ 
@@ -134,7 +145,6 @@ async function dbRoute (fastify, options) {
                         status: null 
                     });
                 }
-        
             } else {
                 // on creer la relation
                 createRelation(userId, friendId, 'pending');
@@ -168,7 +178,7 @@ async function dbRoute (fastify, options) {
             } if (userId == friendId) {
                 return reply.status(400).send({
                     success: false,
-                    error: 'Cannot check friendship with yourself'
+                    error: 'Cannot block yourself'
                 });
             }
 
@@ -176,11 +186,19 @@ async function dbRoute (fastify, options) {
             if (datas) {
                 // Si uniquement 1 a bloque l'autre
                 if (datas.status === "blocked") {
-                    if (datas.user == userId)
+                    if (datas.user == userId) {
                         deleteRelation(userId, friendId);
+                        return reply.status(200).send({ 
+                            success: true,
+                            blocking: false 
+                        });
+                    }
                     else 
-                        updateStatus(userId, friendId, friendId, userId, "both_blocking");
-                    return reply.status(200).send({ success: true, blocking: false });
+                        updateStatus(userId, friendId, "both_blocking");
+                    return reply.status(200).send({ 
+                        success: true,
+                        blocking: true 
+                    });
                 }
                 // Si les deux sont bloques
                 else if (datas.status === "both_blocking") {
@@ -188,7 +206,11 @@ async function dbRoute (fastify, options) {
                         updateRStatus(userId, friendId, "blocked");
                     else
                         updateStatus(userId, friendId, "blocked");
-                    return reply.status(200).send({ success: true, blocking: false });
+
+                    return reply.status(200).send({
+                        success: true,
+                        blocking: false
+                    });
                 }
                 // Si autre (pending, amis)
                 else {
@@ -197,16 +219,25 @@ async function dbRoute (fastify, options) {
                     }
                     else
                         updateRStatus(userId, friendId, "blocked");
-                    return reply.status(200).send({ success: true, blocking: true });
+                    return reply.status(200).send({ 
+                        success: true,
+                        blocking: true 
+                    });
                 }
             }
             // Sinon creer un blocage
             else {
                 createRelation(userId, friendId, 'blocked');
-                return reply.status(200).send({ success: true, blocking: true });
+                return reply.status(200).send({ 
+                    success: true,
+                    blocking: true 
+                });
             }
         } catch (error) {
-            return reply.status(500).send({ success: false, error: error });
+            return reply.status(500).send({ 
+                success: false,
+                error: 'Database error' 
+            });
         }
     });
 
@@ -227,7 +258,7 @@ async function dbRoute (fastify, options) {
                     success: false,
                     error: 'User not found'
                 });
-            } if (user == friend) {
+            } if (user.user_id == friend.friend_id) {
                 return reply.status(400).send({
                     success: false,
                     error: 'Cannot check friendship with yourself'
@@ -267,7 +298,7 @@ async function dbRoute (fastify, options) {
                 if (friendship.status === 'both_blocking') {
                     return reply.status(200).send({
                         success: true,
-                        message: 'Unblock',
+                        message: 'unblock',
                         status: friendship.status,
                         emoji: friendship.user === userId ? '🔓' : '🔒'
                     });

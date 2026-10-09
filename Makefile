@@ -48,7 +48,7 @@ status:
 	docker container ls -a
 	docker image ls -a
 
-test_profile:
-	node --test $(TEST)/profile.test.js
+test_friends:
+	node --test $(TEST)/db.friends.test.js
 
 .PHONY: all down clean fclean re logs status
