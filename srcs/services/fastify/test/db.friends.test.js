@@ -145,6 +145,8 @@ test('block unknow user', async () => {
     const body = res.json();
     assert.equal(res.statusCode, 404);
     assert.equal(body.success, false);
+
+    await app.close();
 });
 
 test('block myself', async (t) => {
