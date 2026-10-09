@@ -62,8 +62,6 @@ test('store game with unknow user', async (t) => {
 
     assert.equal(res.statusCode, 404);
     assert.equal(res.json().success, false);
-
-    await app.close();
 });
 
 test('store game to historic', async (t) => {
