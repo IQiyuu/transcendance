@@ -2,13 +2,13 @@ import { test } from 'node:test'
 import assert from 'node:assert'
 import { makeApp } from './helpers.js'
 
-test("l'app démarre", async () => {
+test("App is working", async () => {
   const app = await makeApp()
   await app.ready()
   await app.close()
 })
 
-test('une route inconnue renvoie 404', async () => {
+test('Unknow road', async () => {
   const app = await makeApp()
   const res = await app.inject({ method: 'GET', url: '/cette-route-nexiste-pas' })
   assert.equal(res.statusCode, 404)
