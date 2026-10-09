@@ -178,7 +178,7 @@ async function gameRoute (fastify, options) {
                         message: 'Empty file'
                     });
                 }
-
+                console.log(res.statusCode, res.json());
                 await fs.promises.writeFile(filepath, image);
         
                 options.db
