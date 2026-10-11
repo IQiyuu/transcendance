@@ -1,4 +1,5 @@
 # ft_transcendence
+![CI](https://github.com/IQiyuu/transcendance/actions/workflows/ci.yml/badge.svg)
 
 Site web de **Pong multijoueur en ligne**, avec gestion des utilisateurs, parties à distance et historique des matchs.
 
